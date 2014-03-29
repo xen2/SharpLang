@@ -1,15 +1,82 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.Cecil;
+using Mono.Options;
+using SharpLLVM;
 
-namespace SharpLang.Compiler
+namespace SharpLang.CompilerServices
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
+            var exeName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
+            var showHelp = false;
+            int exitCode = 0;
+            string outputFile = null;
+
+            var p = new OptionSet
+                {
+                    "SharpLang Compiler - Version: "
+                    +
+                    String.Format(
+                        "{0}.{1}.{2}",
+                        typeof(Program).Assembly.GetName().Version.Major,
+                        typeof(Program).Assembly.GetName().Version.Minor,
+                        typeof(Program).Assembly.GetName().Version.Build) + string.Empty,
+                    string.Format("Usage: {0} assembly.dll [options]*", exeName),
+                    string.Empty,
+                    "=== Options ===",
+                    string.Empty,
+                    { "h|help", "Show this message and exit", v => showHelp = v != null },
+                    { "o", "Output filename. Default to [inputfilename].bc", v => outputFile = v },
+                };
+
+            try
+            {
+                var inputFiles = p.Parse(args);
+
+                if (showHelp)
+                {
+                    p.WriteOptionDescriptions(Console.Out);
+                    return 0;
+                }
+
+                if (inputFiles.Count == 0)
+                {
+                    throw new OptionException("No input file", string.Empty);
+                }
+                else if (inputFiles.Count > 1)
+                {
+                    throw new OptionException("Only one input file is currently accepted", string.Empty);
+                }
+
+                var inputFile = inputFiles[0];
+
+                if (outputFile == null)
+                {
+                    outputFile = Path.ChangeExtension(inputFile, "bc");
+                }
+
+                Driver.CompileAssembly(inputFile, outputFile);
+            }
+            catch (OptionException e)
+            {
+                Console.WriteLine("Command option '{0}': {1}", e.OptionName, e.Message);
+                exitCode = -1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected error: {0}", e);
+                exitCode = -1;
+            }
+
+            return exitCode;
         }
     }
 }

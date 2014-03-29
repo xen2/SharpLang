@@ -7,7 +7,7 @@
     <ProjectGuid>{5725F285-F214-4D24-B0AA-392C6C128792}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpLang.Compiler</RootNamespace>
+    <RootNamespace>SharpLang.CompilerServices</RootNamespace>
     <AssemblyName>SharpLang.Compiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,6 +48,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler.cs" />
+    <Compile Include="Driver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
