@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{281D0D91-1372-4A15-BFDB-5B677887AE72}</ProjectGuid>
+    <ProjectGuid>{5234B98C-C58D-4784-89EF-7707FACEB530}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpLLVM.Tests</RootNamespace>
-    <AssemblyName>SharpLLVM.Tests</AssemblyName>
+    <RootNamespace>SharpLang.Compiler.Tests</RootNamespace>
+    <AssemblyName>SharpLang.Compiler.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -20,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -33,19 +32,34 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\deps\Mono.Cecil\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\deps\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestLLVM.cs" />
+    <None Include="tests\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpLang.Compiler\SharpLang.Compiler.csproj">
+      <Project>{5725F285-F214-4D24-B0AA-392C6C128792}</Project>
+      <Name>SharpLang.Compiler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpLLVM\SharpLLVM.csproj">
-      <Project>{7c5a9dad-a185-47dd-9d31-40b8ce230712}</Project>
+      <Project>{7C5A9DAD-A185-47DD-9D31-40B8CE230712}</Project>
       <Name>SharpLLVM</Name>
     </ProjectReference>
   </ItemGroup>
