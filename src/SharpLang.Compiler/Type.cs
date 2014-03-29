@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -7,8 +8,9 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Type
     {
-        public Type(TypeRef generatedType)
+        public Type(TypeReference typeReference, TypeRef generatedType)
         {
+            TypeReference = typeReference;
             GeneratedType = generatedType;
         }
 
@@ -19,5 +21,13 @@ namespace SharpLang.CompilerServices
         /// The LLVM generated type.
         /// </value>
         public TypeRef GeneratedType { get; private set; }
+
+        public TypeReference TypeReference { get; private set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return TypeReference.ToString();
+        }
     }
 }

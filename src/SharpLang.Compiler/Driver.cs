@@ -14,7 +14,7 @@ namespace SharpLang.CompilerServices
                 new ReaderParameters { AssemblyResolver = assemblyResolver, ReadSymbols = true });
 
             var compiler = new Compiler();
-            var module = compiler.CompileAssembly(assemblyDefinition);
+            var module = compiler.CompileAssembly(assemblyResolver, assemblyDefinition);
 
             LLVM.WriteBitcodeToFile(module, outputFile);
         } 

@@ -40,7 +40,7 @@ namespace SharpLang.CompilerServices.Tests
                 throw new InvalidOperationException(errors.ToString());
             }
 
-            Driver.CompileAssembly(compilerParameters.OutputAssembly, Path.GetFileNameWithoutExtension(sourceFile) + "-out.txt");
+            Driver.CompileAssembly(compilerParameters.OutputAssembly, Path.ChangeExtension(sourceFile, "bc"));
 
             // TODO: Execute and compare output
             throw new NotImplementedException();

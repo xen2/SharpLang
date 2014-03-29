@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -7,9 +8,11 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
-        public Class(TypeRef dataType)
+        public Class(TypeDefinition typeDefinition, TypeRef dataType)
         {
+            TypeDefinition = typeDefinition;
             DataType = dataType;
+            Type = dataType;
         }
 
         /// <summary>
@@ -27,5 +30,13 @@ namespace SharpLang.CompilerServices
         /// The LLVM data type (fields).
         /// </value>
         public TypeRef DataType { get; private set; }
+
+        public TypeDefinition TypeDefinition { get; private set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return TypeDefinition.ToString();
+        }
     }
 }
