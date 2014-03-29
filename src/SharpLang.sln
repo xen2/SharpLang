@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharpLLVM.Native", "SharpLL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLLVM.Tests", "SharpLLVM.Tests\SharpLLVM.Tests.csproj", "{281D0D91-1372-4A15-BFDB-5B677887AE72}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler", "SharpLang.Compiler\SharpLang.Compiler.csproj", "{5725F285-F214-4D24-B0AA-392C6C128792}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,16 @@ Global
 		{281D0D91-1372-4A15-BFDB-5B677887AE72}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{281D0D91-1372-4A15-BFDB-5B677887AE72}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{281D0D91-1372-4A15-BFDB-5B677887AE72}.Release|Win32.ActiveCfg = Release|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5725F285-F214-4D24-B0AA-392C6C128792}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
