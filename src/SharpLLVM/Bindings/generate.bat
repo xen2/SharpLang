@@ -1,0 +1,1 @@
+swig -csharp -I../../../deps/llvm/include -namespace SharpLLVM -dllimport SharpLLVM.Native.dll -outdir .. -o ../../SharpLLVM.Native/LLVM_wrap.c LLVM.i
