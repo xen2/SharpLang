@@ -2,12 +2,12 @@
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Mono.Cecil;
 using NUnit.Framework;
-using SharpLLVM;
 
 namespace SharpLang.CompilerServices.Tests
 {
@@ -41,10 +41,63 @@ namespace SharpLang.CompilerServices.Tests
                 throw new InvalidOperationException(errors.ToString());
             }
 
-            Driver.CompileAssembly(compilerParameters.OutputAssembly, Path.ChangeExtension(sourceFile, "bc"));
+            var bitcodeFile = Path.ChangeExtension(sourceFile, "bc");
+            Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile);
 
-            // TODO: Execute and compare output
-            throw new NotImplementedException();
+            var outputFile = Path.Combine(Path.GetDirectoryName(sourceFile),
+                Path.GetFileNameWithoutExtension(sourceFile) + "-llvm.exe");
+
+            // Read variables from config file
+            Driver.Path = ConfigurationManager.AppSettings["Path"];
+            Driver.LLC = ConfigurationManager.AppSettings["LLC"];
+            Driver.CC = ConfigurationManager.AppSettings["CC"];
+
+            // Link bitcode and runtime
+            Driver.LinkBitcodes(outputFile, bitcodeFile);
+
+            // Execute original and ours
+            var output1 = ExecuteAndCaptureOutput(compilerParameters.OutputAssembly);
+            var output2 = ExecuteAndCaptureOutput(outputFile);
+
+            // Compare output
+            Assert.That(output2, Is.EqualTo(output1));
+        }
+
+        private static string ExecuteAndCaptureOutput(string executableFile)
+        {
+            var processStartInfo = new ProcessStartInfo(executableFile);
+
+            var output = new StringBuilder();
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.CreateNoWindow = true;
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
+
+            var process = new Process();
+            process.StartInfo = processStartInfo;
+
+            process.OutputDataReceived += (sender, args) =>
+            {
+                lock (output)
+                {
+                    if (args.Data != null)
+                        output.AppendLine(args.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, args) =>
+            {
+                lock (output)
+                {
+                    if (args.Data != null)
+                        output.AppendLine(args.Data);
+                }
+            };
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+
+            return output.ToString();
         }
 
         public static IEnumerable<string> TestCases

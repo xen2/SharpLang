@@ -39,6 +39,7 @@
       <HintPath>..\..\deps\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -49,6 +50,7 @@
   <ItemGroup>
     <Compile Include="TestFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="App.config" />
     <None Include="tests\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
