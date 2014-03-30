@@ -13,6 +13,7 @@ namespace SharpLang.CompilerServices
     {
         private ModuleRef module;
         private ContextRef context;
+        private BuilderRef builder;
 
         private IAssemblyResolver assemblyResolver;
         private AssemblyDefinition assembly;
@@ -31,6 +32,7 @@ namespace SharpLang.CompilerServices
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
             context = LLVM.GetModuleContext(module);
+            builder = LLVM.CreateBuilderInContext(context);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)
@@ -67,6 +69,20 @@ namespace SharpLang.CompilerServices
             {
                 CompileMethodImpl(methodToCompile.Key, methodToCompile.Value);
             }
+
+            // Emit "main" which will call the assembly entry point (if any)
+            Function entryPoint;
+	        if (assembly.EntryPoint != null && functions.TryGetValue(assembly.EntryPoint, out entryPoint))
+	        {
+	            var mainFunctionType = LLVM.FunctionType(LLVM.Int32TypeInContext(context), new TypeRef[0], false);
+	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
+                LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
+                LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
+                LLVM.BuildCall(builder, entryPoint.GeneratedValue, new ValueRef[0], string.Empty);
+	            LLVM.BuildRet(builder, LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
+	        }
+
+            LLVM.DisposeBuilder(builder);
 
             // Verify module
             string message;
@@ -221,6 +237,7 @@ namespace SharpLang.CompilerServices
             else
             {
                 // Need to compile
+                LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
                 methodsToCompile.Add(new KeyValuePair<MethodDefinition, ValueRef>(methodDefinition, functionGlobal));
             }
             
@@ -231,7 +248,6 @@ namespace SharpLang.CompilerServices
         {
             var numParams = method.Parameters.Count;
             var body = method.Body;
-            var builder = LLVM.CreateBuilderInContext(context);
 
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty));
 
@@ -273,6 +289,9 @@ namespace SharpLang.CompilerServices
 
                         // Invoke method
                         LLVM.BuildCall(builder, targetMethod.GeneratedValue, args, string.Empty);
+                        
+                        // Mark method as needed
+                        LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
 
                         // Push return result on stack
                         if (targetMethodReference.ReturnType.MetadataType != MetadataType.Void)

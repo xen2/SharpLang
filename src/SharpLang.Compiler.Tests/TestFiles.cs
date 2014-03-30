@@ -25,6 +25,7 @@ namespace SharpLang.CompilerServices.Tests
             var compilerParameters = new CompilerParameters();
             compilerParameters.IncludeDebugInformation = false;
             compilerParameters.GenerateInMemory = false;
+            compilerParameters.GenerateExecutable = true;
             compilerParameters.TreatWarningsAsErrors = false;
 
             compilerParameters.OutputAssembly = Path.ChangeExtension(sourceFile, "exe");
