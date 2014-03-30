@@ -325,7 +325,7 @@ namespace SharpLang.CompilerServices
                         break;
                     }
                     default:
-                        throw new NotImplementedException("Opcode not implemented.");
+                        throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
                 }
             }
         }
