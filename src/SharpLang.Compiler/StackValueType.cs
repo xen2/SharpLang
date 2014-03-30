@@ -1,5 +1,8 @@
 namespace SharpLang.CompilerServices
 {
+    /// <summary>
+    /// The type of value on the stack.
+    /// </summary>
     enum StackValueType
     {
         Unknown,
