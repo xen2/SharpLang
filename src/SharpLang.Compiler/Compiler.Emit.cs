@@ -18,7 +18,7 @@ namespace SharpLang.CompilerServices
             var loadInst = LLVM.BuildLoad(builder, locals[operandIndex], string.Empty);
 
             // TODO: Choose appropriate type + conversions
-            stack.Add(new StackValue(StackValueType.Value, loadInst));
+            stack.Add(new StackValue(StackValueType.Int32, loadInst));
         }
 
         private void EmitRet(MethodDefinition method)
@@ -84,6 +84,21 @@ namespace SharpLang.CompilerServices
             if (targetMethodReference.ReturnType.MetadataType != MetadataType.Void)
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        {
+            var value = stack.Pop();
+            var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
+            switch (value.Type)
+            {
+                case StackValueType.Int32:
+                    var cmpInst = LLVM.BuildICmp(builder, IntPredicate.IntEQ, value.Value, zero, string.Empty);
+                    LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
         }
     }

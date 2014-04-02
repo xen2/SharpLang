@@ -267,6 +267,7 @@ namespace SharpLang.CompilerServices
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
             var branchTargets = new int[body.CodeSize];
+            var basicBlocks = new BasicBlockRef[body.CodeSize];
 
             // First instruction can always be reached
             branchTargets[0] = 1;
@@ -286,7 +287,13 @@ namespace SharpLang.CompilerServices
                 }
 
                 // TODO: Break?
-                if (flowControl != FlowControl.Branch
+                if (flowControl == FlowControl.Cond_Branch)
+                {
+                    // Need to enforce a block to be created after a conditional branch
+                    if (instruction.Next != null)
+                        branchTargets[instruction.Next.Offset] += 2;
+                }
+                else if (flowControl != FlowControl.Branch
                     && flowControl != FlowControl.Throw
                     && flowControl != FlowControl.Return)
                 {
@@ -296,6 +303,20 @@ namespace SharpLang.CompilerServices
                 }
             }
 
+            // Create basic block
+            // TODO: Could be done during previous pass
+            for (int offset = 0; offset < branchTargets.Length; offset++)
+            {
+                // We only create basic block sif there is at least 2 way to access the instruction.
+                if (branchTargets[offset] < 2)
+                    continue;
+
+                basicBlocks[offset] = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}", offset));
+            }
+
+            // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
+            bool flowingToNextBlock = false;
+
             foreach (var instruction in body.Instructions)
             {
                 var stackMerges = branchTargets[instruction.Offset];
@@ -304,7 +325,16 @@ namespace SharpLang.CompilerServices
                 if (needPhiNodes)
                 {
                     var previousBasicBlock = basicBlock;
-                    basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                    basicBlock = basicBlocks[instruction.Offset];
+
+                    if (flowingToNextBlock)
+                    {
+                        // Add a jump from previous block to new block
+                        LLVM.BuildBr(builder, basicBlock);
+                    }
+
+                    // Position builder to write at beginning of new block
+                    LLVM.PositionBuilderAtEnd(builder, basicBlock);
 
                     // Replace all stack with PHI nodes.
                     // LLVM will optimize all the unecessary ones.
@@ -321,6 +351,9 @@ namespace SharpLang.CompilerServices
                         stack[index] = newStackValue;
                     }
                 }
+
+                // Reset states
+                flowingToNextBlock = true;
 
                 switch (instruction.OpCode.Code)
                 {
@@ -406,6 +439,17 @@ namespace SharpLang.CompilerServices
                     {
                         var localIndex = ((VariableDefinition)instruction.Operand).Index;
                         EmitStloc(stack, locals, localIndex);
+                        break;
+                    }
+                    #endregion
+
+                    #region Branching (Brtrue, Brfalse, etc...)
+                    case Code.Brfalse:
+                    case Code.Brfalse_S:
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBrfalse(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingToNextBlock = false;
                         break;
                     }
                     #endregion
