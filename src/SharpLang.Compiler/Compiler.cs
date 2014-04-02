@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -10,7 +8,7 @@ using SharpLLVM;
 
 namespace SharpLang.CompilerServices
 {
-    public sealed class Compiler
+    public sealed partial class Compiler
     {
         private ModuleRef module;
         private ContextRef context;
@@ -267,8 +265,6 @@ namespace SharpLang.CompilerServices
                 locals.Add(LLVM.BuildAlloca(builder, type.GeneratedType, local.Name));
             }
 
-            int operandIndex = 0;
-
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
             var branchTargets = new int[body.CodeSize];
 
@@ -330,45 +326,15 @@ namespace SharpLang.CompilerServices
                 {
                     case Code.Ret:
                     {
-                        if (method.ReturnType.MetadataType == MetadataType.Void)
-                            LLVM.BuildRetVoid(builder);
-                        else
-                            throw new NotImplementedException("Opcode not implemented.");
+                        EmitRet(method);
                         break;
                     }
                     case Code.Call:
                     {
                         var targetMethodReference = (MethodReference)instruction.Operand;
-                        //var targetMethodClass = CompileClass(targetMethodReference.DeclaringType);
                         var targetMethod = CompileMethod(targetMethodReference);
 
-                        //targetMethodReference.FullName
-
-                        // Build argument list
-                        var targetNumParams = targetMethodReference.Parameters.Count;
-                        var args = new ValueRef[targetNumParams];
-                        for (int index = 0; index < targetNumParams; index++)
-                        {
-                            var parameter = targetMethodReference.Parameters[index];
-                            var stackItem = stack[stack.Count - targetNumParams + index];
-
-                            args[index] = stackItem.Value;
-                        }
-
-                        // Remove arguments from stack
-                        stack.RemoveRange(stack.Count - targetNumParams, numParams);
-
-                        // Invoke method
-                        LLVM.BuildCall(builder, targetMethod.GeneratedValue, args, string.Empty);
-                        
-                        // Mark method as needed
-                        LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
-
-                        // Push return result on stack
-                        if (targetMethodReference.ReturnType.MetadataType != MetadataType.Void)
-                        {
-                            throw new NotImplementedException();
-                        }
+                        EmitCall(stack, targetMethodReference, targetMethod);
 
                         break;
                     }
@@ -384,37 +350,23 @@ namespace SharpLang.CompilerServices
                     case Code.Ldc_I4_6:
                     case Code.Ldc_I4_7:
                     case Code.Ldc_I4_8:
-                    operandIndex = instruction.OpCode.Code - Code.Ldc_I4_0;
-                    goto Ldc_I4;
-                    case Code.Ldc_I4_S:
-                    case Code.Ldc_I4:
-                    operandIndex = ((VariableDefinition)instruction.Operand).Index;
-                    Ldc_I4:
                     {
-                        stack.Add(new StackValue(StackValueType.Int32, LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
+                        var value = instruction.OpCode.Code - Code.Ldc_I4_0;
+                        EmitI4(stack, value);
                         break;
                     }
-
+                    case Code.Ldc_I4_S:
+                    case Code.Ldc_I4:
+                    {
+                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        EmitI4(stack, value);
+                        break;
+                    }
                     case Code.Ldstr:
                     {
-                        var stringType = CompileClass(corlib.MainModule.GetType(typeof (string).FullName));
                         var operand = (string)instruction.Operand;
 
-                        // Create string data global
-                        var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
-                        var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), string.Empty);
-
-                        // Cast from i8-array to i8*
-                        LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
-                        var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
-                        stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
-
-                        // Create string
-                        var stringConstant = LLVM.ConstNamedStruct(stringType.DataType,
-                            new[] { LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)operand.Length, false), stringConstantDataGlobal });
-
-                        // Push on stack
-                        stack.Add(new StackValue(StackValueType.Value, stringConstant));
+                        EmitLdstr(stack, operand);
 
                         break;
                     }
@@ -424,17 +376,16 @@ namespace SharpLang.CompilerServices
                     case Code.Ldloc_1:
                     case Code.Ldloc_2:
                     case Code.Ldloc_3:
-                    operandIndex = instruction.OpCode.Code - Code.Ldloc_0;
-                    goto Ldloc;
+                    {
+                        var localIndex = instruction.OpCode.Code - Code.Ldloc_0;
+                        EmitLdloc(stack, locals, localIndex);
+                        break;
+                    }
                     case Code.Ldloc:
                     case Code.Ldloc_S:
-                    operandIndex = ((VariableDefinition)instruction.Operand).Index;
-                    Ldloc:
                     {
-                        var loadInst = LLVM.BuildLoad(builder, locals[operandIndex], string.Empty);
-
-                        // TODO: Choose appropriate type + conversions
-                        stack.Add(new StackValue(StackValueType.Value, loadInst));
+                        var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                        EmitLdloc(stack, locals, localIndex);
                         break;
                     }
                     #endregion
@@ -445,16 +396,16 @@ namespace SharpLang.CompilerServices
                     case Code.Stloc_1:
                     case Code.Stloc_2:
                     case Code.Stloc_3:
-                        operandIndex = instruction.OpCode.Code - Code.Stloc_0;
-                        goto Stloc;
+                    {
+                        var localIndex = instruction.OpCode.Code - Code.Stloc_0;
+                        EmitStloc(stack, locals, localIndex);
+                        break;
+                    }
                     case Code.Stloc:
                     case Code.Stloc_S:
-                        operandIndex = ((VariableDefinition)instruction.Operand).Index;
-                    Stloc:
                     {
-
-                        var value = stack.Pop();
-                        LLVM.BuildStore(builder, value.Value, locals[operandIndex]);
+                        var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                        EmitStloc(stack, locals, localIndex);
                         break;
                     }
                     #endregion

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Class.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="Compiler.Emit.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="Program.cs" />
