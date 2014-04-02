@@ -990,9 +990,12 @@ public class LLVM {
     }
   }
 
-  public unsafe static ValueRef ConstArray(TypeRef ElementTy, out ValueRef ConstantVals, uint Length) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.ConstArray(ElementTy.Value, out ConstantVals.Value, Length));
-    return ret;
+  public unsafe static ValueRef ConstArray(TypeRef ElementTy, ValueRef[] ConstantVals) {
+    fixed (ValueRef* swig_ptrTo_ConstantVals = ConstantVals)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.ConstArray(ElementTy.Value, (System.IntPtr)swig_ptrTo_ConstantVals, (uint)ConstantVals.Length));
+      return ret;
+    }
   }
 
   public unsafe static ValueRef ConstNamedStruct(TypeRef StructTy, ValueRef[] ConstantVals) {
@@ -1003,9 +1006,12 @@ public class LLVM {
     }
   }
 
-  public unsafe static ValueRef ConstVector(out ValueRef ScalarConstantVals, uint Size) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.ConstVector(out ScalarConstantVals.Value, Size));
-    return ret;
+  public unsafe static ValueRef ConstVector(ValueRef[] ScalarConstantVals) {
+    fixed (ValueRef* swig_ptrTo_ScalarConstantVals = ScalarConstantVals)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.ConstVector((System.IntPtr)swig_ptrTo_ScalarConstantVals, (uint)ScalarConstantVals.Length));
+      return ret;
+    }
   }
 
   public unsafe static Opcode GetConstOpcode(ValueRef ConstantVal) {
@@ -1597,14 +1603,20 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef MDNodeInContext(ContextRef C, out ValueRef Vals, uint Count) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.MDNodeInContext(C.Value, out Vals.Value, Count));
-    return ret;
+  public unsafe static ValueRef MDNodeInContext(ContextRef C, ValueRef[] Vals) {
+    fixed (ValueRef* swig_ptrTo_Vals = Vals)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.MDNodeInContext(C.Value, (System.IntPtr)swig_ptrTo_Vals, (uint)Vals.Length));
+      return ret;
+    }
   }
 
-  public unsafe static ValueRef MDNode(out ValueRef Vals, uint Count) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.MDNode(out Vals.Value, Count));
-    return ret;
+  public unsafe static ValueRef MDNode(ValueRef[] Vals) {
+    fixed (ValueRef* swig_ptrTo_Vals = Vals)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.MDNode((System.IntPtr)swig_ptrTo_Vals, (uint)Vals.Length));
+      return ret;
+    }
   }
 
   public unsafe static string GetMDString(ValueRef V, SWIGTYPE_p_unsigned_int Len) {
@@ -1804,8 +1816,12 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static void AddIncoming(ValueRef PhiNode, out ValueRef IncomingValues, out BasicBlockRef IncomingBlocks, uint Count) {
-    LLVMPINVOKE.AddIncoming(PhiNode.Value, out IncomingValues.Value, out IncomingBlocks.Value, Count);
+  public unsafe static void AddIncoming(ValueRef PhiNode, ValueRef[] IncomingValues, BasicBlockRef[] IncomingBlocks) {
+    fixed (ValueRef* swig_ptrTo_IncomingValues = IncomingValues)
+    fixed (BasicBlockRef* swig_ptrTo_IncomingBlocks = IncomingBlocks)
+    {
+      LLVMPINVOKE.AddIncoming(PhiNode.Value, (System.IntPtr)swig_ptrTo_IncomingValues, (System.IntPtr)swig_ptrTo_IncomingBlocks, (uint)IncomingBlocks.Length);
+    }
   }
 
   public unsafe static uint CountIncoming(ValueRef PhiNode) {
@@ -1889,9 +1905,12 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef BuildAggregateRet(BuilderRef arg0, out ValueRef RetVals, uint N) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.BuildAggregateRet(arg0.Value, out RetVals.Value, N));
-    return ret;
+  public unsafe static ValueRef BuildAggregateRet(BuilderRef arg0, ValueRef[] RetVals) {
+    fixed (ValueRef* swig_ptrTo_RetVals = RetVals)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.BuildAggregateRet(arg0.Value, (System.IntPtr)swig_ptrTo_RetVals, (uint)RetVals.Length));
+      return ret;
+    }
   }
 
   public unsafe static ValueRef BuildBr(BuilderRef arg0, BasicBlockRef Dest) {
@@ -2143,14 +2162,20 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef BuildGEP(BuilderRef B, ValueRef Pointer, out ValueRef Indices, uint NumIndices, string Name) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.BuildGEP(B.Value, Pointer.Value, out Indices.Value, NumIndices, Name));
-    return ret;
+  public unsafe static ValueRef BuildGEP(BuilderRef B, ValueRef Pointer, ValueRef[] Indices, string Name) {
+    fixed (ValueRef* swig_ptrTo_Indices = Indices)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.BuildGEP(B.Value, Pointer.Value, (System.IntPtr)swig_ptrTo_Indices, (uint)Indices.Length, Name));
+      return ret;
+    }
   }
 
-  public unsafe static ValueRef BuildInBoundsGEP(BuilderRef B, ValueRef Pointer, out ValueRef Indices, uint NumIndices, string Name) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.BuildInBoundsGEP(B.Value, Pointer.Value, out Indices.Value, NumIndices, Name));
-    return ret;
+  public unsafe static ValueRef BuildInBoundsGEP(BuilderRef B, ValueRef Pointer, ValueRef[] Indices, string Name) {
+    fixed (ValueRef* swig_ptrTo_Indices = Indices)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.BuildInBoundsGEP(B.Value, Pointer.Value, (System.IntPtr)swig_ptrTo_Indices, (uint)Indices.Length, Name));
+      return ret;
+    }
   }
 
   public unsafe static ValueRef BuildStructGEP(BuilderRef B, ValueRef Pointer, uint Idx, string Name) {

@@ -2632,7 +2632,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstStruct(void* arg1_data, unsigned int j
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ConstArray(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ConstArray(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMTypeRef arg1 ;
   LLVMValueRef *arg2 = (LLVMValueRef *) 0 ;
@@ -2640,8 +2640,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstArray(void * jarg1, void * jarg2, unsi
   LLVMValueRef result;
   
   arg1 = (LLVMTypeRef)jarg1; 
-  arg2 = (LLVMValueRef *)jarg2; 
-  arg3 = (unsigned int)jarg3; 
+  arg2 = arg2_data; arg3 = jarg2;
   result = LLVMConstArray(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
@@ -2663,14 +2662,13 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstNamedStruct(void * jarg1, void* arg2_d
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ConstVector(void * jarg1, unsigned int jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ConstVector(void* arg1_data, unsigned int jarg1) {
   void * jresult ;
   LLVMValueRef *arg1 = (LLVMValueRef *) 0 ;
   unsigned int arg2 ;
   LLVMValueRef result;
   
-  arg1 = (LLVMValueRef *)jarg1; 
-  arg2 = (unsigned int)jarg2; 
+  arg1 = arg1_data; arg2 = jarg1;
   result = LLVMConstVector(arg1,arg2);
   jresult = result; 
   return jresult;
@@ -4247,7 +4245,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_MDString(char * jarg1, unsigned int jarg2) 
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_MDNodeInContext(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_MDNodeInContext(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMContextRef arg1 ;
   LLVMValueRef *arg2 = (LLVMValueRef *) 0 ;
@@ -4255,22 +4253,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_MDNodeInContext(void * jarg1, void * jarg2,
   LLVMValueRef result;
   
   arg1 = (LLVMContextRef)jarg1; 
-  arg2 = (LLVMValueRef *)jarg2; 
-  arg3 = (unsigned int)jarg3; 
+  arg2 = arg2_data; arg3 = jarg2;
   result = LLVMMDNodeInContext(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_MDNode(void * jarg1, unsigned int jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_MDNode(void* arg1_data, unsigned int jarg1) {
   void * jresult ;
   LLVMValueRef *arg1 = (LLVMValueRef *) 0 ;
   unsigned int arg2 ;
   LLVMValueRef result;
   
-  arg1 = (LLVMValueRef *)jarg1; 
-  arg2 = (unsigned int)jarg2; 
+  arg1 = arg1_data; arg2 = jarg1;
   result = LLVMMDNode(arg1,arg2);
   jresult = result; 
   return jresult;
@@ -4773,7 +4769,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_GetSwitchDefaultDest(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_AddIncoming(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_AddIncoming(void * jarg1, void * jarg2, void* arg3_data, unsigned int jarg3) {
   LLVMValueRef arg1 ;
   LLVMValueRef *arg2 = (LLVMValueRef *) 0 ;
   LLVMBasicBlockRef *arg3 = (LLVMBasicBlockRef *) 0 ;
@@ -4781,8 +4777,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddIncoming(void * jarg1, void * jarg2, void 
   
   arg1 = (LLVMValueRef)jarg1; 
   arg2 = (LLVMValueRef *)jarg2; 
-  arg3 = (LLVMBasicBlockRef *)jarg3; 
-  arg4 = (unsigned int)jarg4; 
+  arg3 = arg3_data; arg4 = jarg3;
   LLVMAddIncoming(arg1,arg2,arg3,arg4);
 }
 
@@ -4989,7 +4984,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildRet(void * jarg1, void * jarg2) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_BuildAggregateRet(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_BuildAggregateRet(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMBuilderRef arg1 ;
   LLVMValueRef *arg2 = (LLVMValueRef *) 0 ;
@@ -4997,8 +4992,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildAggregateRet(void * jarg1, void * jarg
   LLVMValueRef result;
   
   arg1 = (LLVMBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef *)jarg2; 
-  arg3 = (unsigned int)jarg3; 
+  arg2 = arg2_data; arg3 = jarg2;
   result = LLVMBuildAggregateRet(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
@@ -5846,7 +5840,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildStore(void * jarg1, void * jarg2, void
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_BuildGEP(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, char * jarg5) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_BuildGEP(void * jarg1, void * jarg2, void* arg3_data, unsigned int jarg3, char * jarg5) {
   void * jresult ;
   LLVMBuilderRef arg1 ;
   LLVMValueRef arg2 ;
@@ -5857,8 +5851,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildGEP(void * jarg1, void * jarg2, void *
   
   arg1 = (LLVMBuilderRef)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef *)jarg3; 
-  arg4 = (unsigned int)jarg4; 
+  arg3 = arg3_data; arg4 = jarg3;
   arg5 = (char *)jarg5; 
   result = LLVMBuildGEP(arg1,arg2,arg3,arg4,(char const *)arg5);
   jresult = result; 
@@ -5866,7 +5859,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildGEP(void * jarg1, void * jarg2, void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_BuildInBoundsGEP(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, char * jarg5) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_BuildInBoundsGEP(void * jarg1, void * jarg2, void* arg3_data, unsigned int jarg3, char * jarg5) {
   void * jresult ;
   LLVMBuilderRef arg1 ;
   LLVMValueRef arg2 ;
@@ -5877,8 +5870,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_BuildInBoundsGEP(void * jarg1, void * jarg2
   
   arg1 = (LLVMBuilderRef)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef *)jarg3; 
-  arg4 = (unsigned int)jarg4; 
+  arg3 = arg3_data; arg4 = jarg3;
   arg5 = (char *)jarg5; 
   result = LLVMBuildInBoundsGEP(arg1,arg2,arg3,arg4,(char const *)arg5);
   jresult = result; 

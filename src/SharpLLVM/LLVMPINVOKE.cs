@@ -778,13 +778,13 @@ class LLVMPINVOKE {
   public static extern System.IntPtr ConstStruct(System.IntPtr arg1_data, uint jarg1, bool jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstArray")]
-  public static extern System.IntPtr ConstArray(System.IntPtr jarg1, out System.IntPtr jarg2, uint jarg3);
+  public static extern System.IntPtr ConstArray(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstNamedStruct")]
   public static extern System.IntPtr ConstNamedStruct(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstVector")]
-  public static extern System.IntPtr ConstVector(out System.IntPtr jarg1, uint jarg2);
+  public static extern System.IntPtr ConstVector(System.IntPtr arg1_data, uint jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetConstOpcode")]
   public static extern int GetConstOpcode(System.IntPtr jarg1);
@@ -1150,10 +1150,10 @@ class LLVMPINVOKE {
   public static extern System.IntPtr MDString(string jarg1, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_MDNodeInContext")]
-  public static extern System.IntPtr MDNodeInContext(System.IntPtr jarg1, out System.IntPtr jarg2, uint jarg3);
+  public static extern System.IntPtr MDNodeInContext(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_MDNode")]
-  public static extern System.IntPtr MDNode(out System.IntPtr jarg1, uint jarg2);
+  public static extern System.IntPtr MDNode(System.IntPtr arg1_data, uint jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetMDString")]
   public static extern string GetMDString(System.IntPtr jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
@@ -1282,7 +1282,7 @@ class LLVMPINVOKE {
   public static extern System.IntPtr GetSwitchDefaultDest(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddIncoming")]
-  public static extern void AddIncoming(System.IntPtr jarg1, out System.IntPtr jarg2, out System.IntPtr jarg3, uint jarg4);
+  public static extern void AddIncoming(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr arg3_data, uint jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_CountIncoming")]
   public static extern uint CountIncoming(System.IntPtr jarg1);
@@ -1339,7 +1339,7 @@ class LLVMPINVOKE {
   public static extern System.IntPtr BuildRet(System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildAggregateRet")]
-  public static extern System.IntPtr BuildAggregateRet(System.IntPtr jarg1, out System.IntPtr jarg2, uint jarg3);
+  public static extern System.IntPtr BuildAggregateRet(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildBr")]
   public static extern System.IntPtr BuildBr(System.IntPtr jarg1, System.IntPtr jarg2);
@@ -1492,10 +1492,10 @@ class LLVMPINVOKE {
   public static extern System.IntPtr BuildStore(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildGEP")]
-  public static extern System.IntPtr BuildGEP(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, uint jarg4, string jarg5);
+  public static extern System.IntPtr BuildGEP(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr arg3_data, uint jarg3, string jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildInBoundsGEP")]
-  public static extern System.IntPtr BuildInBoundsGEP(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, uint jarg4, string jarg5);
+  public static extern System.IntPtr BuildInBoundsGEP(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr arg3_data, uint jarg3, string jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildStructGEP")]
   public static extern System.IntPtr BuildStructGEP(System.IntPtr jarg1, System.IntPtr jarg2, uint jarg3, string jarg4);

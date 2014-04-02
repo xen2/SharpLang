@@ -19,7 +19,7 @@
 
 %rename("%(strip:[LLVM])s") "";
 
-%define REF_CLASS(TYPE, CSTYPE...)
+%define REF_CLASS(TYPE, CSTYPE)
     typedef struct TYPE { } TYPE;
     %typemap(cstype) TYPE* "out $csclassname"
     %typemap(csin) TYPE* "out $csinput.Value"
@@ -27,6 +27,13 @@
 	%typemap(imtype) TYPE "System.IntPtr"
     %typemap(imtype) TYPE* "out System.IntPtr"
 
+	// Arrays (ptr)
+    %typemap(csin, pre="    fixed (CSTYPE* swig_ptrTo_$csinput = $csinput)")
+                     (TYPE *ARRAY) "(System.IntPtr)swig_ptrTo_$csinput"
+    %typemap(cstype) (TYPE *ARRAY) "CSTYPE[]"
+	%typemap(imtype) (TYPE *ARRAY) "System.IntPtr"
+
+    // Arrays (ptr + count)
     %typemap(in) (TYPE *ARRAY, unsigned ARRAYSIZE) "$1 = $1_data; $2 = $input;"
     %typemap(ctype) (TYPE *ARRAY, unsigned ARRAYSIZE) "void* $1_data, unsigned int"
     %typemap(csin, pre="    fixed (CSTYPE* swig_ptrTo_$csinput = $csinput)")
@@ -83,9 +90,16 @@ REF_CLASS(LLVMUseRef, UseRef)
 
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ParamTypes, unsigned ParamCount)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Vals, unsigned Count)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *ConstantVals, unsigned Count)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *ConstantVals, unsigned Length)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *ScalarConstantVals, unsigned Size)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *ConstantIndices, unsigned NumIndices)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Args, unsigned NumArgs)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *RetVals, unsigned N)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Indices, unsigned NumIndices)};
+%apply (LLVMValueRef *ARRAY) {(LLVMValueRef *IncomingValues)};
+%apply (LLVMBasicBlockRef *ARRAY, unsigned ARRAYSIZE) {(LLVMBasicBlockRef *IncomingBlocks, unsigned Count)};
 
 %include "llvm-c/Core.h"
 %include "llvm-c/BitReader.h"
