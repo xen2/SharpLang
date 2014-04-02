@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -249,12 +250,82 @@ namespace SharpLang.CompilerServices
             var numParams = method.Parameters.Count;
             var body = method.Body;
 
-            LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty));
+            var basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+
+            LLVM.PositionBuilderAtEnd(builder, basicBlock);
 
             var stack = new List<StackValue>(body.MaxStackSize);
+            var locals = new List<ValueRef>(body.Variables.Count);
+
+            // Process locals
+            foreach (var local in body.Variables)
+            {
+                if (local.IsPinned)
+                    throw new NotSupportedException();
+
+                var type = CompileType(local.VariableType);
+                locals.Add(LLVM.BuildAlloca(builder, type.GeneratedType, local.Name));
+            }
+
+            int operandIndex = 0;
+
+            // Some wasted space due to unused offsets, but we only keep one so it should be fine.
+            var branchTargets = new int[body.CodeSize];
+
+            // First instruction can always be reached
+            branchTargets[0] = 1;
+
+            // Find branch targets (which will require PHI node for stack merging)
+            for (int index = 0; index < body.Instructions.Count; index++)
+            {
+                var instruction = body.Instructions[index];
+
+                var flowControl = instruction.OpCode.FlowControl;
+                if (flowControl == FlowControl.Cond_Branch)
+                {
+                    var target = (Instruction)instruction.Operand;
+
+                    // Operand Target can be reached
+                    branchTargets[target.Offset]++;
+                }
+
+                // TODO: Break?
+                if (flowControl != FlowControl.Branch
+                    && flowControl != FlowControl.Throw
+                    && flowControl != FlowControl.Return)
+                {
+                    // Next instruction can be reached
+                    if (instruction.Next != null)
+                        branchTargets[instruction.Next.Offset]++;
+                }
+            }
 
             foreach (var instruction in body.Instructions)
             {
+                var stackMerges = branchTargets[instruction.Offset];
+                bool needPhiNodes = (stackMerges > 1);
+
+                if (needPhiNodes)
+                {
+                    var previousBasicBlock = basicBlock;
+                    basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+
+                    // Replace all stack with PHI nodes.
+                    // LLVM will optimize all the unecessary ones.
+                    // LLVm also allows self-referential PHI nodes so we don't need to care about loops.
+                    for (int index = 0; index < stack.Count; index++)
+                    {
+                        var stackValue = stack[index];
+
+                        var newStackValue = new StackValue(stackValue.Type, LLVM.BuildPhi(builder, LLVM.TypeOf(stackValue.Value), string.Empty));
+
+                        // Add values flowing from previous instruction
+                        LLVM.AddIncoming(newStackValue.Value, new[] { stackValue.Value }, new[] { previousBasicBlock });
+
+                        stack[index] = newStackValue;
+                    }
+                }
+
                 switch (instruction.OpCode.Code)
                 {
                     case Code.Ret:
@@ -301,6 +372,29 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+
+                    #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
+                    // Ldc_I4
+                    case Code.Ldc_I4_0:
+                    case Code.Ldc_I4_1:
+                    case Code.Ldc_I4_2:
+                    case Code.Ldc_I4_3:
+                    case Code.Ldc_I4_4:
+                    case Code.Ldc_I4_5:
+                    case Code.Ldc_I4_6:
+                    case Code.Ldc_I4_7:
+                    case Code.Ldc_I4_8:
+                    operandIndex = instruction.OpCode.Code - Code.Ldc_I4_0;
+                    goto Ldc_I4;
+                    case Code.Ldc_I4_S:
+                    case Code.Ldc_I4:
+                    operandIndex = ((VariableDefinition)instruction.Operand).Index;
+                    Ldc_I4:
+                    {
+                        stack.Add(new StackValue(StackValueType.Int32, LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
+                        break;
+                    }
+
                     case Code.Ldstr:
                     {
                         var stringType = CompileClass(corlib.MainModule.GetType(typeof (string).FullName));
@@ -324,6 +418,47 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+
+                    // Ldloc
+                    case Code.Ldloc_0:
+                    case Code.Ldloc_1:
+                    case Code.Ldloc_2:
+                    case Code.Ldloc_3:
+                    operandIndex = instruction.OpCode.Code - Code.Ldloc_0;
+                    goto Ldloc;
+                    case Code.Ldloc:
+                    case Code.Ldloc_S:
+                    operandIndex = ((VariableDefinition)instruction.Operand).Index;
+                    Ldloc:
+                    {
+                        var loadInst = LLVM.BuildLoad(builder, locals[operandIndex], string.Empty);
+
+                        // TODO: Choose appropriate type + conversions
+                        stack.Add(new StackValue(StackValueType.Value, loadInst));
+                        break;
+                    }
+                    #endregion
+
+                    #region Store opcodes (Stloc, etc...)
+                    // Stloc
+                    case Code.Stloc_0:
+                    case Code.Stloc_1:
+                    case Code.Stloc_2:
+                    case Code.Stloc_3:
+                        operandIndex = instruction.OpCode.Code - Code.Stloc_0;
+                        goto Stloc;
+                    case Code.Stloc:
+                    case Code.Stloc_S:
+                        operandIndex = ((VariableDefinition)instruction.Operand).Index;
+                    Stloc:
+                    {
+
+                        var value = stack.Pop();
+                        LLVM.BuildStore(builder, value.Value, locals[operandIndex]);
+                        break;
+                    }
+                    #endregion
+
                     default:
                         throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
                 }

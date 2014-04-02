@@ -54,6 +54,7 @@
     <Compile Include="Function.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StackExtensions.cs" />
     <Compile Include="StackValue.cs" />
     <Compile Include="StackValueType.cs" />
     <Compile Include="Type.cs" />
