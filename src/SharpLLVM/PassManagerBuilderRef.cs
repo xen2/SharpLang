@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct PassManagerBuilderRef {
-    public PassManagerBuilderRef(global::System.IntPtr cPtr) {
+public struct PassManagerBuilderRef : System.IEquatable<PassManagerBuilderRef> {
+    public PassManagerBuilderRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(PassManagerBuilderRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is PassManagerBuilderRef && Equals((PassManagerBuilderRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(PassManagerBuilderRef left, PassManagerBuilderRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PassManagerBuilderRef left, PassManagerBuilderRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

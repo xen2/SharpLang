@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct TargetDataRef {
-    public TargetDataRef(global::System.IntPtr cPtr) {
+public struct TargetDataRef : System.IEquatable<TargetDataRef> {
+    public TargetDataRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(TargetDataRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is TargetDataRef && Equals((TargetDataRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(TargetDataRef left, TargetDataRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(TargetDataRef left, TargetDataRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

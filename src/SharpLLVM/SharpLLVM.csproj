@@ -40,11 +40,11 @@
     <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\$(Configuration)\SharpLLVM.Native.dll">
+    <None Include="..\Release\SharpLLVM.Native.dll">
       <Link>SharpLLVM.Native.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(Configuration)\SharpLLVM.Native.pdb">
+    <None Include="..\Release\SharpLLVM.Native.pdb">
       <Link>SharpLLVM.Native.pdb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

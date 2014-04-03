@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct BuilderRef {
-    public BuilderRef(global::System.IntPtr cPtr) {
+public struct BuilderRef : System.IEquatable<BuilderRef> {
+    public BuilderRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(BuilderRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is BuilderRef && Equals((BuilderRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(BuilderRef left, BuilderRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(BuilderRef left, BuilderRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

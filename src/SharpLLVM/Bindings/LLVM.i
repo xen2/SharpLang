@@ -45,14 +45,41 @@
 %nodefault;
 %typemap(out) SWIGTYPE %{ $result = $1; %}
 %typemap(in) SWIGTYPE %{ $1 = ($1_ltype)$input; %}
-%typemap(csinterfaces) SWIGTYPE ""
+%typemap(csinterfaces) SWIGTYPE "System.IEquatable<$csclassname>"
 %typemap(csclassmodifiers) SWIGTYPE "public struct"
 %typemap(csbody) SWIGTYPE %{
-    public $csclassname(global::System.IntPtr cPtr) {
+    public $csclassname(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; %}
+    public System.IntPtr Value;
+    
+    public bool Equals($csclassname other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is $csclassname && Equals(($csclassname)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==($csclassname left, $csclassname right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=($csclassname left, $csclassname right)
+    {
+        return !left.Equals(right);
+    }%}
 %typemap(csout, excode=SWIGEXCODE) SWIGTYPE {
     $&csclassname ret = new $&csclassname($imcall);$excode
     return ret;

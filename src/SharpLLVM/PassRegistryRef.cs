@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct PassRegistryRef {
-    public PassRegistryRef(global::System.IntPtr cPtr) {
+public struct PassRegistryRef : System.IEquatable<PassRegistryRef> {
+    public PassRegistryRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(PassRegistryRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is PassRegistryRef && Equals((PassRegistryRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(PassRegistryRef left, PassRegistryRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PassRegistryRef left, PassRegistryRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

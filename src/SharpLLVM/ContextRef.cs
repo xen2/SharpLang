@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct ContextRef {
-    public ContextRef(global::System.IntPtr cPtr) {
+public struct ContextRef : System.IEquatable<ContextRef> {
+    public ContextRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(ContextRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is ContextRef && Equals((ContextRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(ContextRef left, ContextRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ContextRef left, ContextRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

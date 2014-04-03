@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct TargetLibraryInfoRef {
-    public TargetLibraryInfoRef(global::System.IntPtr cPtr) {
+public struct TargetLibraryInfoRef : System.IEquatable<TargetLibraryInfoRef> {
+    public TargetLibraryInfoRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(TargetLibraryInfoRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is TargetLibraryInfoRef && Equals((TargetLibraryInfoRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(TargetLibraryInfoRef left, TargetLibraryInfoRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(TargetLibraryInfoRef left, TargetLibraryInfoRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }

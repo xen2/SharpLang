@@ -8,12 +8,39 @@
 
 namespace SharpLLVM {
 
-public struct ModuleProviderRef {
-    public ModuleProviderRef(global::System.IntPtr cPtr) {
+public struct ModuleProviderRef : System.IEquatable<ModuleProviderRef> {
+    public ModuleProviderRef(global::System.IntPtr cPtr)
+    {
         Value = cPtr;
     }
 
-    public System.IntPtr Value; 
+    public System.IntPtr Value;
+    
+    public bool Equals(ModuleProviderRef other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is ModuleProviderRef && Equals((ModuleProviderRef)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(ModuleProviderRef left, ModuleProviderRef right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ModuleProviderRef left, ModuleProviderRef right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 }
