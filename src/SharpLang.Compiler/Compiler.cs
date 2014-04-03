@@ -22,7 +22,7 @@ namespace SharpLang.CompilerServices
         private Dictionary<TypeDefinition, Class> classes = new Dictionary<TypeDefinition, Class>();
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>();
 
-        private List<KeyValuePair<MethodDefinition, ValueRef>> methodsToCompile = new List<KeyValuePair<MethodDefinition, ValueRef>>();
+        private List<KeyValuePair<MethodDefinition, Function>> methodsToCompile = new List<KeyValuePair<MethodDefinition, Function>>();
 
         public ModuleRef CompileAssembly(IAssemblyResolver assemblyResolver, AssemblyDefinition assembly)
         {
@@ -139,11 +139,14 @@ namespace SharpLang.CompilerServices
                     LLVM.StructSetBody(dataType, new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
                     stackType = StackValueType.Value;
                     break;
-                default:
+                case MetadataType.Class:
                     // Process non-static fields
                     dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
                     processFields = true;
+                    stackType = StackValueType.Object;
                     break;
+                default:
+                    throw new NotImplementedException();
             }
 
             @class = new Class(typeDefinition, dataType, stackType);
@@ -215,24 +218,28 @@ namespace SharpLang.CompilerServices
                 return function;
 
             var numParams = method.Parameters.Count;
-            var parameterTypes = new TypeRef[numParams];
+            var parameterTypes = new Type[numParams];
+            var parameterTypesLLVM = new TypeRef[numParams];
             for (int index = 0; index < numParams; index++)
             {
                 var parameter = method.Parameters[index];
-                var parameterType = CompileType(parameter.ParameterType).GeneratedType;
-                if (parameterType.Value == IntPtr.Zero)
+                var parameterType = CompileType(parameter.ParameterType);
+                if (parameterType.GeneratedType.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
+                parameterTypesLLVM[index] = parameterType.GeneratedType;
             }
+
+            var returnType = CompileType(method.ReturnType);
 
             // Generate function global
             var methodDefinition = method.Resolve();
             bool isExternal = methodDefinition.Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
-            var functionType = LLVM.FunctionType(CompileType(method.ReturnType).GeneratedType, parameterTypes, false);
+            var functionType = LLVM.FunctionType(returnType.GeneratedType, parameterTypesLLVM, false);
             var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
 
-            function = new Function(functionGlobal);
+            function = new Function(method, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
             if (isExternal)
@@ -244,16 +251,17 @@ namespace SharpLang.CompilerServices
             {
                 // Need to compile
                 LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
-                methodsToCompile.Add(new KeyValuePair<MethodDefinition, ValueRef>(methodDefinition, functionGlobal));
+                methodsToCompile.Add(new KeyValuePair<MethodDefinition, Function>(methodDefinition, function));
             }
             
             return function;
         }
 
-        private void CompileMethodImpl(MethodDefinition method, ValueRef functionGlobal)
+        private void CompileMethodImpl(MethodDefinition method, Function function)
         {
             var numParams = method.Parameters.Count;
             var body = method.Body;
+            var functionGlobal = function.GeneratedValue;
 
             var basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
 
@@ -261,6 +269,7 @@ namespace SharpLang.CompilerServices
 
             var stack = new List<StackValue>(body.MaxStackSize);
             var locals = new List<StackValue>(body.Variables.Count);
+            var args = new List<StackValue>(numParams);
 
             // Process locals
             foreach (var local in body.Variables)
@@ -270,6 +279,13 @@ namespace SharpLang.CompilerServices
 
                 var type = CompileType(local.VariableType);
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.GeneratedType, local.Name)));
+            }
+
+            for (int index = 0; index < function.ParameterTypes.Length; index++)
+            {
+                var argType = function.ParameterTypes[index];
+                var arg = LLVM.GetParam(functionGlobal, (uint)index);
+                args.Add(new StackValue(argType.StackType, argType, arg));
             }
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
@@ -290,7 +306,7 @@ namespace SharpLang.CompilerServices
                     var target = (Instruction)instruction.Operand;
 
                     // Operand Target can be reached
-                    branchTargets[target.Offset]++;
+                    branchTargets[target.Offset] += 2;
                 }
 
                 // TODO: Break?
@@ -368,6 +384,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ret:
                     {
                         EmitRet(method);
+                        flowingToNextBlock = false;
                         break;
                     }
                     case Code.Call:
@@ -401,6 +418,23 @@ namespace SharpLang.CompilerServices
                     {
                         var value = ((VariableDefinition)instruction.Operand).Index;
                         EmitI4(stack, value);
+                        break;
+                    }
+                    // Ldarg
+                    case Code.Ldarg_0:
+                    case Code.Ldarg_1:
+                    case Code.Ldarg_2:
+                    case Code.Ldarg_3:
+                    {
+                        var value = instruction.OpCode.Code - Code.Ldarg_0;
+                        EmitLdarg(stack, args, value);
+                        break;
+                    }
+                    case Code.Ldarg_S:
+                    case Code.Ldarg:
+                    {
+                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        EmitLdarg(stack, args, value);
                         break;
                     }
                     case Code.Ldstr:

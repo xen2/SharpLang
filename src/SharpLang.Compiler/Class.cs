@@ -1,3 +1,4 @@
+using System;
 using Mono.Cecil;
 using SharpLLVM;
 
@@ -14,6 +15,22 @@ namespace SharpLang.CompilerServices
             DataType = dataType;
             Type = dataType;
             StackType = stackType;
+
+            switch (stackType)
+            {
+                case StackValueType.Int32:
+                    TypeOnStack = LLVM.Int32TypeInContext(LLVM.GetTypeContext(dataType));
+                    break;
+                case StackValueType.Int64:
+                    TypeOnStack = LLVM.Int64TypeInContext(LLVM.GetTypeContext(dataType));
+                    break;
+                case StackValueType.Value:
+                case StackValueType.Object:
+                    TypeOnStack = Type;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -23,6 +40,14 @@ namespace SharpLang.CompilerServices
         /// The LLVM type (object header and <see cref="DataType"/>).
         /// </value>
         public TypeRef Type { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM type when on the stack.
+        /// </summary>
+        /// <value>
+        /// The LLVM type when on the stack.
+        /// </value>
+        public TypeRef TypeOnStack { get; private set; }
 
         /// <summary>
         /// Gets the LLVM data type.

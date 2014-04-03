@@ -12,21 +12,22 @@ namespace SharpLang.CompilerServices
         /// <param name="stack">The stack variable.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        private ValueRef ConvertFromStackToLocal(StackValue local, StackValue stack)
+        private ValueRef ConvertFromStackToLocal(Type localType, StackValue stack)
         {
             var stackValue = stack.Value;
 
             // Same type, return as is
-            if (local.Type.GeneratedType == stack.Type.GeneratedType)
+            if (stack.StackType == StackValueType.Value
+                && localType.GeneratedType == stack.Type.GeneratedType)
             {
                 return stackValue;
             }
 
             // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
             if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
-                && LLVM.GetTypeKind(local.Type.GeneratedType) == TypeKind.IntegerTypeKind)
+                && LLVM.GetTypeKind(localType.GeneratedType) == TypeKind.IntegerTypeKind)
             {
-                return LLVM.BuildIntCast(builder, stackValue, local.Type.GeneratedType, string.Empty);
+                return LLVM.BuildIntCast(builder, stackValue, localType.GeneratedType, string.Empty);
             }
 
             // TODO: Other cases
