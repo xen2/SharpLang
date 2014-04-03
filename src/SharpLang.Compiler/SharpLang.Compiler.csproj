@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class.cs" />
+    <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Compiler.Emit.cs" />
     <Compile Include="Driver.cs" />

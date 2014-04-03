@@ -7,18 +7,26 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
-        private void EmitStloc(List<StackValue> stack, List<ValueRef> locals, int localIndex)
+        private void EmitStloc(List<StackValue> stack, List<StackValue> locals, int localIndex)
         {
             var value = stack.Pop();
-            LLVM.BuildStore(builder, value.Value, locals[localIndex]);
+
+            var local = locals[localIndex];
+
+            var stackValue = ConvertFromStackToLocal(local, value);
+
+            LLVM.BuildStore(builder, stackValue, local.Value);
         }
 
-        private void EmitLdloc(List<StackValue> stack, List<ValueRef> locals, int operandIndex)
+        private void EmitLdloc(List<StackValue> stack, List<StackValue> locals, int operandIndex)
         {
-            var loadInst = LLVM.BuildLoad(builder, locals[operandIndex], string.Empty);
+            var local = locals[operandIndex];
+            var value = LLVM.BuildLoad(builder, local.Value, string.Empty);
+
+            value = ConvertFromLocalToStack(local, value);
 
             // TODO: Choose appropriate type + conversions
-            stack.Add(new StackValue(StackValueType.Int32, loadInst));
+            stack.Add(new StackValue(local.StackType, local.Type, value));
         }
 
         private void EmitRet(MethodDefinition method)
@@ -31,7 +39,8 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdstr(List<StackValue> stack, string operand)
         {
-            var stringType = CompileClass(corlib.MainModule.GetType(typeof(string).FullName));
+            var stringType = CompileType(corlib.MainModule.GetType(typeof(string).FullName));
+            var stringClass = CompileClass(corlib.MainModule.GetType(typeof(string).FullName));
 
             // Create string data global
             var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
@@ -43,16 +52,18 @@ namespace SharpLang.CompilerServices
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
 
             // Create string
-            var stringConstant = LLVM.ConstNamedStruct(stringType.DataType,
+            var stringConstant = LLVM.ConstNamedStruct(stringClass.DataType,
                 new[] { LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)operand.Length, false), stringConstantDataGlobal });
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Value, stringConstant));
+            stack.Add(new StackValue(StackValueType.Value, stringType, stringConstant));
         }
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
         {
-            stack.Add(new StackValue(StackValueType.Int32,
+            var intType = CompileType(corlib.MainModule.GetType(typeof(int).FullName));
+
+            stack.Add(new StackValue(StackValueType.Int32, intType,
                 LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
         }
 
@@ -91,7 +102,7 @@ namespace SharpLang.CompilerServices
         {
             var value = stack.Pop();
             var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
-            switch (value.Type)
+            switch (value.StackType)
             {
                 case StackValueType.Int32:
                     var cmpInst = LLVM.BuildICmp(builder, IntPredicate.IntEQ, value.Value, zero, string.Empty);

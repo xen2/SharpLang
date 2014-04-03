@@ -8,10 +8,11 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Type
     {
-        public Type(TypeReference typeReference, TypeRef generatedType)
+        public Type(TypeReference typeReference, TypeRef generatedType, StackValueType stackType)
         {
             TypeReference = typeReference;
             GeneratedType = generatedType;
+            StackType = stackType;
         }
 
         /// <summary>
@@ -23,6 +24,8 @@ namespace SharpLang.CompilerServices
         public TypeRef GeneratedType { get; private set; }
 
         public TypeReference TypeReference { get; private set; }
+
+        public StackValueType StackType { get; private set; }
 
         /// <inheritdoc/>
         public override string ToString()

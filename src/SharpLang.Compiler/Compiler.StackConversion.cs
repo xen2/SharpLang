@@ -1,0 +1,74 @@
+﻿using System;
+using SharpLLVM;
+
+namespace SharpLang.CompilerServices
+{
+    public partial class Compiler
+    {
+        /// <summary>
+        /// Helper function to convert variables from stack to local
+        /// </summary>
+        /// <param name="local">The local variable.</param>
+        /// <param name="stack">The stack variable.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private ValueRef ConvertFromStackToLocal(StackValue local, StackValue stack)
+        {
+            var stackValue = stack.Value;
+
+            // Same type, return as is
+            if (local.Type.GeneratedType == stack.Type.GeneratedType)
+            {
+                return stackValue;
+            }
+
+            // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
+            if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
+                && LLVM.GetTypeKind(local.Type.GeneratedType) == TypeKind.IntegerTypeKind)
+            {
+                return LLVM.BuildIntCast(builder, stackValue, local.Type.GeneratedType, string.Empty);
+            }
+
+            // TODO: Other cases
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Helper function to convert variables from local to stack.
+        /// </summary>
+        /// <param name="local">The local variable.</param>
+        /// <param name="stack">The stack variable.</param>
+        /// <returns></returns>
+        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private ValueRef ConvertFromLocalToStack(StackValue local, ValueRef stack)
+        {
+            switch (local.StackType)
+            {
+                case StackValueType.Int32:
+                    var int32Type = LLVM.Int32TypeInContext(context);
+                    if (local.Type.GeneratedType != int32Type
+                        && LLVM.GetTypeKind(local.Type.GeneratedType) == TypeKind.IntegerTypeKind
+                        && LLVM.GetIntTypeWidth(local.Type.GeneratedType) < 32)
+                    {
+                        // Extend sign if needed
+                        // TODO: Need a way to handle unsigned int. Unfortunately it seems that
+                        // LLVMBuildIntCast doesn't have CastInst::CreateIntegerCast isSigned parameter.
+                        // Probably need to directly create ZExt/SExt.
+                        return LLVM.BuildIntCast(builder, stack, int32Type, string.Empty);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    break;
+                case StackValueType.Value:
+                    // Value type, no conversion should be needed
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return stack;
+        }
+    }
+}

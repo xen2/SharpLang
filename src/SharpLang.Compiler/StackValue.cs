@@ -7,8 +7,9 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class StackValue
     {
-        public StackValue(StackValueType type, ValueRef value)
+        public StackValue(StackValueType stackType, Type type, ValueRef value)
         {
+            StackType = stackType;
             Type = type;
             Value = value;
         }
@@ -19,8 +20,10 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The type of the stack value.
         /// </value>
-        public StackValueType Type { get; private set; }
+        public StackValueType StackType { get; private set; }
 
         public ValueRef Value { get; private set; }
+
+        public Type Type { get; private set; }
     }
 }

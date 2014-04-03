@@ -8,11 +8,12 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
-        public Class(TypeDefinition typeDefinition, TypeRef dataType)
+        public Class(TypeDefinition typeDefinition, TypeRef dataType, StackValueType stackType)
         {
             TypeDefinition = typeDefinition;
             DataType = dataType;
             Type = dataType;
+            StackType = stackType;
         }
 
         /// <summary>
@@ -32,6 +33,8 @@ namespace SharpLang.CompilerServices
         public TypeRef DataType { get; private set; }
 
         public TypeDefinition TypeDefinition { get; private set; }
+
+        public StackValueType StackType { get; private set; }
 
         /// <inheritdoc/>
         public override string ToString()

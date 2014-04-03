@@ -100,6 +100,7 @@ namespace SharpLang.CompilerServices
                 return @class;
 
             TypeRef dataType;
+            var stackType = StackValueType.Unknown;
             bool processFields = false;
 
             switch (typeDefinition.MetadataType)
@@ -109,28 +110,34 @@ namespace SharpLang.CompilerServices
                     break;
                 case MetadataType.Boolean:
                     dataType = LLVM.Int1TypeInContext(context);
+                    stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Char:
                 case MetadataType.Byte:
                 case MetadataType.SByte:
                     dataType = LLVM.Int8TypeInContext(context);
+                    stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Int16:
                 case MetadataType.UInt16:
                     dataType = LLVM.Int16TypeInContext(context);
+                    stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Int32:
                 case MetadataType.UInt32:
                     dataType = LLVM.Int32TypeInContext(context);
+                    stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Int64:
                 case MetadataType.UInt64:
                     dataType = LLVM.Int64TypeInContext(context);
+                    stackType = StackValueType.Int64;
                     break;
                 case MetadataType.String:
                     // String: 32 bit length + char pointer
                     dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
                     LLVM.StructSetBody(dataType, new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
+                    stackType = StackValueType.Value;
                     break;
                 default:
                     // Process non-static fields
@@ -139,7 +146,7 @@ namespace SharpLang.CompilerServices
                     break;
             }
 
-            @class = new Class(typeDefinition, dataType);
+            @class = new Class(typeDefinition, dataType, stackType);
             classes.Add(typeDefinition, @class);
 
             if (processFields)
@@ -184,11 +191,11 @@ namespace SharpLang.CompilerServices
                 var typeDefinition = typeReference.Resolve();
                 var @class = CompileClass(typeDefinition);
 
-                type = new Type(typeReference, @class.Type);
+                type = new Type(typeReference, @class.Type, @class.StackType);
             }
             else
             {
-                type = new Type(typeReference, LLVM.VoidTypeInContext(context));
+                type = new Type(typeReference, LLVM.VoidTypeInContext(context), StackValueType.Unknown);
             }
 
             types.Add(typeReference, type);
@@ -253,7 +260,7 @@ namespace SharpLang.CompilerServices
             LLVM.PositionBuilderAtEnd(builder, basicBlock);
 
             var stack = new List<StackValue>(body.MaxStackSize);
-            var locals = new List<ValueRef>(body.Variables.Count);
+            var locals = new List<StackValue>(body.Variables.Count);
 
             // Process locals
             foreach (var local in body.Variables)
@@ -262,7 +269,7 @@ namespace SharpLang.CompilerServices
                     throw new NotSupportedException();
 
                 var type = CompileType(local.VariableType);
-                locals.Add(LLVM.BuildAlloca(builder, type.GeneratedType, local.Name));
+                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.GeneratedType, local.Name)));
             }
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
@@ -343,7 +350,8 @@ namespace SharpLang.CompilerServices
                     {
                         var stackValue = stack[index];
 
-                        var newStackValue = new StackValue(stackValue.Type, LLVM.BuildPhi(builder, LLVM.TypeOf(stackValue.Value), string.Empty));
+                        // TODO: Check stack type during merging?
+                        var newStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builder, LLVM.TypeOf(stackValue.Value), string.Empty));
 
                         // Add values flowing from previous instruction
                         LLVM.AddIncoming(newStackValue.Value, new[] { stackValue.Value }, new[] { previousBasicBlock });
