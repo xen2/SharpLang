@@ -248,9 +248,14 @@ namespace SharpLang.CompilerServices
                         break;
                     }
                     case Code.Ldc_I4_S:
+                    {
+                        var value = (sbyte)instruction.Operand;
+                        EmitI4(stack, value);
+                        break;
+                    }
                     case Code.Ldc_I4:
                     {
-                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        var value = (int)instruction.Operand;
                         EmitI4(stack, value);
                         break;
                     }
