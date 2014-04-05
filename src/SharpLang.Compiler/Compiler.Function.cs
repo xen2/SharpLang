@@ -208,28 +208,28 @@ namespace SharpLang.CompilerServices
                 switch (instruction.OpCode.Code)
                 {
                     case Code.Ret:
-                        {
-                            EmitRet(method);
-                            flowingToNextBlock = false;
-                            break;
-                        }
+                    {
+                        EmitRet(method);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     case Code.Call:
-                        {
-                            var targetMethodReference = (MethodReference)instruction.Operand;
-                            var targetMethod = GetFunction(targetMethodReference);
+                    {
+                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethod = GetFunction(targetMethodReference);
 
-                            EmitCall(stack, targetMethodReference, targetMethod);
+                        EmitCall(stack, targetMethodReference, targetMethod);
 
-                            break;
-                        }
+                        break;
+                    }
                     case Code.Initobj:
-                        {
-                            var address = stack.Pop();
-                            var typeReference = (TypeReference)instruction.Operand;
-                            var type = GetType(typeReference);
-                            EmitInitobj(address, type);
-                            break;
-                        }
+                    {
+                        var address = stack.Pop();
+                        var typeReference = (TypeReference)instruction.Operand;
+                        var type = GetType(typeReference);
+                        EmitInitobj(address, type);
+                        break;
+                    }
 
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
@@ -242,68 +242,68 @@ namespace SharpLang.CompilerServices
                     case Code.Ldc_I4_6:
                     case Code.Ldc_I4_7:
                     case Code.Ldc_I4_8:
-                        {
-                            var value = instruction.OpCode.Code - Code.Ldc_I4_0;
-                            EmitI4(stack, value);
-                            break;
-                        }
+                    {
+                        var value = instruction.OpCode.Code - Code.Ldc_I4_0;
+                        EmitI4(stack, value);
+                        break;
+                    }
                     case Code.Ldc_I4_S:
                     case Code.Ldc_I4:
-                        {
-                            var value = ((VariableDefinition)instruction.Operand).Index;
-                            EmitI4(stack, value);
-                            break;
-                        }
+                    {
+                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        EmitI4(stack, value);
+                        break;
+                    }
                     // Ldarg
                     case Code.Ldarg_0:
                     case Code.Ldarg_1:
                     case Code.Ldarg_2:
                     case Code.Ldarg_3:
-                        {
-                            var value = instruction.OpCode.Code - Code.Ldarg_0;
-                            EmitLdarg(stack, args, value);
-                            break;
-                        }
+                    {
+                        var value = instruction.OpCode.Code - Code.Ldarg_0;
+                        EmitLdarg(stack, args, value);
+                        break;
+                    }
                     case Code.Ldarg_S:
                     case Code.Ldarg:
-                        {
-                            var value = ((VariableDefinition)instruction.Operand).Index;
-                            EmitLdarg(stack, args, value);
-                            break;
-                        }
+                    {
+                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        EmitLdarg(stack, args, value);
+                        break;
+                    }
                     case Code.Ldstr:
-                        {
-                            var operand = (string)instruction.Operand;
+                    {
+                        var operand = (string)instruction.Operand;
 
-                            EmitLdstr(stack, operand);
+                        EmitLdstr(stack, operand);
 
-                            break;
-                        }
+                        break;
+                    }
 
                     // Ldloc
                     case Code.Ldloc_0:
                     case Code.Ldloc_1:
                     case Code.Ldloc_2:
                     case Code.Ldloc_3:
-                        {
-                            var localIndex = instruction.OpCode.Code - Code.Ldloc_0;
-                            EmitLdloc(stack, locals, localIndex);
-                            break;
-                        }
+                    {
+                        var localIndex = instruction.OpCode.Code - Code.Ldloc_0;
+                        EmitLdloc(stack, locals, localIndex);
+                        break;
+                    }
                     case Code.Ldloc:
                     case Code.Ldloc_S:
-                        {
-                            var localIndex = ((VariableDefinition)instruction.Operand).Index;
-                            EmitLdloc(stack, locals, localIndex);
-                            break;
-                        }
+                    {
+                        var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                        EmitLdloc(stack, locals, localIndex);
+                        break;
+                    }
                     case Code.Ldloca:
                     case Code.Ldloca_S:
-                        {
-                            var localIndex = ((VariableDefinition)instruction.Operand).Index;
-                            EmitLdloca(stack, locals, localIndex);
-                            break;
-                        }
+                    {
+                        var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                        EmitLdloca(stack, locals, localIndex);
+                        break;
+                    }
                     #endregion
 
                     #region Store opcodes (Stloc, etc...)
@@ -312,45 +312,45 @@ namespace SharpLang.CompilerServices
                     case Code.Stloc_1:
                     case Code.Stloc_2:
                     case Code.Stloc_3:
-                        {
-                            var localIndex = instruction.OpCode.Code - Code.Stloc_0;
-                            EmitStloc(stack, locals, localIndex);
-                            break;
-                        }
+                    {
+                        var localIndex = instruction.OpCode.Code - Code.Stloc_0;
+                        EmitStloc(stack, locals, localIndex);
+                        break;
+                    }
                     case Code.Stloc:
                     case Code.Stloc_S:
-                        {
-                            var localIndex = ((VariableDefinition)instruction.Operand).Index;
-                            EmitStloc(stack, locals, localIndex);
-                            break;
-                        }
+                    {
+                        var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                        EmitStloc(stack, locals, localIndex);
+                        break;
+                    }
                     #endregion
 
                     #region Branching (Brtrue, Brfalse, etc...)
                     case Code.Br:
                     case Code.Br_S:
-                        {
-                            var targetInstruction = (Instruction)instruction.Operand;
-                            EmitBr(basicBlocks[targetInstruction.Offset]);
-                            flowingToNextBlock = false;
-                            break;
-                        }
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBr(basicBlocks[targetInstruction.Offset]);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     case Code.Brfalse:
                     case Code.Brfalse_S:
-                        {
-                            var targetInstruction = (Instruction)instruction.Operand;
-                            EmitBrfalse(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
-                            flowingToNextBlock = false;
-                            break;
-                        }
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBrfalse(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     case Code.Brtrue:
                     case Code.Brtrue_S:
-                        {
-                            var targetInstruction = (Instruction)instruction.Operand;
-                            EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
-                            flowingToNextBlock = false;
-                            break;
-                        }
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     #endregion
 
                     default:
