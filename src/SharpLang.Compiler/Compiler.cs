@@ -303,6 +303,7 @@ namespace SharpLang.CompilerServices
 
             LLVM.PositionBuilderAtEnd(builder, basicBlock);
 
+            // Create stack, locals and args
             var stack = new List<StackValue>(body.MaxStackSize);
             var locals = new List<StackValue>(body.Variables.Count);
             var args = new List<StackValue>(numParams);
@@ -317,6 +318,7 @@ namespace SharpLang.CompilerServices
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.GeneratedType, local.Name)));
             }
 
+            // Process args
             for (int index = 0; index < function.ParameterTypes.Length; index++)
             {
                 var argType = function.ParameterTypes[index];
@@ -325,12 +327,9 @@ namespace SharpLang.CompilerServices
             }
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
-            var branchTargets = new int[body.CodeSize];
+            var branchTargets = new bool[body.CodeSize];
             var basicBlocks = new BasicBlockRef[body.CodeSize];
             var forwardStacks = new StackValue[body.CodeSize][];
-
-            // First instruction can always be reached
-            branchTargets[0] = 1;
 
             // Find branch targets (which will require PHI node for stack merging)
             for (int index = 0; index < body.Instructions.Count; index++)
@@ -338,29 +337,23 @@ namespace SharpLang.CompilerServices
                 var instruction = body.Instructions[index];
 
                 var flowControl = instruction.OpCode.FlowControl;
+
+                // Process branch targets
                 if (flowControl == FlowControl.Cond_Branch
                     || flowControl == FlowControl.Branch)
                 {
                     var target = (Instruction)instruction.Operand;
 
                     // Operand Target can be reached
-                    branchTargets[target.Offset] += 2;
+                    branchTargets[target.Offset] = true;
                 }
 
+                // Need to enforce a block to be created for the next instruction after a conditional branch
                 // TODO: Break?
                 if (flowControl == FlowControl.Cond_Branch)
                 {
-                    // Need to enforce a block to be created after a conditional branch
                     if (instruction.Next != null)
-                        branchTargets[instruction.Next.Offset] += 2;
-                }
-                else if (flowControl != FlowControl.Branch
-                    && flowControl != FlowControl.Throw
-                    && flowControl != FlowControl.Return)
-                {
-                    // Next instruction can be reached
-                    if (instruction.Next != null)
-                        branchTargets[instruction.Next.Offset]++;
+                        branchTargets[instruction.Next.Offset] = true;
                 }
             }
 
@@ -368,22 +361,21 @@ namespace SharpLang.CompilerServices
             // TODO: Could be done during previous pass
             for (int offset = 0; offset < branchTargets.Length; offset++)
             {
-                // We only create basic block sif there is at least 2 way to access the instruction.
-                if (branchTargets[offset] < 2)
-                    continue;
-
-                basicBlocks[offset] = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}", offset));
+                // Create a basic block if this was a branch target or an instruction after a conditional branch
+                if (branchTargets[offset])
+                {
+                    basicBlocks[offset] = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}", offset));
+                }
             }
 
             // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
-            bool flowingToNextBlock = false;
+            bool flowingToNextBlock = true;
 
             foreach (var instruction in body.Instructions)
             {
-                var stackMerges = branchTargets[instruction.Offset];
-                bool needPhiNodes = (stackMerges > 1);
+                var branchTarget = branchTargets[instruction.Offset];
 
-                if (needPhiNodes)
+                if (branchTarget)
                 {
                     var previousBasicBlock = basicBlock;
                     basicBlock = basicBlocks[instruction.Offset];
