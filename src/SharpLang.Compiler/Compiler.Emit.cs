@@ -10,21 +10,26 @@ namespace SharpLang.CompilerServices
         private void EmitStloc(List<StackValue> stack, List<StackValue> locals, int localIndex)
         {
             var value = stack.Pop();
-
             var local = locals[localIndex];
 
+            // Convert from stack to local value
             var stackValue = ConvertFromStackToLocal(local.Type, value);
 
+            // Store value into local
             LLVM.BuildStore(builder, stackValue, local.Value);
         }
 
         private void EmitLdloc(List<StackValue> stack, List<StackValue> locals, int operandIndex)
         {
             var local = locals[operandIndex];
+
+            // Load value from local
             var value = LLVM.BuildLoad(builder, local.Value, string.Empty);
 
+            // Convert from local to stack value
             value = ConvertFromLocalToStack(local, value);
 
+            // Add value to stack
             // TODO: Choose appropriate type + conversions
             stack.Add(new StackValue(local.StackType, local.Type, value));
         }
@@ -32,8 +37,11 @@ namespace SharpLang.CompilerServices
         private void EmitLdloca(List<StackValue> stack, List<StackValue> locals, int operandIndex)
         {
             var local = locals[operandIndex];
+
+            // Convert from local to stack value
             var value = ConvertFromLocalToStack(local, local.Value);
 
+            // Add value to stack
             // TODO: Choose appropriate type + conversions
             stack.Add(new StackValue(StackValueType.Reference, local.Type, value));
         }
@@ -93,6 +101,7 @@ namespace SharpLang.CompilerServices
         {
             var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
 
+            // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int32, intType,
                 LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
         }
@@ -129,15 +138,23 @@ namespace SharpLang.CompilerServices
 
         private void EmitBr(BasicBlockRef targetBasicBlock)
         {
+            // Unconditional branch
             LLVM.BuildBr(builder, targetBasicBlock);
         }
 
+        /// <summary>
+        /// Helper function for Brfalse/Brtrue: compare stack value with zero using zeroPredicate,
+        /// and accordingly jump to either target or next block.
+        /// </summary>
         private void EmitBrCommon(StackValue stack, IntPredicate zeroPredicate, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
+            // Zero constant
             var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
+
             switch (stack.StackType)
             {
                 case StackValueType.Int32:
+                    // Compare stack value with zero, and accordingly jump to either target or next block
                     var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
                     break;
