@@ -327,6 +327,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
+            // TODO: Reuse same allocated instance per thread, and grow it only if necessary
             var branchTargets = new bool[body.CodeSize];
             var basicBlocks = new BasicBlockRef[body.CodeSize];
             var forwardStacks = new StackValue[body.CodeSize][];
@@ -567,7 +568,7 @@ namespace SharpLang.CompilerServices
                             throw new InvalidOperationException("Backward jump with a non-empty stack unknown target.");
                     }
 
-
+                    // Merge stack (add PHI incoming)
                     MergeStack(stack, basicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
                 }
             }
