@@ -503,6 +503,14 @@ namespace SharpLang.CompilerServices
                         flowingToNextBlock = false;
                         break;
                     }
+                    case Code.Brtrue:
+                    case Code.Brtrue_S:
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     #endregion
 
                     default:

@@ -1,4 +1,4 @@
-// Cover OpCode.Brfalse and OpCode.Br
+// Cover OpCode.Brfalse, OpCode.Brtrue and OpCode.Br
 public static class Program
 {
     public static void Main()
@@ -7,11 +7,17 @@ public static class Program
         bool flag = true;
 
         if (flag)
+        {
+            System.Console.WriteLine("Flag");
             flag2 = true;
+        }
         else
+        {
+            System.Console.WriteLine("NotFlag");
             flag2 = false;
+        }
 
-        if (flag2)
-            System.Console.WriteLine("True");
+        if (!flag2)
+            System.Console.WriteLine("NotFlag2");
     }
 }

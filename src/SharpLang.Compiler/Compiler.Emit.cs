@@ -109,19 +109,30 @@ namespace SharpLang.CompilerServices
             LLVM.BuildBr(builder, targetBasicBlock);
         }
 
-        private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        private void EmitBrCommon(StackValue stack, IntPredicate zeroPredicate, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
-            var value = stack.Pop();
             var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
-            switch (value.StackType)
+            switch (stack.StackType)
             {
                 case StackValueType.Int32:
-                    var cmpInst = LLVM.BuildICmp(builder, IntPredicate.IntEQ, value.Value, zero, string.Empty);
+                    var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
                     break;
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        {
+            // Stack element should be equal to zero.
+            EmitBrCommon(stack.Pop(), IntPredicate.IntEQ, targetBasicBlock, nextBasicBlock);
+        }
+
+        private void EmitBrtrue(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        {
+            // Stack element should be different from zero.
+            EmitBrCommon(stack.Pop(), IntPredicate.IntNE, targetBasicBlock, nextBasicBlock);
         }
     }
 }
