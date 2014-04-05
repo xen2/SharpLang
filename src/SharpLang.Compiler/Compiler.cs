@@ -301,7 +301,8 @@ namespace SharpLang.CompilerServices
                 var instruction = body.Instructions[index];
 
                 var flowControl = instruction.OpCode.FlowControl;
-                if (flowControl == FlowControl.Cond_Branch)
+                if (flowControl == FlowControl.Cond_Branch
+                    || flowControl == FlowControl.Branch)
                 {
                     var target = (Instruction)instruction.Operand;
 
@@ -486,6 +487,14 @@ namespace SharpLang.CompilerServices
                     #endregion
 
                     #region Branching (Brtrue, Brfalse, etc...)
+                    case Code.Br:
+                    case Code.Br_S:
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+                        EmitBr(basicBlocks[targetInstruction.Offset]);
+                        flowingToNextBlock = false;
+                        break;
+                    }
                     case Code.Brfalse:
                     case Code.Brfalse_S:
                     {

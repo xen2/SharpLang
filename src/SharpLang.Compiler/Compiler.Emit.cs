@@ -104,6 +104,11 @@ namespace SharpLang.CompilerServices
             }
         }
 
+        private void EmitBr(BasicBlockRef targetBasicBlock)
+        {
+            LLVM.BuildBr(builder, targetBasicBlock);
+        }
+
         private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
             var value = stack.Pop();
