@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Mono.Cecil;
 using SharpLLVM;
 
@@ -72,11 +73,11 @@ namespace SharpLang.CompilerServices
                 processStartInfo.FileName = LLC;
                 processStartInfo.Arguments = string.Format("-filetype=obj {0} -o {1}", bitcodeFile, System.IO.Path.ChangeExtension(bitcodeFile, "obj"));
 
-                var processLLC = Process.Start(processStartInfo);
-                processLLC.WaitForExit();
+                string processLLCOutput;
+                var processLLC = ExecuteAndCaptureOutput(processStartInfo, out processLLCOutput);
                 if (processLLC.ExitCode != 0)
                 {
-                    throw new InvalidOperationException("Error executing llc.");
+                    throw new InvalidOperationException(string.Format("Error executing llc: {0}", processLLCOutput));
                 }
             }
             
@@ -84,12 +85,48 @@ namespace SharpLang.CompilerServices
             processStartInfo.FileName = CC;
             processStartInfo.Arguments = string.Format("{0} tests\\MiniRuntime.c -o {1}", string.Join(" ", bitcodeFiles.Select(x => System.IO.Path.ChangeExtension(x, "obj"))), outputFile);
 
-            var processLinker = Process.Start(processStartInfo);
+            string processLinkerOutput;
+            var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);
             processLinker.WaitForExit();
             if (processLinker.ExitCode != 0)
             {
-                throw new InvalidOperationException("Error executing llc.");
+                throw new InvalidOperationException(string.Format("Error executing llc: {0}", processLinkerOutput));
             }
+        }
+
+        private static Process ExecuteAndCaptureOutput(ProcessStartInfo processStartInfo, out string output)
+        {
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
+
+            var process = new Process();
+            process.StartInfo = processStartInfo;
+
+            var outputBuilder = new StringBuilder();
+
+            process.OutputDataReceived += (sender, args) =>
+            {
+                lock (outputBuilder)
+                {
+                    if (args.Data != null)
+                        outputBuilder.AppendLine(args.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, args) =>
+            {
+                lock (outputBuilder)
+                {
+                    if (args.Data != null)
+                        outputBuilder.AppendLine(args.Data);
+                }
+            };
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+
+            output = outputBuilder.ToString();
+            return process;
         }
     }
 }
