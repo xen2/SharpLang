@@ -27,10 +27,9 @@ namespace SharpLang.CompilerServices
             var value = LLVM.BuildLoad(builder, local.Value, string.Empty);
 
             // Convert from local to stack value
-            value = ConvertFromLocalToStack(local, value);
+            value = ConvertFromLocalToStack(local.Type, value);
 
             // Add value to stack
-            // TODO: Choose appropriate type + conversions
             stack.Add(new StackValue(local.StackType, local.Type, value));
         }
 
@@ -39,7 +38,7 @@ namespace SharpLang.CompilerServices
             var local = locals[operandIndex];
 
             // Convert from local to stack value
-            var value = ConvertFromLocalToStack(local, local.Value);
+            var value = ConvertFromLocalToStack(local.Type, local.Value);
 
             // Add value to stack
             // TODO: Choose appropriate type + conversions
@@ -49,7 +48,7 @@ namespace SharpLang.CompilerServices
         private void EmitLdarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
         {
             var arg = args[operandIndex];
-            var value = ConvertFromLocalToStack(arg, arg.Value);
+            var value = ConvertFromLocalToStack(arg.Type, arg.Value);
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
         }
 

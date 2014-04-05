@@ -42,25 +42,25 @@ namespace SharpLang.CompilerServices
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException"></exception>
         /// <exception cref="System.NotImplementedException"></exception>
-        private ValueRef ConvertFromLocalToStack(StackValue local, ValueRef stack)
+        private ValueRef ConvertFromLocalToStack(Type localType, ValueRef stack)
         {
-            switch (local.StackType)
+            switch (localType.StackType)
             {
                 case StackValueType.Int32:
                     var int32Type = LLVM.Int32TypeInContext(context);
-                    if (local.Type.GeneratedType != int32Type
-                        && LLVM.GetTypeKind(local.Type.GeneratedType) == TypeKind.IntegerTypeKind
-                        && LLVM.GetIntTypeWidth(local.Type.GeneratedType) < 32)
+                    if (localType.GeneratedType != int32Type)
                     {
-                        // Extend sign if needed
-                        // TODO: Need a way to handle unsigned int. Unfortunately it seems that
-                        // LLVMBuildIntCast doesn't have CastInst::CreateIntegerCast isSigned parameter.
-                        // Probably need to directly create ZExt/SExt.
-                        return LLVM.BuildIntCast(builder, stack, int32Type, string.Empty);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
+                        if (LLVM.GetTypeKind(localType.GeneratedType) != TypeKind.IntegerTypeKind)
+                            throw new InvalidOperationException();
+
+                        if (LLVM.GetIntTypeWidth(localType.GeneratedType) < 32)
+                        {
+                            // Extend sign if needed
+                            // TODO: Need a way to handle unsigned int. Unfortunately it seems that
+                            // LLVMBuildIntCast doesn't have CastInst::CreateIntegerCast isSigned parameter.
+                            // Probably need to directly create ZExt/SExt.
+                            return LLVM.BuildIntCast(builder, stack, int32Type, string.Empty);
+                        }
                     }
                     break;
                 case StackValueType.Value:
