@@ -222,6 +222,14 @@ namespace SharpLang.CompilerServices
 
                             break;
                         }
+                    case Code.Initobj:
+                        {
+                            var address = stack.Pop();
+                            var typeReference = (TypeReference)instruction.Operand;
+                            var type = GetType(typeReference);
+                            EmitInitobj(address, type);
+                            break;
+                        }
 
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
@@ -287,6 +295,13 @@ namespace SharpLang.CompilerServices
                         {
                             var localIndex = ((VariableDefinition)instruction.Operand).Index;
                             EmitLdloc(stack, locals, localIndex);
+                            break;
+                        }
+                    case Code.Ldloca:
+                    case Code.Ldloca_S:
+                        {
+                            var localIndex = ((VariableDefinition)instruction.Operand).Index;
+                            EmitLdloca(stack, locals, localIndex);
                             break;
                         }
                     #endregion

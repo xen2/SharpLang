@@ -29,11 +29,35 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(local.StackType, local.Type, value));
         }
 
+        private void EmitLdloca(List<StackValue> stack, List<StackValue> locals, int operandIndex)
+        {
+            var local = locals[operandIndex];
+            var value = ConvertFromLocalToStack(local, local.Value);
+
+            // TODO: Choose appropriate type + conversions
+            stack.Add(new StackValue(StackValueType.Reference, local.Type, value));
+        }
+
         private void EmitLdarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
         {
             var arg = args[operandIndex];
             var value = ConvertFromLocalToStack(arg, arg.Value);
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
+        }
+
+        private void EmitInitobj(StackValue address, Type type)
+        {
+            var value = address.Value;
+            var expectedType = LLVM.PointerType(type.GeneratedType, 0);
+
+            // If necessary, cast to expected type
+            if (LLVM.TypeOf(value) != expectedType)
+            {
+                value = LLVM.BuildPointerCast(builder, value, expectedType, string.Empty);
+            }
+
+            // Store null value (should be all zero)
+            LLVM.BuildStore(builder, LLVM.ConstNull(type.GeneratedType), value);
         }
 
         private void EmitRet(MethodDefinition method)
