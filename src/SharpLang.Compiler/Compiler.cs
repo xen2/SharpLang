@@ -12,7 +12,12 @@ namespace SharpLang.CompilerServices
     {
         private ModuleRef module;
         private ContextRef context;
+
+        // Builder for normal instructions
         private BuilderRef builder;
+
+        // Builder that is used for PHI nodes
+        private BuilderRef builderPhi;
 
         private IAssemblyResolver assemblyResolver;
         private AssemblyDefinition assembly;
@@ -32,6 +37,7 @@ namespace SharpLang.CompilerServices
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
+            builderPhi = LLVM.CreateBuilderInContext(context);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)
@@ -257,6 +263,36 @@ namespace SharpLang.CompilerServices
             return function;
         }
 
+        private void MergeStack(List<StackValue> stack, BasicBlockRef sourceBasicBlock, ref StackValue[] targetStack, BasicBlockRef targetBasicBlock)
+        {
+            // First time? Need to create stack and position builder
+            if (targetStack == null)
+            {
+                targetStack = new StackValue[stack.Count];
+                if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero)
+                    throw new InvalidOperationException("Target basic block should have no instruction yet.");
+                LLVM.PositionBuilderAtEnd(builderPhi, targetBasicBlock);
+            }
+
+            for (int index = 0; index < stack.Count; index++)
+            {
+                var stackValue = stack[index];
+
+                var mergedStackValue = targetStack[index];
+
+                // First time? Need to create PHI node
+                if (mergedStackValue == null)
+                {
+                    // TODO: Check stack type during merging?
+                    mergedStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builderPhi, LLVM.TypeOf(stackValue.Value), string.Empty));
+                    targetStack[index] = mergedStackValue;
+                }
+
+                // Add values from previous stack value
+                LLVM.AddIncoming(mergedStackValue.Value, new[] { stackValue.Value }, new[] { sourceBasicBlock });
+            }
+        }
+
         private void CompileMethodImpl(MethodDefinition method, Function function)
         {
             var numParams = method.Parameters.Count;
@@ -291,6 +327,7 @@ namespace SharpLang.CompilerServices
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
             var branchTargets = new int[body.CodeSize];
             var basicBlocks = new BasicBlockRef[body.CodeSize];
+            var forwardStacks = new StackValue[body.CodeSize][];
 
             // First instruction can always be reached
             branchTargets[0] = 1;
@@ -351,30 +388,36 @@ namespace SharpLang.CompilerServices
                     var previousBasicBlock = basicBlock;
                     basicBlock = basicBlocks[instruction.Offset];
 
+                    var forwardStack = forwardStacks[instruction.Offset];
+
                     if (flowingToNextBlock)
                     {
                         // Add a jump from previous block to new block
                         LLVM.BuildBr(builder, basicBlock);
+
+                        // Flow stack and build PHI nodes
+                        MergeStack(stack, previousBasicBlock, ref forwardStack, basicBlock);
+                        forwardStacks[instruction.Offset] = forwardStack;
+                    }
+
+                    // Clear stack
+                    stack.Clear();
+
+                    // Try to restore stack from previously reached forward jump
+                    if (forwardStack != null)
+                    {
+                        // Restoring stack as it was during one of previous forward jump
+                        stack.AddRange(forwardStack);
+                    }
+                    else
+                    {
+                        // TODO: Actually, need to restore stack from one of previous forward jump instruction, if any
+                        // (if only backward jumps, spec says it should be empty to avoid multi-pass IL scanning,
+                        // but that's something we could also support later -- Mono doesn't but MS.NET does)
                     }
 
                     // Position builder to write at beginning of new block
                     LLVM.PositionBuilderAtEnd(builder, basicBlock);
-
-                    // Replace all stack with PHI nodes.
-                    // LLVM will optimize all the unecessary ones.
-                    // LLVm also allows self-referential PHI nodes so we don't need to care about loops.
-                    for (int index = 0; index < stack.Count; index++)
-                    {
-                        var stackValue = stack[index];
-
-                        // TODO: Check stack type during merging?
-                        var newStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builder, LLVM.TypeOf(stackValue.Value), string.Empty));
-
-                        // Add values flowing from previous instruction
-                        LLVM.AddIncoming(newStackValue.Value, new[] { stackValue.Value }, new[] { previousBasicBlock });
-
-                        stack[index] = newStackValue;
-                    }
                 }
 
                 // Reset states
@@ -515,6 +558,25 @@ namespace SharpLang.CompilerServices
 
                     default:
                         throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
+                }
+
+                // If we do a jump, let's merge stack
+                var flowControl = instruction.OpCode.FlowControl;
+                if (flowControl == FlowControl.Cond_Branch
+                    || flowControl == FlowControl.Branch)
+                {
+                    var target = (Instruction)instruction.Operand;
+
+                    // Backward jump? Make sure stack was properly created by a previous forward jump, or empty
+                    if (target.Offset < instruction.Offset)
+                    {
+                        var forwardStack = forwardStacks[target.Offset];
+                        if (forwardStack != null && forwardStack.Length > 0)
+                            throw new InvalidOperationException("Backward jump with a non-empty stack unknown target.");
+                    }
+
+
+                    MergeStack(stack, basicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
                 }
             }
         }
