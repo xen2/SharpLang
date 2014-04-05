@@ -82,7 +82,9 @@ namespace SharpLang.CompilerServices
                     if (field.IsStatic)
                         continue;
 
-                    fieldTypes.Add(CreateType(assembly.MainModule.Import(field.FieldType)).GeneratedType);
+                    var fieldType = CreateType(assembly.MainModule.Import(field.FieldType));
+                    @class.Fields.Add(field, new Field(@class, fieldType, fieldTypes.Count));
+                    fieldTypes.Add(fieldType.GeneratedType);
                 }
 
                 LLVM.StructSetBody(dataType, fieldTypes.ToArray(), false);

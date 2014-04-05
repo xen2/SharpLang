@@ -173,5 +173,51 @@ namespace SharpLang.CompilerServices
             // Stack element should be different from zero.
             EmitBrCommon(stack.Pop(), IntPredicate.IntNE, targetBasicBlock, nextBasicBlock);
         }
+
+        private void EmitStfld(List<StackValue> stack, Field field)
+        {
+            var value = stack.Pop();
+            var @object = stack.Pop();
+
+            // Build indices for GEP
+            var indices = new[]
+            {
+                LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false),
+                LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false)
+            };
+
+            // Find field address using GEP
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+
+            // Convert stack value to appropriate type
+            var fieldValue = ConvertFromStackToLocal(field.Type, value);
+
+            // Store value in field
+            LLVM.BuildStore(builder, fieldValue, fieldAddress);
+        }
+
+        private void EmitLdfld(List<StackValue> stack, Field field)
+        {
+            var @object = stack.Pop();
+
+            // Build indices for GEP
+            var indices = new[]
+            {
+                LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false),
+                LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false)
+            };
+
+            // Find field address using GEP
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+
+            // Load value from field and create "fake" local
+            var value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
+
+            // Convert from local to stack value
+            value = ConvertFromLocalToStack(field.Type, value);
+
+            // Add value to stack
+            stack.Add(new StackValue(field.Type.StackType, field.Type, value));
+        }
     }
 }

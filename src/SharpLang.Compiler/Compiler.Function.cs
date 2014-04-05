@@ -309,6 +309,19 @@ namespace SharpLang.CompilerServices
                         EmitLdloca(stack, locals, localIndex);
                         break;
                     }
+                    case Code.Ldfld:
+                    {
+                        var fieldReference = (FieldReference)instruction.Operand;
+                        var fieldDefinition = fieldReference.Resolve();
+
+                        // Resolve class and field
+                        var @class = GetClass(fieldDefinition.DeclaringType);
+                        var field = @class.Fields[fieldDefinition];
+
+                        EmitLdfld(stack, field);
+
+                        break;
+                    }
                     #endregion
 
                     #region Store opcodes (Stloc, etc...)
@@ -327,6 +340,19 @@ namespace SharpLang.CompilerServices
                     {
                         var localIndex = ((VariableDefinition)instruction.Operand).Index;
                         EmitStloc(stack, locals, localIndex);
+                        break;
+                    }
+                    case Code.Stfld:
+                    {
+                        var fieldReference = (FieldReference)instruction.Operand;
+                        var fieldDefinition = fieldReference.Resolve();
+
+                        // Resolve class and field
+                        var @class = GetClass(fieldDefinition.DeclaringType);
+                        var field = @class.Fields[fieldDefinition];
+
+                        EmitStfld(stack, field);
+
                         break;
                     }
                     #endregion

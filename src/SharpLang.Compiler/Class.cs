@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mono.Cecil;
 using SharpLLVM;
 
@@ -15,6 +16,7 @@ namespace SharpLang.CompilerServices
             DataType = dataType;
             Type = dataType;
             StackType = stackType;
+            Fields = new Dictionary<FieldDefinition, Field>();
 
             switch (stackType)
             {
@@ -60,6 +62,8 @@ namespace SharpLang.CompilerServices
         public TypeDefinition TypeDefinition { get; private set; }
 
         public StackValueType StackType { get; private set; }
+
+        public Dictionary<FieldDefinition, Field> Fields { get; private set; }
 
         /// <inheritdoc/>
         public override string ToString()
