@@ -16,7 +16,7 @@ namespace SharpLang.CompilerServices
         private Class GetClass(TypeDefinition typeDefinition)
         {
             Class @class;
-            if (classes.TryGetValue(typeDefinition, out @class))
+            if (!classes.TryGetValue(typeDefinition, out @class))
                 throw new InvalidOperationException(string.Format("Could not find class {0}", typeDefinition));
 
             return @class;
