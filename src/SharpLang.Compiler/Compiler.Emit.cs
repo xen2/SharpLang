@@ -46,8 +46,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdstr(List<StackValue> stack, string operand)
         {
-            var stringType = CompileType(corlib.MainModule.GetType(typeof(string).FullName));
-            var stringClass = CompileClass(corlib.MainModule.GetType(typeof(string).FullName));
+            var stringType = GetType(corlib.MainModule.GetType(typeof(string).FullName));
 
             // Create string data global
             var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
@@ -59,7 +58,7 @@ namespace SharpLang.CompilerServices
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
 
             // Create string
-            var stringConstant = LLVM.ConstNamedStruct(stringClass.DataType,
+            var stringConstant = LLVM.ConstNamedStruct(stringType.GeneratedType,
                 new[] { LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)operand.Length, false), stringConstantDataGlobal });
 
             // Push on stack

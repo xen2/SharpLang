@@ -128,50 +128,37 @@ namespace SharpLang.CompilerServices
                 return @class;
 
             TypeRef dataType;
-            var stackType = StackValueType.Unknown;
+            StackValueType stackType;
             bool processFields = false;
 
             switch (typeDefinition.MetadataType)
             {
                 case MetadataType.Void:
-                    dataType = LLVM.VoidTypeInContext(context);
-                    break;
                 case MetadataType.Boolean:
-                    dataType = LLVM.Int1TypeInContext(context);
-                    stackType = StackValueType.Int32;
-                    break;
                 case MetadataType.Char:
                 case MetadataType.Byte:
                 case MetadataType.SByte:
-                    dataType = LLVM.Int8TypeInContext(context);
-                    stackType = StackValueType.Int32;
-                    break;
                 case MetadataType.Int16:
                 case MetadataType.UInt16:
-                    dataType = LLVM.Int16TypeInContext(context);
-                    stackType = StackValueType.Int32;
-                    break;
                 case MetadataType.Int32:
                 case MetadataType.UInt32:
-                    dataType = LLVM.Int32TypeInContext(context);
-                    stackType = StackValueType.Int32;
-                    break;
                 case MetadataType.Int64:
                 case MetadataType.UInt64:
-                    dataType = LLVM.Int64TypeInContext(context);
-                    stackType = StackValueType.Int64;
-                    break;
                 case MetadataType.String:
-                    // String: 32 bit length + char pointer
-                    dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
-                    LLVM.StructSetBody(dataType, new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
-                    stackType = StackValueType.Value;
+                {
+                    // Non recursive type, get info through Type
+                    var type = GetType(typeDefinition);
+                    dataType = type.GeneratedType;
+                    stackType = type.StackType;
+
                     break;
+                }
+                case MetadataType.ValueType:
                 case MetadataType.Class:
                     // Process non-static fields
                     dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
                     processFields = true;
-                    stackType = StackValueType.Object;
+                    stackType = typeDefinition.MetadataType == MetadataType.ValueType ? StackValueType.Value : StackValueType.Object;
                     break;
                 default:
                     throw new NotImplementedException();
@@ -219,8 +206,13 @@ namespace SharpLang.CompilerServices
         Type GetType(TypeReference typeReference)
         {
             Type type;
-            if (!types.TryGetValue(typeReference, out type))
-                throw new InvalidOperationException(string.Format("Could not find type {0}", typeReference));
+            var typeDefinition = typeReference.Resolve();
+            if (types.TryGetValue(typeDefinition, out type))
+                return type;
+
+            type = BuildType(typeDefinition, false);
+
+            types.Add(typeDefinition, type);
 
             return type;
         }
@@ -233,29 +225,86 @@ namespace SharpLang.CompilerServices
         Type CompileType(TypeReference typeReference)
         {
             Type type;
-            if (types.TryGetValue(typeReference, out type))
+            var typeDefinition = typeReference.Resolve();
+            if (types.TryGetValue(typeDefinition, out type))
                 return type;
 
-            if (typeReference.MetadataType != MetadataType.Void)
-            {
-                var typeDefinition = typeReference.Resolve();
-                var @class = CompileClass(typeDefinition);
+            type = BuildType(typeDefinition, true);
 
-                type = new Type(typeReference, @class.Type, @class.StackType);
-            }
-            else
-            {
-                type = new Type(typeReference, LLVM.VoidTypeInContext(context), StackValueType.Unknown);
-            }
-
-            types.Add(typeReference, type);
-
-            if (type == null)
-            {
-                throw new NotImplementedException();
-            }
+            types.Add(typeDefinition, type);
 
             return type;
+        }
+
+        private Type BuildType(TypeDefinition typeDefinition, bool allowClassResolve)
+        {
+            TypeRef dataType;
+            StackValueType stackType;
+
+            switch (typeDefinition.MetadataType)
+            {
+                case MetadataType.Void:
+                    dataType = LLVM.VoidTypeInContext(context);
+                    stackType = StackValueType.Unknown;
+                    break;
+                case MetadataType.Boolean:
+                    dataType = LLVM.Int1TypeInContext(context);
+                    stackType = StackValueType.Int32;
+                    break;
+                case MetadataType.Char:
+                case MetadataType.Byte:
+                case MetadataType.SByte:
+                    dataType = LLVM.Int8TypeInContext(context);
+                    stackType = StackValueType.Int32;
+                    break;
+                case MetadataType.Int16:
+                case MetadataType.UInt16:
+                    dataType = LLVM.Int16TypeInContext(context);
+                    stackType = StackValueType.Int32;
+                    break;
+                case MetadataType.Int32:
+                case MetadataType.UInt32:
+                    dataType = LLVM.Int32TypeInContext(context);
+                    stackType = StackValueType.Int32;
+                    break;
+                case MetadataType.Int64:
+                case MetadataType.UInt64:
+                    dataType = LLVM.Int64TypeInContext(context);
+                    stackType = StackValueType.Int64;
+                    break;
+                case MetadataType.String:
+                    // String: 32 bit length + char pointer
+                    dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
+                    LLVM.StructSetBody(dataType,
+                        new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
+                    stackType = StackValueType.Value;
+                    break;
+                case MetadataType.ValueType:
+                case MetadataType.Class:
+                case MetadataType.Object:
+                {
+                    if (!allowClassResolve)
+                        throw new InvalidOperationException();
+
+                    // When resolved, void becomes a real type
+                    if (typeDefinition.FullName == typeof(void).FullName)
+                    {
+                        goto case MetadataType.Void;
+                    }
+
+                    // Process non-static fields
+                    var @class = CompileClass(typeDefinition);
+
+                    dataType = @class.Type;
+                    stackType = @class.StackType;
+
+                    break;
+                }
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return new Type(typeDefinition, dataType, stackType);
         }
 
         /// <summary>
@@ -494,7 +543,7 @@ namespace SharpLang.CompilerServices
                     case Code.Call:
                     {
                         var targetMethodReference = (MethodReference)instruction.Operand;
-                        var targetMethod = CompileFunction(targetMethodReference);
+                        var targetMethod = GetFunction(targetMethodReference);
 
                         EmitCall(stack, targetMethodReference, targetMethod);
 
