@@ -32,9 +32,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\..\deps\Mono.Cecil\Mono.Cecil.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\deps\NUnit\nunit.framework.dll</HintPath>
     </Reference>

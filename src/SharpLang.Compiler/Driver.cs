@@ -36,9 +36,16 @@ namespace SharpLang.CompilerServices
 
         public static void CompileAssembly(string inputFile, string outputFile)
         {
+            // Force PdbReader to be referenced
+            typeof(Mono.Cecil.Pdb.PdbReader).ToString();
+
             var assemblyResolver = new DefaultAssemblyResolver();
+
+            // Check if there is a PDB
+            var readPdb = File.Exists(System.IO.Path.ChangeExtension(inputFile, "pdb"));
+
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(inputFile,
-                new ReaderParameters { AssemblyResolver = assemblyResolver, ReadSymbols = true });
+                new ReaderParameters { AssemblyResolver = assemblyResolver, ReadSymbols = readPdb });
 
             var compiler = new Compiler();
             var module = compiler.CompileAssembly(assemblyResolver, assemblyDefinition);
