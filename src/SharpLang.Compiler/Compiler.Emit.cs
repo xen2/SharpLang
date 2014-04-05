@@ -67,7 +67,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
         {
-            var intType = CompileType(corlib.MainModule.GetType(typeof(int).FullName));
+            var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
 
             stack.Add(new StackValue(StackValueType.Int32, intType,
                 LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));

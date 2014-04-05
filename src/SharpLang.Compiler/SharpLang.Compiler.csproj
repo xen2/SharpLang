@@ -49,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class.cs" />
+    <Compile Include="Compiler.Class.cs" />
+    <Compile Include="Compiler.Type.cs" />
+    <Compile Include="Compiler.Function.cs" />
     <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Compiler.Emit.cs" />
