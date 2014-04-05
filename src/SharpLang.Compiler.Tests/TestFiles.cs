@@ -49,8 +49,10 @@ namespace SharpLang.CompilerServices.Tests
 
             // Read variables from config file
             Driver.Path = ConfigurationManager.AppSettings["Path"];
-            Driver.LLC = ConfigurationManager.AppSettings["LLC"];
             Driver.CC = ConfigurationManager.AppSettings["CC"];
+
+            // LLC should be copied locally
+            Driver.LLC = @"llc";
 
             // Link bitcode and runtime
             Driver.LinkBitcodes(outputFile, bitcodeFile);
