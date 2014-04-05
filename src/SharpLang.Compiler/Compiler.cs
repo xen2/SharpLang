@@ -8,6 +8,9 @@ using SharpLLVM;
 
 namespace SharpLang.CompilerServices
 {
+    /// <summary>
+    /// Provides access to C# LLVM code generator.
+    /// </summary>
     public sealed partial class Compiler
     {
         private ModuleRef module;
@@ -53,7 +56,7 @@ namespace SharpLang.CompilerServices
                     CompileType(member.DeclaringType);
                     if (method != null)
                     {
-                        CompileMethod(method);
+                        CompileFunction(method);
                     }
                 }
 
@@ -99,6 +102,25 @@ namespace SharpLang.CompilerServices
             return module;
         }
 
+        /// <summary>
+        /// Gets the specified class.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <returns></returns>
+        Class GetClass(TypeDefinition typeDefinition)
+        {
+            Class @class;
+            if (classes.TryGetValue(typeDefinition, out @class))
+                throw new InvalidOperationException(string.Format("Could not find class {0}", typeDefinition));
+
+            return @class;
+        }
+
+        /// <summary>
+        /// Compiles the specified class.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <returns></returns>
         Class CompileClass(TypeDefinition typeDefinition)
         {
             Class @class;
@@ -184,11 +206,30 @@ namespace SharpLang.CompilerServices
                 // Process methods
                 foreach (var method in @class.TypeDefinition.Methods)
                 {
-                    var function = CompileMethod(method);
+                    var function = CompileFunction(method);
                 }
             }
         }
 
+        /// <summary>
+        /// Gets the specified type.
+        /// </summary>
+        /// <param name="typeReference">The type reference.</param>
+        /// <returns></returns>
+        Type GetType(TypeReference typeReference)
+        {
+            Type type;
+            if (!types.TryGetValue(typeReference, out type))
+                throw new InvalidOperationException(string.Format("Could not find type {0}", typeReference));
+
+            return type;
+        }
+
+        /// <summary>
+        /// Compiles the specified type.
+        /// </summary>
+        /// <param name="typeReference">The type reference.</param>
+        /// <returns></returns>
         Type CompileType(TypeReference typeReference)
         {
             Type type;
@@ -217,7 +258,26 @@ namespace SharpLang.CompilerServices
             return type;
         }
 
-        Function CompileMethod(MethodReference method)
+        /// <summary>
+        /// Gets the function.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        private Function GetFunction(MethodReference method)
+        {
+            Function function;
+            if (!functions.TryGetValue(method, out function))
+                throw new InvalidOperationException(string.Format("Could not find method {0}", method));
+
+            return function;
+        }
+
+        /// <summary>
+        /// Compiles the function.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        Function CompileFunction(MethodReference method)
         {
             Function function;
             if (functions.TryGetValue(method, out function))
@@ -263,20 +323,27 @@ namespace SharpLang.CompilerServices
             return function;
         }
 
-        private void MergeStack(List<StackValue> stack, BasicBlockRef sourceBasicBlock, ref StackValue[] targetStack, BasicBlockRef targetBasicBlock)
+        /// <summary>
+        /// Merges the stack.
+        /// </summary>
+        /// <param name="sourceStack">The source stack.</param>
+        /// <param name="sourceBasicBlock">The source basic block.</param>
+        /// <param name="targetStack">The target stack.</param>
+        /// <param name="targetBasicBlock">The target basic block.</param>
+        private void MergeStack(List<StackValue> sourceStack, BasicBlockRef sourceBasicBlock, ref StackValue[] targetStack, BasicBlockRef targetBasicBlock)
         {
             // First time? Need to create stack and position builder
             if (targetStack == null)
             {
-                targetStack = new StackValue[stack.Count];
+                targetStack = new StackValue[sourceStack.Count];
                 if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero)
                     throw new InvalidOperationException("Target basic block should have no instruction yet.");
                 LLVM.PositionBuilderAtEnd(builderPhi, targetBasicBlock);
             }
 
-            for (int index = 0; index < stack.Count; index++)
+            for (int index = 0; index < sourceStack.Count; index++)
             {
-                var stackValue = stack[index];
+                var stackValue = sourceStack[index];
 
                 var mergedStackValue = targetStack[index];
 
@@ -427,7 +494,7 @@ namespace SharpLang.CompilerServices
                     case Code.Call:
                     {
                         var targetMethodReference = (MethodReference)instruction.Operand;
-                        var targetMethod = CompileMethod(targetMethodReference);
+                        var targetMethod = CompileFunction(targetMethodReference);
 
                         EmitCall(stack, targetMethodReference, targetMethod);
 
