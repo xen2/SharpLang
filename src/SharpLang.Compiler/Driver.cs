@@ -11,13 +11,13 @@ namespace SharpLang.CompilerServices
 {
     public class Driver
     {
-        /// <summary>
-        /// Gets or sets the paths used when executing command line.
-        /// </summary>
-        /// <value>
-        /// The paths used when executing command line.
-        /// </value>
-        public static string Path { get; set; }
+        private static bool clangWrapperCreated = false;
+
+        static Driver()
+        {
+            LLC = "llc";
+            Clang = "clang";
+        }
 
         /// <summary>
         /// Gets or sets the path to LLC.
@@ -33,7 +33,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The path to C compiler.
         /// </value>
-        public static string CC { get; set; }
+        public static string Clang { get; set; }
 
         public static void CompileAssembly(string inputFile, string outputFile)
         {
@@ -60,12 +60,10 @@ namespace SharpLang.CompilerServices
             processStartInfo.CreateNoWindow = true;
             processStartInfo.UseShellExecute = false;
 
-            // Prepare PATH to have access to various compiler tools
-            if (!string.IsNullOrEmpty(Path))
-            {
-                var path = processStartInfo.EnvironmentVariables["PATH"];
-                processStartInfo.EnvironmentVariables["PATH"] = Path + ";" + path;
-            }
+            // Setup environment using vcvars32.bat
+            processStartInfo.FileName = @"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat";
+            string output;
+            ExecuteAndCaptureOutput(processStartInfo, out output);
 
             // Compile each LLVM .bc file to a .obj file with llc
             foreach (var bitcodeFile in bitcodeFiles)
@@ -81,8 +79,32 @@ namespace SharpLang.CompilerServices
                 }
             }
             
-            // Use gcc to link the .obj files and runtime
-            processStartInfo.FileName = CC;
+            // Use clang to link the .obj files and runtime
+            if (true) // Platform is windows
+            {
+                // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
+                var clangWrapper = "clang.bat";
+                if (!clangWrapperCreated)
+                {
+                    var vc7Dir = GetPathToVC7("12.0") ?? GetPathToVC7("11.0") ?? GetPathToVC7("10.0");
+                    if (vc7Dir == null)
+                        throw new NotImplementedException("Could not find Visual C++ compiler path.");
+
+                    File.WriteAllLines(clangWrapper,
+                        new[]
+                        {
+                            string.Format("call \"{0}vcvarsall.bat\" x86", vc7Dir),
+                            string.Format("{0} %*", Clang)
+                        });
+                    clangWrapperCreated = true;
+                }
+
+                processStartInfo.FileName = "clang.bat";
+            }
+            else
+            {
+                processStartInfo.FileName = Clang;
+            }
             processStartInfo.Arguments = string.Format("{0} tests\\MiniRuntime.c -o {1}", string.Join(" ", bitcodeFiles.Select(x => System.IO.Path.ChangeExtension(x, "obj"))), outputFile);
 
             string processLinkerOutput;
@@ -90,10 +112,38 @@ namespace SharpLang.CompilerServices
             processLinker.WaitForExit();
             if (processLinker.ExitCode != 0)
             {
-                throw new InvalidOperationException(string.Format("Error executing llc: {0}", processLinkerOutput));
+                throw new InvalidOperationException(string.Format("Error executing clang: {0}", processLinkerOutput));
             }
         }
 
+        /// <summary>
+        /// Gets the path to Visual C++ compiler.
+        /// </summary>
+        /// <param name="version">The Visual C++ compiler version.</param>
+        /// <returns>The path to Visual C++ compiler.</returns>
+        public static string GetPathToVC7(string version)
+        {
+            // Open Key
+            var is64BitProcess = Environment.Is64BitProcess;
+            var registryKeyName = string.Format(@"Software\{0}Microsoft\VisualStudio\SxS\VC7", is64BitProcess ? @"Wow6432Node\" : string.Empty);
+            var vsKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryKeyName);
+            if (vsKey == null)
+                return null;
+
+            // Find appropriate value
+            var value = vsKey.GetValue(version);
+            if (value == null)
+                return null;
+
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// Executes process and capture its output.
+        /// </summary>
+        /// <param name="processStartInfo">The process start information.</param>
+        /// <param name="output">The output.</param>
+        /// <returns></returns>
         private static Process ExecuteAndCaptureOutput(ProcessStartInfo processStartInfo, out string output)
         {
             processStartInfo.RedirectStandardOutput = true;

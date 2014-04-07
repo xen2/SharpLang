@@ -36,7 +36,6 @@
       <HintPath>..\..\deps\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -59,7 +58,6 @@
     <None Include="tests\SimpleBranching2.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="App.config" />
     <None Include="tests\MiniRuntime.c">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -89,6 +87,10 @@
   <ItemGroup>
     <None Include="..\..\deps\llvm\build\RelWithDebInfo\bin\llc.exe">
       <Link>llc.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\deps\llvm\build\RelWithDebInfo\bin\clang.exe">
+      <Link>clang.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

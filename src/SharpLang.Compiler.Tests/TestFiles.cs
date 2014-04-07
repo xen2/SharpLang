@@ -47,13 +47,6 @@ namespace SharpLang.CompilerServices.Tests
             var outputFile = Path.Combine(Path.GetDirectoryName(sourceFile),
                 Path.GetFileNameWithoutExtension(sourceFile) + "-llvm.exe");
 
-            // Read variables from config file
-            Driver.Path = ConfigurationManager.AppSettings["Path"];
-            Driver.CC = ConfigurationManager.AppSettings["CC"];
-
-            // LLC should be copied locally
-            Driver.LLC = @"llc";
-
             // Link bitcode and runtime
             Driver.LinkBitcodes(outputFile, bitcodeFile);
 
@@ -65,6 +58,11 @@ namespace SharpLang.CompilerServices.Tests
             Assert.That(output2, Is.EqualTo(output1));
         }
 
+        /// <summary>
+        /// Executes process and capture its output.
+        /// </summary>
+        /// <param name="executableFile">The executable file.</param>
+        /// <returns></returns>
         private static string ExecuteAndCaptureOutput(string executableFile)
         {
             var processStartInfo = new ProcessStartInfo(executableFile);
