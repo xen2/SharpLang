@@ -105,7 +105,7 @@ namespace SharpLang.CompilerServices
             {
                 processStartInfo.FileName = Clang;
             }
-            processStartInfo.Arguments = string.Format("{0} tests\\MiniRuntime.c -o {1}", string.Join(" ", bitcodeFiles.Select(x => System.IO.Path.ChangeExtension(x, "obj"))), outputFile);
+            processStartInfo.Arguments = string.Format("{0} tests\\MiniCorlib.c -o {1}", string.Join(" ", bitcodeFiles.Select(x => System.IO.Path.ChangeExtension(x, "obj"))), outputFile);
 
             string processLinkerOutput;
             var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);

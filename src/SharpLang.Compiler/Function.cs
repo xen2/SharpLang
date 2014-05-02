@@ -11,6 +11,7 @@ namespace SharpLang.CompilerServices
             GeneratedValue = generatedValue;
             ReturnType = returnType;
             ParameterTypes = parameterTypes;
+            VirtualSlot = -1;
         }
 
         public MethodReference MethodReference { get; private set; }
@@ -38,5 +39,7 @@ namespace SharpLang.CompilerServices
         /// The parameter types.
         /// </value>
         public Type[] ParameterTypes { get; private set; }
+
+        public int VirtualSlot { get; set; }
     }
 }

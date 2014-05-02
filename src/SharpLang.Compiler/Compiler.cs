@@ -16,6 +16,8 @@ namespace SharpLang.CompilerServices
         private ModuleRef module;
         private ContextRef context;
 
+        private ValueRef allocObjectFunction;
+
         // Builder for normal instructions
         private BuilderRef builder;
 
@@ -36,6 +38,9 @@ namespace SharpLang.CompilerServices
             this.assembly = assembly;
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
+
+            allocObjectFunction = RuntimeInline.Runtime.define_allocObject(module);
+
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
             builderPhi = LLVM.CreateBuilderInContext(context);
@@ -61,6 +66,11 @@ namespace SharpLang.CompilerServices
                 foreach (var type in assemblyModule.Types)
                 {
                     CreateType(type);
+
+                    foreach (var nestedType in type.NestedTypes)
+                    {
+                        CreateType(nestedType);
+                    }
                 }
             }
 
@@ -90,6 +100,8 @@ namespace SharpLang.CompilerServices
 
             LLVM.DisposeBuilder(builder);
 
+            var code = LLVM.PrintModuleToString(module);
+
             // Verify module
             string message;
             if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
@@ -108,8 +120,18 @@ namespace SharpLang.CompilerServices
                 // Process methods
                 foreach (var method in @class.TypeDefinition.Methods)
                 {
-                    CreateFunction(method);
+                    var function = CreateFunction(method);
+
+                    if (method.IsVirtual)
+                    {
+                        function.VirtualSlot = @class.VirtualTable.Count;
+                        @class.VirtualTable.Add(function);
+                    }
                 }
+
+                // Create VTable
+                var vtableMethodType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+                var vtable = LLVM.ConstArray(vtableMethodType, @class.VirtualTable.Select(virtualMethod => LLVM.ConstPointerCast(virtualMethod.GeneratedValue, vtableMethodType)).ToArray());
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -35,12 +36,23 @@ namespace SharpLang.CompilerServices
                 return function;
 
             var numParams = method.Parameters.Count;
+            if (method.HasThis)
+                numParams++;
             var parameterTypes = new Type[numParams];
             var parameterTypesLLVM = new TypeRef[numParams];
             for (int index = 0; index < numParams; index++)
             {
-                var parameter = method.Parameters[index];
-                var parameterType = CreateType(parameter.ParameterType);
+                TypeReference parameterTypeReference;
+                if (method.HasThis && index == 0)
+                {
+                    parameterTypeReference = method.DeclaringType;
+                }
+                else
+                {
+                    var parameter = method.Parameters[method.HasThis ? index - 1 : index];
+                    parameterTypeReference = parameter.ParameterType;
+                }
+                var parameterType = CreateType(parameterTypeReference);
                 if (parameterType.GeneratedType.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
@@ -228,6 +240,17 @@ namespace SharpLang.CompilerServices
                         var typeReference = (TypeReference)instruction.Operand;
                         var type = GetType(typeReference);
                         EmitInitobj(address, type);
+                        break;
+                    }
+
+                    case Code.Newobj:
+                    {
+                        var ctorReference = (MethodReference)instruction.Operand;
+                        var ctor = GetFunction(ctorReference);
+                        var type = GetType(ctorReference.DeclaringType);
+
+                        EmitNewobj(stack, type, ctor);
+
                         break;
                     }
 

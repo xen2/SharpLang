@@ -67,6 +67,33 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, LLVM.ConstNull(type.GeneratedType), value);
         }
 
+        private void EmitNewobj(List<StackValue> stack, Type type, Function ctor)
+        {
+            if (type.StackType == StackValueType.Object)
+            {
+                // TODO: Improve performance (better inlining, etc...)
+                // Invoke malloc
+                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.GeneratedType), LLVM.Int32TypeInContext(context), string.Empty);
+                var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
+                var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.GeneratedType, string.Empty);
+
+                // Add it to stack, right before arguments
+                var ctorNumParams = ctor.ParameterTypes.Length;
+                stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
+
+                // Invoke ctor
+                EmitCall(stack, ctor.MethodReference, ctor);
+
+                // Add created object on the stack
+                stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
+            }
+            else
+            {
+                // TODO: Support value type too
+                throw new NotImplementedException();
+            }
+        }
+
         private void EmitRet(MethodDefinition method)
         {
             if (method.ReturnType.MetadataType == MetadataType.Void)
@@ -108,12 +135,10 @@ namespace SharpLang.CompilerServices
         private void EmitCall(List<StackValue> stack, MethodReference targetMethodReference, Function targetMethod)
         {
             // Build argument list
-            var targetNumParams = targetMethodReference.Parameters.Count;
+            var targetNumParams = targetMethod.ParameterTypes.Length;
             var args = new ValueRef[targetNumParams];
             for (int index = 0; index < targetNumParams; index++)
             {
-                var parameter = targetMethodReference.Parameters[index];
-
                 // TODO: Casting/implicit conversion?
                 var stackItem = stack[stack.Count - targetNumParams + index];
                 args[index] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index], stackItem);
@@ -180,14 +205,17 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = new[]
-            {
-                LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false),
-                LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false)
-            };
+            var indices = new List<ValueRef>(3);
+            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
+
+            if (@object.StackType == StackValueType.Object)
+                indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 1, false));
+
+            // TODO: Object parent classes
+            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false));
 
             // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices.ToArray(), string.Empty);
 
             // Convert stack value to appropriate type
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
@@ -201,14 +229,17 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = new[]
-            {
-                LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false),
-                LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false)
-            };
+            var indices = new List<ValueRef>(3);
+            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
+            if (@object.StackType == StackValueType.Object)
+                indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 1, false));
+
+            // TODO: Object parent classes
+            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false));
+
 
             // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices.ToArray(), string.Empty);
 
             // Load value from field and create "fake" local
             var value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);

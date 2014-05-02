@@ -22,3 +22,8 @@ void System_Void_System_Console__WriteLine_System_Int32_(int32_t i)
 {
 	printf("%i\n", i);
 }
+
+// void System.Object..ctor()
+void System_Void_System_Object___ctor__(void* obj)
+{
+}

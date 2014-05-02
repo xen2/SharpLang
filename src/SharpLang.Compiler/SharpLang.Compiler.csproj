@@ -60,6 +60,8 @@
     <Compile Include="Function.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeInline\Runtime.cs" />
+    <Compile Include="RuntimeInline\RuntimePINVOKE.cs" />
     <Compile Include="StackExtensions.cs" />
     <Compile Include="StackValue.cs" />
     <Compile Include="StackValueType.cs" />
@@ -73,6 +75,16 @@
       <Project>{7c5a9dad-a185-47dd-9d31-40b8ce230712}</Project>
       <Name>SharpLLVM</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Release\SharpLang.RuntimeInline.dll">
+      <Link>SharpLang.RuntimeInline.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Release\SharpLang.RuntimeInline.pdb">
+      <Link>SharpLang.RuntimeInline.pdb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

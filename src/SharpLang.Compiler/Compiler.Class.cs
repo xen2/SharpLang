@@ -70,12 +70,24 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
             }
 
-            @class = new Class(typeDefinition, dataType, stackType);
+            // Create class version (boxed version with VTable)
+            var boxedType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
+            var vtableType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+            LLVM.StructSetBody(boxedType, new[] { vtableType, dataType }, false);
+
+            @class = new Class(typeDefinition, dataType, boxedType, stackType);
             classes.Add(typeDefinition, @class);
 
             if (processFields)
             {
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
+
+                // Add parent class
+                if (typeDefinition.MetadataType == MetadataType.Class && typeDefinition.BaseType != null)
+                {
+                    var parentClass = CreateClass(typeDefinition.BaseType.Resolve());
+                    fieldTypes.Add(parentClass.DataType);
+                }
 
                 foreach (var field in typeDefinition.Fields)
                 {

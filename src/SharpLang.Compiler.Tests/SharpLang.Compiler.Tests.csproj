@@ -46,6 +46,9 @@
   <ItemGroup>
     <Compile Include="TestFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="tests\SimpleClass.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="tests\SimpleStruct.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -56,9 +59,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="tests\SimpleBranching2.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="tests\MiniRuntime.c">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="tests\SimpleCallBoolean.cs">
@@ -91,6 +91,11 @@
     </None>
     <None Include="..\..\deps\llvm\build\RelWithDebInfo\bin\clang.exe">
       <Link>clang.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tests\MiniCorlib.c">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -10,13 +10,15 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
-        public Class(TypeDefinition typeDefinition, TypeRef dataType, StackValueType stackType)
+        public Class(TypeDefinition typeDefinition, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
             TypeDefinition = typeDefinition;
             DataType = dataType;
-            Type = dataType;
+            ObjectType = objectType;
             StackType = stackType;
+            Type = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
             Fields = new Dictionary<FieldDefinition, Field>();
+            VirtualTable = new List<Function>();
 
             switch (stackType)
             {
@@ -39,9 +41,17 @@ namespace SharpLang.CompilerServices
         /// Gets the LLVM type.
         /// </summary>
         /// <value>
-        /// The LLVM type (object header and <see cref="DataType"/>).
+        /// The LLVM type.
         /// </value>
         public TypeRef Type { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM object type (object header and <see cref="DataType"/>).
+        /// </summary>
+        /// <value>
+        /// The LLVM boxed type (object header and <see cref="DataType"/>).
+        /// </value>
+        public TypeRef ObjectType { get; private set; }
 
         /// <summary>
         /// Gets the LLVM type when on the stack.
@@ -64,6 +74,8 @@ namespace SharpLang.CompilerServices
         public StackValueType StackType { get; private set; }
 
         public Dictionary<FieldDefinition, Field> Fields { get; private set; }
+
+        public List<Function> VirtualTable { get; private set; } 
 
         /// <inheritdoc/>
         public override string ToString()

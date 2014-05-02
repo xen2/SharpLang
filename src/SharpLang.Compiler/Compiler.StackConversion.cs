@@ -23,6 +23,28 @@ namespace SharpLang.CompilerServices
                 return stackValue;
             }
 
+            // Object: allow upcast as well
+            if (stack.StackType == StackValueType.Object)
+            {
+                if (localType.GeneratedType == stack.Type.GeneratedType)
+                {
+                    return stackValue;
+                }
+                
+                // Check upcast
+                var stackType = stack.Type.TypeReference.Resolve();
+                while (stackType != null)
+                {
+                    if (stackType == localType.TypeReference)
+                    {
+                        // It's an upcast, do LLVM pointer cast
+                        return LLVM.BuildPointerCast(builder, stackValue, localType.GeneratedType, string.Empty);
+                    }
+
+                    stackType = stackType.BaseType.Resolve();
+                }
+            }
+
             // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
             if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
                 && LLVM.GetTypeKind(localType.GeneratedType) == TypeKind.IntegerTypeKind)
@@ -65,6 +87,9 @@ namespace SharpLang.CompilerServices
                     break;
                 case StackValueType.Value:
                     // Value type, no conversion should be needed
+                    break;
+                case StackValueType.Object:
+                    // TODO: Check type conversions (upcasts, etc...)
                     break;
                 default:
                     throw new NotImplementedException();
