@@ -86,6 +86,7 @@ namespace SharpLang.CompilerServices
                 if (typeDefinition.MetadataType == MetadataType.Class && typeDefinition.BaseType != null)
                 {
                     var parentClass = CreateClass(typeDefinition.BaseType.Resolve());
+                    @class.BaseType = parentClass;
                     fieldTypes.Add(parentClass.DataType);
                 }
 
@@ -95,7 +96,7 @@ namespace SharpLang.CompilerServices
                         continue;
 
                     var fieldType = CreateType(assembly.MainModule.Import(field.FieldType));
-                    @class.Fields.Add(field, new Field(@class, fieldType, fieldTypes.Count));
+                    @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
                     fieldTypes.Add(fieldType.GeneratedType);
                 }
 

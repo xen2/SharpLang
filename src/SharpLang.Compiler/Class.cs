@@ -69,13 +69,27 @@ namespace SharpLang.CompilerServices
         /// </value>
         public TypeRef DataType { get; private set; }
 
+        /// <summary>
+        /// Gets the Cecil type definition.
+        /// </summary>
+        /// <value>
+        /// The Cecil type definition.
+        /// </value> 
         public TypeDefinition TypeDefinition { get; private set; }
 
         public StackValueType StackType { get; private set; }
 
         public Dictionary<FieldDefinition, Field> Fields { get; private set; }
 
-        public List<Function> VirtualTable { get; private set; } 
+        public List<Function> VirtualTable { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the parent class.
+        /// </summary>
+        /// <value>
+        /// The parent class.
+        /// </value>
+        public Class BaseType { get; internal set; }
 
         /// <inheritdoc/>
         public override string ToString()

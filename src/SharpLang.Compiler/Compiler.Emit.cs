@@ -205,17 +205,10 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = new List<ValueRef>(3);
-            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
-
-            if (@object.StackType == StackValueType.Object)
-                indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 1, false));
-
-            // TODO: Object parent classes
-            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false));
+            var indices = BuildFieldIndices(field, @object);
 
             // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices.ToArray(), string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
 
             // Convert stack value to appropriate type
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
@@ -229,17 +222,10 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = new List<ValueRef>(3);
-            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
-            if (@object.StackType == StackValueType.Object)
-                indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), 1, false));
-
-            // TODO: Object parent classes
-            indices.Add(LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)field.StructIndex, false));
-
+            var indices = BuildFieldIndices(field, @object);
 
             // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices.ToArray(), string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
 
             // Load value from field and create "fake" local
             var value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
@@ -249,6 +235,49 @@ namespace SharpLang.CompilerServices
 
             // Add value to stack
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
+        }
+
+        private ValueRef[] BuildFieldIndices(Field field, StackValue @object)
+        {
+            // Build indices for GEP
+            var indices = new List<ValueRef>(3);
+
+            var int32Type = LLVM.Int32TypeInContext(context);
+
+            // First pointer indirection
+            indices.Add(LLVM.ConstInt(int32Type, 0, false));
+
+            if (@object.StackType == StackValueType.Object)
+            {
+                // 0 is vtable pointer, 1 is object itself (need to add enum?)
+                indices.Add(LLVM.ConstInt(int32Type, 1, false));
+
+                // For now, go through hierarchy and check that type match
+                // Other options:
+                // - cast
+                // - store class depth (and just do a substraction)
+                int depth = 0;
+                var @class = GetClass(@object.Type.TypeReference.Resolve());
+                while (@class != null)
+                {
+                    if (@class == field.DeclaringClass)
+                        break;
+
+                    @class = @class.BaseType;
+                    depth++;
+                }
+
+                if (@class == null)
+                    throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, @object.Type.TypeReference));
+
+                // Apply GEP indices to find right object
+                for (int i = 0; i < depth; ++i)
+                    indices.Add(LLVM.ConstInt(int32Type, 0, false));
+            }
+
+            // Access the appropriate field
+            indices.Add(LLVM.ConstInt(int32Type, (uint)field.StructIndex, false));
+            return indices.ToArray();
         }
     }
 }

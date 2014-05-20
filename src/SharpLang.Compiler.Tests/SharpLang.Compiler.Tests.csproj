@@ -46,7 +46,10 @@
   <ItemGroup>
     <Compile Include="TestFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="tests\SimpleClass.cs">
+    <None Include="tests\SimpleClassFieldInheritance.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="tests\SimpleClassField.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="tests\SimpleStruct.cs">
