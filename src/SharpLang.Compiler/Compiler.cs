@@ -20,6 +20,7 @@ namespace SharpLang.CompilerServices
 
         // Builder for normal instructions
         private BuilderRef builder;
+        private TypeRef intPtrType;
 
         // Builder that is used for PHI nodes
         private BuilderRef builderPhi;
@@ -43,6 +44,7 @@ namespace SharpLang.CompilerServices
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
+            intPtrType = LLVM.Int32TypeInContext(context);
             builderPhi = LLVM.CreateBuilderInContext(context);
 
             // Process types
