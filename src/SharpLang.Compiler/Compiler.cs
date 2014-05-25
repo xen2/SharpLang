@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -29,7 +30,7 @@ namespace SharpLang.CompilerServices
         private AssemblyDefinition corlib;
 
         private Dictionary<TypeReference, Type> types = new Dictionary<TypeReference, Type>(MemberEqualityComparer.Default);
-        private Dictionary<TypeDefinition, Class> classes = new Dictionary<TypeDefinition, Class>(MemberEqualityComparer.Default);
+        private Dictionary<TypeReference, Class> classes = new Dictionary<TypeReference, Class>(MemberEqualityComparer.Default);
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
 
         private List<KeyValuePair<MethodDefinition, Function>> methodsToCompile = new List<KeyValuePair<MethodDefinition, Function>>();
@@ -67,11 +68,13 @@ namespace SharpLang.CompilerServices
 
                 foreach (var type in assemblyModule.Types)
                 {
-                    CreateType(type);
+                    if (!type.HasGenericParameters)
+                        CreateType(type);
 
                     foreach (var nestedType in type.NestedTypes)
                     {
-                        CreateType(nestedType);
+                        if (!nestedType.HasGenericParameters)
+                            CreateType(nestedType);
                     }
                 }
             }
@@ -97,7 +100,11 @@ namespace SharpLang.CompilerServices
                 LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
 
-                LLVM.BuildCall(builder, entryPoint.GeneratedValue, new ValueRef[0], string.Empty);
+	            var parameters = (entryPoint.ParameterTypes.Length > 0)
+	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].GeneratedType) }
+	                : new ValueRef[0];
+
+                LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);
 	            LLVM.BuildRet(builder, LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
 	        }
 
@@ -117,13 +124,19 @@ namespace SharpLang.CompilerServices
 
         void CompileClassMethods(Class @class)
         {
-            bool isExternal = @class.TypeDefinition.Module.Assembly != assembly;
+            var typeDefinition = @class.TypeReference.Resolve();
+            var genericInstanceType = @class.TypeReference as GenericInstanceType;
+            bool isExternal = typeDefinition.Module.Assembly != assembly;
             if (!isExternal)
             {
                 // Process methods
-                foreach (var method in @class.TypeDefinition.Methods)
+                foreach (var method in typeDefinition.Methods)
                 {
-                    var function = CreateFunction(method);
+                    var methodReference = @class.TypeReference is GenericInstanceType
+                        ? new MethodReference(method.Name, ResolveGenericsVisitor.Process(@class.TypeReference, method.ReturnType), @class.TypeReference)
+                        : method;
+
+                    var function = CreateFunction(methodReference);
 
                     if (method.IsVirtual)
                     {

@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -45,7 +46,7 @@ namespace SharpLang.CompilerServices
                 TypeReference parameterTypeReference;
                 if (method.HasThis && index == 0)
                 {
-                    parameterTypeReference = method.DeclaringType;
+                    parameterTypeReference = ResolveGenericsVisitor.Process(method, method.DeclaringType);
                 }
                 else
                 {
@@ -68,7 +69,7 @@ namespace SharpLang.CompilerServices
             var functionType = LLVM.FunctionType(returnType.GeneratedType, parameterTypesLLVM, false);
             var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
 
-            function = new Function(methodDefinition, functionGlobal, returnType, parameterTypes);
+            function = new Function(method, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
             if (isExternal)
@@ -240,7 +241,7 @@ namespace SharpLang.CompilerServices
                         var targetMethod = GetFunction(targetMethodReference);
 
                         // TODO: Interface calls & virtual calls
-                        if ((targetMethod.MethodDefinition.Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
+                        if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
                         {
                             throw new NotImplementedException();
                         }
@@ -402,11 +403,10 @@ namespace SharpLang.CompilerServices
                     case Code.Ldfld:
                     {
                         var fieldReference = (FieldReference)instruction.Operand;
-                        var fieldDefinition = fieldReference.Resolve();
 
                         // Resolve class and field
-                        var @class = GetClass(fieldDefinition.DeclaringType);
-                        var field = @class.Fields[fieldDefinition];
+                        var @class = GetClass(fieldReference.DeclaringType);
+                        var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitLdfld(stack, field);
 
@@ -435,11 +435,10 @@ namespace SharpLang.CompilerServices
                     case Code.Stfld:
                     {
                         var fieldReference = (FieldReference)instruction.Operand;
-                        var fieldDefinition = fieldReference.Resolve();
 
                         // Resolve class and field
-                        var @class = GetClass(fieldDefinition.DeclaringType);
-                        var field = @class.Fields[fieldDefinition];
+                        var @class = GetClass(fieldReference.DeclaringType);
+                        var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitStfld(stack, field);
 

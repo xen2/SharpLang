@@ -164,7 +164,7 @@ namespace SharpLang.CompilerServices
             LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
 
             // Push return result on stack
-            if (targetMethod.MethodDefinition.ReturnType.MetadataType != MetadataType.Void)
+            if (targetMethod.MethodReference.ReturnType.MetadataType != MetadataType.Void)
             {
                 // Convert return value from local to stack value
                 var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, call);
@@ -271,7 +271,7 @@ namespace SharpLang.CompilerServices
                 // - cast
                 // - store class depth (and just do a substraction)
                 int depth = 0;
-                var @class = GetClass(@object.Type.TypeReference.Resolve());
+                var @class = GetClass(@object.Type.TypeReference);
                 while (@class != null)
                 {
                     if (@class == field.DeclaringClass)

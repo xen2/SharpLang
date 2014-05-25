@@ -107,6 +107,7 @@ namespace SharpLang.CompilerServices
                         new[] { intPtrType, LLVM.PointerType(elementType.GeneratedType, 0) }, false);
                     stackType = StackValueType.Value;
                     break;
+                case MetadataType.GenericInstance:
                 case MetadataType.ValueType:
                 case MetadataType.Class:
                 case MetadataType.Object:
@@ -121,7 +122,7 @@ namespace SharpLang.CompilerServices
                     }
 
                     // Process non-static fields
-                    var @class = CreateClass(typeReference.Resolve());
+                    var @class = CreateClass(typeReference);
 
                     dataType = @class.Type;
                     stackType = @class.StackType;

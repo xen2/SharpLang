@@ -10,9 +10,9 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
-        public Class(TypeDefinition typeDefinition, TypeRef dataType, TypeRef objectType, StackValueType stackType)
+        public Class(TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
-            TypeDefinition = typeDefinition;
+            TypeReference = typeReference;
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
@@ -70,12 +70,12 @@ namespace SharpLang.CompilerServices
         public TypeRef DataType { get; private set; }
 
         /// <summary>
-        /// Gets the Cecil type definition.
+        /// Gets the Cecil type reference.
         /// </summary>
         /// <value>
-        /// The Cecil type definition.
+        /// The Cecil type reference.
         /// </value> 
-        public TypeDefinition TypeDefinition { get; private set; }
+        public TypeReference TypeReference { get; private set; }
 
         public StackValueType StackType { get; private set; }
 
@@ -94,7 +94,7 @@ namespace SharpLang.CompilerServices
         /// <inheritdoc/>
         public override string ToString()
         {
-            return TypeDefinition.ToString();
+            return TypeReference.ToString();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -11,13 +12,13 @@ namespace SharpLang.CompilerServices
         /// <summary>
         /// Gets the specified class.
         /// </summary>
-        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="typeReference">The type definition.</param>
         /// <returns></returns>
-        private Class GetClass(TypeDefinition typeDefinition)
+        private Class GetClass(TypeReference typeReference)
         {
             Class @class;
-            if (!classes.TryGetValue(typeDefinition, out @class))
-                throw new InvalidOperationException(string.Format("Could not find class {0}", typeDefinition));
+            if (!classes.TryGetValue(typeReference, out @class))
+                throw new InvalidOperationException(string.Format("Could not find class {0}", typeReference));
 
             return @class;
         }
@@ -25,19 +26,19 @@ namespace SharpLang.CompilerServices
         /// <summary>
         /// Compiles the specified class.
         /// </summary>
-        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="typeReference">The type definition.</param>
         /// <returns></returns>
-        private Class CreateClass(TypeDefinition typeDefinition)
+        private Class CreateClass(TypeReference typeReference)
         {
             Class @class;
-            if (classes.TryGetValue(typeDefinition, out @class))
+            if (classes.TryGetValue(typeReference, out @class))
                 return @class;
 
             TypeRef dataType;
             StackValueType stackType;
             bool processFields = false;
 
-            switch (typeDefinition.MetadataType)
+            switch (typeReference.MetadataType)
             {
                 case MetadataType.Void:
                 case MetadataType.Boolean:
@@ -53,7 +54,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.String:
                 {
                     // Non recursive type, get info through Type
-                    var type = GetType(typeDefinition);
+                    var type = GetType(typeReference);
                     dataType = type.GeneratedType;
                     stackType = type.StackType;
 
@@ -61,31 +62,35 @@ namespace SharpLang.CompilerServices
                 }
                 case MetadataType.ValueType:
                 case MetadataType.Class:
+                case MetadataType.Object:
+                case MetadataType.GenericInstance:
                     // Process non-static fields
-                    dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
+                    dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
                     processFields = true;
-                    stackType = typeDefinition.MetadataType == MetadataType.ValueType ? StackValueType.Value : StackValueType.Object;
+                    stackType = typeReference.MetadataType == MetadataType.ValueType ? StackValueType.Value : StackValueType.Object;
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
             // Create class version (boxed version with VTable)
-            var boxedType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
+            var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
             var vtableType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             LLVM.StructSetBody(boxedType, new[] { vtableType, dataType }, false);
 
-            @class = new Class(typeDefinition, dataType, boxedType, stackType);
-            classes.Add(typeDefinition, @class);
+            @class = new Class(typeReference, dataType, boxedType, stackType);
+            classes.Add(typeReference, @class);
 
             if (processFields)
             {
+                var typeDefinition = typeReference.Resolve();
+
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
 
                 // Add parent class
-                if (typeDefinition.MetadataType == MetadataType.Class && typeDefinition.BaseType != null)
+                if (typeReference.MetadataType == MetadataType.Class && typeDefinition.BaseType != null)
                 {
-                    var parentClass = CreateClass(typeDefinition.BaseType.Resolve());
+                    var parentClass = CreateClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType));
                     @class.BaseType = parentClass;
                     fieldTypes.Add(parentClass.DataType);
                 }
@@ -95,7 +100,7 @@ namespace SharpLang.CompilerServices
                     if (field.IsStatic)
                         continue;
 
-                    var fieldType = CreateType(assembly.MainModule.Import(field.FieldType));
+                    var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
                     @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
                     fieldTypes.Add(fieldType.GeneratedType);
                 }
