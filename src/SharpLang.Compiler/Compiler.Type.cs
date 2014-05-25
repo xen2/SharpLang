@@ -92,10 +92,10 @@ namespace SharpLang.CompilerServices
                     stackType = StackValueType.NativeInt;
                     break;
                 case MetadataType.String:
-                    // String: 32 bit length + char pointer
+                    // String: length (native int) + char pointer
                     dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
                     LLVM.StructSetBody(dataType,
-                        new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
+                        new[] { intPtrType, LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
                     stackType = StackValueType.Value;
                     break;
                 case MetadataType.ValueType:

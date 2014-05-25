@@ -73,7 +73,7 @@ namespace SharpLang.CompilerServices
             {
                 // TODO: Improve performance (better inlining, etc...)
                 // Invoke malloc
-                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.GeneratedType), LLVM.Int32TypeInContext(context), string.Empty);
+                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.GeneratedType), intPtrType, string.Empty);
                 var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
                 var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.GeneratedType, string.Empty);
 
@@ -127,7 +127,7 @@ namespace SharpLang.CompilerServices
 
             // Create string
             var stringConstant = LLVM.ConstNamedStruct(stringType.GeneratedType,
-                new[] { LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)operand.Length, false), stringConstantDataGlobal });
+                new[] { LLVM.ConstInt(intPtrType, (ulong)operand.Length, false), stringConstantDataGlobal });
 
             // Push on stack
             stack.Add(new StackValue(StackValueType.Value, stringType, stringConstant));
