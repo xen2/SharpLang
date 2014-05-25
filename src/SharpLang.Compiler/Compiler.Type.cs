@@ -98,6 +98,15 @@ namespace SharpLang.CompilerServices
                         new[] { intPtrType, LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
                     stackType = StackValueType.Value;
                     break;
+                case MetadataType.Array:
+                    // String: length (native int) + first element pointer
+                    var arrayType = (ArrayType)typeReference;
+                    var elementType = CreateType(arrayType.ElementType);
+                    dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
+                    LLVM.StructSetBody(dataType,
+                        new[] { intPtrType, LLVM.PointerType(elementType.GeneratedType, 0) }, false);
+                    stackType = StackValueType.Value;
+                    break;
                 case MetadataType.ValueType:
                 case MetadataType.Class:
                 case MetadataType.Object:

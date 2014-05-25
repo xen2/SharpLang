@@ -293,5 +293,79 @@ namespace SharpLang.CompilerServices
             indices.Add(LLVM.ConstInt(int32Type, (uint)field.StructIndex, false));
             return indices.ToArray();
         }
+
+        private void EmitNewarr(List<StackValue> stack, Type elementType)
+        {
+            var arrayType = GetType(new ArrayType(elementType.TypeReference));
+
+            var numElements = stack.Pop();
+
+            // Invoke malloc
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.GeneratedType), intPtrType, string.Empty);
+            var arraySize = LLVM.BuildMul(builder, typeSize, numElements.Value, string.Empty);
+            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
+            var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.GeneratedType, 0), string.Empty);
+
+            // Create array
+            var arrayConstant = LLVM.ConstNamedStruct(arrayType.GeneratedType,
+                new[] { numElements.Value, LLVM.ConstPointerNull(LLVM.PointerType(elementType.GeneratedType, 0)) });
+
+            // Update array with allocated pointer
+            arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, values, 1, string.Empty);
+
+            // Push on stack
+            stack.Add(new StackValue(StackValueType.Value, arrayType, arrayConstant));
+        }
+
+        private void EmitLdlen(List<StackValue> stack)
+        {
+            var array = stack.Pop();
+
+            // Compute element location
+            var arraySize = LLVM.BuildExtractValue(builder, array.Value, 0, string.Empty);
+
+            // TODO: Switch to native type
+            var nativeUnsignedIntType = CreateType(corlib.MainModule.GetType(typeof(UIntPtr).FullName));
+
+            // Add constant integer value to stack
+            stack.Add(new StackValue(StackValueType.NativeInt, nativeUnsignedIntType, arraySize));
+        }
+
+        private void EmitLdelem_Ref(List<StackValue> stack)
+        {
+            var index = stack.Pop();
+            var array = stack.Pop();
+
+            // Get element type
+            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
+
+            // Load first element pointer
+            var arrayFirstElement = LLVM.BuildExtractValue(builder, array.Value, 1, string.Empty);
+
+            // Find pointer of element at requested index
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+
+            // Load element
+            var element = LLVM.BuildLoad(builder, arrayElementPointer, string.Empty);
+
+            // Push loaded element onto the stack
+            stack.Add(new StackValue(elementType.StackType, elementType, element));
+        }
+
+        private void EmitStelem_Ref(List<StackValue> stack)
+        {
+            var value = stack.Pop();
+            var index = stack.Pop();
+            var array = stack.Pop();
+
+            // Load first element pointer
+            var arrayFirstElement = LLVM.BuildExtractValue(builder, array.Value, 1, string.Empty);
+
+            // Find pointer of element at requested index
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+
+            // Store element
+            LLVM.BuildStore(builder, value.Value, arrayElementPointer);
+        }
     }
 }

@@ -273,6 +273,54 @@ namespace SharpLang.CompilerServices
                         break;
                     }
 
+                    #region Array opcodes (Newarr, Ldlen, Stelem_Ref, etc...)
+                    case Code.Newarr:
+                    {
+                        var elementType = GetType((TypeReference)instruction.Operand);
+
+                        EmitNewarr(stack, elementType);
+ 
+                        break;
+                    }
+                    case Code.Ldlen:
+                    {
+                        EmitLdlen(stack);
+
+                        break;
+                    }
+                    case Code.Ldelem_Ref:
+                    {
+                        EmitLdelem_Ref(stack);
+
+                        break;
+                    }
+                    case Code.Stelem_Ref:
+                    {
+                        EmitStelem_Ref(stack);
+
+                        break;
+                    }
+                    #endregion
+
+                    case Code.Conv_I4:
+                    {
+                        var value = stack.Pop();
+
+                        // TODO: Conversions from float & pointer
+                        if (value.StackType == StackValueType.Float
+                            || value.StackType == StackValueType.Pointer)
+                            throw new NotImplementedException();
+
+                        var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
+
+                        var convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.GeneratedType, string.Empty);
+
+                        // Add constant integer value to stack
+                        stack.Add(new StackValue(StackValueType.Int32, intType, convertedValue));
+
+                        break;
+                    }
+
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
                     case Code.Ldc_I4_0:
