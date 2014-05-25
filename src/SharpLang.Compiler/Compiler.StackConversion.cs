@@ -32,16 +32,16 @@ namespace SharpLang.CompilerServices
                 }
                 
                 // Check upcast
-                var stackType = stack.Type.TypeReference.Resolve();
+                var stackType = stack.Type.TypeReference;
                 while (stackType != null)
                 {
-                    if (stackType == localType.TypeReference)
+                    if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReference))
                     {
                         // It's an upcast, do LLVM pointer cast
                         return LLVM.BuildPointerCast(builder, stackValue, localType.GeneratedType, string.Empty);
                     }
 
-                    stackType = stackType.BaseType.Resolve();
+                    stackType = stackType.Resolve().BaseType;
                 }
             }
 

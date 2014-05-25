@@ -27,9 +27,9 @@ namespace SharpLang.CompilerServices
         private AssemblyDefinition assembly;
         private AssemblyDefinition corlib;
 
-        private Dictionary<TypeReference, Type> types = new Dictionary<TypeReference, Type>();
-        private Dictionary<TypeDefinition, Class> classes = new Dictionary<TypeDefinition, Class>();
-        private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>();
+        private Dictionary<TypeReference, Type> types = new Dictionary<TypeReference, Type>(MemberEqualityComparer.Default);
+        private Dictionary<TypeDefinition, Class> classes = new Dictionary<TypeDefinition, Class>(MemberEqualityComparer.Default);
+        private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
 
         private List<KeyValuePair<MethodDefinition, Function>> methodsToCompile = new List<KeyValuePair<MethodDefinition, Function>>();
 
@@ -94,6 +94,7 @@ namespace SharpLang.CompilerServices
 	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
                 LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
+
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, new ValueRef[0], string.Empty);
 	            LLVM.BuildRet(builder, LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
 	        }
@@ -132,6 +133,21 @@ namespace SharpLang.CompilerServices
                 // Create VTable
                 var vtableMethodType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
                 var vtable = LLVM.ConstArray(vtableMethodType, @class.VirtualTable.Select(virtualMethod => LLVM.ConstPointerCast(virtualMethod.GeneratedValue, vtableMethodType)).ToArray());
+            }
+        }
+
+        class MemberEqualityComparer : IEqualityComparer<MemberReference>
+        {
+            public static readonly MemberEqualityComparer Default = new MemberEqualityComparer();
+
+            public bool Equals(MemberReference x, MemberReference y)
+            {
+                return x.FullName == y.FullName;
+            }
+
+            public int GetHashCode(MemberReference obj)
+            {
+                return obj.FullName.GetHashCode();
             }
         }
     }

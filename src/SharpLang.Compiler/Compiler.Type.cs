@@ -16,13 +16,12 @@ namespace SharpLang.CompilerServices
         Type GetType(TypeReference typeReference)
         {
             Type type;
-            var typeDefinition = typeReference.Resolve();
-            if (types.TryGetValue(typeDefinition, out type))
+            if (types.TryGetValue(typeReference, out type))
                 return type;
 
-            type = BuildType(typeDefinition, false);
+            type = BuildType(typeReference, false);
 
-            types.Add(typeDefinition, type);
+            types.Add(typeReference, type);
 
             return type;
         }
@@ -35,13 +34,12 @@ namespace SharpLang.CompilerServices
         private Type CreateType(TypeReference typeReference)
         {
             Type type;
-            var typeDefinition = typeReference.Resolve();
-            if (types.TryGetValue(typeDefinition, out type))
+            if (types.TryGetValue(typeReference, out type))
                 return type;
 
-            type = BuildType(typeDefinition, true);
+            type = BuildType(typeReference, true);
 
-            types.Add(typeDefinition, type);
+            types.Add(typeReference, type);
 
             return type;
         }
@@ -49,15 +47,15 @@ namespace SharpLang.CompilerServices
         /// <summary>
         /// Internal helper to actually builds the type.
         /// </summary>
-        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="typeReference">The type definition.</param>
         /// <param name="allowClassResolve">if set to <c>true</c> [allow class resolve].</param>
         /// <returns></returns>
-        private Type BuildType(TypeDefinition typeDefinition, bool allowClassResolve)
+        private Type BuildType(TypeReference typeReference, bool allowClassResolve)
         {
             TypeRef dataType;
             StackValueType stackType;
 
-            switch (typeDefinition.MetadataType)
+            switch (typeReference.MetadataType)
             {
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
@@ -90,7 +88,7 @@ namespace SharpLang.CompilerServices
                     break;
                 case MetadataType.String:
                     // String: 32 bit length + char pointer
-                    dataType = LLVM.StructCreateNamed(context, typeDefinition.FullName);
+                    dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
                     LLVM.StructSetBody(dataType,
                         new[] { LLVM.Int32TypeInContext(context), LLVM.PointerType(LLVM.Int8TypeInContext(context), 0) }, false);
                     stackType = StackValueType.Value;
@@ -103,13 +101,13 @@ namespace SharpLang.CompilerServices
                         throw new InvalidOperationException();
 
                     // When resolved, void becomes a real type
-                    if (typeDefinition.FullName == typeof(void).FullName)
+                    if (typeReference.FullName == typeof(void).FullName)
                     {
                         goto case MetadataType.Void;
                     }
 
                     // Process non-static fields
-                    var @class = CreateClass(typeDefinition);
+                    var @class = CreateClass(typeReference.Resolve());
 
                     dataType = @class.Type;
                     stackType = @class.StackType;
@@ -120,7 +118,7 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
             }
 
-            return new Type(typeDefinition, dataType, stackType);
+            return new Type(typeReference, dataType, stackType);
         }
     }
 }
