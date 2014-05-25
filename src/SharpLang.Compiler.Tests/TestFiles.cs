@@ -97,6 +97,9 @@ namespace SharpLang.CompilerServices.Tests
             process.BeginErrorReadLine();
             process.WaitForExit();
 
+            if (process.ExitCode != 0)
+                throw new InvalidOperationException("Invalid exit code.");
+
             return output.ToString();
         }
 
