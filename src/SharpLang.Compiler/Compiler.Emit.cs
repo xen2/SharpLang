@@ -73,7 +73,7 @@ namespace SharpLang.CompilerServices
             {
                 // TODO: Improve performance (better inlining, etc...)
                 // Invoke malloc
-                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.GeneratedType), intPtrType, string.Empty);
+                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(LLVM.GetElementType(type.GeneratedType)), intPtrType, string.Empty);
                 var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
                 var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.GeneratedType, string.Empty);
 
