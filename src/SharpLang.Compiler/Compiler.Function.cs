@@ -68,7 +68,7 @@ namespace SharpLang.CompilerServices
             var functionType = LLVM.FunctionType(returnType.GeneratedType, parameterTypesLLVM, false);
             var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
 
-            function = new Function(method, functionGlobal, returnType, parameterTypes);
+            function = new Function(methodDefinition, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
             if (isExternal)
@@ -221,7 +221,7 @@ namespace SharpLang.CompilerServices
                 {
                     case Code.Ret:
                     {
-                        EmitRet(method);
+                        EmitRet(stack, method);
                         flowingToNextBlock = false;
                         break;
                     }
@@ -230,7 +230,26 @@ namespace SharpLang.CompilerServices
                         var targetMethodReference = (MethodReference)instruction.Operand;
                         var targetMethod = GetFunction(targetMethodReference);
 
-                        EmitCall(stack, targetMethodReference, targetMethod);
+                        EmitCall(stack, targetMethod);
+
+                        break;
+                    }
+                    case Code.Callvirt:
+                    {
+                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethod = GetFunction(targetMethodReference);
+
+                        // TODO: Interface calls & virtual calls
+                        if ((targetMethod.MethodDefinition.Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
+                        {
+                            throw new NotImplementedException();
+                        }
+                        else
+                        {
+                            // Normal call
+                            // TODO: Callvirt on non virtual function is only done to force NULL check
+                            EmitCall(stack, targetMethod);
+                        }
 
                         break;
                     }

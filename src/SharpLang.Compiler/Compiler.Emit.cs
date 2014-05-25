@@ -82,7 +82,7 @@ namespace SharpLang.CompilerServices
                 stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
 
                 // Invoke ctor
-                EmitCall(stack, ctor.MethodReference, ctor);
+                EmitCall(stack, ctor);
 
                 // Add created object on the stack
                 stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
@@ -94,12 +94,22 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private void EmitRet(MethodDefinition method)
+        private void EmitRet(List<StackValue> stack, MethodDefinition method)
         {
             if (method.ReturnType.MetadataType == MetadataType.Void)
+            {
+                // Emit ret void
                 LLVM.BuildRetVoid(builder);
+            }
             else
-                throw new NotImplementedException("Opcode not implemented.");
+            {
+                // Get last item from stack
+                var stackItem = stack.Pop();
+
+                // Get return type
+                var returnType = CreateType(method.ReturnType);
+                LLVM.BuildRet(builder, ConvertFromStackToLocal(returnType, stackItem));
+            }
         }
 
         private void EmitLdstr(List<StackValue> stack, string operand)
@@ -132,7 +142,7 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
         }
 
-        private void EmitCall(List<StackValue> stack, MethodReference targetMethodReference, Function targetMethod)
+        private void EmitCall(List<StackValue> stack, Function targetMethod)
         {
             // Build argument list
             var targetNumParams = targetMethod.ParameterTypes.Length;
@@ -148,15 +158,19 @@ namespace SharpLang.CompilerServices
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
 
             // Invoke method
-            LLVM.BuildCall(builder, targetMethod.GeneratedValue, args, string.Empty);
+            var call = LLVM.BuildCall(builder, targetMethod.GeneratedValue, args, string.Empty);
 
             // Mark method as needed
             LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
 
             // Push return result on stack
-            if (targetMethodReference.ReturnType.MetadataType != MetadataType.Void)
+            if (targetMethod.MethodDefinition.ReturnType.MetadataType != MetadataType.Void)
             {
-                throw new NotImplementedException();
+                // Convert return value from local to stack value
+                var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, call);
+
+                // Add value to stack
+                stack.Add(new StackValue(targetMethod.ReturnType.StackType, targetMethod.ReturnType, returnValue));
             }
         }
 
