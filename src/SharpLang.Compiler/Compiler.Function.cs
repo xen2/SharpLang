@@ -46,12 +46,12 @@ namespace SharpLang.CompilerServices
                 TypeReference parameterTypeReference;
                 if (method.HasThis && index == 0)
                 {
-                    parameterTypeReference = ResolveGenericsVisitor.Process(method, method.DeclaringType);
+                    parameterTypeReference = method.DeclaringType;
                 }
                 else
                 {
                     var parameter = method.Parameters[method.HasThis ? index - 1 : index];
-                    parameterTypeReference = parameter.ParameterType;
+                    parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
                 }
                 var parameterType = CreateType(parameterTypeReference);
                 if (parameterType.GeneratedType.Value == IntPtr.Zero)
@@ -60,7 +60,7 @@ namespace SharpLang.CompilerServices
                 parameterTypesLLVM[index] = parameterType.GeneratedType;
             }
 
-            var returnType = CreateType(method.ReturnType);
+            var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
 
             // Generate function global
             var methodDefinition = method.Resolve();
@@ -81,7 +81,7 @@ namespace SharpLang.CompilerServices
             {
                 // Need to compile
                 LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
-                methodsToCompile.Add(new KeyValuePair<MethodDefinition, Function>(methodDefinition, function));
+                methodsToCompile.Add(new KeyValuePair<MethodReference, Function>(method, function));
             }
 
             return function;
@@ -95,8 +95,10 @@ namespace SharpLang.CompilerServices
         /// <exception cref="System.NotSupportedException"></exception>
         /// <exception cref="System.NotImplementedException"></exception>
         /// <exception cref="System.InvalidOperationException">Backward jump with a non-empty stack unknown target.</exception>
-        private void CompileFunction(MethodDefinition method, Function function)
+        private void CompileFunction(MethodReference methodReference, Function function)
         {
+            var method = methodReference.Resolve();
+
             var numParams = method.Parameters.Count;
             var body = method.Body;
             var functionGlobal = function.GeneratedValue;
@@ -222,7 +224,7 @@ namespace SharpLang.CompilerServices
                 {
                     case Code.Ret:
                     {
-                        EmitRet(stack, method);
+                        EmitRet(stack, methodReference);
                         flowingToNextBlock = false;
                         break;
                     }
@@ -405,7 +407,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(fieldReference.DeclaringType);
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitLdfld(stack, field);
@@ -437,7 +439,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(fieldReference.DeclaringType);
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitStfld(stack, field);

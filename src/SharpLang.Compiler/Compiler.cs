@@ -33,7 +33,7 @@ namespace SharpLang.CompilerServices
         private Dictionary<TypeReference, Class> classes = new Dictionary<TypeReference, Class>(MemberEqualityComparer.Default);
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
 
-        private List<KeyValuePair<MethodDefinition, Function>> methodsToCompile = new List<KeyValuePair<MethodDefinition, Function>>();
+        private List<KeyValuePair<MethodReference, Function>> methodsToCompile = new List<KeyValuePair<MethodReference, Function>>();
 
         public ModuleRef CompileAssembly(AssemblyDefinition assembly)
         {
@@ -59,6 +59,8 @@ namespace SharpLang.CompilerServices
                 foreach (var member in assemblyModule.GetMemberReferences())
                 {
                     var method = member as MethodReference;
+                    if (member.DeclaringType.ContainsGenericParameter())
+                        continue;
                     CreateType(member.DeclaringType);
                     if (method != null)
                     {
@@ -132,10 +134,15 @@ namespace SharpLang.CompilerServices
                 // Process methods
                 foreach (var method in typeDefinition.Methods)
                 {
-                    var methodReference = @class.TypeReference is GenericInstanceType
-                        ? new MethodReference(method.Name, ResolveGenericsVisitor.Process(@class.TypeReference, method.ReturnType), @class.TypeReference)
-                        : method;
-
+                    MethodReference methodReference;
+                    if (@class.TypeReference is GenericInstanceType)
+                    {
+                        methodReference = method.MakeGeneric(((GenericInstanceType)@class.TypeReference).GenericArguments.ToArray());
+                    }
+                    else
+                    {
+                        methodReference = method;
+                    }
                     var function = CreateFunction(methodReference);
 
                     if (method.IsVirtual)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Mono.Cecil;
+using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -94,7 +95,7 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private void EmitRet(List<StackValue> stack, MethodDefinition method)
+        private void EmitRet(List<StackValue> stack, MethodReference method)
         {
             if (method.ReturnType.MetadataType == MetadataType.Void)
             {
@@ -107,7 +108,7 @@ namespace SharpLang.CompilerServices
                 var stackItem = stack.Pop();
 
                 // Get return type
-                var returnType = CreateType(method.ReturnType);
+                var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
                 LLVM.BuildRet(builder, ConvertFromStackToLocal(returnType, stackItem));
             }
         }
