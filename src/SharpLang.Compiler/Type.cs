@@ -8,20 +8,39 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Type
     {
-        public Type(TypeReference typeReference, TypeRef generatedType, StackValueType stackType)
+        public Type(TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
             TypeReference = typeReference;
-            GeneratedType = generatedType;
+            DataType = dataType;
+            ObjectType = objectType;
+            StackType = stackType;
+            DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
             StackType = stackType;
         }
 
         /// <summary>
-        /// Gets or sets the LLVM generated type.
+        /// Gets the LLVM default type.
         /// </summary>
         /// <value>
-        /// The LLVM generated type.
+        /// The LLVM default type.
         /// </value>
-        public TypeRef GeneratedType { get; private set; }
+        public TypeRef DefaultType { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM object type (object header and <see cref="DataType"/>).
+        /// </summary>
+        /// <value>
+        /// The LLVM boxed type (object header and <see cref="DataType"/>).
+        /// </value>
+        public TypeRef ObjectType { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM data type.
+        /// </summary>
+        /// <value>
+        /// The LLVM data type (fields).
+        /// </value>
+        public TypeRef DataType { get; private set; }
 
         public TypeReference TypeReference { get; private set; }
 

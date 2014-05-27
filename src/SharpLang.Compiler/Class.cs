@@ -10,13 +10,14 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
-        public Class(TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
+        public Class(Type type, TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
+            Type = type;
             TypeReference = typeReference;
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
-            Type = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
+            DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
             Fields = new Dictionary<FieldDefinition, Field>();
             VirtualTable = new List<Function>();
 
@@ -30,7 +31,7 @@ namespace SharpLang.CompilerServices
                     break;
                 case StackValueType.Value:
                 case StackValueType.Object:
-                    TypeOnStack = Type;
+                    TypeOnStack = DefaultType;
                     break;
                 default:
                     throw new NotImplementedException();
@@ -38,12 +39,20 @@ namespace SharpLang.CompilerServices
         }
 
         /// <summary>
-        /// Gets the LLVM type.
+        /// Gets the type.
         /// </summary>
         /// <value>
-        /// The LLVM type.
+        /// The type.
         /// </value>
-        public TypeRef Type { get; private set; }
+        public Type Type { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM default type.
+        /// </summary>
+        /// <value>
+        /// The LLVM default type.
+        /// </value>
+        public TypeRef DefaultType { get; private set; }
 
         /// <summary>
         /// Gets the LLVM object type (object header and <see cref="DataType"/>).

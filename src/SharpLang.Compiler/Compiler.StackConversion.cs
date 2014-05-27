@@ -18,7 +18,7 @@ namespace SharpLang.CompilerServices
 
             // Same type, return as is
             if (stack.StackType == StackValueType.Value
-                && localType.GeneratedType == stack.Type.GeneratedType)
+                && localType.DefaultType == stack.Type.DefaultType)
             {
                 return stackValue;
             }
@@ -26,7 +26,7 @@ namespace SharpLang.CompilerServices
             // Object: allow upcast as well
             if (stack.StackType == StackValueType.Object)
             {
-                if (localType.GeneratedType == stack.Type.GeneratedType)
+                if (localType.DefaultType == stack.Type.DefaultType)
                 {
                     return stackValue;
                 }
@@ -38,7 +38,7 @@ namespace SharpLang.CompilerServices
                     if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReference))
                     {
                         // It's an upcast, do LLVM pointer cast
-                        return LLVM.BuildPointerCast(builder, stackValue, localType.GeneratedType, string.Empty);
+                        return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
                     }
 
                     stackType = stackType.Resolve().BaseType;
@@ -47,9 +47,9 @@ namespace SharpLang.CompilerServices
 
             // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
             if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
-                && LLVM.GetTypeKind(localType.GeneratedType) == TypeKind.IntegerTypeKind)
+                && LLVM.GetTypeKind(localType.DefaultType) == TypeKind.IntegerTypeKind)
             {
-                return LLVM.BuildIntCast(builder, stackValue, localType.GeneratedType, string.Empty);
+                return LLVM.BuildIntCast(builder, stackValue, localType.DefaultType, string.Empty);
             }
 
             // TODO: Other cases
@@ -70,12 +70,12 @@ namespace SharpLang.CompilerServices
             {
                 case StackValueType.Int32:
                     var int32Type = LLVM.Int32TypeInContext(context);
-                    if (localType.GeneratedType != int32Type)
+                    if (localType.DefaultType != int32Type)
                     {
-                        if (LLVM.GetTypeKind(localType.GeneratedType) != TypeKind.IntegerTypeKind)
+                        if (LLVM.GetTypeKind(localType.DefaultType) != TypeKind.IntegerTypeKind)
                             throw new InvalidOperationException();
 
-                        if (LLVM.GetIntTypeWidth(localType.GeneratedType) < 32)
+                        if (LLVM.GetIntTypeWidth(localType.DefaultType) < 32)
                         {
                             // Extend sign if needed
                             // TODO: Need a way to handle unsigned int. Unfortunately it seems that

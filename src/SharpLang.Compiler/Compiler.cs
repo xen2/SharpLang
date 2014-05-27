@@ -71,12 +71,12 @@ namespace SharpLang.CompilerServices
                 foreach (var type in assemblyModule.Types)
                 {
                     if (!type.HasGenericParameters)
-                        CreateType(type);
+                        GetClass(type);
 
                     foreach (var nestedType in type.NestedTypes)
                     {
                         if (!nestedType.HasGenericParameters)
-                            CreateType(nestedType);
+                            GetClass(nestedType);
                     }
                 }
             }
@@ -103,7 +103,7 @@ namespace SharpLang.CompilerServices
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
 
 	            var parameters = (entryPoint.ParameterTypes.Length > 0)
-	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].GeneratedType) }
+	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultType) }
 	                : new ValueRef[0];
 
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);

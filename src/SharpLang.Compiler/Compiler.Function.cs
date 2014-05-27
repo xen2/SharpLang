@@ -54,10 +54,10 @@ namespace SharpLang.CompilerServices
                     parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
                 }
                 var parameterType = CreateType(parameterTypeReference);
-                if (parameterType.GeneratedType.Value == IntPtr.Zero)
+                if (parameterType.DefaultType.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
-                parameterTypesLLVM[index] = parameterType.GeneratedType;
+                parameterTypesLLVM[index] = parameterType.DefaultType;
             }
 
             var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
@@ -66,7 +66,7 @@ namespace SharpLang.CompilerServices
             var methodDefinition = method.Resolve();
             bool isExternal = methodDefinition.Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
-            var functionType = LLVM.FunctionType(returnType.GeneratedType, parameterTypesLLVM, false);
+            var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
             var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
 
             function = new Function(method, functionGlobal, returnType, parameterTypes);
@@ -119,7 +119,7 @@ namespace SharpLang.CompilerServices
                     throw new NotSupportedException();
 
                 var type = CreateType(local.VariableType);
-                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.GeneratedType, local.Name)));
+                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
             }
 
             // Process args
@@ -316,7 +316,7 @@ namespace SharpLang.CompilerServices
 
                         var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
 
-                        var convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.GeneratedType, string.Empty);
+                        var convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.DefaultType, string.Empty);
 
                         // Add constant integer value to stack
                         stack.Add(new StackValue(StackValueType.Int32, intType, convertedValue));

@@ -56,7 +56,7 @@ namespace SharpLang.CompilerServices
         private void EmitInitobj(StackValue address, Type type)
         {
             var value = address.Value;
-            var expectedType = LLVM.PointerType(type.GeneratedType, 0);
+            var expectedType = LLVM.PointerType(type.DefaultType, 0);
 
             // If necessary, cast to expected type
             if (LLVM.TypeOf(value) != expectedType)
@@ -65,7 +65,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Store null value (should be all zero)
-            LLVM.BuildStore(builder, LLVM.ConstNull(type.GeneratedType), value);
+            LLVM.BuildStore(builder, LLVM.ConstNull(type.DefaultType), value);
         }
 
         private void EmitNewobj(List<StackValue> stack, Type type, Function ctor)
@@ -74,9 +74,9 @@ namespace SharpLang.CompilerServices
             {
                 // TODO: Improve performance (better inlining, etc...)
                 // Invoke malloc
-                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(LLVM.GetElementType(type.GeneratedType)), intPtrType, string.Empty);
+                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(LLVM.GetElementType(type.DefaultType)), intPtrType, string.Empty);
                 var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
-                var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.GeneratedType, string.Empty);
+                var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.DefaultType, string.Empty);
 
                 // Add it to stack, right before arguments
                 var ctorNumParams = ctor.ParameterTypes.Length;
@@ -127,7 +127,7 @@ namespace SharpLang.CompilerServices
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
 
             // Create string
-            var stringConstant = LLVM.ConstNamedStruct(stringType.GeneratedType,
+            var stringConstant = LLVM.ConstNamedStruct(stringType.DefaultType,
                 new[] { LLVM.ConstInt(intPtrType, (ulong)operand.Length, false), stringConstantDataGlobal });
 
             // Push on stack
@@ -302,14 +302,14 @@ namespace SharpLang.CompilerServices
             var numElements = stack.Pop();
 
             // Invoke malloc
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.GeneratedType), intPtrType, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), intPtrType, string.Empty);
             var arraySize = LLVM.BuildMul(builder, typeSize, numElements.Value, string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
-            var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.GeneratedType, 0), string.Empty);
+            var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultType, 0), string.Empty);
 
             // Create array
-            var arrayConstant = LLVM.ConstNamedStruct(arrayType.GeneratedType,
-                new[] { numElements.Value, LLVM.ConstPointerNull(LLVM.PointerType(elementType.GeneratedType, 0)) });
+            var arrayConstant = LLVM.ConstNamedStruct(arrayType.DefaultType,
+                new[] { numElements.Value, LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
 
             // Update array with allocated pointer
             arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, values, 1, string.Empty);

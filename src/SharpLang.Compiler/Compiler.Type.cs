@@ -57,6 +57,9 @@ namespace SharpLang.CompilerServices
 
             switch (typeReference.MetadataType)
             {
+                case MetadataType.RequiredModifier:
+                    // TODO: Add support for this feature
+                    return BuildType(((RequiredModifierType)typeReference).ElementType, allowClassResolve);
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
                     stackType = StackValueType.Unknown;
@@ -104,7 +107,7 @@ namespace SharpLang.CompilerServices
                     var elementType = CreateType(arrayType.ElementType);
                     dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
                     LLVM.StructSetBody(dataType,
-                        new[] { intPtrType, LLVM.PointerType(elementType.GeneratedType, 0) }, false);
+                        new[] { intPtrType, LLVM.PointerType(elementType.DefaultType, 0) }, false);
                     stackType = StackValueType.Value;
                     break;
                 case MetadataType.GenericInstance:
@@ -112,20 +115,15 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Class:
                 case MetadataType.Object:
                 {
-                    if (!allowClassResolve)
-                        throw new InvalidOperationException();
-
                     // When resolved, void becomes a real type
                     if (typeReference.FullName == typeof(void).FullName)
                     {
                         goto case MetadataType.Void;
                     }
 
-                    // Process non-static fields
-                    var @class = CreateClass(typeReference);
+                    dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
 
-                    dataType = @class.Type;
-                    stackType = @class.StackType;
+                    stackType = typeReference.IsValueType ? StackValueType.Value : StackValueType.Object;
 
                     break;
                 }
@@ -133,7 +131,12 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
             }
 
-            return new Type(typeReference, dataType, stackType);
+            // Create class version (boxed version with VTable)
+            var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
+            var vtableType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+            LLVM.StructSetBody(boxedType, new[] { vtableType, dataType }, false);
+
+            return new Type(typeReference, dataType, boxedType, stackType);
         }
     }
 }
