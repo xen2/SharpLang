@@ -64,7 +64,8 @@ namespace SharpLang.CompilerServices
                     CreateType(member.DeclaringType);
                     if (method != null)
                     {
-                        CreateFunction(method);
+                        if (!method.HasGenericParameters)
+                            CreateFunction(method);
                     }
                 }
 
