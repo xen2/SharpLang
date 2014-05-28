@@ -71,7 +71,7 @@ namespace SharpLang.CompilerServices
 
                 foreach (var type in assemblyModule.Types)
                 {
-                    if (!type.HasGenericParameters)
+                    if (!type.HasGenericParameters && type.FullName != typeof(void).FullName)
                         GetClass(type);
 
                     foreach (var nestedType in type.NestedTypes)
