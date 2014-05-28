@@ -7,14 +7,14 @@
 // Match runtime String struct layout
 typedef struct String
 {
-	uint32_t length;
+	size_t length;
 	char* value;
 } String;
 
 // void System.Console.WriteLine(string)
 void System_Void_System_Console__WriteLine_System_String_(String str)
 {
-	printf("%.*s\n", str.length, str.value);
+	printf("%.*s\n", (uint32_t)str.length, str.value);
 }
 
 // void System.Console.WriteLine(string)
