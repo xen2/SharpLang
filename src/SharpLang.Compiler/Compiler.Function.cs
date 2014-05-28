@@ -308,14 +308,24 @@ namespace SharpLang.CompilerServices
                     {
                         var value = stack.Pop();
 
-                        // TODO: Conversions from float & pointer
-                        if (value.StackType == StackValueType.Float
-                            || value.StackType == StackValueType.Pointer)
-                            throw new NotImplementedException();
-
                         var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
 
-                        var convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.DefaultType, string.Empty);
+                        ValueRef convertedValue;
+
+                        if (value.StackType == StackValueType.Int32
+                            || value.StackType == StackValueType.Int64)
+                        {
+                            convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.DefaultType, string.Empty);
+                        }
+                        else if (value.StackType == StackValueType.NativeInt)
+                        {
+                            convertedValue = LLVM.BuildPtrToInt(builder, value.Value, intType.DefaultType, string.Empty);
+                        }
+                        else
+                        {
+                            // TODO: Conversions from float & pointer
+                            throw new NotImplementedException();
+                        }
 
                         // Add constant integer value to stack
                         stack.Add(new StackValue(StackValueType.Int32, intType, convertedValue));

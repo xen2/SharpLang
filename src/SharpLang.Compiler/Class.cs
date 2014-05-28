@@ -23,6 +23,9 @@ namespace SharpLang.CompilerServices
 
             switch (stackType)
             {
+                case StackValueType.NativeInt:
+                    TypeOnStack = LLVM.PointerType(LLVM.Int8TypeInContext(LLVM.GetTypeContext(dataType)), 0);
+                    break;
                 case StackValueType.Int32:
                     TypeOnStack = LLVM.Int32TypeInContext(LLVM.GetTypeContext(dataType));
                     break;

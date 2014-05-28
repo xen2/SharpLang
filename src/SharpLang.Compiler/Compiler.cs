@@ -45,7 +45,7 @@ namespace SharpLang.CompilerServices
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
-            intPtrType = LLVM.Int32TypeInContext(context);
+            intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             builderPhi = LLVM.CreateBuilderInContext(context);
 
             // Process types

@@ -51,6 +51,8 @@ namespace SharpLang.CompilerServices
                 case MetadataType.UInt32:
                 case MetadataType.Int64:
                 case MetadataType.UInt64:
+                case MetadataType.IntPtr:
+                case MetadataType.UIntPtr:
                 case MetadataType.String:
                 {
                     break;
