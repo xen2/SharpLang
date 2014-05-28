@@ -63,8 +63,7 @@ namespace SharpLang.CompilerServices
             var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
 
             // Generate function global
-            var methodDefinition = method.Resolve();
-            bool isExternal = methodDefinition.Module.Assembly != assembly;
+            bool isExternal = method.DeclaringType.Resolve().Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
             var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
