@@ -19,7 +19,7 @@ namespace SharpLang.CompilerServices
             if (types.TryGetValue(typeReference, out type))
                 return type;
 
-            type = BuildType(typeReference, false);
+            type = BuildType(typeReference);
 
             types.Add(typeReference, type);
 
@@ -37,7 +37,7 @@ namespace SharpLang.CompilerServices
             if (types.TryGetValue(typeReference, out type))
                 return type;
 
-            type = BuildType(typeReference, true);
+            type = BuildType(typeReference);
 
             types.Add(typeReference, type);
 
@@ -48,9 +48,8 @@ namespace SharpLang.CompilerServices
         /// Internal helper to actually builds the type.
         /// </summary>
         /// <param name="typeReference">The type definition.</param>
-        /// <param name="allowClassResolve">if set to <c>true</c> [allow class resolve].</param>
         /// <returns></returns>
-        private Type BuildType(TypeReference typeReference, bool allowClassResolve)
+        private Type BuildType(TypeReference typeReference)
         {
             TypeRef dataType;
             StackValueType stackType;
@@ -59,14 +58,14 @@ namespace SharpLang.CompilerServices
             {
                 case MetadataType.ByReference:
                 {
-                    var type = BuildType(((ByReferenceType)typeReference).ElementType, allowClassResolve);
+                    var type = BuildType(((ByReferenceType)typeReference).ElementType);
                     dataType = LLVM.PointerType(type.DataType, 0);
                     stackType = StackValueType.Reference;
                     break;
                 }
                 case MetadataType.RequiredModifier:
                     // TODO: Add support for this feature
-                    return BuildType(((RequiredModifierType)typeReference).ElementType, allowClassResolve);
+                    return BuildType(((RequiredModifierType)typeReference).ElementType);
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
                     stackType = StackValueType.Unknown;
