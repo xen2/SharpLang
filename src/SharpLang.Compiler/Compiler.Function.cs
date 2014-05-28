@@ -19,10 +19,10 @@ namespace SharpLang.CompilerServices
         private Function GetFunction(MethodReference method)
         {
             Function function;
-            if (!functions.TryGetValue(method, out function))
-                throw new InvalidOperationException(string.Format("Could not find method {0}", method));
+            if (functions.TryGetValue(method, out function))
+                return function;
 
-            return function;
+            return CreateFunction(method);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace SharpLang.CompilerServices
             {
                 // Need to compile
                 LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
-                methodsToCompile.Add(new KeyValuePair<MethodReference, Function>(method, function));
+                methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(method, function));
             }
 
             return function;

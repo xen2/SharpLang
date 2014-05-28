@@ -33,7 +33,7 @@ namespace SharpLang.CompilerServices
         private Dictionary<TypeReference, Class> classes = new Dictionary<TypeReference, Class>(MemberEqualityComparer.Default);
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
 
-        private List<KeyValuePair<MethodReference, Function>> methodsToCompile = new List<KeyValuePair<MethodReference, Function>>();
+        private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
         public ModuleRef CompileAssembly(AssemblyDefinition assembly)
         {
@@ -88,8 +88,9 @@ namespace SharpLang.CompilerServices
             }
 
             // Generate code
-            foreach (var methodToCompile in methodsToCompile)
+            while (methodsToCompile.Count > 0)
             {
+                var methodToCompile = methodsToCompile.Dequeue();
                 CompileFunction(methodToCompile.Key, methodToCompile.Value);
             }
 
@@ -134,6 +135,11 @@ namespace SharpLang.CompilerServices
                 // Process methods
                 foreach (var method in typeDefinition.Methods)
                 {
+                    // If a method contains generic parameters, skip it
+                    // Its closed instantiations (with generic arguments) is what needs to be generated.
+                    if (method.ContainsGenericParameter())
+                        continue;
+
                     MethodReference methodReference;
                     if (@class.TypeReference is GenericInstanceType)
                     {

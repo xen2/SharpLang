@@ -46,6 +46,9 @@
   <ItemGroup>
     <Compile Include="TestFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="tests\SimpleGenericFunction.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="tests\SimpleGenericClass.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
