@@ -34,6 +34,10 @@ namespace SharpLang.CompilerServices.Cecil
 
         public virtual TypeReference VisitDynamic(TypeReference type)
         {
+            var byrefType = type as ByReferenceType;
+            if (byrefType != null)
+                return Visit(byrefType);
+
             var arrayType = type as ArrayType;
             if (arrayType != null)
                 return Visit(arrayType);
@@ -70,6 +74,12 @@ namespace SharpLang.CompilerServices.Cecil
         public virtual TypeReference Visit(ArrayType type)
         {
             type = type.ChangeArrayType(VisitDynamic(type.ElementType), type.Rank);
+            return type.ChangeGenericParameters(Visit(type.GenericParameters));
+        }
+
+        public virtual TypeReference Visit(ByReferenceType type)
+        {
+            type = type.ChangeByReferenceType(VisitDynamic(type.ElementType));
             return type.ChangeGenericParameters(Visit(type.GenericParameters));
         }
 

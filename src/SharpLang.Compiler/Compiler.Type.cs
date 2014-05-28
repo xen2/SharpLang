@@ -57,6 +57,13 @@ namespace SharpLang.CompilerServices
 
             switch (typeReference.MetadataType)
             {
+                case MetadataType.ByReference:
+                {
+                    var type = BuildType(((ByReferenceType)typeReference).ElementType, allowClassResolve);
+                    dataType = LLVM.PointerType(type.DataType, 0);
+                    stackType = StackValueType.Reference;
+                    break;
+                }
                 case MetadataType.RequiredModifier:
                     // TODO: Add support for this feature
                     return BuildType(((RequiredModifierType)typeReference).ElementType, allowClassResolve);

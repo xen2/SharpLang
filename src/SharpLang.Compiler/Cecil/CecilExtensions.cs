@@ -74,6 +74,18 @@ namespace SharpLang.CompilerServices.Cecil
             return type;
         }
 
+        public static ByReferenceType ChangeByReferenceType(this ByReferenceType type, TypeReference elementType)
+        {
+            if (elementType != type.ElementType)
+            {
+                var result = new ByReferenceType(elementType);
+                if (type.HasGenericParameters)
+                    SetGenericParameters(result, type.GenericParameters);
+                return result;
+            }
+            return type;
+        }
+
         public static ArrayType ChangeArrayType(this ArrayType type, TypeReference elementType, int rank)
         {
             if (elementType != type.ElementType || rank != type.Rank)
