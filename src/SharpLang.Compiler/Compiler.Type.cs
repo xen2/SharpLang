@@ -56,6 +56,13 @@ namespace SharpLang.CompilerServices
 
             switch (typeReference.MetadataType)
             {
+                case MetadataType.Pointer:
+                {
+                    var type = BuildType(((PointerType)typeReference).ElementType);
+                    dataType = LLVM.PointerType(type.DataType, 0);
+                    stackType = StackValueType.Pointer;
+                    break;
+                }
                 case MetadataType.ByReference:
                 {
                     var type = BuildType(((ByReferenceType)typeReference).ElementType);
