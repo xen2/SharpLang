@@ -28,3 +28,8 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+/build/vs2012
+/build/vs2013
+/build/gmake
+/deps/llvm
+/tools/swig
