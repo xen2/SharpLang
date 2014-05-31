@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using SharpLang.CompilerServices.Cecil;
@@ -78,8 +79,6 @@ namespace SharpLang.CompilerServices
             var boxedType = type.ObjectType;
             var dataType = type.DataType;
             var stackType = type.StackType;
-            var vtableType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-            LLVM.StructSetBody(boxedType, new[] { vtableType, dataType }, false);
 
             @class = new Class(type, typeReference, dataType, boxedType, stackType);
             classes.Add(typeReference, @class);
@@ -95,8 +94,23 @@ namespace SharpLang.CompilerServices
                 {
                     var parentClass = GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType));
                     @class.BaseType = parentClass;
+
+                    // Add fields and vtable slots from parent class
                     fieldTypes.Add(parentClass.DataType);
+                    @class.VirtualTable.AddRange(parentClass.VirtualTable);
                 }
+
+                // Build methods slots
+                // TODO: This will trigger their compilation, but maybe we might want to defer that later
+                // (esp. since vtable is not built yet => recursion issues)
+                CompileClassMethods(@class);
+
+                // Build vtable
+                var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
+                var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(vtableConstant), string.Empty);
+                LLVM.SetInitializer(vtableGlobal, vtableConstant);
+                LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
+                @class.GeneratedVirtualTable = vtableGlobal;
 
                 foreach (var field in typeDefinition.Fields)
                 {

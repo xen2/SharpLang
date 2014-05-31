@@ -12,7 +12,7 @@ namespace SharpLang.CompilerServices.Cecil
     /// <summary>
     /// Various useful extension methods for Cecil.
     /// </summary>
-    public static class CecilExtensions
+    static partial class CecilExtensions
     {
         // Not sure why Cecil made ContainsGenericParameter internal, but let's work around it by reflection.
         private static readonly MethodInfo containsGenericParameterGetMethod = typeof(MemberReference).GetProperty("ContainsGenericParameter", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).GetMethod;

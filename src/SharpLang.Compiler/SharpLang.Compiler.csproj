@@ -48,6 +48,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cecil\CecilExtensions.TypeMap.cs" />
     <Compile Include="Cecil\CecilExtensions.cs" />
     <Compile Include="Cecil\ResolveGenericsVisitor.cs" />
     <Compile Include="Cecil\TypeReferenceVisitor.cs" />

@@ -128,6 +128,12 @@ namespace SharpLang.CompilerServices
 
         void CompileClassMethods(Class @class)
         {
+            // Already processed?
+            if (@class.MethodCompiled)
+                return;
+
+            @class.MethodCompiled = true;
+
             var typeDefinition = @class.TypeReference.Resolve();
             var genericInstanceType = @class.TypeReference as GenericInstanceType;
             bool isExternal = typeDefinition.Module.Assembly != assembly;
@@ -154,14 +160,33 @@ namespace SharpLang.CompilerServices
 
                     if (method.IsVirtual)
                     {
-                        function.VirtualSlot = @class.VirtualTable.Count;
-                        @class.VirtualTable.Add(function);
+                        if (method.IsNewSlot)
+                        {
+                            // New slot
+                            function.VirtualSlot = @class.VirtualTable.Count;
+                            @class.VirtualTable.Add(function);
+                        }
+                        else
+                        {
+                            // Find slot in base types
+                            var baseType = @class.BaseType;
+                            Function matchedMethod = null;
+                            while (baseType != null)
+                            {
+                                matchedMethod = CecilExtensions.TryMatchMethod(baseType, method);
+                                if (matchedMethod != null)
+                                    break;
+                                baseType = baseType.BaseType;
+                            }
+
+                            if (matchedMethod == null)
+                                throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.TypeReference));
+
+                            function.VirtualSlot = matchedMethod.VirtualSlot;
+                            @class.VirtualTable[function.VirtualSlot] = function;
+                        }
                     }
                 }
-
-                // Create VTable
-                var vtableMethodType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-                var vtable = LLVM.ConstArray(vtableMethodType, @class.VirtualTable.Select(virtualMethod => LLVM.ConstPointerCast(virtualMethod.GeneratedValue, vtableMethodType)).ToArray());
             }
         }
 

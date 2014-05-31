@@ -10,6 +10,8 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
+        internal bool MethodCompiled;
+
         public Class(Type type, TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
             Type = type;
@@ -105,6 +107,14 @@ namespace SharpLang.CompilerServices
         /// The parent class.
         /// </value>
         public Class BaseType { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the virtual table global variable.
+        /// </summary>
+        /// <value>
+        /// The generated virtual table global variable.
+        /// </value>
+        public ValueRef GeneratedVirtualTableGlobal { get; internal set; }
 
         /// <inheritdoc/>
         public override string ToString()

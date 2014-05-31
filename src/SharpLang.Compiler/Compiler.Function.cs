@@ -244,12 +244,40 @@ namespace SharpLang.CompilerServices
                         // TODO: Interface calls & virtual calls
                         if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
                         {
-                            throw new NotImplementedException();
+                            // Build indices for GEP
+                            var indices = new List<ValueRef>(3);
+                            var int32Type = LLVM.Int32TypeInContext(context);
+
+                            // First pointer indirection
+                            indices.Add(LLVM.ConstInt(int32Type, 0, false));
+
+                            // Second pointer: vtable
+                            indices.Add(LLVM.ConstInt(int32Type, 0, false));
+
+                            var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
+                            var @class = GetClass(thisObject.Type.TypeReference);
+                            
+                            // Get vtable pointer
+                            var vtablePointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices.ToArray(), string.Empty);
+                            vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
+
+                            // Cast to expected vtable type
+                            vtablePointer = LLVM.BuildPointerCast(builder, vtablePointer, LLVM.TypeOf(@class.GeneratedVirtualTableGlobal), string.Empty);
+
+                            // Get method stored in vtable slot
+                            indices[1] = LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false);
+                            vtablePointer = LLVM.BuildInBoundsGEP(builder, vtablePointer, indices.ToArray(), string.Empty);
+                            vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
+
+                            // Emit call
+                            EmitCall(stack, targetMethod, vtablePointer);
                         }
                         else
                         {
                             // Normal call
-                            // TODO: Callvirt on non virtual function is only done to force NULL check
+                            // Callvirt on non virtual function is only done to force "this" NULL check
+                            // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
+                            // so maybe we should keep this as is?
                             EmitCall(stack, targetMethod);
                         }
 

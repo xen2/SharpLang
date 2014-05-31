@@ -82,6 +82,20 @@ namespace SharpLang.CompilerServices
                 var ctorNumParams = ctor.ParameterTypes.Length;
                 stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
 
+                // Resolve class
+                var @class = GetClass(type.TypeReference);
+
+                // Store vtable global into first field of the object
+                var int32Type = LLVM.Int32TypeInContext(context);
+                var indices = new[]
+                {
+                    LLVM.ConstInt(int32Type, 0, false),
+                    LLVM.ConstInt(int32Type, 0, false),
+                };
+
+                var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+                LLVM.BuildStore(builder, @class.GeneratedVirtualTableGlobal, vtablePointer);
+
                 // Invoke ctor
                 EmitCall(stack, ctor);
 
@@ -143,7 +157,7 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
         }
 
-        private void EmitCall(List<StackValue> stack, Function targetMethod)
+        private void EmitCall(List<StackValue> stack, Function targetMethod, ValueRef overrideMethod = default(ValueRef))
         {
             // Build argument list
             var targetNumParams = targetMethod.ParameterTypes.Length;
@@ -159,7 +173,7 @@ namespace SharpLang.CompilerServices
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
 
             // Invoke method
-            var call = LLVM.BuildCall(builder, targetMethod.GeneratedValue, args, string.Empty);
+            var call = LLVM.BuildCall(builder, overrideMethod.Value != IntPtr.Zero ? overrideMethod : targetMethod.GeneratedValue, args, string.Empty);
 
             // Mark method as needed
             LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
