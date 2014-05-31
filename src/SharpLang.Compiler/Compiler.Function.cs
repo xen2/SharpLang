@@ -245,28 +245,33 @@ namespace SharpLang.CompilerServices
                         if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
                         {
                             // Build indices for GEP
-                            var indices = new List<ValueRef>(3);
                             var int32Type = LLVM.Int32TypeInContext(context);
 
-                            // First pointer indirection
-                            indices.Add(LLVM.ConstInt(int32Type, 0, false));
-
-                            // Second pointer: vtable
-                            indices.Add(LLVM.ConstInt(int32Type, 0, false));
+                            var indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, 0, false),                                 // Pointer indirection
+                                LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+                            };
 
                             var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
                             var @class = GetClass(thisObject.Type.TypeReference);
                             
                             // Get vtable pointer
-                            var vtablePointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices.ToArray(), string.Empty);
+                            var vtablePointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
                             vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
 
                             // Cast to expected vtable type
-                            vtablePointer = LLVM.BuildPointerCast(builder, vtablePointer, LLVM.TypeOf(@class.GeneratedVirtualTableGlobal), string.Empty);
+                            vtablePointer = LLVM.BuildPointerCast(builder, vtablePointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
 
                             // Get method stored in vtable slot
-                            indices[1] = LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false);
-                            vtablePointer = LLVM.BuildInBoundsGEP(builder, vtablePointer, indices.ToArray(), string.Empty);
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
+                                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.VirtualTable, false),   // Access vtable
+                                LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),           // Access specific vtable slot
+                            };
+
+                            vtablePointer = LLVM.BuildInBoundsGEP(builder, vtablePointer, indices, string.Empty);
                             vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
 
                             // Emit call

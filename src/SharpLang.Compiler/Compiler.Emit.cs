@@ -89,12 +89,12 @@ namespace SharpLang.CompilerServices
                 var int32Type = LLVM.Int32TypeInContext(context);
                 var indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false),
-                    LLVM.ConstInt(int32Type, 0, false),
+                    LLVM.ConstInt(int32Type, 0, false),                                 // Pointer indirection
+                    LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
                 };
 
                 var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-                LLVM.BuildStore(builder, @class.GeneratedVirtualTableGlobal, vtablePointer);
+                LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobal, vtablePointer);
 
                 // Invoke ctor
                 EmitCall(stack, ctor);
@@ -278,8 +278,8 @@ namespace SharpLang.CompilerServices
 
             if (@object.StackType == StackValueType.Object)
             {
-                // 0 is vtable pointer, 1 is object itself (need to add enum?)
-                indices.Add(LLVM.ConstInt(int32Type, 1, false));
+                // Access data
+                indices.Add(LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false));
 
                 // For now, go through hierarchy and check that type match
                 // Other options:
@@ -299,7 +299,7 @@ namespace SharpLang.CompilerServices
                 if (@class == null)
                     throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, @object.Type.TypeReference));
 
-                // Apply GEP indices to find right object
+                // Apply GEP indices to find right object (parent is always stored in first element)
                 for (int i = 0; i < depth; ++i)
                     indices.Add(LLVM.ConstInt(int32Type, 0, false));
             }

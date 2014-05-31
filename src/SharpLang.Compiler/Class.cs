@@ -109,12 +109,12 @@ namespace SharpLang.CompilerServices
         public Class BaseType { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the virtual table global variable.
+        /// Gets or sets the RTTI global variable, which will contain vtable, IMT, static fields, etc...
         /// </summary>
         /// <value>
-        /// The generated virtual table global variable.
+        /// The generated RTTI global variable.
         /// </value>
-        public ValueRef GeneratedVirtualTableGlobal { get; internal set; }
+        public ValueRef GeneratedRuntimeTypeInfoGlobal { get; internal set; }
 
         /// <inheritdoc/>
         public override string ToString()

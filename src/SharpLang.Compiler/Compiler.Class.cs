@@ -89,10 +89,11 @@ namespace SharpLang.CompilerServices
 
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
 
+                var parentClass = typeDefinition.BaseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType)) : null;
+
                 // Add parent class
-                if (typeReference.MetadataType == MetadataType.Class && typeDefinition.BaseType != null)
+                if (typeReference.MetadataType == MetadataType.Class && parentClass != null)
                 {
-                    var parentClass = GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType));
                     @class.BaseType = parentClass;
 
                     // Add fields and vtable slots from parent class
@@ -105,12 +106,20 @@ namespace SharpLang.CompilerServices
                 // (esp. since vtable is not built yet => recursion issues)
                 CompileClassMethods(@class);
 
+                // Get parent type RTTI
+                var parentRuntimeTypeInfo = parentClass != null
+                    ? parentClass.GeneratedRuntimeTypeInfoGlobal
+                    : LLVM.ConstPointerNull(LLVM.PointerType(LLVM.Int8TypeInContext(context), 0));
+
                 // Build vtable
                 var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
-                var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(vtableConstant), string.Empty);
-                LLVM.SetInitializer(vtableGlobal, vtableConstant);
+
+                // Build RTTI
+                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, vtableConstant }, false);
+                var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
+                LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
                 LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
-                @class.GeneratedVirtualTableGlobal = vtableGlobal;
+                @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
 
                 foreach (var field in typeDefinition.Fields)
                 {
