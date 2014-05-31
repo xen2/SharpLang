@@ -92,12 +92,11 @@ namespace SharpLang.CompilerServices
                 var parentClass = typeDefinition.BaseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType)) : null;
 
                 // Add parent class
-                if (typeReference.MetadataType == MetadataType.Class && parentClass != null)
+                if (parentClass != null)
                 {
                     @class.BaseType = parentClass;
 
-                    // Add fields and vtable slots from parent class
-                    fieldTypes.Add(parentClass.DataType);
+                    // Add parent classes
                     @class.VirtualTable.AddRange(parentClass.VirtualTable);
                 }
 
@@ -114,12 +113,33 @@ namespace SharpLang.CompilerServices
                 // Build vtable
                 var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
 
+                // Build static fields
+                foreach (var field in typeDefinition.Fields)
+                {
+                    if (!field.IsStatic)
+                        continue;
+
+                    var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+                    @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                    fieldTypes.Add(fieldType.DefaultType);
+                }
+
+                var staticFieldsEmpty = LLVM.ConstNull(LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false));
+                fieldTypes.Clear(); // Reused for non-static fields after
+
                 // Build RTTI
-                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, vtableConstant }, false);
+                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, vtableConstant, staticFieldsEmpty }, false);
                 var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
                 LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
                 LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
                 @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
+
+                // Build actual type data (fields)
+                // Add fields and vtable slots from parent class
+                if (parentClass != null && typeReference.MetadataType == MetadataType.Class)
+                {
+                    fieldTypes.Add(parentClass.DataType);
+                }
 
                 foreach (var field in typeDefinition.Fields)
                 {

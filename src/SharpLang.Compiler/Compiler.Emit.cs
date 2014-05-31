@@ -309,6 +309,58 @@ namespace SharpLang.CompilerServices
             return indices.ToArray();
         }
 
+        private void EmitStsfld(List<StackValue> stack, Field field)
+        {
+            var value = stack.Pop();
+
+            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+
+            // Get static field GEP indices
+            var indices = BuildStaticFieldIndices(field);
+
+            // Find static field address in runtime type info
+            var staticFieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
+
+            // Convert stack value to appropriate type
+            var fieldValue = ConvertFromStackToLocal(field.Type, value);
+
+            // Store value in static field
+            LLVM.BuildStore(builder, fieldValue, staticFieldAddress);
+        }
+
+        private void EmitLdsfld(List<StackValue> stack, Field field)
+        {
+            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+
+            // Get static field GEP indices
+            var indices = BuildStaticFieldIndices(field);
+
+            // Find static field address in runtime type info
+            var staticFieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
+
+            // Load value from field and create "fake" local
+            var value = LLVM.BuildLoad(builder, staticFieldAddress, string.Empty);
+
+            // Convert from local to stack value
+            value = ConvertFromLocalToStack(field.Type, value);
+
+            // Add value to stack
+            stack.Add(new StackValue(field.Type.StackType, field.Type, value));
+        }
+
+        private ValueRef[] BuildStaticFieldIndices(Field field)
+        {
+            var int32Type = LLVM.Int32TypeInContext(context);
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.StaticFields, false),   // Access static fields
+                LLVM.ConstInt(int32Type, (ulong)field.StructIndex, false),                  // Access specific static field
+            };
+
+            return indices;
+        }
+
         private void EmitNewarr(List<StackValue> stack, Type elementType)
         {
             var arrayType = GetType(new ArrayType(elementType.TypeReference));

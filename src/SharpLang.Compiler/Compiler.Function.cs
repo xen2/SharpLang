@@ -456,6 +456,18 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+                    case Code.Ldsfld:
+                    {
+                        var fieldReference = (FieldReference)instruction.Operand;
+
+                        // Resolve class and field
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var field = @class.Fields[fieldReference.Resolve()];
+
+                        EmitLdsfld(stack, field);
+
+                        break;
+                    }
                     #endregion
 
                     #region Store opcodes (Stloc, etc...)
@@ -486,6 +498,18 @@ namespace SharpLang.CompilerServices
 
                         EmitStfld(stack, field);
 
+                        break;
+                    }
+
+                    case Code.Stsfld:
+                    {
+                        var fieldReference = (FieldReference)instruction.Operand;
+
+                        // Resolve class and field
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var field = @class.Fields[fieldReference.Resolve()];
+
+                        EmitStsfld(stack, field);
                         break;
                     }
                     #endregion
