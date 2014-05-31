@@ -275,7 +275,7 @@ namespace SharpLang.CompilerServices
                         else
                         {
                             // Normal call
-                            // Callvirt on non virtual function is only done to force "this" NULL check
+                            // Callvirt on non-virtual function is only done to force "this" NULL check
                             // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
                             // so maybe we should keep this as is?
                             EmitCall(stack, targetMethod);

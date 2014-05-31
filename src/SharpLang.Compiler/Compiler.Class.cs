@@ -110,7 +110,7 @@ namespace SharpLang.CompilerServices
                 var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(vtableConstant), string.Empty);
                 LLVM.SetInitializer(vtableGlobal, vtableConstant);
                 LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
-                @class.GeneratedVirtualTable = vtableGlobal;
+                @class.GeneratedVirtualTableGlobal = vtableGlobal;
 
                 foreach (var field in typeDefinition.Fields)
                 {
