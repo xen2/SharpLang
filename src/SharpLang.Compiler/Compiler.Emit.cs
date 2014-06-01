@@ -173,10 +173,11 @@ namespace SharpLang.CompilerServices
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
 
             // Invoke method
-            var call = LLVM.BuildCall(builder, overrideMethod.Value != IntPtr.Zero ? overrideMethod : targetMethod.GeneratedValue, args, string.Empty);
+            var actualMethod = overrideMethod.Value != IntPtr.Zero ? overrideMethod : targetMethod.GeneratedValue;
+            var call = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
 
             // Mark method as needed
-            LLVM.SetLinkage(targetMethod.GeneratedValue, Linkage.ExternalLinkage);
+            LLVM.SetLinkage(actualMethod, Linkage.ExternalLinkage);
 
             // Push return result on stack
             if (targetMethod.MethodReference.ReturnType.MetadataType != MetadataType.Void)

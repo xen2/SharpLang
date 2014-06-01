@@ -22,6 +22,7 @@ namespace SharpLang.CompilerServices
             DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
             Fields = new Dictionary<FieldDefinition, Field>();
             VirtualTable = new List<Function>();
+            Interfaces = new HashSet<Class>();
 
             switch (stackType)
             {
@@ -99,6 +100,8 @@ namespace SharpLang.CompilerServices
         public Dictionary<FieldDefinition, Field> Fields { get; private set; }
 
         public List<Function> VirtualTable { get; private set; }
+
+        public HashSet<Class> Interfaces { get; private set; }
 
         /// <summary>
         /// Gets or sets the parent class.

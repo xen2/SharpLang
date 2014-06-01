@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
@@ -10,6 +11,8 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
+        public const int InterfaceMethodTableSize = 19;
+
         /// <summary>
         /// Gets the specified class.
         /// </summary>
@@ -98,6 +101,8 @@ namespace SharpLang.CompilerServices
 
                     // Add parent classes
                     @class.VirtualTable.AddRange(parentClass.VirtualTable);
+                    foreach (var @interface in parentClass.Interfaces)
+                        @class.Interfaces.Add(@interface);
                 }
 
                 // Build methods slots
@@ -106,13 +111,62 @@ namespace SharpLang.CompilerServices
                 CompileClassMethods(@class);
 
                 // Get parent type RTTI
+                var runtimeTypeInfoType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
                 var parentRuntimeTypeInfo = parentClass != null
-                    ? parentClass.GeneratedRuntimeTypeInfoGlobal
-                    : LLVM.ConstPointerNull(LLVM.PointerType(LLVM.Int8TypeInContext(context), 0));
+                    ? LLVM.ConstPointerCast(parentClass.GeneratedRuntimeTypeInfoGlobal, runtimeTypeInfoType)
+                    : LLVM.ConstPointerNull(runtimeTypeInfoType);
 
                 // Build vtable
                 var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
+    
+                // Build IMT
+                var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
+                foreach (var @interface in typeDefinition.Interfaces)
+                {
+                    var resolvedInterface = ResolveGenericsVisitor.Process(typeReference, @interface);
+                    @class.Interfaces.Add(GetClass(resolvedInterface));
 
+                    // TODO: Add any inherited interface inherited by the resolvedInterface as well
+                }
+
+                foreach (var @interface in @class.Interfaces)
+                {
+                    foreach (var interfaceMethod in @interface.TypeReference.Resolve().Methods)
+                    {
+                        var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
+    
+                        var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+    
+                        var methodId = GetMethodId(resolvedInterfaceMethod);
+                        var imtSlotIndex = (int)(methodId % interfaceMethodTable.Length);
+    
+                        var imtSlot = interfaceMethodTable[imtSlotIndex];
+                        if (imtSlot == null)
+                            interfaceMethodTable[imtSlotIndex] = imtSlot = new LinkedList<InterfaceMethodTableEntry>();
+    
+                        imtSlot.AddLast(new InterfaceMethodTableEntry { Function = resolvedFunction, MethodId = methodId, SlotIndex = imtSlotIndex });
+                    }
+                }
+                var interfaceMethodTableConstant = LLVM.ConstArray(imtEntryType, interfaceMethodTable.Select(imtSlot =>
+                {
+                    if (imtSlot == null)
+                    {
+                        // No entries: null slot
+                        return LLVM.ConstNull(imtEntryType);
+                    }
+    
+                    if (imtSlot.Count > 1)
+                        throw new NotImplementedException("IMT with more than one entry per slot is not implemented yet.");
+    
+                    var imtEntry = imtSlot.First.Value;
+                    return LLVM.ConstNamedStruct(imtEntryType, new[]
+                    {
+                        LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
+                        LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)imtEntry.MethodId, false),   // i32 functionId
+                        LLVM.ConstPointerNull(LLVM.PointerType(imtEntryType, 0)),                           // IMTEntry* nextSlot
+                    });
+                }).ToArray());
+    
                 // Build static fields
                 foreach (var field in typeDefinition.Fields)
                 {
@@ -128,7 +182,7 @@ namespace SharpLang.CompilerServices
                 fieldTypes.Clear(); // Reused for non-static fields after
 
                 // Build RTTI
-                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, vtableConstant, staticFieldsEmpty }, false);
+                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, interfaceMethodTableConstant, vtableConstant, staticFieldsEmpty }, false);
                 var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
                 LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
                 LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
@@ -155,6 +209,38 @@ namespace SharpLang.CompilerServices
             }
 
             return @class;
+        }
+
+        private static uint GetMethodId(MethodReference resolvedInterfaceMethod)
+        {
+            // For now, use full name has code for IMT slot
+            // (might need a more robust method later, esp. since runtime needs to compute it for covariance/contravariance)
+            var methodId = StringHashCode(resolvedInterfaceMethod.FullName);
+            return methodId;
+        }
+
+        private static uint StringHashCode(string str)
+        {
+            uint hash = 17;
+            foreach (char c in str)
+            {
+                unchecked
+                {
+                    hash = hash*23 + c;
+                }
+            }
+
+            return hash;
+        }
+
+        /// <summary>
+        /// Represents an entry in the Interface Method Table (IMT).
+        /// </summary>
+        private struct InterfaceMethodTableEntry
+        {
+            public Function Function;
+            public uint MethodId;
+            public int SlotIndex;
         }
     }
 }

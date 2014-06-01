@@ -22,6 +22,7 @@ namespace SharpLang.CompilerServices
         // Builder for normal instructions
         private BuilderRef builder;
         private TypeRef intPtrType;
+        private TypeRef imtEntryType;
 
         // Builder that is used for PHI nodes
         private BuilderRef builderPhi;
@@ -47,6 +48,10 @@ namespace SharpLang.CompilerServices
             builder = LLVM.CreateBuilderInContext(context);
             intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             builderPhi = LLVM.CreateBuilderInContext(context);
+
+            // struct IMTSlot { i8* functionPtr, i32 functionId, IMTEntry* nextEntry }
+            imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
+            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, LLVM.Int32TypeInContext(context), LLVM.PointerType(imtEntryType, 0) }, false);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)
@@ -135,7 +140,9 @@ namespace SharpLang.CompilerServices
             @class.MethodCompiled = true;
 
             var typeDefinition = @class.TypeReference.Resolve();
-            var genericInstanceType = @class.TypeReference as GenericInstanceType;
+
+            bool isInterface = typeDefinition.IsInterface;
+
             bool isExternal = typeDefinition.Module.Assembly != assembly;
             if (!isExternal)
             {
@@ -147,20 +154,17 @@ namespace SharpLang.CompilerServices
                     if (method.ContainsGenericParameter())
                         continue;
 
-                    MethodReference methodReference;
-                    if (@class.TypeReference is GenericInstanceType)
-                    {
-                        methodReference = method.MakeGeneric(((GenericInstanceType)@class.TypeReference).GenericArguments.ToArray());
-                    }
-                    else
-                    {
-                        methodReference = method;
-                    }
+                    var methodReference = ResolveGenericMethod(@class.TypeReference, method);
                     var function = CreateFunction(methodReference);
 
                     if (method.IsVirtual)
                     {
-                        if (method.IsNewSlot)
+                        if (isInterface)
+                        {
+                            // Store IMT slot
+                            function.VirtualSlot = (int)(GetMethodId(methodReference) % InterfaceMethodTableSize);
+                        }
+                        else if (method.IsNewSlot)
                         {
                             // New slot
                             function.VirtualSlot = @class.VirtualTable.Count;
@@ -188,6 +192,15 @@ namespace SharpLang.CompilerServices
                     }
                 }
             }
+        }
+
+        private static MethodReference ResolveGenericMethod(TypeReference typeReference, MethodReference method)
+        {
+            var genericInstanceType = typeReference as GenericInstanceType;
+            if (genericInstanceType != null)
+                return method.MakeGeneric(genericInstanceType.GenericArguments.ToArray());
+
+            return method;
         }
 
         class MemberEqualityComparer : IEqualityComparer<MemberReference>

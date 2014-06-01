@@ -5,9 +5,10 @@ namespace SharpLang.CompilerServices
 {
     class Function
     {
-        public Function(MethodReference methodReference, ValueRef generatedValue, Type returnType, Type[] parameterTypes)
+        public Function(MethodReference methodReference, TypeRef functionType, ValueRef generatedValue, Type returnType, Type[] parameterTypes)
         {
             MethodReference = methodReference;
+            FunctionType = functionType;
             GeneratedValue = generatedValue;
             ReturnType = returnType;
             ParameterTypes = parameterTypes;
@@ -17,12 +18,20 @@ namespace SharpLang.CompilerServices
         public MethodReference MethodReference { get; private set; }
 
         /// <summary>
-        /// Gets or sets the LLVM generated value.
+        /// Gets the LLVM function type.
+        /// </summary>
+        /// <value>
+        /// The LLVM function type.
+        /// </value>
+        public TypeRef FunctionType { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM generated value.
         /// </summary>
         /// <value>
         /// The LLVM generated value.
         /// </value>
-        public ValueRef GeneratedValue { get; internal set; }
+        public ValueRef GeneratedValue { get; private set; }
 
         /// <summary>
         /// Gets the return type.

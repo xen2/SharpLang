@@ -66,21 +66,28 @@ namespace SharpLang.CompilerServices
             bool isExternal = method.DeclaringType.Resolve().Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
-            var functionGlobal = LLVM.AddFunction(module, methodMangledName, functionType);
 
-            function = new Function(method, functionGlobal, returnType, parameterTypes);
+            var hasBody = method.Resolve().HasBody;
+            var functionGlobal = hasBody
+                ? LLVM.AddFunction(module, methodMangledName, functionType)
+                : new ValueRef(IntPtr.Zero);
+
+            function = new Function(method, functionType, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
-            if (isExternal)
+            if (hasBody)
             {
-                // External weak linkage
-                LLVM.SetLinkage(functionGlobal, Linkage.ExternalWeakLinkage);
-            }
-            else
-            {
-                // Need to compile
-                LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
-                methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(method, function));
+                if (isExternal)
+                {
+                    // External weak linkage
+                    LLVM.SetLinkage(functionGlobal, Linkage.ExternalWeakLinkage);
+                }
+                else
+                {
+                    // Need to compile
+                    LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
+                    methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(method, function));
+                }
             }
 
             return function;
@@ -97,6 +104,9 @@ namespace SharpLang.CompilerServices
         private void CompileFunction(MethodReference methodReference, Function function)
         {
             var method = methodReference.Resolve();
+
+            if (method.HasBody == false)
+                return;
 
             var numParams = method.Parameters.Count;
             var body = method.Body;
@@ -255,27 +265,64 @@ namespace SharpLang.CompilerServices
 
                             var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
                             var @class = GetClass(thisObject.Type.TypeReference);
-                            
-                            // Get vtable pointer
-                            var vtablePointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
-                            vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
 
-                            // Cast to expected vtable type
-                            vtablePointer = LLVM.BuildPointerCast(builder, vtablePointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
+                            // TODO: Checking actual type stored in thisObject we might be able to statically resolve method?
 
-                            // Get method stored in vtable slot
-                            indices = new[]
+                            // Get RTTI pointer
+                            var rttiPointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
+                            rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
+
+                            // Cast to expected RTTI type
+                            rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
+
+                            if (targetMethod.MethodReference.DeclaringType.Resolve().IsInterface)
                             {
-                                LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
-                                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.VirtualTable, false),   // Access vtable
-                                LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),           // Access specific vtable slot
-                            };
+                                // Interface call
 
-                            vtablePointer = LLVM.BuildInBoundsGEP(builder, vtablePointer, indices, string.Empty);
-                            vtablePointer = LLVM.BuildLoad(builder, vtablePointer, string.Empty);
+                                // Get method stored in IMT slot
+                                indices = new[]
+                                {
+                                    LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
+                                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.InterfaceMethodTable, false),   // Access IMT
+                                    LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),                   // Access specific IMT slot
+                                };
 
-                            // Emit call
-                            EmitCall(stack, targetMethod, vtablePointer);
+                                var imtEntry = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+
+                                var indices2 = new[]
+                                {
+                                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                                    LLVM.ConstInt(int32Type, 0, false), // Access to method slot
+                                };
+                                var imtMethod = LLVM.BuildInBoundsGEP(builder, imtEntry, indices2, string.Empty);
+                                var methodPointer = LLVM.BuildLoad(builder, imtMethod, string.Empty);
+                                var resolvedMethod = LLVM.BuildPointerCast(builder, methodPointer, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
+
+                                // TODO: Compare method ID and iterate in the linked list until the correct match is found
+                                // If no match is found, it's likely due to covariance/contravariance, so we will need a fallback
+                                var methodId = GetMethodId(targetMethod.MethodReference);
+
+                                // Emit call
+                                EmitCall(stack, targetMethod, resolvedMethod);
+                            }
+                            else
+                            {
+                                // Virtual table call
+
+                                // Get method stored in vtable slot
+                                indices = new[]
+                                {
+                                    LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
+                                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.VirtualTable, false),   // Access vtable
+                                    LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),           // Access specific vtable slot
+                                };
+
+                                var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+                                var resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
+
+                                // Emit call
+                                EmitCall(stack, targetMethod, resolvedMethod);
+                            }
                         }
                         else
                         {

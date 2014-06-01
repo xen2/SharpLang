@@ -6,6 +6,7 @@ namespace SharpLang.CompilerServices
     enum RuntimeTypeInfoFields
     {
         Base = 0,
+        InterfaceMethodTable,
         VirtualTable,
         StaticFields,
     }

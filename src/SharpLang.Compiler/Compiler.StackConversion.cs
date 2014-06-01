@@ -30,18 +30,35 @@ namespace SharpLang.CompilerServices
                 {
                     return stackValue;
                 }
-                
-                // Check upcast
-                var stackType = stack.Type.TypeReference;
-                while (stackType != null)
-                {
-                    if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReference))
-                    {
-                        // It's an upcast, do LLVM pointer cast
-                        return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
-                    }
 
-                    stackType = stackType.Resolve().BaseType;
+                if (localType.TypeReference.Resolve().IsInterface)
+                {
+                    // Interface upcast
+                    var stackClass = GetClass(stack.Type.TypeReference);
+                    foreach (var @interface in stackClass.Interfaces)
+                    {
+                        if (MemberEqualityComparer.Default.Equals(@interface.TypeReference, localType.TypeReference))
+                        {
+                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                        }
+                    }
+                }
+                else
+                {
+                    // Class upcast
+                    // Check upcast in hierarchy
+                    // TODO: we could optimize by storing Depth
+                    var stackType = stack.Type.TypeReference;
+                    while (stackType != null)
+                    {
+                        if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReference))
+                        {
+                            // It's an upcast, do LLVM pointer cast
+                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                        }
+
+                        stackType = stackType.Resolve().BaseType;
+                    }
                 }
             }
 
