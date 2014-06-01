@@ -37,7 +37,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile)
+        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false)
         {
             // Force PdbReader to be referenced
             typeof(Mono.Cecil.Pdb.PdbReader).ToString();
@@ -52,6 +52,13 @@ namespace SharpLang.CompilerServices
 
             var compiler = new Compiler();
             var module = compiler.CompileAssembly(assemblyDefinition);
+
+            if (generateIR)
+            {
+                var irFile = Path.ChangeExtension(inputFile, "ll");
+                var ir = LLVM.PrintModuleToString(module);
+                File.WriteAllText(irFile, ir);
+            }
 
             LLVM.WriteBitcodeToFile(module, outputFile);
         }

@@ -116,8 +116,6 @@ namespace SharpLang.CompilerServices
 
             LLVM.DisposeBuilder(builder);
 
-            var code = LLVM.PrintModuleToString(module);
-
             // Verify module
 #if VERIFY_LLVM
             string message;
