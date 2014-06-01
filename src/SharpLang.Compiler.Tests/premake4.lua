@@ -2,7 +2,7 @@ project "SharpLang.Compiler.Tests"
 
   kind "SharedLib"
   language "C#"
-  flags { "Unsafe"}
+  flags { "Unsafe" }
 
   SetupManagedProject()
 
@@ -12,6 +12,8 @@ project "SharpLang.Compiler.Tests"
   {
     depsdir .. "/NUnit",
   }
+
+  dependson { "SharpLang.RuntimeInline" }
   
   links
   {
