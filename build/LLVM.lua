@@ -32,7 +32,7 @@ function SetupLLVMIncludes()
   configuration(c)
 end
 
-function SetupLLVMLibs()
+function SetupLLVMLibDirs()
   local c = configuration()
 
   libdirs { path.join(LLVMBuildDir, "lib") }
@@ -49,6 +49,10 @@ function SetupLLVMLibs()
   configuration "macosx"
     links { "c++", "curses", "pthread", "z" }
 
+  configuration(c)
+end
+
+function SetupLLVMLibs()
   configuration "*"
     links
     {
