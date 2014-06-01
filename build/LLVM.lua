@@ -1,9 +1,21 @@
 -- Setup the LLVM dependency directories
 
 LLVMRootDir = "../../deps/llvm/"
-LLVMBuildDir = "../../deps/llvm/build/"
 
 -- TODO: Search for available system dependencies
+
+newoption
+{
+  trigger = "llvm",
+  value = "path",
+  description = "Path to the LLVM directory"
+}
+
+if _OPTIONS['llvm'] ~= "path" then
+  LLVMRootDir = _OPTIONS['llvm']
+end
+
+LLVMBuildDir = path.join(LLVMRootDir, "build")
 
 function SetupLLVMIncludes()
   local c = configuration()
