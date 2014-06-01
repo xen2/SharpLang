@@ -51,12 +51,14 @@ namespace SharpLang.CompilerServices
             // Process types
             foreach (var assemblyModule in assembly.Modules)
             {
-                foreach (var type in assemblyModule.GetTypeReferences())
+                var typeReferences = assemblyModule.GetTypeReferences();
+                foreach (var type in typeReferences)
                 {
                     CreateType(type);
                 }
 
-                foreach (var member in assemblyModule.GetMemberReferences())
+                var memberReferences = assemblyModule.GetMemberReferences();
+                foreach (var member in memberReferences)
                 {
                     var method = member as MethodReference;
                     if (member.DeclaringType.ContainsGenericParameter())
