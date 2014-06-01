@@ -119,11 +119,13 @@ namespace SharpLang.CompilerServices
             var code = LLVM.PrintModuleToString(module);
 
             // Verify module
+#if VERIFY_LLVM
             string message;
             if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
             {
                 throw new InvalidOperationException(message);
             }
+#endif
             
             return module;
         }
