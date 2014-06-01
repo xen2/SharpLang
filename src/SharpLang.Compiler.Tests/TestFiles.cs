@@ -1,13 +1,11 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using SharpLang.Compiler.Utils;
 
 namespace SharpLang.CompilerServices.Tests
 {
@@ -17,24 +15,28 @@ namespace SharpLang.CompilerServices.Tests
         public static CodeDomProvider codeDomProvider;
 
         [Test, TestCaseSource("TestCases")]
-        public void Test(string sourceFile)
+        public static void Test(string sourceFile)
         {
             if (codeDomProvider == null)
                 codeDomProvider = new Microsoft.CSharp.CSharpCodeProvider();
 
-            var compilerParameters = new CompilerParameters();
-            compilerParameters.IncludeDebugInformation = false;
-            compilerParameters.GenerateInMemory = false;
-            compilerParameters.GenerateExecutable = true;
-            compilerParameters.TreatWarningsAsErrors = false;
+            var compilerParameters = new CompilerParameters
+            {
+                IncludeDebugInformation = false,
+                GenerateInMemory = false,
+                GenerateExecutable = true,
+                TreatWarningsAsErrors = false,
+                OutputAssembly = Path.ChangeExtension(sourceFile, "exe")
+            };
 
-            compilerParameters.OutputAssembly = Path.ChangeExtension(sourceFile, "exe");
-            var compilerResults = codeDomProvider.CompileAssemblyFromFile(compilerParameters, sourceFile);
+            var compilerResults = codeDomProvider.CompileAssemblyFromFile(
+                compilerParameters, sourceFile);
 
             if (compilerResults.Errors.HasErrors)
             {
                 var errors = new StringBuilder();
-                errors.AppendLine(string.Format("Serialization assembly compilation: {0} error(s)", compilerResults.Errors.Count));
+                errors.AppendLine(string.Format("Serialization assembly compilation: {0} error(s)",
+                    compilerResults.Errors.Count));
                 foreach (var error in compilerResults.Errors)
                     errors.AppendLine(error.ToString());
 
@@ -73,8 +75,7 @@ namespace SharpLang.CompilerServices.Tests
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
 
-            var process = new Process();
-            process.StartInfo = processStartInfo;
+            var process = new Process {StartInfo = processStartInfo};
 
             process.OutputDataReceived += (sender, args) =>
             {
@@ -107,7 +108,10 @@ namespace SharpLang.CompilerServices.Tests
         {
             get
             {
-                foreach (var file in Directory.EnumerateFiles("tests", "*.cs", SearchOption.AllDirectories))
+                var directory = Utils.GetTestsDirectory();
+                var files = Directory.EnumerateFiles(directory, "*.cs",
+                    SearchOption.AllDirectories);
+                foreach (var file in files)
                 {
                     yield return file;
                 }
