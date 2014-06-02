@@ -11,7 +11,7 @@ newoption
   description = "Path to the LLVM directory"
 }
 
-if _OPTIONS['llvm'] ~= "path" then
+if _OPTIONS['llvm'] ~= nil then
   LLVMRootDir = _OPTIONS['llvm']
 end
 
