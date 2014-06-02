@@ -56,12 +56,14 @@ namespace SharpLang.CompilerServices
             // Process types
             foreach (var assemblyModule in assembly.Modules)
             {
-                foreach (var type in assemblyModule.GetTypeReferences())
+                var typeReferences = assemblyModule.GetTypeReferences();
+                foreach (var type in typeReferences)
                 {
                     CreateType(type);
                 }
 
-                foreach (var member in assemblyModule.GetMemberReferences())
+                var memberReferences = assemblyModule.GetMemberReferences();
+                foreach (var member in memberReferences)
                 {
                     var method = member as MethodReference;
                     if (member.DeclaringType.ContainsGenericParameter())
@@ -119,14 +121,14 @@ namespace SharpLang.CompilerServices
 
             LLVM.DisposeBuilder(builder);
 
-            var code = LLVM.PrintModuleToString(module);
-
             // Verify module
+#if VERIFY_LLVM
             string message;
             if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
             {
                 throw new InvalidOperationException(message);
             }
+#endif
             
             return module;
         }

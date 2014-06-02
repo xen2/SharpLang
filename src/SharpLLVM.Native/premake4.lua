@@ -9,4 +9,5 @@ project "SharpLLVM.Native"
   files { "**.c" }
 
   SetupLLVMIncludes()
+  SetupLLVMLibDirs()
   SetupLLVMLibs()

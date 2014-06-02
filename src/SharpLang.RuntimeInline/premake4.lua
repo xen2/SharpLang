@@ -1,4 +1,4 @@
-project "SharpLLVM.RuntimeInline"
+project "SharpLang.RuntimeInline"
 
   kind "SharedLib"
   language "C++"
@@ -8,4 +8,10 @@ project "SharpLLVM.RuntimeInline"
   files { "*.h", "*_wrap.cpp", "*.i", "*.inc" }
   
   SetupLLVMIncludes()
-  SetupLLVMLibs()
+  SetupLLVMLibDirs()
+
+  links 
+  {
+    "LLVMCore",
+    "LLVMSupport",
+  }

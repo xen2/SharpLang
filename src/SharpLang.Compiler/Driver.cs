@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Mono.Cecil;
+using SharpLang.Compiler.Utils;
+using SharpLang.Toolsets;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -35,7 +37,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile)
+        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false)
         {
             // Force PdbReader to be referenced
             typeof(Mono.Cecil.Pdb.PdbReader).ToString();
@@ -51,25 +53,84 @@ namespace SharpLang.CompilerServices
             var compiler = new Compiler();
             var module = compiler.CompileAssembly(assemblyDefinition);
 
+            if (generateIR)
+            {
+                var irFile = Path.ChangeExtension(inputFile, "ll");
+                var ir = LLVM.PrintModuleToString(module);
+                File.WriteAllText(irFile, ir);
+            }
+
             LLVM.WriteBitcodeToFile(module, outputFile);
         }
 
+        const string ClangWrapper = "vs_clang.bat";
+
         public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
         {
-            var processStartInfo = new ProcessStartInfo();
-            processStartInfo.CreateNoWindow = true;
-            processStartInfo.UseShellExecute = false;
+            GenerateObjects(bitcodeFiles);
 
-            // Setup environment using vcvars32.bat
-            processStartInfo.FileName = @"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat";
-            string output;
-            ExecuteAndCaptureOutput(processStartInfo, out output);
+            var filesToLink = new List<string>();
+            filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
+            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
+
+            // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
+            CreateCompilerWrapper();
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                //FileName = Clang,
+                FileName = ClangWrapper,
+                Arguments = string.Format("{0} -o {1}", string.Join(" ", filesToLink), outputFile)
+            };
+
+            string processLinkerOutput;
+            var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);
+            processLinker.WaitForExit();
+
+            if (processLinker.ExitCode != 0)
+                throw new InvalidOperationException(string.Format("Error executing clang: {0}",
+                    processLinkerOutput));
+        }
+
+        private static void CreateCompilerWrapper()
+        {
+            if (clangWrapperCreated)
+                return;
+
+            string vsDir;
+            if (!MSVCToolchain.GetVisualStudioDir(out vsDir))
+                throw new Exception("Could not find Visual Studio on the system");
+
+            var vcvars = Path.Combine(vsDir, @"VC\vcvarsall.bat");
+            if (!File.Exists(vcvars))
+                throw new Exception("Could not find vcvarsall.bat on the system");
+
+            File.WriteAllLines(ClangWrapper, new[]
+                    {
+                        string.Format("call \"{0}\" x86", Path.Combine(vsDir, "VC", "vcvarsall.bat")),
+                        string.Format("{0} %*", Clang)
+                    });
+
+            clangWrapperCreated = true;
+        }
+
+        private static void GenerateObjects(IEnumerable<string> bitcodeFiles)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+            };
 
             // Compile each LLVM .bc file to a .obj file with llc
             foreach (var bitcodeFile in bitcodeFiles)
             {
                 processStartInfo.FileName = LLC;
-                processStartInfo.Arguments = string.Format("-filetype=obj {0} -o {1}", bitcodeFile, System.IO.Path.ChangeExtension(bitcodeFile, "obj"));
+
+                var objFile = Path.ChangeExtension(bitcodeFile, "obj");
+                processStartInfo.Arguments = string.Format("-filetype=obj {0} -o {1}", bitcodeFile, objFile);
 
                 string processLLCOutput;
                 var processLLC = ExecuteAndCaptureOutput(processStartInfo, out processLLCOutput);
@@ -78,64 +139,6 @@ namespace SharpLang.CompilerServices
                     throw new InvalidOperationException(string.Format("Error executing llc: {0}", processLLCOutput));
                 }
             }
-            
-            // Use clang to link the .obj files and runtime
-            if (true) // Platform is windows
-            {
-                // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
-                var clangWrapper = "clang.bat";
-                if (!clangWrapperCreated)
-                {
-                    var vc7Dir = GetPathToVC7("12.0") ?? GetPathToVC7("11.0") ?? GetPathToVC7("10.0");
-                    if (vc7Dir == null)
-                        throw new NotImplementedException("Could not find Visual C++ compiler path.");
-
-                    File.WriteAllLines(clangWrapper,
-                        new[]
-                        {
-                            string.Format("call \"{0}vcvarsall.bat\" x86", vc7Dir),
-                            string.Format("{0} %*", Clang)
-                        });
-                    clangWrapperCreated = true;
-                }
-
-                processStartInfo.FileName = "clang.bat";
-            }
-            else
-            {
-                processStartInfo.FileName = Clang;
-            }
-            processStartInfo.Arguments = string.Format("{0} tests\\MiniCorlib.c -o {1}", string.Join(" ", bitcodeFiles.Select(x => System.IO.Path.ChangeExtension(x, "obj"))), outputFile);
-
-            string processLinkerOutput;
-            var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);
-            processLinker.WaitForExit();
-            if (processLinker.ExitCode != 0)
-            {
-                throw new InvalidOperationException(string.Format("Error executing clang: {0}", processLinkerOutput));
-            }
-        }
-
-        /// <summary>
-        /// Gets the path to Visual C++ compiler.
-        /// </summary>
-        /// <param name="version">The Visual C++ compiler version.</param>
-        /// <returns>The path to Visual C++ compiler.</returns>
-        public static string GetPathToVC7(string version)
-        {
-            // Open Key
-            var is64BitProcess = Environment.Is64BitProcess;
-            var registryKeyName = string.Format(@"Software\{0}Microsoft\VisualStudio\SxS\VC7", is64BitProcess ? @"Wow6432Node\" : string.Empty);
-            var vsKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryKeyName);
-            if (vsKey == null)
-                return null;
-
-            // Find appropriate value
-            var value = vsKey.GetValue(version);
-            if (value == null)
-                return null;
-
-            return value.ToString();
         }
 
         /// <summary>
@@ -149,8 +152,7 @@ namespace SharpLang.CompilerServices
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
 
-            var process = new Process();
-            process.StartInfo = processStartInfo;
+            var process = new Process {StartInfo = processStartInfo};
 
             var outputBuilder = new StringBuilder();
 

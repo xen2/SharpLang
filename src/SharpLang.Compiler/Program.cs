@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Mono.Cecil;
 using Mono.Options;
-using SharpLLVM;
 
 namespace SharpLang.CompilerServices
 {
@@ -17,6 +11,7 @@ namespace SharpLang.CompilerServices
         {
             var exeName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
             var showHelp = false;
+            var generateIR = false;
             int exitCode = 0;
             string outputFile = null;
 
@@ -35,6 +30,7 @@ namespace SharpLang.CompilerServices
                     string.Empty,
                     { "h|help", "Show this message and exit", v => showHelp = v != null },
                     { "o", "Output filename. Default to [inputfilename].bc", v => outputFile = v },
+                    { "d", "Generate debug LLVM IR assembly output", v => generateIR = true },
                 };
 
             try
@@ -63,7 +59,7 @@ namespace SharpLang.CompilerServices
                     outputFile = Path.ChangeExtension(inputFile, "bc");
                 }
 
-                Driver.CompileAssembly(inputFile, outputFile);
+                Driver.CompileAssembly(inputFile, outputFile, generateIR);
             }
             catch (OptionException e)
             {

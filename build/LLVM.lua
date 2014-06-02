@@ -1,9 +1,21 @@
 -- Setup the LLVM dependency directories
 
 LLVMRootDir = "../../deps/llvm/"
-LLVMBuildDir = "../../deps/llvm/build/"
 
 -- TODO: Search for available system dependencies
+
+newoption
+{
+  trigger = "llvm",
+  value = "path",
+  description = "Path to the LLVM directory"
+}
+
+if _OPTIONS['llvm'] ~= "path" then
+  LLVMRootDir = _OPTIONS['llvm']
+end
+
+LLVMBuildDir = path.join(LLVMRootDir, "build")
 
 function SetupLLVMIncludes()
   local c = configuration()
@@ -20,7 +32,7 @@ function SetupLLVMIncludes()
   configuration(c)
 end
 
-function SetupLLVMLibs()
+function SetupLLVMLibDirs()
   local c = configuration()
 
   libdirs { path.join(LLVMBuildDir, "lib") }
@@ -37,6 +49,10 @@ function SetupLLVMLibs()
   configuration "macosx"
     links { "c++", "curses", "pthread", "z" }
 
+  configuration(c)
+end
+
+function SetupLLVMLibs()
   configuration "*"
     links
     {
