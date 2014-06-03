@@ -154,8 +154,6 @@ namespace SharpLang.CompilerServices
 
             // Create class version (boxed version with VTable)
             var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
-            var vtableType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-            LLVM.StructSetBody(boxedType, new[] { vtableType, dataType }, false);
 
             return new Type(typeReference, dataType, boxedType, stackType);
         }

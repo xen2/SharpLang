@@ -374,9 +374,11 @@ namespace SharpLang.CompilerServices
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
             var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultType, 0), string.Empty);
 
+            var numElementsAsPointer = LLVM.BuildIntToPtr(builder, numElements.Value, intPtrType, string.Empty);
+
             // Create array
             var arrayConstant = LLVM.ConstNamedStruct(arrayType.DefaultType,
-                new[] { numElements.Value, LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
+                new[] { numElementsAsPointer, LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
 
             // Update array with allocated pointer
             arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, values, 1, string.Empty);
