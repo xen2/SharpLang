@@ -97,7 +97,7 @@ namespace SharpLang.CompilerServices
             // Invoke malloc
             var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), LLVM.Int32TypeInContext(context), string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] {typeSize}, string.Empty);
-            var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.DefaultType, string.Empty);
+            var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
             // Resolve class
             var @class = GetClass(type.TypeReference);
