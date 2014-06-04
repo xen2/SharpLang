@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct BuilderRef : System.IEquatable<BuilderRef> {
+public partial struct BuilderRef : System.IEquatable<BuilderRef> {
     public BuilderRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

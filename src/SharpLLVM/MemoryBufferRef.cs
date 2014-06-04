@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct MemoryBufferRef : System.IEquatable<MemoryBufferRef> {
+public partial struct MemoryBufferRef : System.IEquatable<MemoryBufferRef> {
     public MemoryBufferRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct PassManagerRef : System.IEquatable<PassManagerRef> {
+public partial struct PassManagerRef : System.IEquatable<PassManagerRef> {
     public PassManagerRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

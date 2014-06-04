@@ -25,7 +25,7 @@
 %typemap(out) SWIGTYPE %{ $result = $1; %}
 %typemap(in) SWIGTYPE %{ $1 = ($1_ltype)$input; %}
 %typemap(csinterfaces) SWIGTYPE "System.IEquatable<$csclassname>"
-%typemap(csclassmodifiers) SWIGTYPE "public struct"
+%typemap(csclassmodifiers) SWIGTYPE "public partial struct"
 %typemap(csbody) SWIGTYPE %{
     public $csclassname(global::System.IntPtr cPtr)
     {

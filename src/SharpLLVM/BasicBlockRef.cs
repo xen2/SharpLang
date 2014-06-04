@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct BasicBlockRef : System.IEquatable<BasicBlockRef> {
+public partial struct BasicBlockRef : System.IEquatable<BasicBlockRef> {
     public BasicBlockRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

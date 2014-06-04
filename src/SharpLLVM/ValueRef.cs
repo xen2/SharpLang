@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct ValueRef : System.IEquatable<ValueRef> {
+public partial struct ValueRef : System.IEquatable<ValueRef> {
     public ValueRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

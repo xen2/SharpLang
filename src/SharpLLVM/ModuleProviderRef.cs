@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct ModuleProviderRef : System.IEquatable<ModuleProviderRef> {
+public partial struct ModuleProviderRef : System.IEquatable<ModuleProviderRef> {
     public ModuleProviderRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;

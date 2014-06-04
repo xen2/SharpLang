@@ -8,7 +8,7 @@
 
 namespace SharpLLVM {
 
-public struct TargetLibraryInfoRef : System.IEquatable<TargetLibraryInfoRef> {
+public partial struct TargetLibraryInfoRef : System.IEquatable<TargetLibraryInfoRef> {
     public TargetLibraryInfoRef(global::System.IntPtr cPtr)
     {
         Value = cPtr;
