@@ -145,6 +145,10 @@ namespace SharpLang.CompilerServices
                             var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
         
                             var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+
+                            // If method is not found, it could be due to covariance/contravariance
+                            if (resolvedFunction == null)
+                                throw new InvalidOperationException("Interface method not found");
         
                             var methodId = GetMethodId(resolvedInterfaceMethod);
                             var imtSlotIndex = (int)(methodId % interfaceMethodTable.Length);
