@@ -110,83 +110,93 @@ namespace SharpLang.CompilerServices
                 // (esp. since vtable is not built yet => recursion issues)
                 CompileClassMethods(@class);
 
-                // Get parent type RTTI
-                var runtimeTypeInfoType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-                var parentRuntimeTypeInfo = parentClass != null
-                    ? LLVM.ConstPointerCast(parentClass.GeneratedRuntimeTypeInfoGlobal, runtimeTypeInfoType)
-                    : LLVM.ConstPointerNull(runtimeTypeInfoType);
-
-                // Build vtable
-                var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
-    
-                // Build IMT
-                var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
-                foreach (var @interface in typeDefinition.Interfaces)
+                if (typeDefinition.IsInterface)
                 {
-                    var resolvedInterface = ResolveGenericsVisitor.Process(typeReference, @interface);
-                    @class.Interfaces.Add(GetClass(resolvedInterface));
-
-                    // TODO: Add any inherited interface inherited by the resolvedInterface as well
+                    // Interface: No need for vtable, we can just use object's one
+                    var vtableGlobal = GetClass(assembly.MainModule.Import(typeof(object))).GeneratedRuntimeTypeInfoGlobal;
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
+                    @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
                 }
-
-                foreach (var @interface in @class.Interfaces)
+                else
                 {
-                    foreach (var interfaceMethod in @interface.TypeReference.Resolve().Methods)
+                    // Get parent type RTTI
+                    var runtimeTypeInfoType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+                    var parentRuntimeTypeInfo = parentClass != null
+                        ? LLVM.ConstPointerCast(parentClass.GeneratedRuntimeTypeInfoGlobal, runtimeTypeInfoType)
+                        : LLVM.ConstPointerNull(runtimeTypeInfoType);
+    
+                    // Build vtable
+                    var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
+        
+                    // Build IMT
+                    var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
+                    foreach (var @interface in typeDefinition.Interfaces)
                     {
-                        var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
+                        var resolvedInterface = ResolveGenericsVisitor.Process(typeReference, @interface);
+                        @class.Interfaces.Add(GetClass(resolvedInterface));
     
-                        var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+                        // TODO: Add any inherited interface inherited by the resolvedInterface as well
+                    }
     
-                        var methodId = GetMethodId(resolvedInterfaceMethod);
-                        var imtSlotIndex = (int)(methodId % interfaceMethodTable.Length);
-    
-                        var imtSlot = interfaceMethodTable[imtSlotIndex];
+                    foreach (var @interface in @class.Interfaces)
+                    {
+                        foreach (var interfaceMethod in @interface.TypeReference.Resolve().Methods)
+                        {
+                            var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
+        
+                            var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+        
+                            var methodId = GetMethodId(resolvedInterfaceMethod);
+                            var imtSlotIndex = (int)(methodId % interfaceMethodTable.Length);
+        
+                            var imtSlot = interfaceMethodTable[imtSlotIndex];
+                            if (imtSlot == null)
+                                interfaceMethodTable[imtSlotIndex] = imtSlot = new LinkedList<InterfaceMethodTableEntry>();
+        
+                            imtSlot.AddLast(new InterfaceMethodTableEntry { Function = resolvedFunction, MethodId = methodId, SlotIndex = imtSlotIndex });
+                        }
+                    }
+                    var interfaceMethodTableConstant = LLVM.ConstArray(imtEntryType, interfaceMethodTable.Select(imtSlot =>
+                    {
                         if (imtSlot == null)
-                            interfaceMethodTable[imtSlotIndex] = imtSlot = new LinkedList<InterfaceMethodTableEntry>();
-    
-                        imtSlot.AddLast(new InterfaceMethodTableEntry { Function = resolvedFunction, MethodId = methodId, SlotIndex = imtSlotIndex });
-                    }
-                }
-                var interfaceMethodTableConstant = LLVM.ConstArray(imtEntryType, interfaceMethodTable.Select(imtSlot =>
-                {
-                    if (imtSlot == null)
+                        {
+                            // No entries: null slot
+                            return LLVM.ConstNull(imtEntryType);
+                        }
+        
+                        if (imtSlot.Count > 1)
+                            throw new NotImplementedException("IMT with more than one entry per slot is not implemented yet.");
+        
+                        var imtEntry = imtSlot.First.Value;
+                        return LLVM.ConstNamedStruct(imtEntryType, new[]
+                        {
+                            LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
+                            LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)imtEntry.MethodId, false),   // i32 functionId
+                            LLVM.ConstPointerNull(LLVM.PointerType(imtEntryType, 0)),                           // IMTEntry* nextSlot
+                        });
+                    }).ToArray());
+        
+                    // Build static fields
+                    foreach (var field in typeDefinition.Fields)
                     {
-                        // No entries: null slot
-                        return LLVM.ConstNull(imtEntryType);
+                        if (!field.IsStatic)
+                            continue;
+    
+                        var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+                        @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                        fieldTypes.Add(fieldType.DefaultType);
                     }
     
-                    if (imtSlot.Count > 1)
-                        throw new NotImplementedException("IMT with more than one entry per slot is not implemented yet.");
+                    var staticFieldsEmpty = LLVM.ConstNull(LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false));
+                    fieldTypes.Clear(); // Reused for non-static fields after
     
-                    var imtEntry = imtSlot.First.Value;
-                    return LLVM.ConstNamedStruct(imtEntryType, new[]
-                    {
-                        LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
-                        LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)imtEntry.MethodId, false),   // i32 functionId
-                        LLVM.ConstPointerNull(LLVM.PointerType(imtEntryType, 0)),                           // IMTEntry* nextSlot
-                    });
-                }).ToArray());
-    
-                // Build static fields
-                foreach (var field in typeDefinition.Fields)
-                {
-                    if (!field.IsStatic)
-                        continue;
-
-                    var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
-                    @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
-                    fieldTypes.Add(fieldType.DefaultType);
+                    // Build RTTI
+                    var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, interfaceMethodTableConstant, vtableConstant, staticFieldsEmpty }, false);
+                    var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
+                    LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
+                    @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
                 }
-
-                var staticFieldsEmpty = LLVM.ConstNull(LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false));
-                fieldTypes.Clear(); // Reused for non-static fields after
-
-                // Build RTTI
-                var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, interfaceMethodTableConstant, vtableConstant, staticFieldsEmpty }, false);
-                var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
-                LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
-                LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
-                @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
 
                 // Build actual type data (fields)
                 // Add fields and vtable slots from parent class
