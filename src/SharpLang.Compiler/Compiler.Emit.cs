@@ -72,29 +72,11 @@ namespace SharpLang.CompilerServices
         {
             if (type.StackType == StackValueType.Object)
             {
-                // TODO: Improve performance (better inlining, etc...)
-                // Invoke malloc
-                var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(LLVM.GetElementType(type.DefaultType)), LLVM.Int32TypeInContext(context), string.Empty);
-                var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
-                var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.DefaultType, string.Empty);
+                var allocatedObject = AllocateObject(type);
 
                 // Add it to stack, right before arguments
                 var ctorNumParams = ctor.ParameterTypes.Length;
                 stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
-
-                // Resolve class
-                var @class = GetClass(type.TypeReference);
-
-                // Store vtable global into first field of the object
-                var int32Type = LLVM.Int32TypeInContext(context);
-                var indices = new[]
-                {
-                    LLVM.ConstInt(int32Type, 0, false),                                 // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
-                };
-
-                var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-                LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobal, vtablePointer);
 
                 // Invoke ctor
                 EmitCall(stack, ctor);
@@ -107,6 +89,30 @@ namespace SharpLang.CompilerServices
                 // TODO: Support value type too
                 throw new NotImplementedException();
             }
+        }
+
+        private ValueRef AllocateObject(Type type)
+        {
+            // TODO: Improve performance (better inlining, etc...)
+            // Invoke malloc
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), LLVM.Int32TypeInContext(context), string.Empty);
+            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] {typeSize}, string.Empty);
+            var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, type.DefaultType, string.Empty);
+
+            // Resolve class
+            var @class = GetClass(type.TypeReference);
+
+            // Store vtable global into first field of the object
+            var int32Type = LLVM.Int32TypeInContext(context);
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                LLVM.ConstInt(int32Type, (int) ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+            };
+
+            var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobal, vtablePointer);
+            return allocatedObject;
         }
 
         private void EmitRet(List<StackValue> stack, MethodReference method)
