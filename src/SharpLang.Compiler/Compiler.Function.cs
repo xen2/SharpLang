@@ -355,6 +355,56 @@ namespace SharpLang.CompilerServices
                         break;
                     }
 
+                    #region Box/Unbox opcodes
+                    case Code.Box:
+                    {
+                        var typeReference = (TypeReference)instruction.Operand;
+                        var @class = GetClass(typeReference);
+
+                        var valueType = stack.Pop();
+
+                        // Allocate object
+                        var allocatedObject = AllocateObject(@class.Type);
+
+                        var dataPointer = GetDataPointer(allocatedObject);
+
+                        // Copy data
+                        LLVM.BuildStore(builder, valueType.Value, dataPointer);
+
+                        // Add created object on the stack
+                        stack.Add(new StackValue(StackValueType.Object, @class.Type, allocatedObject));
+
+                        break;
+                    }
+
+                    case Code.Unbox_Any:
+                    {
+                        var typeReference = (TypeReference)instruction.Operand;
+                        var @class = GetClass(typeReference);
+
+                        var obj = stack.Pop();
+
+                        if (typeReference.IsValueType)
+                        {
+                            // TODO: check type?
+                            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(@class.ObjectType, 0), string.Empty);
+
+                            var dataPointer = GetDataPointer(objCast);
+
+                            var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
+
+                            stack.Add(new StackValue(StackValueType.Value, @class.Type, data));
+                        }
+                        else
+                        {
+                            // Should act as "castclass" on reference types
+                            goto case Code.Castclass;
+                        }
+
+                        break;
+                    }
+                    #endregion
+
                     #region Array opcodes (Newarr, Ldlen, Stelem_Ref, etc...)
                     case Code.Newarr:
                     {
@@ -588,6 +638,7 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    case Code.Castclass:
                     default:
                         throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
                 }
@@ -611,6 +662,20 @@ namespace SharpLang.CompilerServices
                     MergeStack(stack, basicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
                 }
             }
+        }
+
+        private ValueRef GetDataPointer(ValueRef obj)
+        {
+            // Get data pointer
+            var int32Type = LLVM.Int32TypeInContext(context);
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false), // Data
+            };
+
+            var dataPointer = LLVM.BuildInBoundsGEP(builder, obj, indices, string.Empty);
+            return dataPointer;
         }
 
         /// <summary>
