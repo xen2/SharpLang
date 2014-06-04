@@ -176,8 +176,11 @@ namespace SharpLang.CompilerServices
             var actualMethod = overrideMethod.Value != IntPtr.Zero ? overrideMethod : targetMethod.GeneratedValue;
             var call = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
 
-            // Mark method as needed
-            LLVM.SetLinkage(actualMethod, Linkage.ExternalLinkage);
+            // Mark method as needed (if non-virtual call)
+            if (overrideMethod.Value == IntPtr.Zero)
+            {
+                LLVM.SetLinkage(actualMethod, Linkage.ExternalLinkage);
+            }
 
             // Push return result on stack
             if (targetMethod.MethodReference.ReturnType.MetadataType != MetadataType.Void)
