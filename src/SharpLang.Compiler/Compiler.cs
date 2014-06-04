@@ -159,6 +159,8 @@ namespace SharpLang.CompilerServices
                     var methodReference = ResolveGenericMethod(@class.TypeReference, method);
                     var function = CreateFunction(methodReference);
 
+                    @class.Functions.Add(function);
+
                     if (method.IsVirtual)
                     {
                         if (isInterface)

@@ -38,9 +38,14 @@ namespace SharpLang.CompilerServices.Cecil
     {
         public static Function TryMatchMethod(Class @class, MethodReference method)
         {
-            foreach (var candidate in @class.VirtualTable)
-                if (MethodMatch(candidate.MethodReference, method))
-                    return candidate;
+            while (@class != null)
+            {
+                foreach (var candidate in @class.Functions)
+                    if (MethodMatch(candidate.MethodReference, method))
+                        return candidate;
+
+                @class = @class.BaseType;
+            }
 
             return null;
         }
