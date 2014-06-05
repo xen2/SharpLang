@@ -6,6 +6,7 @@ incdir = path.getabsolute("../include");
 bindir = path.getabsolute("../bin");
 examplesdir = path.getabsolute("../examples");
 testsdir = path.getabsolute("../tests");
+toolsdir = path.getabsolute("../tools");
 
 builddir = path.getabsolute("./" .. action);
 if _ARGS[1] then
