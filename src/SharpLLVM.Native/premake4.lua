@@ -26,15 +26,15 @@ end
 project "SharpLLVM.Native"
 
   kind "SharedLib"
-  language "C++"
+  language "C"
 
   SetupNativeProject()
 
   includedirs { "." }
   files
   {
-  	path.join(gendir, "LLVM_wrap.c"),
-  	"../SharpLLVM/Bindings/**.i"
+    path.join(gendir, "LLVM_wrap.c"),
+    "../SharpLLVM/Bindings/**.i"
   }
 
   SetupSWIGBindings()

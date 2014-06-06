@@ -18,7 +18,6 @@ gendir = path.join(builddir, "gen");
 
 common_flags = { "Unicode", "Symbols" }
 msvc_buildflags = { }
-gcc_buildflags = { "-std=c++11" }
 
 msvc_cpp_defines = { }
 
@@ -41,9 +40,12 @@ function SetupNativeProject()
   configuration { "gmake" }
     buildoptions { gcc_buildflags }
     
-  configuration { "macosx" }
-    buildoptions { gcc_buildflags, "-stdlib=libc++" }
-    links { "c++" }
+  local lang = premake.api.scope.project.language
+  if lang == "C++" then
+    configuration { "macosx" }
+      buildoptions { "-std=c++11", "-stdlib=libc++" }
+      links { "c++" }
+  end
   
   -- OS-specific options
   
