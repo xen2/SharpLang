@@ -233,6 +233,19 @@ namespace SharpLang.CompilerServices
 
                 switch (opcode)
                 {
+                    case Code.Pop:
+                    {
+                        // Pop and discard last stack value
+                        stack.Pop();
+                        break;
+                    }
+                    case Code.Dup:
+                    {
+                        // Readd last stack value
+                        var lastStackValue = stack[stack.Count - 1];
+                        stack.Add(new StackValue(lastStackValue.StackType, lastStackValue.Type, lastStackValue.Value));
+                        break;
+                    }
                     case Code.Ret:
                     {
                         EmitRet(stack, methodReference);
