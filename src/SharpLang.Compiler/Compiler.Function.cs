@@ -255,8 +255,6 @@ namespace SharpLang.CompilerServices
                         if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
                         {
                             // Build indices for GEP
-                            var int32Type = LLVM.Int32TypeInContext(context);
-
                             var indices = new[]
                             {
                                 LLVM.ConstInt(int32Type, 0, false),                                 // Pointer indirection
@@ -921,11 +919,10 @@ namespace SharpLang.CompilerServices
         private ValueRef GetDataPointer(ValueRef obj)
         {
             // Get data pointer
-            var int32Type = LLVM.Int32TypeInContext(context);
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false), // Data
+                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
             };
 
             var dataPointer = LLVM.BuildInBoundsGEP(builder, obj, indices, string.Empty);

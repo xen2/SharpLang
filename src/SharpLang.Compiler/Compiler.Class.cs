@@ -175,7 +175,7 @@ namespace SharpLang.CompilerServices
                         return LLVM.ConstNamedStruct(imtEntryType, new[]
                         {
                             LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
-                            LLVM.ConstInt(LLVM.Int32TypeInContext(context), (ulong)imtEntry.MethodId, false),   // i32 functionId
+                            LLVM.ConstInt(int32Type, (ulong)imtEntry.MethodId, false),                          // i32 functionId
                             LLVM.ConstPointerNull(LLVM.PointerType(imtEntryType, 0)),                           // IMTEntry* nextSlot
                         });
                     }).ToArray());

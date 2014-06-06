@@ -86,19 +86,20 @@ namespace SharpLang.CompilerServices
             switch (localType.StackType)
             {
                 case StackValueType.Int32:
-                    var int32Type = LLVM.Int32TypeInContext(context);
-                    if (localType.DefaultType != int32Type)
+                case StackValueType.Int64:
+                    var expectedIntType = localType.StackType == StackValueType.Int32 ? int32Type : int64Type;
+                    if (localType.DefaultType != expectedIntType)
                     {
                         if (LLVM.GetTypeKind(localType.DefaultType) != TypeKind.IntegerTypeKind)
                             throw new InvalidOperationException();
 
-                        if (LLVM.GetIntTypeWidth(localType.DefaultType) < 32)
+                        if (LLVM.GetIntTypeWidth(localType.DefaultType) < LLVM.GetIntTypeWidth(expectedIntType))
                         {
                             // Extend sign if needed
                             // TODO: Need a way to handle unsigned int. Unfortunately it seems that
                             // LLVMBuildIntCast doesn't have CastInst::CreateIntegerCast isSigned parameter.
                             // Probably need to directly create ZExt/SExt.
-                            return LLVM.BuildIntCast(builder, stack, int32Type, string.Empty);
+                            return LLVM.BuildIntCast(builder, stack, expectedIntType, string.Empty);
                         }
                     }
                     break;

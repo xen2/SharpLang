@@ -95,7 +95,7 @@ namespace SharpLang.CompilerServices
         {
             // TODO: Improve performance (better inlining, etc...)
             // Invoke malloc
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), LLVM.Int32TypeInContext(context), string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), int32Type, string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] {typeSize}, string.Empty);
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
@@ -103,11 +103,10 @@ namespace SharpLang.CompilerServices
             var @class = GetClass(type.TypeReference);
 
             // Store vtable global into first field of the object
-            var int32Type = LLVM.Int32TypeInContext(context);
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                LLVM.ConstInt(int32Type, (int) ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+                LLVM.ConstInt(int32Type, 0, false),                                     // Pointer indirection
+                LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false),     // Access RTTI
             };
 
             var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
@@ -143,12 +142,12 @@ namespace SharpLang.CompilerServices
 
             // Cast from i8-array to i8*
             LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
-            var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
+            var zero = LLVM.ConstInt(int32Type, 0, false);
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
 
             // Create string
             var stringConstant = LLVM.ConstNamedStruct(stringType.DefaultType,
-                new[] { LLVM.ConstIntToPtr(LLVM.ConstInt(LLVM.Int64TypeInContext(context), (ulong)operand.Length, false), intPtrType), stringConstantDataGlobal });
+                new[] { LLVM.ConstIntToPtr(LLVM.ConstInt(int64Type, (ulong)operand.Length, false), intPtrType), stringConstantDataGlobal });
 
             // Push on stack
             stack.Add(new StackValue(StackValueType.Value, stringType, stringConstant));
@@ -160,7 +159,7 @@ namespace SharpLang.CompilerServices
 
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int32, intType,
-                LLVM.ConstInt(LLVM.Int32TypeInContext(context), (uint)operandIndex, true)));
+                LLVM.ConstInt(int32Type, (uint)operandIndex, true)));
         }
 
         private void EmitCall(List<StackValue> stack, Function targetMethod, ValueRef overrideMethod = default(ValueRef))
@@ -212,7 +211,7 @@ namespace SharpLang.CompilerServices
         private void EmitBrCommon(StackValue stack, IntPredicate zeroPredicate, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
             // Zero constant
-            var zero = LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false);
+            var zero = LLVM.ConstInt(int32Type, 0, false);
 
             switch (stack.StackType)
             {
@@ -280,8 +279,6 @@ namespace SharpLang.CompilerServices
         {
             // Build indices for GEP
             var indices = new List<ValueRef>(3);
-
-            var int32Type = LLVM.Int32TypeInContext(context);
 
             // First pointer indirection
             indices.Add(LLVM.ConstInt(int32Type, 0, false));
@@ -360,7 +357,6 @@ namespace SharpLang.CompilerServices
 
         private ValueRef[] BuildStaticFieldIndices(Field field)
         {
-            var int32Type = LLVM.Int32TypeInContext(context);
             var indices = new[]
             {
                 LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
@@ -378,7 +374,7 @@ namespace SharpLang.CompilerServices
             var numElements = stack.Pop();
 
             // Invoke malloc
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), LLVM.Int32TypeInContext(context), string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
             var arraySize = LLVM.BuildMul(builder, typeSize, numElements.Value, string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
             var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultType, 0), string.Empty);

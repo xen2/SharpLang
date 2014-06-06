@@ -102,12 +102,12 @@ namespace SharpLang.CompilerServices
                     break;
                 case MetadataType.Int32:
                 case MetadataType.UInt32:
-                    dataType = LLVM.Int32TypeInContext(context);
+                    dataType = int32Type;
                     stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Int64:
                 case MetadataType.UInt64:
-                    dataType = LLVM.Int64TypeInContext(context);
+                    dataType = int64Type;
                     stackType = StackValueType.Int64;
                     break;
                 case MetadataType.UIntPtr:

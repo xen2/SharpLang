@@ -53,14 +53,14 @@ namespace SharpLang.CompilerServices
             intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             int32Type = LLVM.Int32TypeInContext(context);
             int64Type = LLVM.Int64TypeInContext(context);
-            nativeIntType = LLVM.Int32TypeInContext(context);
+            nativeIntType = int32Type; // Or int64Type?
             builderPhi = LLVM.CreateBuilderInContext(context);
 
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
 
             // struct IMTSlot { i8* functionPtr, i32 functionId, IMTEntry* nextEntry }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
-            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, LLVM.Int32TypeInContext(context), LLVM.PointerType(imtEntryType, 0) }, false);
+            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, int32Type, LLVM.PointerType(imtEntryType, 0) }, false);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)
@@ -115,7 +115,7 @@ namespace SharpLang.CompilerServices
             Function entryPoint;
 	        if (assembly.EntryPoint != null && functions.TryGetValue(assembly.EntryPoint, out entryPoint))
 	        {
-	            var mainFunctionType = LLVM.FunctionType(LLVM.Int32TypeInContext(context), new TypeRef[0], false);
+                var mainFunctionType = LLVM.FunctionType(int32Type, new TypeRef[0], false);
 	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
                 LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
@@ -125,7 +125,7 @@ namespace SharpLang.CompilerServices
 	                : new ValueRef[0];
 
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);
-	            LLVM.BuildRet(builder, LLVM.ConstInt(LLVM.Int32TypeInContext(context), 0, false));
+                LLVM.BuildRet(builder, LLVM.ConstInt(int32Type, 0, false));
 	        }
 
             LLVM.DisposeBuilder(builder);
