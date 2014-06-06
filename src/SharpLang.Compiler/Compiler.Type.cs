@@ -60,7 +60,7 @@ namespace SharpLang.CompilerServices
                 {
                     var type = BuildType(((PointerType)typeReference).ElementType);
                     dataType = LLVM.PointerType(type.DataType, 0);
-                    stackType = StackValueType.Pointer;
+                    stackType = StackValueType.NativeInt;
                     break;
                 }
                 case MetadataType.ByReference:

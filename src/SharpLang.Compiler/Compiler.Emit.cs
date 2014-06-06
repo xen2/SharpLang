@@ -403,11 +403,8 @@ namespace SharpLang.CompilerServices
             // Compute element location
             var arraySize = LLVM.BuildExtractValue(builder, array.Value, 0, string.Empty);
 
-            // TODO: Switch to native type
-            var nativeUnsignedIntType = CreateType(corlib.MainModule.GetType(typeof(UIntPtr).FullName));
-
             // Add constant integer value to stack
-            stack.Add(new StackValue(StackValueType.NativeInt, nativeUnsignedIntType, arraySize));
+            stack.Add(new StackValue(StackValueType.NativeInt, intPtr, arraySize));
         }
 
         private void EmitLdelem_Ref(List<StackValue> stack)

@@ -13,6 +13,5 @@ namespace SharpLang.CompilerServices
         Object,
         Reference,
         Value,
-        Pointer,
     }
 }

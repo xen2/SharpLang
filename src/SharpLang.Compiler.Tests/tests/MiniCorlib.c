@@ -17,10 +17,16 @@ void System_Void_System_Console__WriteLine_System_String_(String str)
 	printf("%.*s\n", (uint32_t)str.length, str.value);
 }
 
-// void System.Console.WriteLine(string)
+// void System.Console.WriteLine(int)
 void System_Void_System_Console__WriteLine_System_Int32_(int32_t i)
 {
 	printf("%i\n", i);
+}
+
+// void System.Console.WriteLine(uint)
+void System_Void_System_Console__WriteLine_System_UInt32_(uint32_t i)
+{
+	printf("%u\n", i);
 }
 
 // void System.Object..ctor()

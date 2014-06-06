@@ -638,6 +638,260 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    case Code.Add:
+                    case Code.Add_Ovf:
+                    case Code.Add_Ovf_Un:
+                    case Code.Sub:
+                    case Code.Sub_Ovf:
+                    case Code.Sub_Ovf_Un:
+                    case Code.Mul:
+                    case Code.Mul_Ovf:
+                    case Code.Mul_Ovf_Un:
+                    case Code.Div:
+                    case Code.Div_Un:
+                    case Code.Rem:
+                    case Code.Rem_Un:
+                    case Code.Shl:
+                    case Code.Shr:
+                    case Code.Shr_Un:
+                    case Code.Xor:
+                    case Code.Or:
+                    case Code.And:
+                    {
+                        var operand2 = stack.Pop();
+                        var operand1 = stack.Pop();
+
+                        var value1 = operand1.Value;
+                        var value2 = operand2.Value;
+
+                        bool needNativeIntConversion = true;
+                        StackValueType outputStackType;
+
+                        bool isShiftOperation = false;
+                        bool isIntegerOperation = false;
+
+                        // Detect shift and integer operations
+                        switch (instruction.OpCode.Code)
+                        {
+                            case Code.Shl:
+                            case Code.Shr:
+                            case Code.Shr_Un:
+                                isShiftOperation = true;
+                                break;
+                            case Code.Xor:
+                            case Code.Or:
+                            case Code.And:
+                            case Code.Div_Un:
+                            case Code.Not:
+                                isIntegerOperation = true;
+                                break;
+                        }
+
+                        if (isShiftOperation) // Shift operations are specials
+                        {
+                            switch (operand2.StackType)
+                            {
+                                case StackValueType.Int32:
+                                case StackValueType.NativeInt:
+                                    value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                                    break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+
+                            // Check first operand, and convert second operand to match first one
+                            switch (operand1.StackType)
+                            {
+                                case StackValueType.Int32:
+                                    value2 = LLVM.BuildIntCast(builder, value2, int32Type, string.Empty);
+                                    break;
+                                case StackValueType.Int64:
+                                    value2 = LLVM.BuildIntCast(builder, value2, int64Type, string.Empty);
+                                    break;
+                                case StackValueType.NativeInt:
+                                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                                    value2 = LLVM.BuildIntCast(builder, value2, nativeIntType, string.Empty);
+                                    break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+
+                            // Output type is determined by first operand
+                            outputStackType = operand1.StackType;
+                        }
+                        else if (operand1.StackType == operand2.StackType) // Diagonal
+                        {
+                            // Check type
+                            switch (operand1.StackType)
+                            {
+                                case StackValueType.Int32:
+                                case StackValueType.Int64:
+                                case StackValueType.Float:
+                                    outputStackType = operand1.StackType;
+
+                                    // We can keep type as is (no conversion required)
+                                    needNativeIntConversion = true;
+                                    break;
+                                case StackValueType.NativeInt:
+                                    outputStackType = operand1.StackType;
+                                    break;
+                                case StackValueType.Reference:
+                                    if (instruction.OpCode.Code != Code.Sub && instruction.OpCode.Code != Code.Sub_Ovf_Un)
+                                        goto InvalidBinaryOperation;
+                                    outputStackType = StackValueType.NativeInt;
+                                    break;
+                                default:
+                                    throw new InvalidOperationException(string.Format("Binary operations are not allowed on {0}.", operand1.StackType));
+                            }
+                        }
+                        else if (operand1.StackType == StackValueType.NativeInt && operand2.StackType == StackValueType.Int32)
+                        {
+                            outputStackType = StackValueType.NativeInt;
+                        }
+                        else if (operand1.StackType == StackValueType.Int32 && operand2.StackType == StackValueType.NativeInt)
+                        {
+                            outputStackType = StackValueType.NativeInt;
+                        }
+                        else if (!isIntegerOperation && operand1.StackType == StackValueType.Reference) // ref + [i32, nativeint]
+                        {
+                            switch (operand2.StackType)
+                            {
+                                case StackValueType.Int32:
+                                    break;
+                                case StackValueType.NativeInt:
+                                    break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+
+                            if (instruction.OpCode.Code != Code.Add && instruction.OpCode.Code != Code.Add_Ovf_Un
+                                && instruction.OpCode.Code != Code.Sub && instruction.OpCode.Code != Code.Sub_Ovf)
+                                goto InvalidBinaryOperation;
+
+                            outputStackType = StackValueType.Reference;
+                        }
+                        else if (!isIntegerOperation && operand2.StackType == StackValueType.Reference) // [i32, nativeint] + ref
+                        {
+                            switch (operand1.StackType)
+                            {
+                                case StackValueType.Int32:
+                                case StackValueType.NativeInt:
+                                    break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+
+                            if (instruction.OpCode.Code != Code.Add && instruction.OpCode.Code != Code.Add_Ovf_Un)
+                                goto InvalidBinaryOperation;
+
+                            outputStackType = StackValueType.Reference;
+                        }
+                        else
+                        {
+                            goto InvalidBinaryOperation;
+                        }
+
+                        // Convert to native int (if necessary)
+                        if (needNativeIntConversion)
+                        {
+                            value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                            value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                        }
+
+                        ValueRef result;
+
+                        // Perform binary operation
+                        if (operand1.StackType == StackValueType.Float)
+                        {
+                            switch (instruction.OpCode.Code)
+                            {
+                                case Code.Add:          result = LLVM.BuildFAdd(builder, value1, value2, string.Empty); break;
+                                case Code.Sub:          result = LLVM.BuildFSub(builder, value1, value2, string.Empty); break;
+                                case Code.Mul:          result = LLVM.BuildFMul(builder, value1, value2, string.Empty); break;
+                                case Code.Div:          result = LLVM.BuildFDiv(builder, value1, value2, string.Empty); break;
+                                case Code.Rem:          result = LLVM.BuildFRem(builder, value1, value2, string.Empty); break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+                        }
+                        else
+                        {
+                            switch (instruction.OpCode.Code)
+                            {
+                                case Code.Add:          result = LLVM.BuildAdd(builder, value1, value2, string.Empty); break;
+                                case Code.Add_Ovf:      result = LLVM.BuildNSWAdd(builder, value1, value2, string.Empty); break;
+                                case Code.Add_Ovf_Un:   result = LLVM.BuildNUWAdd(builder, value1, value2, string.Empty); break;
+                                case Code.Sub:          result = LLVM.BuildSub(builder, value1, value2, string.Empty); break;
+                                case Code.Sub_Ovf:      result = LLVM.BuildNSWSub(builder, value1, value2, string.Empty); break;
+                                case Code.Sub_Ovf_Un:   result = LLVM.BuildNUWSub(builder, value1, value2, string.Empty); break;
+                                case Code.Mul:          result = LLVM.BuildMul(builder, value1, value2, string.Empty); break;
+                                case Code.Mul_Ovf:      result = LLVM.BuildNSWMul(builder, value1, value2, string.Empty); break;
+                                case Code.Mul_Ovf_Un:   result = LLVM.BuildNUWMul(builder, value1, value2, string.Empty); break;
+                                case Code.Div:          result = LLVM.BuildSDiv(builder, value1, value2, string.Empty); break;
+                                case Code.Div_Un:       result = LLVM.BuildUDiv(builder, value1, value2, string.Empty); break;
+                                case Code.Rem:          result = LLVM.BuildSRem(builder, value1, value2, string.Empty); break;
+                                case Code.Rem_Un:       result = LLVM.BuildURem(builder, value1, value2, string.Empty); break;
+                                case Code.Shl:          result = LLVM.BuildShl(builder, value1, value2, string.Empty); break;
+                                case Code.Shr:          result = LLVM.BuildAShr(builder, value1, value2, string.Empty); break;
+                                case Code.Shr_Un:       result = LLVM.BuildLShr(builder, value1, value2, string.Empty); break;
+                                case Code.And:          result = LLVM.BuildAnd(builder, value1, value2, string.Empty); break;
+                                case Code.Or:           result = LLVM.BuildOr(builder, value1, value2, string.Empty); break;
+                                case Code.Xor:          result = LLVM.BuildXor(builder, value1, value2, string.Empty); break;
+                                default:
+                                    goto InvalidBinaryOperation;
+                            }
+
+                            // TODO: Perform overflow check
+                            switch (instruction.OpCode.Code)
+                            {
+                                case Code.Add_Ovf:
+                                case Code.Add_Ovf_Un:
+                                case Code.Sub_Ovf:
+                                case Code.Sub_Ovf_Un:
+                                case Code.Mul_Ovf:
+                                case Code.Mul_Ovf_Un:
+                                    throw new NotImplementedException("Binary operator with overflow check are not implemented.");
+                                default:
+                                    break;
+                            }
+                        }
+
+                        Type outputType;
+
+                        switch (outputStackType)
+                        {
+                            case StackValueType.Int32:
+                            case StackValueType.Int64:
+                            case StackValueType.Float:
+                                // No output conversion required, as it could only have been from same input types (non-shift) or operand 1 (shift)
+                                outputType = operand1.Type;
+                                break;
+                            case StackValueType.NativeInt:
+                                outputType = intPtr;
+                                break;
+                            case StackValueType.Reference:
+                                result = LLVM.BuildIntToPtr(builder, result, intPtrType, string.Empty);
+
+                                // Get type from one of its operand (if output is reference type, one of the two operand must be too)
+                                if (operand1.StackType == StackValueType.Reference)
+                                    outputType = operand1.Type;
+                                else if (operand2.StackType == StackValueType.Reference)
+                                    outputType = operand2.Type;
+                                else
+                                    goto InvalidBinaryOperation;
+                                break;
+                            default:
+                                goto InvalidBinaryOperation;
+                        }
+
+                        stack.Add(new StackValue(outputStackType, outputType, result));
+
+                        break;
+
+                    InvalidBinaryOperation:
+                        throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", instruction.OpCode.Code, operand1.StackType, operand2.StackType));
+                    }
+
                     case Code.Castclass:
                     default:
                         throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
