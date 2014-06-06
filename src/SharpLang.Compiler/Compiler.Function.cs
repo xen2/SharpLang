@@ -489,6 +489,13 @@ namespace SharpLang.CompilerServices
                         EmitI4(stack, value);
                         break;
                     }
+                    // Ldc_I8
+                    case Code.Ldc_I8:
+                    {
+                        var value = (long)instruction.Operand;
+                        EmitI8(stack, value);
+                        break;
+                    }
                     // Ldarg
                     case Code.Ldarg_0:
                     case Code.Ldarg_1:

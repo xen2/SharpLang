@@ -162,6 +162,15 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(int32Type, (uint)operandIndex, true)));
         }
 
+        private void EmitI8(List<StackValue> stack, long operandIndex)
+        {
+            var intType = CreateType(corlib.MainModule.GetType(typeof(long).FullName));
+
+            // Add constant integer value to stack
+            stack.Add(new StackValue(StackValueType.Int64, intType,
+                LLVM.ConstInt(int64Type, (ulong)operandIndex, true)));
+        }
+
         private void EmitCall(List<StackValue> stack, Function targetMethod, ValueRef overrideMethod = default(ValueRef))
         {
             // Build argument list
