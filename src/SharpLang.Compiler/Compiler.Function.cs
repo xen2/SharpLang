@@ -432,110 +432,6 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
-                    case Code.Conv_U:
-                    case Code.Conv_I:
-                    case Code.Conv_U1:
-                    case Code.Conv_I1:
-                    case Code.Conv_U2:
-                    case Code.Conv_I2:
-                    case Code.Conv_U4:
-                    case Code.Conv_I4:
-                    case Code.Conv_U8:
-                    case Code.Conv_I8:
-                    {
-                        var value = stack.Pop();
-
-                        uint intermediateWidth;
-                        System.Type intermediateRealType;
-                        bool outputNativeInt = false;
-                        bool isSigned;
-                        switch (instruction.OpCode.Code)
-                        {
-                            case Code.Conv_U:   isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); outputNativeInt = true; break;
-                            case Code.Conv_I:   isSigned = true;  intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); outputNativeInt = true; break;
-                            case Code.Conv_U1:  isSigned = false; intermediateWidth = 8;  intermediateRealType = typeof(byte); break;
-                            case Code.Conv_I1:  isSigned = true;  intermediateWidth = 8;  intermediateRealType = typeof(sbyte); break;
-                            case Code.Conv_U2:  isSigned = false; intermediateWidth = 16; intermediateRealType = typeof(ushort); break;
-                            case Code.Conv_I2:  isSigned = true;  intermediateWidth = 16; intermediateRealType = typeof(short); break;
-                            case Code.Conv_U4:  isSigned = false; intermediateWidth = 32; intermediateRealType = typeof(uint); break;
-                            case Code.Conv_I4:  isSigned = true;  intermediateWidth = 32; intermediateRealType = typeof(int); break;
-                            case Code.Conv_U8:  isSigned = false; intermediateWidth = 64; intermediateRealType = typeof(ulong); break;
-                            case Code.Conv_I8:  isSigned = true;  intermediateWidth = 64; intermediateRealType = typeof(long); break;
-                            default:
-                                throw new InvalidOperationException();
-                        }
-
-                        var currentValue = value.Value;
-
-                        if (value.StackType == StackValueType.NativeInt)
-                        {
-                            // Convert to integer
-                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
-                        }
-                        else if (value.StackType == StackValueType.Reference)
-                        {
-                            if (instruction.OpCode.Code != Code.Conv_U8 && instruction.OpCode.Code != Code.Conv_U)
-                                throw new InvalidOperationException();
-
-                            // Convert to integer
-                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
-                        }
-                        else if (value.StackType == StackValueType.Float)
-                        {
-                            // TODO: Float conversions
-                            throw new NotImplementedException();
-                        }
-
-                        var inputType = LLVM.TypeOf(currentValue);
-                        var inputWidth = LLVM.GetIntTypeWidth(inputType);
-                        var smallestWidth = Math.Min(intermediateWidth, inputWidth);
-                        var smallestType = LLVM.IntTypeInContext(context, smallestWidth);
-                        var outputWidth = Math.Max(intermediateWidth, 32);
-
-                        // Truncate (if necessary)
-                        if (smallestWidth < inputWidth)
-                            currentValue = LLVM.BuildTrunc(builder, currentValue, smallestType, string.Empty);
-
-                        // Reextend to appropriate type (if necessary)
-                        if (outputWidth > smallestWidth)
-                        {
-                            var outputIntType = LLVM.IntTypeInContext(context, outputWidth);
-                            if (isSigned)
-                                currentValue = LLVM.BuildSExt(builder, currentValue, outputIntType, string.Empty);
-                            else
-                                currentValue = LLVM.BuildZExt(builder, currentValue, outputIntType, string.Empty);
-                        }
-
-                        // Convert to native int (if necessary)
-                        if (outputNativeInt)
-                            currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
-
-                        // Add constant integer value to stack
-                        switch (instruction.OpCode.Code)
-                        {
-                            case Code.Conv_U:
-                            case Code.Conv_I:
-                                stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
-                                break;
-                            case Code.Conv_U1:
-                            case Code.Conv_I1:
-                            case Code.Conv_U2:
-                            case Code.Conv_I2:
-                            case Code.Conv_U4:
-                            case Code.Conv_I4:
-                                stack.Add(new StackValue(StackValueType.Int32, int32, currentValue));
-                                break;
-                            case Code.Conv_U8:
-                            case Code.Conv_I8:
-                                stack.Add(new StackValue(StackValueType.Int64, int64, currentValue));
-                                break;
-                            default:
-                                throw new InvalidOperationException();
-                        }
-
-                        break;
-                    }
-
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
                     case Code.Ldc_I4_0:
@@ -718,6 +614,113 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Conversion opcodes (Conv_U, Conv_I, etc...)
+                    case Code.Conv_U:
+                    case Code.Conv_I:
+                    case Code.Conv_U1:
+                    case Code.Conv_I1:
+                    case Code.Conv_U2:
+                    case Code.Conv_I2:
+                    case Code.Conv_U4:
+                    case Code.Conv_I4:
+                    case Code.Conv_U8:
+                    case Code.Conv_I8:
+                    {
+                        var value = stack.Pop();
+
+                        uint intermediateWidth;
+                        System.Type intermediateRealType;
+                        bool outputNativeInt = false;
+                        bool isSigned;
+                        switch (instruction.OpCode.Code)
+                        {
+                            case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); outputNativeInt = true; break;
+                            case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); outputNativeInt = true; break;
+                            case Code.Conv_U1: isSigned = false; intermediateWidth = 8; intermediateRealType = typeof(byte); break;
+                            case Code.Conv_I1: isSigned = true; intermediateWidth = 8; intermediateRealType = typeof(sbyte); break;
+                            case Code.Conv_U2: isSigned = false; intermediateWidth = 16; intermediateRealType = typeof(ushort); break;
+                            case Code.Conv_I2: isSigned = true; intermediateWidth = 16; intermediateRealType = typeof(short); break;
+                            case Code.Conv_U4: isSigned = false; intermediateWidth = 32; intermediateRealType = typeof(uint); break;
+                            case Code.Conv_I4: isSigned = true; intermediateWidth = 32; intermediateRealType = typeof(int); break;
+                            case Code.Conv_U8: isSigned = false; intermediateWidth = 64; intermediateRealType = typeof(ulong); break;
+                            case Code.Conv_I8: isSigned = true; intermediateWidth = 64; intermediateRealType = typeof(long); break;
+                            default:
+                                throw new InvalidOperationException();
+                        }
+
+                        var currentValue = value.Value;
+
+                        if (value.StackType == StackValueType.NativeInt)
+                        {
+                            // Convert to integer
+                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
+                        }
+                        else if (value.StackType == StackValueType.Reference)
+                        {
+                            if (instruction.OpCode.Code != Code.Conv_U8 && instruction.OpCode.Code != Code.Conv_U)
+                                throw new InvalidOperationException();
+
+                            // Convert to integer
+                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
+                        }
+                        else if (value.StackType == StackValueType.Float)
+                        {
+                            // TODO: Float conversions
+                            throw new NotImplementedException();
+                        }
+
+                        var inputType = LLVM.TypeOf(currentValue);
+                        var inputWidth = LLVM.GetIntTypeWidth(inputType);
+                        var smallestWidth = Math.Min(intermediateWidth, inputWidth);
+                        var smallestType = LLVM.IntTypeInContext(context, smallestWidth);
+                        var outputWidth = Math.Max(intermediateWidth, 32);
+
+                        // Truncate (if necessary)
+                        if (smallestWidth < inputWidth)
+                            currentValue = LLVM.BuildTrunc(builder, currentValue, smallestType, string.Empty);
+
+                        // Reextend to appropriate type (if necessary)
+                        if (outputWidth > smallestWidth)
+                        {
+                            var outputIntType = LLVM.IntTypeInContext(context, outputWidth);
+                            if (isSigned)
+                                currentValue = LLVM.BuildSExt(builder, currentValue, outputIntType, string.Empty);
+                            else
+                                currentValue = LLVM.BuildZExt(builder, currentValue, outputIntType, string.Empty);
+                        }
+
+                        // Convert to native int (if necessary)
+                        if (outputNativeInt)
+                            currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
+
+                        // Add constant integer value to stack
+                        switch (instruction.OpCode.Code)
+                        {
+                            case Code.Conv_U:
+                            case Code.Conv_I:
+                                stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
+                                break;
+                            case Code.Conv_U1:
+                            case Code.Conv_I1:
+                            case Code.Conv_U2:
+                            case Code.Conv_I2:
+                            case Code.Conv_U4:
+                            case Code.Conv_I4:
+                                stack.Add(new StackValue(StackValueType.Int32, int32, currentValue));
+                                break;
+                            case Code.Conv_U8:
+                            case Code.Conv_I8:
+                                stack.Add(new StackValue(StackValueType.Int64, int64, currentValue));
+                                break;
+                            default:
+                                throw new InvalidOperationException();
+                        }
+
+                        break;
+                    }
+                    #endregion
+
+                    #region Binary operation opcodes (Add, Sub, etc...)
                     case Code.Add:
                     case Code.Add_Ovf:
                     case Code.Add_Ovf_Un:
@@ -744,7 +747,6 @@ namespace SharpLang.CompilerServices
                         var value1 = operand1.Value;
                         var value2 = operand2.Value;
 
-                        bool needNativeIntConversion = false;
                         StackValueType outputStackType;
 
                         bool isShiftOperation = false;
@@ -972,6 +974,7 @@ namespace SharpLang.CompilerServices
                     InvalidBinaryOperation:
                         throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", instruction.OpCode.Code, operand1.StackType, operand2.StackType));
                     }
+                    #endregion
 
                     case Code.Castclass:
                     default:
