@@ -229,7 +229,9 @@ namespace SharpLang.CompilerServices
                 // Reset states
                 flowingToNextBlock = true;
 
-                switch (instruction.OpCode.Code)
+                var opcode = instruction.OpCode.Code;
+
+                switch (opcode)
                 {
                     case Code.Ret:
                     {
@@ -444,7 +446,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ldc_I4_7:
                     case Code.Ldc_I4_8:
                     {
-                        var value = instruction.OpCode.Code - Code.Ldc_I4_0;
+                        var value = opcode - Code.Ldc_I4_0;
                         EmitI4(stack, value);
                         break;
                     }
@@ -473,7 +475,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ldarg_2:
                     case Code.Ldarg_3:
                     {
-                        var value = instruction.OpCode.Code - Code.Ldarg_0;
+                        var value = opcode - Code.Ldarg_0;
                         EmitLdarg(stack, args, value);
                         break;
                     }
@@ -499,7 +501,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ldloc_2:
                     case Code.Ldloc_3:
                     {
-                        var localIndex = instruction.OpCode.Code - Code.Ldloc_0;
+                        var localIndex = opcode - Code.Ldloc_0;
                         EmitLdloc(stack, locals, localIndex);
                         break;
                     }
@@ -550,7 +552,7 @@ namespace SharpLang.CompilerServices
                     case Code.Stloc_2:
                     case Code.Stloc_3:
                     {
-                        var localIndex = instruction.OpCode.Code - Code.Stloc_0;
+                        var localIndex = opcode - Code.Stloc_0;
                         EmitStloc(stack, locals, localIndex);
                         break;
                     }
@@ -632,7 +634,7 @@ namespace SharpLang.CompilerServices
                         System.Type intermediateRealType;
                         bool outputNativeInt = false;
                         bool isSigned;
-                        switch (instruction.OpCode.Code)
+                        switch (opcode)
                         {
                             case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); outputNativeInt = true; break;
                             case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); outputNativeInt = true; break;
@@ -657,7 +659,7 @@ namespace SharpLang.CompilerServices
                         }
                         else if (value.StackType == StackValueType.Reference)
                         {
-                            if (instruction.OpCode.Code != Code.Conv_U8 && instruction.OpCode.Code != Code.Conv_U)
+                            if (opcode != Code.Conv_U8 && opcode != Code.Conv_U)
                                 throw new InvalidOperationException();
 
                             // Convert to integer
@@ -694,7 +696,7 @@ namespace SharpLang.CompilerServices
                             currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
 
                         // Add constant integer value to stack
-                        switch (instruction.OpCode.Code)
+                        switch (opcode)
                         {
                             case Code.Conv_U:
                             case Code.Conv_I:
@@ -753,7 +755,7 @@ namespace SharpLang.CompilerServices
                         bool isIntegerOperation = false;
 
                         // Detect shift and integer operations
-                        switch (instruction.OpCode.Code)
+                        switch (opcode)
                         {
                             case Code.Shl:
                             case Code.Shr:
@@ -817,7 +819,7 @@ namespace SharpLang.CompilerServices
                                     outputStackType = operand1.StackType;
                                     break;
                                 case StackValueType.Reference:
-                                    if (instruction.OpCode.Code != Code.Sub && instruction.OpCode.Code != Code.Sub_Ovf_Un)
+                                    if (opcode != Code.Sub && opcode != Code.Sub_Ovf_Un)
                                         goto InvalidBinaryOperation;
                                     value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
                                     value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
@@ -851,8 +853,8 @@ namespace SharpLang.CompilerServices
                                     goto InvalidBinaryOperation;
                             }
 
-                            if (instruction.OpCode.Code != Code.Add && instruction.OpCode.Code != Code.Add_Ovf_Un
-                                && instruction.OpCode.Code != Code.Sub && instruction.OpCode.Code != Code.Sub_Ovf)
+                            if (opcode != Code.Add && opcode != Code.Add_Ovf_Un
+                                && opcode != Code.Sub && opcode != Code.Sub_Ovf)
                                 goto InvalidBinaryOperation;
 
                             outputStackType = StackValueType.Reference;
@@ -871,7 +873,7 @@ namespace SharpLang.CompilerServices
                                     goto InvalidBinaryOperation;
                             }
 
-                            if (instruction.OpCode.Code != Code.Add && instruction.OpCode.Code != Code.Add_Ovf_Un)
+                            if (opcode != Code.Add && opcode != Code.Add_Ovf_Un)
                                 goto InvalidBinaryOperation;
 
                             outputStackType = StackValueType.Reference;
@@ -886,7 +888,7 @@ namespace SharpLang.CompilerServices
                         // Perform binary operation
                         if (operand1.StackType == StackValueType.Float)
                         {
-                            switch (instruction.OpCode.Code)
+                            switch (opcode)
                             {
                                 case Code.Add:          result = LLVM.BuildFAdd(builder, value1, value2, string.Empty); break;
                                 case Code.Sub:          result = LLVM.BuildFSub(builder, value1, value2, string.Empty); break;
@@ -899,7 +901,7 @@ namespace SharpLang.CompilerServices
                         }
                         else
                         {
-                            switch (instruction.OpCode.Code)
+                            switch (opcode)
                             {
                                 case Code.Add:          result = LLVM.BuildAdd(builder, value1, value2, string.Empty); break;
                                 case Code.Add_Ovf:      result = LLVM.BuildNSWAdd(builder, value1, value2, string.Empty); break;
@@ -925,7 +927,7 @@ namespace SharpLang.CompilerServices
                             }
 
                             // TODO: Perform overflow check
-                            switch (instruction.OpCode.Code)
+                            switch (opcode)
                             {
                                 case Code.Add_Ovf:
                                 case Code.Add_Ovf_Un:
@@ -972,7 +974,7 @@ namespace SharpLang.CompilerServices
                         break;
 
                     InvalidBinaryOperation:
-                        throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", instruction.OpCode.Code, operand1.StackType, operand2.StackType));
+                        throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", opcode, operand1.StackType, operand2.StackType));
                     }
                     #endregion
 
