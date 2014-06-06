@@ -432,31 +432,106 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    case Code.Conv_U:
+                    case Code.Conv_I:
+                    case Code.Conv_U1:
+                    case Code.Conv_I1:
+                    case Code.Conv_U2:
+                    case Code.Conv_I2:
+                    case Code.Conv_U4:
                     case Code.Conv_I4:
+                    case Code.Conv_U8:
+                    case Code.Conv_I8:
                     {
                         var value = stack.Pop();
 
-                        var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
-
-                        ValueRef convertedValue;
-
-                        if (value.StackType == StackValueType.Int32
-                            || value.StackType == StackValueType.Int64)
+                        uint intermediateWidth;
+                        System.Type intermediateRealType;
+                        bool outputNativeInt = false;
+                        bool isSigned;
+                        switch (instruction.OpCode.Code)
                         {
-                            convertedValue = LLVM.BuildIntCast(builder, value.Value, intType.DefaultType, string.Empty);
+                            case Code.Conv_U:   isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); outputNativeInt = true; break;
+                            case Code.Conv_I:   isSigned = true;  intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); outputNativeInt = true; break;
+                            case Code.Conv_U1:  isSigned = false; intermediateWidth = 8;  intermediateRealType = typeof(byte); break;
+                            case Code.Conv_I1:  isSigned = true;  intermediateWidth = 8;  intermediateRealType = typeof(sbyte); break;
+                            case Code.Conv_U2:  isSigned = false; intermediateWidth = 16; intermediateRealType = typeof(ushort); break;
+                            case Code.Conv_I2:  isSigned = true;  intermediateWidth = 16; intermediateRealType = typeof(short); break;
+                            case Code.Conv_U4:  isSigned = false; intermediateWidth = 32; intermediateRealType = typeof(uint); break;
+                            case Code.Conv_I4:  isSigned = true;  intermediateWidth = 32; intermediateRealType = typeof(int); break;
+                            case Code.Conv_U8:  isSigned = false; intermediateWidth = 64; intermediateRealType = typeof(ulong); break;
+                            case Code.Conv_I8:  isSigned = true;  intermediateWidth = 64; intermediateRealType = typeof(long); break;
+                            default:
+                                throw new InvalidOperationException();
                         }
-                        else if (value.StackType == StackValueType.NativeInt)
+
+                        var currentValue = value.Value;
+
+                        if (value.StackType == StackValueType.NativeInt)
                         {
-                            convertedValue = LLVM.BuildPtrToInt(builder, value.Value, intType.DefaultType, string.Empty);
+                            // Convert to integer
+                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
                         }
-                        else
+                        else if (value.StackType == StackValueType.Reference)
                         {
-                            // TODO: Conversions from float & pointer
+                            if (instruction.OpCode.Code != Code.Conv_U8 && instruction.OpCode.Code != Code.Conv_U)
+                                throw new InvalidOperationException();
+
+                            // Convert to integer
+                            currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
+                        }
+                        else if (value.StackType == StackValueType.Float)
+                        {
+                            // TODO: Float conversions
                             throw new NotImplementedException();
                         }
 
+                        var inputType = LLVM.TypeOf(currentValue);
+                        var inputWidth = LLVM.GetIntTypeWidth(inputType);
+                        var smallestWidth = Math.Min(intermediateWidth, inputWidth);
+                        var smallestType = LLVM.IntTypeInContext(context, smallestWidth);
+                        var outputWidth = Math.Max(intermediateWidth, 32);
+
+                        // Truncate (if necessary)
+                        if (smallestWidth < inputWidth)
+                            currentValue = LLVM.BuildTrunc(builder, currentValue, smallestType, string.Empty);
+
+                        // Reextend to appropriate type (if necessary)
+                        if (outputWidth > smallestWidth)
+                        {
+                            var outputIntType = LLVM.IntTypeInContext(context, outputWidth);
+                            if (isSigned)
+                                currentValue = LLVM.BuildSExt(builder, currentValue, outputIntType, string.Empty);
+                            else
+                                currentValue = LLVM.BuildZExt(builder, currentValue, outputIntType, string.Empty);
+                        }
+
+                        // Convert to native int (if necessary)
+                        if (outputNativeInt)
+                            currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
+
                         // Add constant integer value to stack
-                        stack.Add(new StackValue(StackValueType.Int32, intType, convertedValue));
+                        switch (instruction.OpCode.Code)
+                        {
+                            case Code.Conv_U:
+                            case Code.Conv_I:
+                                stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
+                                break;
+                            case Code.Conv_U1:
+                            case Code.Conv_I1:
+                            case Code.Conv_U2:
+                            case Code.Conv_I2:
+                            case Code.Conv_U4:
+                            case Code.Conv_I4:
+                                stack.Add(new StackValue(StackValueType.Int32, int32, currentValue));
+                                break;
+                            case Code.Conv_U8:
+                            case Code.Conv_I8:
+                                stack.Add(new StackValue(StackValueType.Int64, int64, currentValue));
+                                break;
+                            default:
+                                throw new InvalidOperationException();
+                        }
 
                         break;
                     }
@@ -669,7 +744,7 @@ namespace SharpLang.CompilerServices
                         var value1 = operand1.Value;
                         var value2 = operand2.Value;
 
-                        bool needNativeIntConversion = true;
+                        bool needNativeIntConversion = false;
                         StackValueType outputStackType;
 
                         bool isShiftOperation = false;
@@ -733,16 +808,17 @@ namespace SharpLang.CompilerServices
                                 case StackValueType.Int64:
                                 case StackValueType.Float:
                                     outputStackType = operand1.StackType;
-
-                                    // We can keep type as is (no conversion required)
-                                    needNativeIntConversion = true;
                                     break;
                                 case StackValueType.NativeInt:
+                                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                                    value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                                     outputStackType = operand1.StackType;
                                     break;
                                 case StackValueType.Reference:
                                     if (instruction.OpCode.Code != Code.Sub && instruction.OpCode.Code != Code.Sub_Ovf_Un)
                                         goto InvalidBinaryOperation;
+                                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                                    value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                                     outputStackType = StackValueType.NativeInt;
                                     break;
                                 default:
@@ -751,10 +827,12 @@ namespace SharpLang.CompilerServices
                         }
                         else if (operand1.StackType == StackValueType.NativeInt && operand2.StackType == StackValueType.Int32)
                         {
+                            value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
                             outputStackType = StackValueType.NativeInt;
                         }
                         else if (operand1.StackType == StackValueType.Int32 && operand2.StackType == StackValueType.NativeInt)
                         {
+                            value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                             outputStackType = StackValueType.NativeInt;
                         }
                         else if (!isIntegerOperation && operand1.StackType == StackValueType.Reference) // ref + [i32, nativeint]
@@ -762,8 +840,10 @@ namespace SharpLang.CompilerServices
                             switch (operand2.StackType)
                             {
                                 case StackValueType.Int32:
+                                    value2 = LLVM.BuildSExt(builder, value2, nativeIntType, string.Empty);
                                     break;
                                 case StackValueType.NativeInt:
+                                    value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                                     break;
                                 default:
                                     goto InvalidBinaryOperation;
@@ -780,7 +860,10 @@ namespace SharpLang.CompilerServices
                             switch (operand1.StackType)
                             {
                                 case StackValueType.Int32:
+                                    value1 = LLVM.BuildSExt(builder, value1, nativeIntType, string.Empty);
+                                    break;
                                 case StackValueType.NativeInt:
+                                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
                                     break;
                                 default:
                                     goto InvalidBinaryOperation;
@@ -794,13 +877,6 @@ namespace SharpLang.CompilerServices
                         else
                         {
                             goto InvalidBinaryOperation;
-                        }
-
-                        // Convert to native int (if necessary)
-                        if (needNativeIntConversion)
-                        {
-                            value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
-                            value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                         }
 
                         ValueRef result;

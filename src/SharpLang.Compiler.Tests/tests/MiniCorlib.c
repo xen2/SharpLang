@@ -29,6 +29,18 @@ void System_Void_System_Console__WriteLine_System_UInt32_(uint32_t i)
 	printf("%u\n", i);
 }
 
+// void System.Console.WriteLine(int)
+void System_Void_System_Console__WriteLine_System_Int64_(int64_t i)
+{
+	printf("%lli\n", i);
+}
+
+// void System.Console.WriteLine(uint)
+void System_Void_System_Console__WriteLine_System_UInt64_(uint64_t i)
+{
+	printf("%llu\n", i);
+}
+
 // void System.Object..ctor()
 void System_Void_System_Object___ctor__(void* obj)
 {

@@ -22,7 +22,10 @@ namespace SharpLang.CompilerServices
         // Builder for normal instructions
         private BuilderRef builder;
         private Type intPtr;
+        private Type int32;
+        private Type int64;
         private TypeRef intPtrType; // Native integer, pointer representation
+        private int intPtrSize;
         private TypeRef nativeIntType; // Native integer, integer representation
         private TypeRef int32Type;
         private TypeRef int64Type;
@@ -53,10 +56,13 @@ namespace SharpLang.CompilerServices
             intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             int32Type = LLVM.Int32TypeInContext(context);
             int64Type = LLVM.Int64TypeInContext(context);
+            intPtrSize = 4;            // Or 8?
             nativeIntType = int32Type; // Or int64Type?
             builderPhi = LLVM.CreateBuilderInContext(context);
 
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
+            int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName));
+            int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName));
 
             // struct IMTSlot { i8* functionPtr, i32 functionId, IMTEntry* nextEntry }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");

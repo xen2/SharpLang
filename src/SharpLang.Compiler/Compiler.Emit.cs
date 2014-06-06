@@ -155,10 +155,8 @@ namespace SharpLang.CompilerServices
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
         {
-            var intType = CreateType(corlib.MainModule.GetType(typeof(int).FullName));
-
             // Add constant integer value to stack
-            stack.Add(new StackValue(StackValueType.Int32, intType,
+            stack.Add(new StackValue(StackValueType.Int32, int32,
                 LLVM.ConstInt(int32Type, (uint)operandIndex, true)));
         }
 
@@ -167,7 +165,7 @@ namespace SharpLang.CompilerServices
             var intType = CreateType(corlib.MainModule.GetType(typeof(long).FullName));
 
             // Add constant integer value to stack
-            stack.Add(new StackValue(StackValueType.Int64, intType,
+            stack.Add(new StackValue(StackValueType.Int64, int64,
                 LLVM.ConstInt(int64Type, (ulong)operandIndex, true)));
         }
 
