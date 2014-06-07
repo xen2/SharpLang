@@ -74,14 +74,15 @@ namespace SharpLang.CompilerServices
             filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
 
             // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
-            CreateCompilerWrapper();
+            var isWindowsOS = Environment.OSVersion.Platform == PlatformID.Win32NT;
+            if (isWindowsOS)
+                CreateCompilerWrapper();
 
             var processStartInfo = new ProcessStartInfo
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
-                //FileName = Clang,
-                FileName = ClangWrapper,
+                FileName = isWindowsOS ? ClangWrapper : Clang,
                 Arguments = string.Format("{0} -o {1}", string.Join(" ", filesToLink), outputFile)
             };
 
