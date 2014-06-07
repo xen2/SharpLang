@@ -433,15 +433,32 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+                    case Code.Ldelem_I1:
+                    case Code.Ldelem_I2:
+                    case Code.Ldelem_I4:
+                    case Code.Ldelem_I8:
+                    case Code.Ldelem_U1:
+                    case Code.Ldelem_U2:
+                    case Code.Ldelem_U4:
+                    case Code.Ldelem_R4:
+                    case Code.Ldelem_R8:
+                    case Code.Ldelem_Any:
                     case Code.Ldelem_Ref:
                     {
-                        EmitLdelem_Ref(stack);
+                        EmitLdelem(stack);
 
                         break;
                     }
+                    case Code.Stelem_I1:
+                    case Code.Stelem_I2:
+                    case Code.Stelem_I4:
+                    case Code.Stelem_I8:
+                    case Code.Stelem_R4:
+                    case Code.Stelem_R8:
+                    case Code.Stelem_Any:
                     case Code.Stelem_Ref:
                     {
-                        EmitStelem_Ref(stack);
+                        EmitStelem(stack);
 
                         break;
                     }

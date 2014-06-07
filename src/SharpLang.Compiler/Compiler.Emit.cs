@@ -410,7 +410,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, arraySize));
         }
 
-        private void EmitLdelem_Ref(List<StackValue> stack)
+        private void EmitLdelem(List<StackValue> stack)
         {
             var index = stack.Pop();
             var array = stack.Pop();
@@ -427,15 +427,21 @@ namespace SharpLang.CompilerServices
             // Load element
             var element = LLVM.BuildLoad(builder, arrayElementPointer, string.Empty);
 
+            // Convert
+            element = ConvertFromLocalToStack(elementType, element);
+
             // Push loaded element onto the stack
             stack.Add(new StackValue(elementType.StackType, elementType, element));
         }
 
-        private void EmitStelem_Ref(List<StackValue> stack)
+        private void EmitStelem(List<StackValue> stack)
         {
             var value = stack.Pop();
             var index = stack.Pop();
             var array = stack.Pop();
+
+            // Get element type
+            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
 
             // Load first element pointer
             var arrayFirstElement = LLVM.BuildExtractValue(builder, array.Value, 1, string.Empty);
@@ -443,8 +449,11 @@ namespace SharpLang.CompilerServices
             // Find pointer of element at requested index
             var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
 
+            // Convert
+            var convertedElement = ConvertFromStackToLocal(elementType, value);
+
             // Store element
-            LLVM.BuildStore(builder, value.Value, arrayElementPointer);
+            LLVM.BuildStore(builder, convertedElement, arrayElementPointer);
         }
     }
 }
