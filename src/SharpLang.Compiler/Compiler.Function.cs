@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
@@ -25,6 +27,30 @@ namespace SharpLang.CompilerServices
             return CreateFunction(method);
         }
 
+        private FunctionSignature CreateFunctionSignature(MethodReference context, CallSite callSite)
+        {
+            var numParams = callSite.Parameters.Count;
+            if (callSite.HasThis)
+                numParams++;
+            var parameterTypes = new Type[numParams];
+            var parameterTypesLLVM = new TypeRef[numParams];
+            for (int index = 0; index < numParams; index++)
+            {
+                TypeReference parameterTypeReference;
+                var parameter = callSite.Parameters[index];
+                parameterTypeReference = ResolveGenericsVisitor.Process(context, parameter.ParameterType);
+                var parameterType = CreateType(parameterTypeReference);
+                if (parameterType.DefaultType.Value == IntPtr.Zero)
+                    throw new InvalidOperationException();
+                parameterTypes[index] = parameterType;
+                parameterTypesLLVM[index] = parameterType.DefaultType;
+            }
+
+            var returnType = CreateType(ResolveGenericsVisitor.Process(context, context.ReturnType));
+
+            return new FunctionSignature(returnType, parameterTypes);
+        }
+
         /// <summary>
         /// Creates the function.
         /// </summary>
@@ -41,12 +67,13 @@ namespace SharpLang.CompilerServices
                 numParams++;
             var parameterTypes = new Type[numParams];
             var parameterTypesLLVM = new TypeRef[numParams];
+            var declaringType = CreateType(ResolveGenericsVisitor.Process(method, method.DeclaringType));
             for (int index = 0; index < numParams; index++)
             {
                 TypeReference parameterTypeReference;
                 if (method.HasThis && index == 0)
                 {
-                    parameterTypeReference = method.DeclaringType;
+                    parameterTypeReference = declaringType.TypeReference;
                 }
                 else
                 {
@@ -75,7 +102,7 @@ namespace SharpLang.CompilerServices
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : new ValueRef(IntPtr.Zero);
 
-            function = new Function(method, functionType, functionGlobal, returnType, parameterTypes);
+            function = new Function(declaringType, method, functionType, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
             if (hasDefinition)
@@ -96,6 +123,21 @@ namespace SharpLang.CompilerServices
             return function;
         }
 
+        private int UpdateOffsets(MethodBody body)
+        {
+            var offset = 0;
+            foreach (var instruction in body.Instructions)
+            {
+                instruction.Offset = offset;
+                offset += instruction.GetSize();
+            }
+
+            // TODO: Guess better
+            body.MaxStackSize = 8;
+
+            return offset;
+        }
+
         /// <summary>
         /// Compiles the given method definition.
         /// </summary>
@@ -108,16 +150,92 @@ namespace SharpLang.CompilerServices
         {
             var method = methodReference.Resolve();
 
-            if (method.HasBody == false)
-                return;
-
-            var numParams = method.Parameters.Count;
             var body = method.Body;
+            var codeSize = body != null ? body.CodeSize : 0;
             var functionGlobal = function.GeneratedValue;
 
             var basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
-
             LLVM.PositionBuilderAtEnd(builder, basicBlock);
+
+            if (body == null && (method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
+            {
+                var declaringClass = GetClass(function.DeclaringType.TypeReference);
+
+                // Generate IL for various methods
+                if (declaringClass.BaseType != null &&
+                    declaringClass.BaseType.TypeReference.FullName == typeof(MulticastDelegate).FullName)
+                {
+                    var delegateType = corlib.MainModule.GetType(typeof(Delegate).FullName);
+                    var targetField = delegateType.Fields.First(x => x.Name == "_target");
+                    var methodPtrField = delegateType.Fields.First(x => x.Name == "_methodPtr");
+
+                    body = new MethodBody(method);
+                    var il = body.GetILProcessor();
+                    if (method.Name == ".ctor")
+                    {
+                        // TODO: static method: target should be checked for null, and we should push this instead
+                        // Also, we should generate a thunk in _methodPtr and move method to _methodPtrAux.
+
+                        // this._target = target;
+                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        il.Append(Instruction.Create(OpCodes.Ldarg, method.Parameters[0]));
+                        il.Append(Instruction.Create(OpCodes.Stfld, targetField));
+
+                        // this._methodPtr = method;
+                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        il.Append(Instruction.Create(OpCodes.Ldarg, method.Parameters[1]));
+                        il.Append(Instruction.Create(OpCodes.Stfld, methodPtrField));
+
+                        // return;
+                        il.Append(Instruction.Create(OpCodes.Ret));
+                    }
+                    else if (method.Name == "Invoke")
+                    {
+                        // For now, generate IL
+                        // Note that we could probably optimize at callsite too,
+                        // but probably not necessary if LLVM and sealed class are optimized/inlined well enough
+
+                        // ldarg_0
+                        // ldfld _methodPtr
+                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        il.Append(Instruction.Create(OpCodes.Ldfld, methodPtrField));
+
+                        // ldarg_0
+                        // ldfld _target
+                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        il.Append(Instruction.Create(OpCodes.Ldfld, targetField));
+
+                        var callsite = new CallSite(method.ReturnType);
+                        callsite.Parameters.Add(new ParameterDefinition(targetField.FieldType));
+
+                        foreach (var parameter in method.Parameters)
+                        {
+                            callsite.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
+
+                            // ldarg
+                            il.Append(Instruction.Create(OpCodes.Ldarg, parameter));
+                        }
+
+                        // calli
+                        il.Append(Instruction.Create(OpCodes.Calli, callsite));
+
+                        // ret
+                        il.Append(Instruction.Create(OpCodes.Ret));
+                    }
+                    else
+                    {
+                        LLVM.BuildUnreachable(builder);
+                        return;
+                    }
+
+                    codeSize = UpdateOffsets(body);
+                }
+            }
+
+            if (body == null)
+                return;
+
+            var numParams = method.Parameters.Count;
 
             // Create stack, locals and args
             var stack = new List<StackValue>(body.MaxStackSize);
@@ -144,9 +262,9 @@ namespace SharpLang.CompilerServices
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
             // TODO: Reuse same allocated instance per thread, and grow it only if necessary
-            var branchTargets = new bool[body.CodeSize];
-            var basicBlocks = new BasicBlockRef[body.CodeSize];
-            var forwardStacks = new StackValue[body.CodeSize][];
+            var branchTargets = new bool[codeSize];
+            var basicBlocks = new BasicBlockRef[codeSize];
+            var forwardStacks = new StackValue[codeSize][];
 
             // Find branch targets (which will require PHI node for stack merging)
             for (int index = 0; index < body.Instructions.Count; index++)
@@ -260,7 +378,28 @@ namespace SharpLang.CompilerServices
                         var targetMethodReference = (MethodReference)instruction.Operand;
                         var targetMethod = GetFunction(targetMethodReference);
 
-                        EmitCall(stack, targetMethod);
+                        EmitCall(stack, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
+
+                        break;
+                    }
+                    case Code.Calli:
+                    {
+                        var callSite = (CallSite)instruction.Operand;
+
+                        // TODO: Unify with CreateFunction code
+                        var returnType = GetType(callSite.ReturnType).DefaultType;
+                        var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(x.ParameterType).DefaultType).ToArray();
+
+                        // Generate function type
+                        var functionType = LLVM.FunctionType(returnType, parameterTypesLLVM, false);
+
+                        var methodPtr = stack[stack.Count - parameterTypesLLVM.Length - 1];
+
+                        var castedMethodPtr = LLVM.BuildPointerCast(builder, methodPtr.Value, LLVM.PointerType(functionType, 0), string.Empty);
+
+                        var signature = CreateFunctionSignature(methodReference, callSite);
+
+                        EmitCall(stack, signature, castedMethodPtr);
 
                         break;
                     }
@@ -319,7 +458,7 @@ namespace SharpLang.CompilerServices
                                 var methodId = GetMethodId(targetMethod.MethodReference);
 
                                 // Emit call
-                                EmitCall(stack, targetMethod, resolvedMethod);
+                                EmitCall(stack, targetMethod.Signature, resolvedMethod);
                             }
                             else
                             {
@@ -337,7 +476,7 @@ namespace SharpLang.CompilerServices
                                 var resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
 
                                 // Emit call
-                                EmitCall(stack, targetMethod, resolvedMethod);
+                                EmitCall(stack, targetMethod.Signature, resolvedMethod);
                             }
                         }
                         else
@@ -346,7 +485,7 @@ namespace SharpLang.CompilerServices
                             // Callvirt on non-virtual function is only done to force "this" NULL check
                             // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
                             // so maybe we should keep this as is?
-                            EmitCall(stack, targetMethod);
+                            EmitCall(stack, targetMethod.Signature, targetMethod.GeneratedValue);
                         }
 
                         break;
@@ -367,6 +506,16 @@ namespace SharpLang.CompilerServices
                         var type = GetType(ctorReference.DeclaringType);
 
                         EmitNewobj(stack, type, ctor);
+
+                        break;
+                    }
+
+                    case Code.Ldftn:
+                    {
+                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethod = GetFunction(targetMethodReference);
+
+                        stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrType, string.Empty)));
 
                         break;
                     }
@@ -515,7 +664,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ldarg_S:
                     case Code.Ldarg:
                     {
-                        var value = ((VariableDefinition)instruction.Operand).Index;
+                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
                         EmitLdarg(stack, args, value);
                         break;
                     }
@@ -525,6 +674,11 @@ namespace SharpLang.CompilerServices
 
                         EmitLdstr(stack, operand);
 
+                        break;
+                    }
+                    case Code.Ldnull:
+                    {
+                        EmitLdnull(stack);
                         break;
                     }
 

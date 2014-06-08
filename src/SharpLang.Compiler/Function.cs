@@ -5,15 +5,23 @@ namespace SharpLang.CompilerServices
 {
     class Function
     {
-        public Function(MethodReference methodReference, TypeRef functionType, ValueRef generatedValue, Type returnType, Type[] parameterTypes)
+        public Function(Type declaringType, MethodReference methodReference, TypeRef functionType, ValueRef generatedValue, Type returnType, Type[] parameterTypes)
         {
+            Signature = new FunctionSignature(returnType, parameterTypes);
+            DeclaringType = declaringType;
             MethodReference = methodReference;
             FunctionType = functionType;
             GeneratedValue = generatedValue;
-            ReturnType = returnType;
-            ParameterTypes = parameterTypes;
             VirtualSlot = -1;
         }
+
+        /// <summary>
+        /// Gets the declaring class.
+        /// </summary>
+        /// <value>
+        /// The declaring class.
+        /// </value>
+        public Type DeclaringType { get; private set; }
 
         public MethodReference MethodReference { get; private set; }
 
@@ -39,7 +47,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The return type.
         /// </value>
-        public Type ReturnType { get; private set; }
+        public Type ReturnType { get { return Signature.ReturnType; } }
 
         /// <summary>
         /// Gets the parameter types.
@@ -47,8 +55,15 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The parameter types.
         /// </value>
-        public Type[] ParameterTypes { get; private set; }
+        public Type[] ParameterTypes { get { return Signature.ParameterTypes; } }
+
+        public FunctionSignature Signature { get; private set; }
 
         public int VirtualSlot { get; set; }
+
+        public override string ToString()
+        {
+            return MethodReference.ToString();
+        }
     }
 }

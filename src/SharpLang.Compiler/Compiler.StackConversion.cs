@@ -17,7 +17,8 @@ namespace SharpLang.CompilerServices
             var stackValue = stack.Value;
 
             // Same type, return as is
-            if (stack.StackType == StackValueType.Value
+            if ((stack.StackType == StackValueType.Value
+                    || stack.StackType == StackValueType.NativeInt)
                 && localType.DefaultType == stack.Type.DefaultType)
             {
                 return stackValue;
@@ -102,6 +103,9 @@ namespace SharpLang.CompilerServices
                             return LLVM.BuildIntCast(builder, stack, expectedIntType, string.Empty);
                         }
                     }
+                    break;
+                case StackValueType.NativeInt:
+                    // NativeInt type, no conversion should be needed
                     break;
                 case StackValueType.Value:
                     // Value type, no conversion should be needed

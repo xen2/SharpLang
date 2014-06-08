@@ -54,6 +54,9 @@ namespace SharpLang.CompilerServices.Cecil
             if (type == null)
                 return null;
 
+            if (context == null)
+                return type;
+
             var genericInstanceTypeContext = context.DeclaringType as GenericInstanceType;
             var genericInstanceMethodContext = context as GenericInstanceMethod;
             if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)

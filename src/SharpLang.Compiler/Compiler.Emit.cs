@@ -79,7 +79,7 @@ namespace SharpLang.CompilerServices
                 stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
 
                 // Invoke ctor
-                EmitCall(stack, ctor);
+                EmitCall(stack, ctor.Signature, ctor.GeneratedValue);
 
                 // Add created object on the stack
                 stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
@@ -162,14 +162,20 @@ namespace SharpLang.CompilerServices
 
         private void EmitI8(List<StackValue> stack, long operandIndex)
         {
-            var intType = CreateType(corlib.MainModule.GetType(typeof(long).FullName));
-
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int64, int64,
                 LLVM.ConstInt(int64Type, (ulong)operandIndex, true)));
         }
 
-        private void EmitCall(List<StackValue> stack, Function targetMethod, ValueRef overrideMethod = default(ValueRef))
+        private void EmitLdnull(List<StackValue> stack)
+        {
+            var objectType = GetType(corlib.MainModule.GetType(typeof(object).FullName));
+
+            // Add constant integer value to stack
+            stack.Add(new StackValue(StackValueType.Object, objectType, LLVM.ConstNull(objectType.DefaultType)));
+        }
+
+        private void EmitCall(List<StackValue> stack, FunctionSignature targetMethod, ValueRef overrideMethod)
         {
             // Build argument list
             var targetNumParams = targetMethod.ParameterTypes.Length;
@@ -185,17 +191,17 @@ namespace SharpLang.CompilerServices
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
 
             // Invoke method
-            var actualMethod = overrideMethod.Value != IntPtr.Zero ? overrideMethod : targetMethod.GeneratedValue;
+            var actualMethod = overrideMethod;
             var call = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
 
             // Mark method as needed (if non-virtual call)
-            if (overrideMethod.Value == IntPtr.Zero)
+            if (LLVM.IsAGlobalVariable(actualMethod).Value != IntPtr.Zero)
             {
                 LLVM.SetLinkage(actualMethod, Linkage.ExternalLinkage);
             }
 
             // Push return result on stack
-            if (targetMethod.MethodReference.ReturnType.MetadataType != MetadataType.Void)
+            if (targetMethod.ReturnType.TypeReference.MetadataType != MetadataType.Void)
             {
                 // Convert return value from local to stack value
                 var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, call);
