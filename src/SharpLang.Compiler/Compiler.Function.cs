@@ -67,15 +67,16 @@ namespace SharpLang.CompilerServices
             var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
-            var hasBody = method.Resolve().HasBody;
-            var functionGlobal = hasBody
+            var resolvedMethod = method.Resolve();
+            var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) == MethodImplAttributes.InternalCall));
+            var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : new ValueRef(IntPtr.Zero);
 
             function = new Function(method, functionType, functionGlobal, returnType, parameterTypes);
             functions.Add(method, function);
 
-            if (hasBody)
+            if (hasDefinition)
             {
                 if (isExternal)
                 {

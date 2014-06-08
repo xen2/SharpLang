@@ -160,54 +160,50 @@ namespace SharpLang.CompilerServices
 
             bool isInterface = typeDefinition.IsInterface;
 
-            bool isExternal = typeDefinition.Module.Assembly != assembly;
-            if (!isExternal)
+            // Process methods
+            foreach (var method in typeDefinition.Methods)
             {
-                // Process methods
-                foreach (var method in typeDefinition.Methods)
+                // If a method contains generic parameters, skip it
+                // Its closed instantiations (with generic arguments) is what needs to be generated.
+                if (method.ContainsGenericParameter())
+                    continue;
+
+                var methodReference = ResolveGenericMethod(@class.TypeReference, method);
+                var function = CreateFunction(methodReference);
+
+                @class.Functions.Add(function);
+
+                if (method.IsVirtual)
                 {
-                    // If a method contains generic parameters, skip it
-                    // Its closed instantiations (with generic arguments) is what needs to be generated.
-                    if (method.ContainsGenericParameter())
-                        continue;
-
-                    var methodReference = ResolveGenericMethod(@class.TypeReference, method);
-                    var function = CreateFunction(methodReference);
-
-                    @class.Functions.Add(function);
-
-                    if (method.IsVirtual)
+                    if (isInterface)
                     {
-                        if (isInterface)
+                        // Store IMT slot
+                        function.VirtualSlot = (int)(GetMethodId(methodReference) % InterfaceMethodTableSize);
+                    }
+                    else if (method.IsNewSlot)
+                    {
+                        // New slot
+                        function.VirtualSlot = @class.VirtualTable.Count;
+                        @class.VirtualTable.Add(function);
+                    }
+                    else
+                    {
+                        // Find slot in base types
+                        var baseType = @class.BaseType;
+                        Function matchedMethod = null;
+                        while (baseType != null)
                         {
-                            // Store IMT slot
-                            function.VirtualSlot = (int)(GetMethodId(methodReference) % InterfaceMethodTableSize);
+                            matchedMethod = CecilExtensions.TryMatchMethod(baseType, method);
+                            if (matchedMethod != null)
+                                break;
+                            baseType = baseType.BaseType;
                         }
-                        else if (method.IsNewSlot)
-                        {
-                            // New slot
-                            function.VirtualSlot = @class.VirtualTable.Count;
-                            @class.VirtualTable.Add(function);
-                        }
-                        else
-                        {
-                            // Find slot in base types
-                            var baseType = @class.BaseType;
-                            Function matchedMethod = null;
-                            while (baseType != null)
-                            {
-                                matchedMethod = CecilExtensions.TryMatchMethod(baseType, method);
-                                if (matchedMethod != null)
-                                    break;
-                                baseType = baseType.BaseType;
-                            }
 
-                            if (matchedMethod == null)
-                                throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.TypeReference));
+                        if (matchedMethod == null)
+                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.TypeReference));
 
-                            function.VirtualSlot = matchedMethod.VirtualSlot;
-                            @class.VirtualTable[function.VirtualSlot] = function;
-                        }
+                        function.VirtualSlot = matchedMethod.VirtualSlot;
+                        @class.VirtualTable[function.VirtualSlot] = function;
                     }
                 }
             }
