@@ -68,7 +68,9 @@ namespace SharpLang.CompilerServices
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             var resolvedMethod = method.Resolve();
-            var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) == MethodImplAttributes.InternalCall));
+            var hasDefinition = resolvedMethod != null
+                && (resolvedMethod.HasBody
+                    || ((resolvedMethod.ImplAttributes & (MethodImplAttributes.InternalCall | MethodImplAttributes.Runtime)) != 0));
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : new ValueRef(IntPtr.Zero);
