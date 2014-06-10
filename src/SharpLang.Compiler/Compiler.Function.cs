@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
+using CallSite = Mono.Cecil.CallSite;
 
 namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
+        // Additional actions that can be added on Nop instructions
+        // TODO: Need a better system for longer term (might need Cecil changes?)
+        private static readonly ConditionalWeakTable<Instruction, Action<List<StackValue>>> InstructionActions = new ConditionalWeakTable<Instruction, Action<List<StackValue>>>();
+
         /// <summary>
         /// Gets the function.
         /// </summary>
@@ -165,68 +171,9 @@ namespace SharpLang.CompilerServices
                 if (declaringClass.BaseType != null &&
                     declaringClass.BaseType.TypeReference.FullName == typeof(MulticastDelegate).FullName)
                 {
-                    var delegateType = corlib.MainModule.GetType(typeof(Delegate).FullName);
-                    var targetField = delegateType.Fields.First(x => x.Name == "_target");
-                    var methodPtrField = delegateType.Fields.First(x => x.Name == "_methodPtr");
-
-                    body = new MethodBody(method);
-                    var il = body.GetILProcessor();
-                    if (method.Name == ".ctor")
-                    {
-                        // TODO: static method: target should be checked for null, and we should push this instead
-                        // Also, we should generate a thunk in _methodPtr and move method to _methodPtrAux.
-
-                        // this._target = target;
-                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        il.Append(Instruction.Create(OpCodes.Ldarg, method.Parameters[0]));
-                        il.Append(Instruction.Create(OpCodes.Stfld, targetField));
-
-                        // this._methodPtr = method;
-                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        il.Append(Instruction.Create(OpCodes.Ldarg, method.Parameters[1]));
-                        il.Append(Instruction.Create(OpCodes.Stfld, methodPtrField));
-
-                        // return;
-                        il.Append(Instruction.Create(OpCodes.Ret));
-                    }
-                    else if (method.Name == "Invoke")
-                    {
-                        // For now, generate IL
-                        // Note that we could probably optimize at callsite too,
-                        // but probably not necessary if LLVM and sealed class are optimized/inlined well enough
-
-                        // ldarg_0
-                        // ldfld _methodPtr
-                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        il.Append(Instruction.Create(OpCodes.Ldfld, methodPtrField));
-
-                        // ldarg_0
-                        // ldfld _target
-                        il.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        il.Append(Instruction.Create(OpCodes.Ldfld, targetField));
-
-                        var callsite = new CallSite(method.ReturnType);
-                        callsite.Parameters.Add(new ParameterDefinition(targetField.FieldType));
-
-                        foreach (var parameter in method.Parameters)
-                        {
-                            callsite.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
-
-                            // ldarg
-                            il.Append(Instruction.Create(OpCodes.Ldarg, parameter));
-                        }
-
-                        // calli
-                        il.Append(Instruction.Create(OpCodes.Calli, callsite));
-
-                        // ret
-                        il.Append(Instruction.Create(OpCodes.Ret));
-                    }
-                    else
-                    {
-                        LLVM.BuildUnreachable(builder);
+                    body = GenerateDelegateMethod(method, declaringClass);
+                    if (body == null)
                         return;
-                    }
 
                     codeSize = UpdateOffsets(body);
                 }
@@ -354,6 +301,18 @@ namespace SharpLang.CompilerServices
 
                 switch (opcode)
                 {
+                    case Code.Nop:
+                    {
+                        // TODO: Insert nop? Debugger step?
+
+                        // Check if there is a custom action
+                        Action<List<StackValue>> instructionAction;
+                        if (InstructionActions.TryGetValue(instruction, out instructionAction))
+                        {
+                            instructionAction(stack);
+                        }
+                        break;
+                    }
                     case Code.Pop:
                     {
                         // Pop and discard last stack value
@@ -1219,7 +1178,7 @@ namespace SharpLang.CompilerServices
                 targetStack = new StackValue[sourceStack.Count];
                 if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero)
                     throw new InvalidOperationException("Target basic block should have no instruction yet.");
-                LLVM.PositionBuilderAtEnd(builderPhi, targetBasicBlock);
+                LLVM.PositionBuilderAtEnd(builder2, targetBasicBlock);
             }
 
             for (int index = 0; index < sourceStack.Count; index++)
@@ -1232,7 +1191,7 @@ namespace SharpLang.CompilerServices
                 if (mergedStackValue == null)
                 {
                     // TODO: Check stack type during merging?
-                    mergedStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builderPhi, LLVM.TypeOf(stackValue.Value), string.Empty));
+                    mergedStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builder2, LLVM.TypeOf(stackValue.Value), string.Empty));
                     targetStack[index] = mergedStackValue;
                 }
 

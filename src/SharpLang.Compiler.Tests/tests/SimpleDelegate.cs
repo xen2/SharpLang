@@ -25,7 +25,7 @@ public static class Program
         action1("Test1");
 
         // TODO: Delegate to static members are not supported yet
-        //SimpleDelegate action2 = Method;
-        //action2("Test2");
+        SimpleDelegate action2 = Method;
+        action2("Test2");
     }
 }

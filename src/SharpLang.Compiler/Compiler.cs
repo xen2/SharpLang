@@ -32,7 +32,7 @@ namespace SharpLang.CompilerServices
         private TypeRef imtEntryType;
 
         // Builder that is used for PHI nodes
-        private BuilderRef builderPhi;
+        private BuilderRef builder2;
 
         private AssemblyDefinition assembly;
         private AssemblyDefinition corlib;
@@ -58,7 +58,7 @@ namespace SharpLang.CompilerServices
             int64Type = LLVM.Int64TypeInContext(context);
             intPtrSize = 4;            // Or 8?
             nativeIntType = int32Type; // Or int64Type?
-            builderPhi = LLVM.CreateBuilderInContext(context);
+            builder2 = LLVM.CreateBuilderInContext(context);
 
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
             int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName));

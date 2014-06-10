@@ -223,16 +223,24 @@ namespace SharpLang.CompilerServices
         /// </summary>
         private void EmitBrCommon(StackValue stack, IntPredicate zeroPredicate, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
-            // Zero constant
-            var zero = LLVM.ConstInt(int32Type, 0, false);
-
             switch (stack.StackType)
             {
                 case StackValueType.Int32:
+                {
                     // Compare stack value with zero, and accordingly jump to either target or next block
+                    var zero = LLVM.ConstInt(int32Type, 0, false);
                     var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
                     break;
+                }
+                case StackValueType.Object:
+                {
+                    // Compare stack value with zero, and accordingly jump to either target or next block
+                    var zero = LLVM.ConstPointerNull(LLVM.TypeOf(stack.Value));
+                    var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
+                    LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
+                    break;
+                }
                 default:
                     throw new NotImplementedException();
             }
@@ -256,7 +264,7 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = BuildFieldIndices(field, @object);
+            var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
 
             // Find field address using GEP
             var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
@@ -273,7 +281,7 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Build indices for GEP
-            var indices = BuildFieldIndices(field, @object);
+            var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
 
             // Find field address using GEP
             var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
@@ -288,7 +296,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
         }
 
-        private ValueRef[] BuildFieldIndices(Field field, StackValue @object)
+        private ValueRef[] BuildFieldIndices(Field field, StackValueType stackValueType, Type type)
         {
             // Build indices for GEP
             var indices = new List<ValueRef>(3);
@@ -296,7 +304,7 @@ namespace SharpLang.CompilerServices
             // First pointer indirection
             indices.Add(LLVM.ConstInt(int32Type, 0, false));
 
-            if (@object.StackType == StackValueType.Object)
+            if (stackValueType == StackValueType.Object)
             {
                 // Access data
                 indices.Add(LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false));
@@ -306,7 +314,7 @@ namespace SharpLang.CompilerServices
                 // - cast
                 // - store class depth (and just do a substraction)
                 int depth = 0;
-                var @class = GetClass(@object.Type.TypeReference);
+                var @class = GetClass(type.TypeReference);
                 while (@class != null)
                 {
                     if (@class == field.DeclaringClass)
@@ -317,7 +325,7 @@ namespace SharpLang.CompilerServices
                 }
 
                 if (@class == null)
-                    throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, @object.Type.TypeReference));
+                    throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, type.TypeReference));
 
                 // Apply GEP indices to find right object (parent is always stored in first element)
                 for (int i = 0; i < depth; ++i)
