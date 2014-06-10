@@ -6,7 +6,7 @@ That is, it allows you to compile C# and other .NET languages code to any suppor
 
 ## Licence
 
-To be determined, but a permissive licence (likely MIT, LLVM or BSD).
+BSD 2-clause license.
 
 ## Objectives
 
