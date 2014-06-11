@@ -56,7 +56,14 @@ namespace SharpLang.CompilerServices.Cecil
                 return false;
 
             if (candidate.Name != method.Name)
-                return false;
+            {
+                // Check for interface name (i.e. System.IConvertible.ToBoolean matches ToBoolean)
+                var lastDot = candidate.Name.LastIndexOf('.');
+                if (lastDot == -1
+                    || candidate.Name.Substring(lastDot + 1) != method.Name
+                    || candidate.Name.Substring(0, lastDot) != method.DeclaringType.FullName)
+                    return false;
+            }
 
             if (!TypeMatch(candidate.ReturnType, method.ReturnType))
                 return false;
