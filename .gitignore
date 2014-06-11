@@ -34,3 +34,4 @@ _ReSharper*/
 /deps/llvm
 /tools/swig
 /src/SharpLang.Compiler.Tests/tests/*.bc
+/src/**/*.csproj
