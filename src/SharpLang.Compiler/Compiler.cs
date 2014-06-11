@@ -17,7 +17,9 @@ namespace SharpLang.CompilerServices
         private ModuleRef module;
         private ContextRef context;
 
+        // RuntimeInline
         private ValueRef allocObjectFunction;
+        private ValueRef resolveInterfaceCallFunction;
 
         // Builder for normal instructions
         private BuilderRef builder;
@@ -50,6 +52,7 @@ namespace SharpLang.CompilerServices
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
 
             allocObjectFunction = RuntimeInline.Runtime.define_allocObject(module);
+            resolveInterfaceCallFunction = RuntimeInline.Runtime.define_resolveInterfaceCall(module);
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
@@ -64,9 +67,9 @@ namespace SharpLang.CompilerServices
             int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName));
             int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName));
 
-            // struct IMTSlot { i8* functionPtr, i32 functionId, IMTEntry* nextEntry }
+            // struct IMTEntry { i32 functionId, i8* functionPtr }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
-            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, int32Type, LLVM.PointerType(imtEntryType, 0) }, false);
+            LLVM.StructSetBody(imtEntryType, new[] { int32Type, intPtrType }, false);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)

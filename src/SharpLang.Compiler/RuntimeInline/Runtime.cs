@@ -16,6 +16,11 @@ public class Runtime {
       return ret;
     }
 
+  public static ValueRef define_resolveInterfaceCall(ModuleRef mod) {
+      ValueRef ret = new ValueRef(RuntimePINVOKE.define_resolveInterfaceCall(mod.Value));
+      return ret;
+    }
+
 }
 
 }

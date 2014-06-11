@@ -114,3 +114,133 @@ ptr_4->setAttributes(ptr_4_PAL);
 ReturnInst::Create(mod->getContext(), ptr_4, label_3);
 return func_allocObject;
 }
+
+Function* define_resolveInterfaceCall(Module *mod) {
+
+// Type Definitions
+PointerType* PointerTy_0 = PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
+std::vector<Type*>FuncTy_6_args;
+FuncTy_6_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_6_args.push_back(PointerTy_0);
+FunctionType* FuncTy_6 = FunctionType::get(
+ /*Result=*/PointerTy_0,
+ /*Params=*/FuncTy_6_args,
+ /*isVarArg=*/false);
+
+StructType *StructTy_struct_IMTEntry = mod->getTypeByName("struct.IMTEntry");
+if (!StructTy_struct_IMTEntry) {
+StructTy_struct_IMTEntry = StructType::create(mod->getContext(), "struct.IMTEntry");
+}
+std::vector<Type*>StructTy_struct_IMTEntry_fields;
+StructTy_struct_IMTEntry_fields.push_back(IntegerType::get(mod->getContext(), 32));
+StructTy_struct_IMTEntry_fields.push_back(PointerTy_0);
+if (StructTy_struct_IMTEntry->isOpaque()) {
+StructTy_struct_IMTEntry->setBody(StructTy_struct_IMTEntry_fields, /*isPacked=*/false);
+}
+
+PointerType* PointerTy_7 = PointerType::get(StructTy_struct_IMTEntry, 0);
+
+PointerType* PointerTy_8 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
+
+PointerType* PointerTy_9 = PointerType::get(PointerTy_0, 0);
+
+
+// Function Declarations
+
+// Global Variable Declarations
+
+// Constant Definitions
+ConstantInt* const_int32_10 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
+ConstantInt* const_int32_11 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
+ConstantInt* const_int32_12 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("-2"), 10));
+
+// Global Variable Definitions
+
+Function* func_resolveInterfaceCall = mod->getFunction("resolveInterfaceCall");
+if (!func_resolveInterfaceCall) {
+func_resolveInterfaceCall = Function::Create(
+ /*Type=*/FuncTy_6,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"resolveInterfaceCall", mod); 
+func_resolveInterfaceCall->setCallingConv(CallingConv::C);
+}
+AttributeSet func_resolveInterfaceCall_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoUnwind);
+   B.addAttribute(Attribute::ReadOnly);
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func_resolveInterfaceCall_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func_resolveInterfaceCall->setAttributes(func_resolveInterfaceCall_PAL);
+Function::arg_iterator args = func_resolveInterfaceCall->arg_begin();
+Value* int32_method = args++;
+int32_method->setName("method");
+Value* ptr_content = args++;
+ptr_content->setName("content");
+
+BasicBlock* label_13 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+BasicBlock* label_14 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+BasicBlock* label_15 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+BasicBlock* label_16 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+BasicBlock* label_17 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+
+// Block  (label_13)
+CastInst* int32_18 = new PtrToIntInst(ptr_content, IntegerType::get(mod->getContext(), 32), "", label_13);
+BinaryOperator* int32_19 = BinaryOperator::Create(Instruction::And, int32_18, const_int32_10, "", label_13);
+ICmpInst* int1_20 = new ICmpInst(*label_13, ICmpInst::ICMP_EQ, int32_19, const_int32_11, "");
+BranchInst::Create(label_17, label_14, int1_20, label_13);
+
+// Block  (label_14)
+BinaryOperator* int32_22 = BinaryOperator::Create(Instruction::And, int32_18, const_int32_12, "", label_14);
+CastInst* ptr_23 = new IntToPtrInst(int32_22, PointerTy_7, "", label_14);
+BranchInst::Create(label_15, label_14);
+
+// Block  (label_15)
+Argument* fwdref_25 = new Argument(PointerTy_7);
+PHINode* ptr_imtEntry_0 = PHINode::Create(PointerTy_7, 2, "imtEntry.0", label_15);
+ptr_imtEntry_0->addIncoming(ptr_23, label_14);
+ptr_imtEntry_0->addIncoming(fwdref_25, label_15);
+
+std::vector<Value*> ptr_26_indices;
+ptr_26_indices.push_back(const_int32_11);
+ptr_26_indices.push_back(const_int32_11);
+Instruction* ptr_26 = GetElementPtrInst::Create(ptr_imtEntry_0, ptr_26_indices, "", label_15);
+LoadInst* int32_27 = new LoadInst(ptr_26, "", false, label_15);
+int32_27->setAlignment(4);
+ICmpInst* int1_28 = new ICmpInst(*label_15, ICmpInst::ICMP_NE, int32_27, const_int32_11, "");
+ICmpInst* int1_not_ = new ICmpInst(*label_15, ICmpInst::ICMP_NE, int32_27, int32_method, "not.");
+BinaryOperator* int1__ = BinaryOperator::Create(Instruction::And, int1_28, int1_not_, ".", label_15);
+GetElementPtrInst* ptr_29 = GetElementPtrInst::Create(ptr_imtEntry_0, const_int32_10, "", label_15);
+BranchInst::Create(label_15, label_16, int1__, label_15);
+
+// Block  (label_16)
+PHINode* ptr_imtEntry_0_lcssa = PHINode::Create(PointerTy_7, 1, "imtEntry.0.lcssa", label_16);
+ptr_imtEntry_0_lcssa->addIncoming(ptr_imtEntry_0, label_15);
+
+std::vector<Value*> ptr_31_indices;
+ptr_31_indices.push_back(const_int32_11);
+ptr_31_indices.push_back(const_int32_10);
+Instruction* ptr_31 = GetElementPtrInst::Create(ptr_imtEntry_0_lcssa, ptr_31_indices, "", label_16);
+LoadInst* ptr_32 = new LoadInst(ptr_31, "", false, label_16);
+ptr_32->setAlignment(4);
+BranchInst::Create(label_17, label_16);
+
+// Block  (label_17)
+PHINode* ptr_result_0 = PHINode::Create(PointerTy_0, 2, "result.0", label_17);
+ptr_result_0->addIncoming(ptr_32, label_16);
+ptr_result_0->addIncoming(ptr_content, label_13);
+
+ReturnInst::Create(mod->getContext(), ptr_result_0, label_17);
+
+// Resolve Forward References
+fwdref_25->replaceAllUsesWith(ptr_29); delete fwdref_25;
+return func_resolveInterfaceCall;
+}

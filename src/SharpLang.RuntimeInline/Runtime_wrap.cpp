@@ -280,6 +280,18 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_define_allocObject(void * jarg1) {
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_define_resolveInterfaceCall(void * jarg1) {
+  void * jresult ;
+  Module *arg1 = (Module *) 0 ;
+  Function *result = 0 ;
+  
+  arg1 = (Module *)jarg1; 
+  result = (Function *)define_resolveInterfaceCall(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
 #ifdef __cplusplus
 }
 #endif

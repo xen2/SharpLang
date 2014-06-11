@@ -160,24 +160,43 @@ namespace SharpLang.CompilerServices
                             imtSlot.AddLast(new InterfaceMethodTableEntry { Function = resolvedFunction, MethodId = methodId, SlotIndex = imtSlotIndex });
                         }
                     }
-                    var interfaceMethodTableConstant = LLVM.ConstArray(imtEntryType, interfaceMethodTable.Select(imtSlot =>
+                    var interfaceMethodTableConstant = LLVM.ConstArray(intPtrType, interfaceMethodTable.Select(imtSlot =>
                     {
                         if (imtSlot == null)
                         {
                             // No entries: null slot
-                            return LLVM.ConstNull(imtEntryType);
+                            return LLVM.ConstNull(intPtrType);
                         }
-        
-                        if (imtSlot.Count > 1)
-                            throw new NotImplementedException("IMT with more than one entry per slot is not implemented yet.");
-        
-                        var imtEntry = imtSlot.First.Value;
-                        return LLVM.ConstNamedStruct(imtEntryType, new[]
+
+                        if (imtSlot.Count == 1)
                         {
-                            LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
-                            LLVM.ConstInt(int32Type, (ulong)imtEntry.MethodId, false),                          // i32 functionId
-                            LLVM.ConstPointerNull(LLVM.PointerType(imtEntryType, 0)),                           // IMTEntry* nextSlot
-                        });
+                            // Single entry
+                            var imtEntry = imtSlot.First.Value;
+                            return LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType);
+                        }
+                        else
+                        {
+                            // Multiple entries, create IMT array with all entries
+                            // TODO: Support covariance/contravariance?
+                            var imtEntries = LLVM.ConstArray(imtEntryType, imtSlot.Select(imtEntry =>
+                            {
+                                return LLVM.ConstNamedStruct(imtEntryType, new[]
+                                {
+                                    LLVM.ConstInt(int32Type, (ulong)imtEntry.MethodId, false),                          // i32 functionId
+                                    LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),                // i8* functionPtr
+                                });
+                            })
+                            .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryType), 1)).ToArray()); // Append { 0, 0 } terminator
+                            var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), "IMTEntry");
+                            LLVM.SetInitializer(imtEntryGlobal, imtEntries);
+                            
+                            // Add 1 to differentiate between single entry and IMT array
+                            return LLVM.ConstIntToPtr(
+                                LLVM.ConstAdd(
+                                    LLVM.ConstPtrToInt(imtEntryGlobal, nativeIntType),
+                                    LLVM.ConstInt(nativeIntType, 1, false)),
+                                intPtrType);
+                        }
                     }).ToArray());
         
                     // Build static fields

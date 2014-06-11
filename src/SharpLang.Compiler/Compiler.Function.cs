@@ -403,18 +403,19 @@ namespace SharpLang.CompilerServices
 
                                 var imtEntry = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
 
-                                var indices2 = new[]
-                                {
-                                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                                    LLVM.ConstInt(int32Type, 0, false), // Access to method slot
-                                };
-                                var imtMethod = LLVM.BuildInBoundsGEP(builder, imtEntry, indices2, string.Empty);
-                                var methodPointer = LLVM.BuildLoad(builder, imtMethod, string.Empty);
-                                var resolvedMethod = LLVM.BuildPointerCast(builder, methodPointer, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
+                                var methodPointer = LLVM.BuildLoad(builder, imtEntry, string.Empty);
 
                                 // TODO: Compare method ID and iterate in the linked list until the correct match is found
                                 // If no match is found, it's likely due to covariance/contravariance, so we will need a fallback
                                 var methodId = GetMethodId(targetMethod.MethodReference);
+
+                                // Resolve interface call
+                                var resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunction, new[]
+                                {
+                                    LLVM.ConstInt(int32Type, methodId, false),
+                                    methodPointer,
+                                }, string.Empty);
+                                resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
 
                                 // Emit call
                                 EmitCall(stack, targetMethod.Signature, resolvedMethod);
