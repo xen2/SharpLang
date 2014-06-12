@@ -59,7 +59,11 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Pointer:
                 {
                     var type = BuildType(((PointerType)typeReference).ElementType);
-                    dataType = LLVM.PointerType(type.DataType, 0);
+                    // Special case: void*
+                    if (LLVM.VoidTypeInContext(context) == type.DataType)
+                        dataType = intPtrType;
+                    else
+                        dataType = LLVM.PointerType(type.DataType, 0);
                     stackType = StackValueType.NativeInt;
                     break;
                 }
