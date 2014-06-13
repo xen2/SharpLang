@@ -38,11 +38,11 @@ public static class Program
         ITest test1 = new Test1();
         ITest test2 = new Test2();
         ITest test3 = new Test3();
-        //ITest test4 = new Test4(); // Not working yet
+        ITest test4 = new Test4();
 
         System.Console.WriteLine(test1.A());
         System.Console.WriteLine(test2.A());
         System.Console.WriteLine(test3.A());
-        //System.Console.WriteLine(test4.A());  // Not working yet
+        System.Console.WriteLine(test4.A());
     }
 }

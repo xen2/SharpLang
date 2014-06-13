@@ -52,18 +52,23 @@ namespace SharpLang.CompilerServices.Cecil
 
         static bool MethodMatch(MethodReference candidate, MethodReference method)
         {
-            if (!candidate.Resolve().IsVirtual)
+            var candidateResolved = candidate.Resolve();
+
+            // Check overrides
+            if (candidateResolved.HasOverrides)
+            {
+                foreach (var @override in candidateResolved.Overrides)
+                {
+                    if (@override == method)
+                        return true;
+                }
+            }
+
+            if (!candidateResolved.IsVirtual)
                 return false;
 
             if (candidate.Name != method.Name)
-            {
-                // Check for interface name (i.e. System.IConvertible.ToBoolean matches ToBoolean)
-                var lastDot = candidate.Name.LastIndexOf('.');
-                if (lastDot == -1
-                    || candidate.Name.Substring(lastDot + 1) != method.Name
-                    || candidate.Name.Substring(0, lastDot) != method.DeclaringType.FullName)
-                    return false;
-            }
+                return false;
 
             if (!TypeMatch(candidate.ReturnType, method.ReturnType))
                 return false;
