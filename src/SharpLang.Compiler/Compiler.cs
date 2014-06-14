@@ -168,7 +168,8 @@ namespace SharpLang.CompilerServices
             {
                 // If a method contains generic parameters, skip it
                 // Its closed instantiations (with generic arguments) is what needs to be generated.
-                if (method.ContainsGenericParameter())
+                // (except interface methods)
+                if (method.ContainsGenericParameter() && !isInterface)
                     continue;
 
                 var methodReference = ResolveGenericMethod(@class.TypeReference, method);
