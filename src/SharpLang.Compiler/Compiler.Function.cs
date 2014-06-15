@@ -484,7 +484,7 @@ namespace SharpLang.CompilerServices
                     case Code.Box:
                     {
                         var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(typeReference);
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, typeReference));
 
                         var valueType = stack.Pop();
 
@@ -505,7 +505,7 @@ namespace SharpLang.CompilerServices
                     case Code.Unbox_Any:
                     {
                         var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(typeReference);
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, typeReference));
 
                         var obj = stack.Pop();
 
