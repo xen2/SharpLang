@@ -2,7 +2,7 @@
 
 SharpLang is a .NET (MSIL) compiler front-end for LLVM.
 
-That is, it allows you to compile C# and other .NET languages code to any supported LLVM backend.
+It allows you to compile C# and other .NET languages code to any supported LLVM backend.
 
 ## Licence
 
