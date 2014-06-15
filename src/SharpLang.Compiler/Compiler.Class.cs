@@ -95,6 +95,7 @@ namespace SharpLang.CompilerServices
                 var parentClass = typeDefinition.BaseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType)) : null;
 
                 // Add parent class
+                List<Class> superTypes = null;
                 if (parentClass != null)
                 {
                     @class.BaseType = parentClass;
@@ -103,7 +104,22 @@ namespace SharpLang.CompilerServices
                     @class.VirtualTable.AddRange(parentClass.VirtualTable);
                     foreach (var @interface in parentClass.Interfaces)
                         @class.Interfaces.Add(@interface);
+
+                    @class.Depth = parentClass.Depth + 1;
                 }
+
+                // Build list of super types
+                superTypes = new List<Class>(@class.Depth);
+                var currentClass = @class;
+                while (currentClass != null)
+                {
+                    superTypes.Add(currentClass);
+                    currentClass = currentClass.BaseType;
+                }
+
+                // Reverse so that the list start with most inherited object
+                // (allows faster type checking since a given type will always be at a given index)
+                superTypes.Reverse();
 
                 // Build methods slots
                 // TODO: This will trigger their compilation, but maybe we might want to defer that later
@@ -212,13 +228,37 @@ namespace SharpLang.CompilerServices
     
                     var staticFieldsEmpty = LLVM.ConstNull(LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false));
                     fieldTypes.Clear(); // Reused for non-static fields after
-    
+
+                    // Build super types
+                    // Helpful for fast is/as checks on class hierarchy
+                    var superTypeCount = LLVM.ConstInt(int32Type, (ulong)@class.Depth + 1, false);
+                    ValueRef superTypesGlobal;
+
+                    // Super types global
+                    var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)superTypes.Count), string.Empty);
+
+                    var zero = LLVM.ConstInt(int32Type, 0, false);
+                    superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] { zero, zero });
+
                     // Build RTTI
-                    var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[] { parentRuntimeTypeInfo, interfaceMethodTableConstant, vtableConstant, staticFieldsEmpty }, false);
+                    var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[]
+                    {
+                        parentRuntimeTypeInfo,
+                        superTypeCount,
+                        superTypesGlobal,
+                        interfaceMethodTableConstant,
+                        vtableConstant,
+                        staticFieldsEmpty,
+                    }, false);
                     var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
                     LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
                     LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
                     @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
+
+                    // Build super type list (after RTTI since we need pointer to RTTI)
+                    var superTypesConstant = LLVM.ConstArray(intPtrType,
+                        superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
+                    LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
                 }
 
                 // Build actual type data (fields)

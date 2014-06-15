@@ -122,6 +122,14 @@ namespace SharpLang.CompilerServices
         /// </value>
         public ValueRef GeneratedRuntimeTypeInfoGlobal { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets the depth of this class in type hierarchy.
+        /// </summary>
+        /// <value>
+        /// The depth of this class in type hierarchy.
+        /// </value>
+        public int Depth { get; set; }
+
         /// <inheritdoc/>
         public override string ToString()
         {
