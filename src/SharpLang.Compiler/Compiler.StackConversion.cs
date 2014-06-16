@@ -63,6 +63,11 @@ namespace SharpLang.CompilerServices
                 }
             }
 
+            if (stack.StackType == StackValueType.Float && stack.Type == localType)
+            {
+                return stackValue;
+            }
+
             // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
             if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
                 && LLVM.GetTypeKind(localType.DefaultType) == TypeKind.IntegerTypeKind)
@@ -112,6 +117,9 @@ namespace SharpLang.CompilerServices
                     break;
                 case StackValueType.Object:
                     // TODO: Check type conversions (upcasts, etc...)
+                    break;
+                case StackValueType.Float:
+                    // Float type, no conversion should be needed
                     break;
                 default:
                     throw new NotImplementedException();

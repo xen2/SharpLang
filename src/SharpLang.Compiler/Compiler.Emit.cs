@@ -167,6 +167,20 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(int64Type, (ulong)operandIndex, true)));
         }
 
+        private void EmitR4(List<StackValue> stack, float operandIndex)
+        {
+            // Add constant integer value to stack
+            stack.Add(new StackValue(StackValueType.Float, @float,
+                LLVM.ConstReal(@float.DataType, operandIndex)));
+        }
+
+        private void EmitR8(List<StackValue> stack, double operandIndex)
+        {
+            // Add constant integer value to stack
+            stack.Add(new StackValue(StackValueType.Float, @double,
+                LLVM.ConstReal(@double.DataType, operandIndex)));
+        }
+
         private void EmitLdnull(List<StackValue> stack)
         {
             var objectType = GetType(corlib.MainModule.GetType(typeof(object).FullName));
