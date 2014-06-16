@@ -41,6 +41,12 @@ void System_Void_System_Console__WriteLine_System_UInt64_(uint64_t i)
 	printf("%llu\n", i);
 }
 
+// void System.Console.WriteLine(uint)
+void System_Void_System_Console__WriteLine_System_Boolean_(uint8_t b)
+{
+	printf("%s\n", b != 0 ? "True" : "False");
+}
+
 // void System.Console.WriteLine(float)
 void System_Void_System_Console__WriteLine_System_Single_(float f)
 {

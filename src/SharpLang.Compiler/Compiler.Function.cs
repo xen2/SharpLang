@@ -859,6 +859,65 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Comparison opcodes (Ceq, Cgt, etc...)
+                    case Code.Ceq:
+                    case Code.Cgt:
+                    case Code.Cgt_Un:
+                    case Code.Clt:
+                    case Code.Clt_Un:
+                    {
+                        var operand2 = stack.Pop();
+                        var operand1 = stack.Pop();
+
+                        var value1 = operand1.Value;
+                        var value2 = operand2.Value;
+
+                        if (operand1.StackType != operand2.StackType
+                            || operand1.Type != operand2.Type)
+                            throw new InvalidOperationException("Comparison between operands of different types.");
+
+                        ValueRef compareResult;
+                        if (operand1.StackType == StackValueType.Float)
+                        {
+                            RealPredicate predicate;
+                            switch (opcode)
+                            {
+                                case Code.Ceq:      predicate = RealPredicate.RealOEQ; break;
+                                case Code.Cgt:      predicate = RealPredicate.RealOGT; break;
+                                case Code.Cgt_Un:   predicate = RealPredicate.RealUGT; break;
+                                case Code.Clt:      predicate = RealPredicate.RealOLT; break;
+                                case Code.Clt_Un:   predicate = RealPredicate.RealULT; break;
+                                default:
+                                    throw new NotSupportedException();
+                            }
+                            compareResult = LLVM.BuildFCmp(builder, predicate, value1, value2, string.Empty);
+                        }
+                        else
+                        {
+                            IntPredicate predicate;
+                            switch (opcode)
+                            {
+                                case Code.Ceq:      predicate = IntPredicate.IntEQ; break;
+                                case Code.Cgt:      predicate = IntPredicate.IntSGT; break;
+                                case Code.Cgt_Un:   predicate = IntPredicate.IntUGT; break;
+                                case Code.Clt:      predicate = IntPredicate.IntSLT; break;
+                                case Code.Clt_Un:   predicate = IntPredicate.IntULT; break;
+                                default:
+                                    throw new NotSupportedException();
+                            }
+                            compareResult = LLVM.BuildICmp(builder, predicate, value1, value2, string.Empty);
+                        }
+
+                        // Extends to int32
+                        compareResult = LLVM.BuildZExt(builder, compareResult, int32Type, string.Empty);
+
+                        // Push result back on the stack
+                        stack.Add(new StackValue(StackValueType.Int32, int32, compareResult));
+
+                        break;
+                    }
+                    #endregion
+
                     #region Conversion opcodes (Conv_U, Conv_I, etc...)
                     case Code.Conv_U:
                     case Code.Conv_I:
