@@ -859,6 +859,115 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Conditional branching (Beq, Bgt, etc...)
+                    case Code.Beq:
+                    case Code.Beq_S:
+                    case Code.Bge:
+                    case Code.Bge_S:
+                    case Code.Bgt:
+                    case Code.Bgt_S:
+                    case Code.Ble:
+                    case Code.Ble_S:
+                    case Code.Blt:
+                    case Code.Blt_S:
+                    case Code.Bne_Un:
+                    case Code.Bne_Un_S:
+                    case Code.Bge_Un:
+                    case Code.Bge_Un_S:
+                    case Code.Bgt_Un:
+                    case Code.Bgt_Un_S:
+                    case Code.Ble_Un:
+                    case Code.Ble_Un_S:
+                    case Code.Blt_Un:
+                    case Code.Blt_Un_S:
+                    {
+                        var targetInstruction = (Instruction)instruction.Operand;
+
+                        var operand2 = stack.Pop();
+                        var operand1 = stack.Pop();
+
+                        var value1 = operand1.Value;
+                        var value2 = operand2.Value;
+
+                        if ((operand1.StackType == StackValueType.NativeInt && operand2.StackType != StackValueType.NativeInt)
+                            || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
+                            throw new NotImplementedException("Comparison between native int and int types.");
+
+                        if (operand1.StackType != operand2.StackType
+                            || operand1.Type != operand2.Type)
+                            throw new InvalidOperationException("Comparison between operands of different types.");
+
+                        ValueRef compareResult;
+                        if (operand1.StackType == StackValueType.Float)
+                        {
+                            RealPredicate predicate;
+                            switch (opcode)
+                            {
+                                case Code.Beq:
+                                case Code.Beq_S:    predicate = RealPredicate.RealOEQ; break;
+                                case Code.Bge:
+                                case Code.Bge_S:    predicate = RealPredicate.RealOGE; break;
+                                case Code.Bgt:
+                                case Code.Bgt_S:    predicate = RealPredicate.RealOGT; break;
+                                case Code.Ble:
+                                case Code.Ble_S:    predicate = RealPredicate.RealOLE; break;
+                                case Code.Blt:
+                                case Code.Blt_S:    predicate = RealPredicate.RealOLT; break;
+                                case Code.Bne_Un:
+                                case Code.Bne_Un_S: predicate = RealPredicate.RealUNE; break;
+                                case Code.Bge_Un:
+                                case Code.Bge_Un_S: predicate = RealPredicate.RealUGE; break;
+                                case Code.Bgt_Un:
+                                case Code.Bgt_Un_S: predicate = RealPredicate.RealUGT; break;
+                                case Code.Ble_Un:
+                                case Code.Ble_Un_S: predicate = RealPredicate.RealULE; break;
+                                case Code.Blt_Un:
+                                case Code.Blt_Un_S: predicate = RealPredicate.RealULT; break;
+                                default:
+                                    throw new NotSupportedException();
+                            }
+                            compareResult = LLVM.BuildFCmp(builder, predicate, value1, value2, string.Empty);
+                        }
+                        else
+                        {
+                            IntPredicate predicate;
+                            switch (opcode)
+                            {
+                                case Code.Beq:
+                                case Code.Beq_S:    predicate = IntPredicate.IntEQ; break;
+                                case Code.Bge:
+                                case Code.Bge_S:    predicate = IntPredicate.IntSGE; break;
+                                case Code.Bgt:
+                                case Code.Bgt_S:    predicate = IntPredicate.IntSGT; break;
+                                case Code.Ble:
+                                case Code.Ble_S:    predicate = IntPredicate.IntSLE; break;
+                                case Code.Blt:
+                                case Code.Blt_S:    predicate = IntPredicate.IntSLT; break;
+                                case Code.Bne_Un:
+                                case Code.Bne_Un_S: predicate = IntPredicate.IntNE; break;
+                                case Code.Bge_Un:
+                                case Code.Bge_Un_S: predicate = IntPredicate.IntUGE; break;
+                                case Code.Bgt_Un:
+                                case Code.Bgt_Un_S: predicate = IntPredicate.IntUGT; break;
+                                case Code.Ble_Un:
+                                case Code.Ble_Un_S: predicate = IntPredicate.IntULE; break;
+                                case Code.Blt_Un:
+                                case Code.Blt_Un_S: predicate = IntPredicate.IntULT; break;
+                                default:
+                                    throw new NotSupportedException();
+                            }
+                            compareResult = LLVM.BuildICmp(builder, predicate, value1, value2, string.Empty);
+                        }
+
+                        // Branch depending on previous test
+                        LLVM.BuildCondBr(builder, compareResult, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        
+                        flowingToNextBlock = false;
+
+                        break;
+                    }
+                    #endregion
+
                     #region Comparison opcodes (Ceq, Cgt, etc...)
                     case Code.Ceq:
                     case Code.Cgt:
@@ -871,6 +980,10 @@ namespace SharpLang.CompilerServices
 
                         var value1 = operand1.Value;
                         var value2 = operand2.Value;
+
+                        if ((operand1.StackType == StackValueType.NativeInt && operand2.StackType != StackValueType.NativeInt)
+                            || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
+                            throw new NotImplementedException("Comparison between native int and int types.");
 
                         if (operand1.StackType != operand2.StackType
                             || operand1.Type != operand2.Type)
