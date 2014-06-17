@@ -25,6 +25,12 @@ public static class Program
         a <<= 2;
         Console.WriteLine(a);
 
+        a = -a;
+        Console.WriteLine(a);
+
+        a = ~a;
+        Console.WriteLine(a);
+
         uint b = 0xF1E31643;
         b |= 0x8F0F0F0F;
         Console.WriteLine(b);
@@ -33,6 +39,9 @@ public static class Program
         Console.WriteLine(b);
 
         b ^= 0xF0F0F0F0;
+        Console.WriteLine(b);
+
+        b = ~b;
         Console.WriteLine(b);
     }
 
@@ -59,6 +68,12 @@ public static class Program
         a <<= 2;
         Console.WriteLine(a);
 
+        a = -a;
+        Console.WriteLine(a);
+
+        a = ~a;
+        Console.WriteLine(a);
+
         ulong b = 0xF1E31643F1E31643;
         b |= 0x8F0F0F0F8F0F0F0F;
         Console.WriteLine(b);
@@ -67,6 +82,9 @@ public static class Program
         Console.WriteLine(b);
 
         b ^= 0xF0F0F0F0F0F0F0F0;
+        Console.WriteLine(b);
+
+        b = ~b;
         Console.WriteLine(b);
     }
 

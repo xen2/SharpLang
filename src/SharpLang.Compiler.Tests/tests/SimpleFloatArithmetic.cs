@@ -18,6 +18,9 @@ public static class Program
 
         a /= 21.0f;
         Console.WriteLine(a);
+
+        a = -a;
+        Console.WriteLine(a);
     }
 
     static void TestDouble()
@@ -35,6 +38,9 @@ public static class Program
         Console.WriteLine(a);
 
         a /= 21.0;
+        Console.WriteLine(a);
+
+        a = -a;
         Console.WriteLine(a);
     }
 
