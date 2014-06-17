@@ -1137,6 +1137,55 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Unary operation opcodes (Neg, Not, etc...)
+                    case Code.Neg:
+                    case Code.Not:
+                    {
+                        var operand1 = stack.Pop();
+
+                        var value1 = operand1.Value;
+
+                        // Check stack type (and convert if necessary)
+                        switch (operand1.StackType)
+                        {
+                            case StackValueType.Float:
+                                if (opcode == Code.Not)
+                                    throw new InvalidOperationException("Not opcode doesn't work with float");
+                                break;
+                            case StackValueType.NativeInt:
+                                value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                                break;
+                            case StackValueType.Int32:
+                            case StackValueType.Int64:
+                                break;
+                            default:
+                                throw new InvalidOperationException(string.Format("Opcode {0} not supported with stack type {1}", opcode, operand1.StackType));
+                        }
+
+                        // Perform neg or not operation
+                        switch (opcode)
+                        {
+                            case Code.Neg:
+                                if (operand1.StackType == StackValueType.Float)
+                                    value1 = LLVM.BuildFNeg(builder, value1, string.Empty);
+                                else
+                                    value1 = LLVM.BuildNeg(builder, value1, string.Empty);
+                                break;
+                            case Code.Not:
+                                value1 = LLVM.BuildNot(builder, value1, string.Empty);
+                                break;
+                        }
+
+                        if (operand1.StackType == StackValueType.NativeInt)
+                            value1 = LLVM.BuildIntToPtr(builder, value1, intPtrType, string.Empty);
+
+                        // Add back to stack (with same type as before)
+                        stack.Add(new StackValue(operand1.StackType, operand1.Type, value1));
+
+                        break;
+                    }
+                    #endregion
+
                     #region Binary operation opcodes (Add, Sub, etc...)
                     case Code.Add:
                     case Code.Add_Ovf:
