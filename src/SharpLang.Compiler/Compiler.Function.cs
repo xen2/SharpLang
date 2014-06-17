@@ -1254,44 +1254,70 @@ namespace SharpLang.CompilerServices
                             value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
                             outputStackType = StackValueType.NativeInt;
                         }
-                        else if (!isIntegerOperation && operand1.StackType == StackValueType.Reference) // ref + [i32, nativeint]
+                        else if (!isIntegerOperation
+                            && (operand1.StackType == StackValueType.Reference || operand2.StackType == StackValueType.Reference)) // ref + [i32, nativeint] or [i32, nativeint] + ref
                         {
-                            switch (operand2.StackType)
+                            StackValue operandRef, operandInt;
+                            ValueRef valueRef, valueInt;
+
+                            if (operand2.StackType == StackValueType.Reference)
+                            {
+                                operandRef = operand2;
+                                operandInt = operand1;
+                                valueRef = value2;
+                                valueInt = value1;
+
+                            }
+                            else
+                            {
+                                operandRef = operand1;
+                                operandInt = operand2;
+                                valueRef = value1;
+                                valueInt = value2;
+                            }
+
+                            switch (operandInt.StackType)
                             {
                                 case StackValueType.Int32:
-                                    value2 = LLVM.BuildSExt(builder, value2, nativeIntType, string.Empty);
                                     break;
                                 case StackValueType.NativeInt:
-                                    value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                                    valueInt = LLVM.BuildPtrToInt(builder, valueInt, nativeIntType, string.Empty);
                                     break;
                                 default:
                                     goto InvalidBinaryOperation;
                             }
 
-                            if (opcode != Code.Add && opcode != Code.Add_Ovf_Un
-                                && opcode != Code.Sub && opcode != Code.Sub_Ovf)
-                                goto InvalidBinaryOperation;
-
-                            outputStackType = StackValueType.Reference;
-                        }
-                        else if (!isIntegerOperation && operand2.StackType == StackValueType.Reference) // [i32, nativeint] + ref
-                        {
-                            switch (operand1.StackType)
+                            switch (opcode)
                             {
-                                case StackValueType.Int32:
-                                    value1 = LLVM.BuildSExt(builder, value1, nativeIntType, string.Empty);
+                                case Code.Add:
+                                case Code.Add_Ovf_Un:
                                     break;
-                                case StackValueType.NativeInt:
-                                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                                case Code.Sub:
+                                case Code.Sub_Ovf:
+                                    if (operand2.StackType == StackValueType.Reference)
+                                        goto InvalidBinaryOperation;
+
+                                    valueInt = LLVM.BuildNeg(builder, valueInt, string.Empty);
                                     break;
                                 default:
                                     goto InvalidBinaryOperation;
                             }
 
-                            if (opcode != Code.Add && opcode != Code.Add_Ovf_Un)
-                                goto InvalidBinaryOperation;
+                            // If necessary, cast to i8*
+                            var valueRefType = LLVM.TypeOf(valueRef);
+                            if (valueRefType != intPtrType)
+                                valueRef = LLVM.BuildPointerCast(builder, valueRef, intPtrType, string.Empty);
 
-                            outputStackType = StackValueType.Reference;
+                            valueRef = LLVM.BuildGEP(builder, valueRef, new[] { valueInt }, string.Empty);
+
+                            // Cast back to original type
+                            if (valueRefType != intPtrType)
+                                valueRef = LLVM.BuildPointerCast(builder, valueRef, valueRefType, string.Empty);
+
+                            stack.Add(new StackValue(StackValueType.Reference, operandRef.Type, valueRef));
+
+                            // Early exit
+                            break;
                         }
                         else
                         {
