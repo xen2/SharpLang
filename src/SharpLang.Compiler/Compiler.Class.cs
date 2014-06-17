@@ -162,6 +162,14 @@ namespace SharpLang.CompilerServices
         
                             var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
 
+                            var isInterface = resolvedFunction.DeclaringType.TypeReference.Resolve().IsInterface;
+                            if (!isInterface && resolvedFunction.VirtualSlot != -1)
+                            {
+                                // We might have found a base virtual method matching this interface method.
+                                // Let's get the actual method override for this virtual slot.
+                                resolvedFunction = @class.VirtualTable[resolvedFunction.VirtualSlot];
+                            }
+
                             // If method is not found, it could be due to covariance/contravariance
                             if (resolvedFunction == null)
                                 throw new InvalidOperationException("Interface method not found");

@@ -170,13 +170,16 @@ namespace SharpLang.CompilerServices
             // Process methods
             foreach (var method in typeDefinition.Methods)
             {
+                var methodReference = ResolveGenericMethod(@class.TypeReference, method);
+
                 // If a method contains generic parameters, skip it
                 // Its closed instantiations (with generic arguments) is what needs to be generated.
                 // (except interface methods)
-                if (method.ContainsGenericParameter() && !isInterface)
+                // Using ResolveGenericsVisitor.ContainsGenericParameters because Cecil one's doesn't seem to match what .NET Type does.
+                // TODO: Might need a more robust generic resolver/analyzer system soon.
+                if (ResolveGenericsVisitor.ContainsGenericParameters(methodReference.DeclaringType, methodReference) && !isInterface)
                     continue;
 
-                var methodReference = ResolveGenericMethod(@class.TypeReference, method);
                 var function = CreateFunction(methodReference);
 
                 @class.Functions.Add(function);

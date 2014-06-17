@@ -95,6 +95,36 @@ namespace SharpLang.CompilerServices.Cecil
             return result;
         }
 
+        public static MethodReference Process(TypeReference context, MethodReference method)
+        {
+            var genericInstanceType = context as GenericInstanceType;
+            if (genericInstanceType == null)
+                return method;
+
+            var reference = new MethodReference(method.Name, Process(context, method.ReturnType), Process(context, method.DeclaringType))
+            {
+                HasThis = method.HasThis,
+                ExplicitThis = method.ExplicitThis,
+                CallingConvention = method.CallingConvention,
+            };
+
+            foreach (var parameter in method.Parameters)
+                reference.Parameters.Add(new ParameterDefinition(Process(context, parameter.ParameterType)));
+
+            foreach (var generic_parameter in method.GenericParameters)
+                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+
+            return reference;
+        }
+
+        public static bool ContainsGenericParameters(TypeReference context, MethodReference method)
+        {
+            // Determine if method contains any open generic type.
+            // TODO: Might need a more robust generic resolver/analyzer system soon.
+            method = Process(context, method);
+            return method.ContainsGenericParameter();
+        }
+
         public override TypeReference Visit(GenericParameter type)
         {
             TypeReference result;
