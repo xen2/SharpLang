@@ -20,13 +20,17 @@ namespace SharpLang.CompilerServices.Tests
             if (codeDomProvider == null)
                 codeDomProvider = new Microsoft.CSharp.CSharpCodeProvider();
 
+            var outputBase = Path.Combine(Path.GetDirectoryName(sourceFile), "output");
+            var outputAssembly = Path.Combine(outputBase, Path.GetFileNameWithoutExtension(sourceFile) + ".exe");
+            Directory.CreateDirectory(outputBase);
+
             var compilerParameters = new CompilerParameters
             {
                 IncludeDebugInformation = false,
                 GenerateInMemory = false,
                 GenerateExecutable = true,
                 TreatWarningsAsErrors = false,
-                OutputAssembly = Path.ChangeExtension(sourceFile, "exe")
+                OutputAssembly = outputAssembly,
             };
 
             var compilerResults = codeDomProvider.CompileAssemblyFromFile(
@@ -43,11 +47,11 @@ namespace SharpLang.CompilerServices.Tests
                 throw new InvalidOperationException(errors.ToString());
             }
 
-            var bitcodeFile = Path.ChangeExtension(sourceFile, "bc");
+            var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
             Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile);
 
-            var outputFile = Path.Combine(Path.GetDirectoryName(sourceFile),
-                Path.GetFileNameWithoutExtension(sourceFile) + "-llvm.exe");
+            var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
+                Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");
 
             // Link bitcode and runtime
             Driver.LinkBitcodes(outputFile, bitcodeFile);

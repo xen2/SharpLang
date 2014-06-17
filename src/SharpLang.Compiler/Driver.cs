@@ -55,7 +55,7 @@ namespace SharpLang.CompilerServices
 
             if (generateIR)
             {
-                var irFile = Path.ChangeExtension(inputFile, "ll");
+                var irFile = Path.ChangeExtension(outputFile, "ll");
                 var ir = LLVM.PrintModuleToString(module);
                 File.WriteAllText(irFile, ir);
             }

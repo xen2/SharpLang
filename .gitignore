@@ -33,5 +33,5 @@ _ReSharper*/
 /build/gmake
 /deps/llvm
 /tools/swig
-/src/SharpLang.Compiler.Tests/tests/*.bc
+/src/SharpLang.Compiler.Tests/tests/output/
 /src/**/*.csproj
