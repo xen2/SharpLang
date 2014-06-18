@@ -25,5 +25,10 @@ public static class Program
         System.Console.WriteLine(test1 is Test2 ? "True" : "False");
         System.Console.WriteLine(test2 is Test1 ? "True" : "False");
         System.Console.WriteLine(test2 is Test2 ? "True" : "False");
+
+        System.Console.WriteLine(test1 as Test1 != null ? "True" : "False");
+        System.Console.WriteLine(test1 as Test2 != null ? "True" : "False");
+        System.Console.WriteLine(test2 as Test1 != null ? "True" : "False");
+        System.Console.WriteLine(test2 as Test2 != null ? "True" : "False");
     }
 }
