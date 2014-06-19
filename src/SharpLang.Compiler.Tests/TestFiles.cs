@@ -48,6 +48,8 @@ namespace SharpLang.CompilerServices.Tests
             }
 
             var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
+            Driver.LLC = @"../../../../deps/llvm/build/RelWithDebInfo/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+            Driver.Clang = @"../../../../deps/llvm/build/RelWithDebInfo/bin/clang".Replace('/', Path.DirectorySeparatorChar);
             Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile);
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
