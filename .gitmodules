@@ -1,3 +1,6 @@
 [submodule "deps/llvm"]
 	path = deps/llvm
 	url = http://llvm.org/git/llvm.git
+[submodule "deps/clang"]
+	path = deps/clang
+	url = http://llvm.org/git/clang.git
