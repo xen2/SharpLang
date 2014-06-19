@@ -86,6 +86,18 @@ namespace SharpLang.CompilerServices.Cecil
             return type;
         }
 
+        public static RequiredModifierType ChangeRequiredModifierType(this RequiredModifierType type, TypeReference elementType)
+        {
+            if (elementType != type.ElementType)
+            {
+                var result = new RequiredModifierType(type.ModifierType, elementType);
+                if (type.HasGenericParameters)
+                    SetGenericParameters(result, type.GenericParameters);
+                return result;
+            }
+            return type;
+        }
+
         public static PointerType ChangePointerType(this PointerType type, TypeReference elementType)
         {
             if (elementType != type.ElementType)
@@ -97,6 +109,7 @@ namespace SharpLang.CompilerServices.Cecil
             }
             return type;
         }
+
         public static ArrayType ChangeArrayType(this ArrayType type, TypeReference elementType, int rank)
         {
             if (elementType != type.ElementType || rank != type.Rank)

@@ -38,6 +38,10 @@ namespace SharpLang.CompilerServices.Cecil
             if (byrefType != null)
                 return Visit(byrefType);
 
+            var requiredModifierType = type as RequiredModifierType;
+            if (requiredModifierType != null)
+                return Visit(requiredModifierType);
+
             var pointerType = type as PointerType;
             if (pointerType != null)
                 return Visit(pointerType);
@@ -90,6 +94,13 @@ namespace SharpLang.CompilerServices.Cecil
         public virtual TypeReference Visit(PointerType type)
         {
             type = type.ChangePointerType(VisitDynamic(type.ElementType));
+            return type.ChangeGenericParameters(Visit(type.GenericParameters));
+        }
+
+        public virtual TypeReference Visit(RequiredModifierType type)
+        {
+            type = type.ChangeRequiredModifierType(VisitDynamic(type.ElementType));
+            type.ModifierType = VisitDynamic(type.ModifierType);
             return type.ChangeGenericParameters(Visit(type.GenericParameters));
         }
 
