@@ -8,6 +8,10 @@ It allows you to compile C# and other .NET languages code to any supported LLVM 
 
 BSD 2-clause license.
 
+## Documentation
+
+[Getting Started](docs/GettingStarted.md)
+
 ## Objectives
 
 * Fill the gap between managed flexibility/safety/productivity (on by default) and native speed/control (when you actually need it)
