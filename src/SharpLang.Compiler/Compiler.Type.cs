@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -146,9 +147,18 @@ namespace SharpLang.CompilerServices
                         goto case MetadataType.Void;
                     }
 
-                    dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
-
-                    stackType = typeReference.IsValueType ? StackValueType.Value : StackValueType.Object;
+                    if (typeReference.IsValueType && typeReference.Resolve().IsEnum)
+                    {
+                        // Special case: enum
+                        var enumUnderlyingType = GetType(typeReference.Resolve().GetEnumUnderlyingType());
+                        dataType = enumUnderlyingType.DataType;
+                        stackType = enumUnderlyingType.StackType;
+                    }
+                    else
+                    {
+                        dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
+                        stackType = typeReference.IsValueType ? StackValueType.Value : StackValueType.Object;
+                    }
 
                     break;
                 }

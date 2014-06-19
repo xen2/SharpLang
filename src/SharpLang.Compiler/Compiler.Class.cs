@@ -70,7 +70,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Object:
                 case MetadataType.GenericInstance:
                 {
-                    // Process non-static fields
+                    // Process class and instance fields
                     processClass = true;
                     processFields = true;
                     break;
@@ -277,7 +277,9 @@ namespace SharpLang.CompilerServices
                     LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
                 }
 
-                if (processFields)
+                // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
+                // In that case, do not process fields.
+                if (processFields && LLVM.GetTypeKind(dataType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(dataType))
                 {
                     // Build actual type data (fields)
                     // Add fields and vtable slots from parent class
