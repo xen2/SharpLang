@@ -40,6 +40,7 @@ namespace SharpLang.CompilerServices
             if (classes.TryGetValue(typeReference, out @class))
                 return @class;
 
+            bool processClass = false;
             bool processFields = false;
 
             switch (typeReference.MetadataType)
@@ -61,6 +62,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Double:
                 case MetadataType.String:
                 {
+                    processClass = true;
                     break;
                 }
                 case MetadataType.ValueType:
@@ -69,6 +71,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.GenericInstance:
                 {
                     // Process non-static fields
+                    processClass = true;
                     processFields = true;
                     break;
                 }
@@ -86,7 +89,7 @@ namespace SharpLang.CompilerServices
             @class = new Class(type, typeReference, dataType, boxedType, stackType);
             classes.Add(typeReference, @class);
 
-            if (processFields)
+            if (processClass)
             {
                 var typeDefinition = typeReference.Resolve();
 
@@ -274,24 +277,27 @@ namespace SharpLang.CompilerServices
                     LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
                 }
 
-                // Build actual type data (fields)
-                // Add fields and vtable slots from parent class
-                if (parentClass != null && typeReference.MetadataType == MetadataType.Class)
+                if (processFields)
                 {
-                    fieldTypes.Add(parentClass.DataType);
+                    // Build actual type data (fields)
+                    // Add fields and vtable slots from parent class
+                    if (parentClass != null && typeReference.MetadataType == MetadataType.Class)
+                    {
+                        fieldTypes.Add(parentClass.DataType);
+                    }
+
+                    foreach (var field in typeDefinition.Fields)
+                    {
+                        if (field.IsStatic)
+                            continue;
+
+                        var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+                        @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                        fieldTypes.Add(fieldType.DefaultType);
+                    }
+
+                    LLVM.StructSetBody(dataType, fieldTypes.ToArray(), false);
                 }
-
-                foreach (var field in typeDefinition.Fields)
-                {
-                    if (field.IsStatic)
-                        continue;
-
-                    var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
-                    @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
-                    fieldTypes.Add(fieldType.DefaultType);
-                }
-
-                LLVM.StructSetBody(dataType, fieldTypes.ToArray(), false);
             }
 
             return @class;
