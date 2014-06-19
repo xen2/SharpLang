@@ -159,6 +159,11 @@ namespace SharpLang.CompilerServices
                         foreach (var interfaceMethod in @interface.TypeReference.Resolve().Methods)
                         {
                             var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
+
+                            // If method is not fully resolved (generic method in interface), ignore it
+                            // We are waiting for actual closed uses.
+                            if (ResolveGenericsVisitor.ContainsGenericParameters(resolvedInterfaceMethod))
+                                continue;
         
                             var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
 

@@ -180,7 +180,7 @@ namespace SharpLang.CompilerServices
                 // (except interface methods)
                 // Using ResolveGenericsVisitor.ContainsGenericParameters because Cecil one's doesn't seem to match what .NET Type does.
                 // TODO: Might need a more robust generic resolver/analyzer system soon.
-                if (ResolveGenericsVisitor.ContainsGenericParameters(methodReference.DeclaringType, methodReference) && !isInterface)
+                if (ResolveGenericsVisitor.ContainsGenericParameters(methodReference))
                     continue;
 
                 var function = CreateFunction(methodReference);

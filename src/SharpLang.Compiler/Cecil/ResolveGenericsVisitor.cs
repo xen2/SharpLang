@@ -89,19 +89,15 @@ namespace SharpLang.CompilerServices.Cecil
             var result = visitor.VisitDynamic(type);
 
             // Make sure type is closed now
-            if (result.ContainsGenericParameter())
-                throw new InvalidOperationException("Unsupported generic resolution.");
+            //if (result.ContainsGenericParameter())
+            //    throw new InvalidOperationException("Unsupported generic resolution.");
 
             return result;
         }
 
-        public static MethodReference Process(TypeReference context, MethodReference method)
+        public static MethodReference Process(MethodReference method)
         {
-            var genericInstanceType = context as GenericInstanceType;
-            if (genericInstanceType == null)
-                return method;
-
-            var reference = new MethodReference(method.Name, Process(context, method.ReturnType), Process(context, method.DeclaringType))
+            var reference = new MethodReference(method.Name, Process(method, method.ReturnType), Process(method, method.DeclaringType))
             {
                 HasThis = method.HasThis,
                 ExplicitThis = method.ExplicitThis,
@@ -109,7 +105,7 @@ namespace SharpLang.CompilerServices.Cecil
             };
 
             foreach (var parameter in method.Parameters)
-                reference.Parameters.Add(new ParameterDefinition(Process(context, parameter.ParameterType)));
+                reference.Parameters.Add(new ParameterDefinition(Process(method, parameter.ParameterType)));
 
             foreach (var generic_parameter in method.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
@@ -117,11 +113,11 @@ namespace SharpLang.CompilerServices.Cecil
             return reference;
         }
 
-        public static bool ContainsGenericParameters(TypeReference context, MethodReference method)
+        public static bool ContainsGenericParameters(MethodReference method)
         {
             // Determine if method contains any open generic type.
             // TODO: Might need a more robust generic resolver/analyzer system soon.
-            method = Process(context, method);
+            method = Process(method);
             return method.ContainsGenericParameter();
         }
 
