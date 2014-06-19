@@ -48,7 +48,16 @@ namespace SharpLang.CompilerServices.Tests
             }
 
             var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
-            Driver.LLC = @"../../../../deps/llvm/build/RelWithDebInfo/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+
+            // Try to use locally compiled llc and clang (if they exist)
+            var llcLocal = @"../../../../deps/llvm/build/RelWithDebInfo/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+            if (File.Exists(llcLocal) || File.Exists(llcLocal + ".exe"))
+                Driver.LLC = llcLocal;
+
+            var clangLocal = @"../../../../deps/llvm/build/RelWithDebInfo/bin/clang".Replace('/', Path.DirectorySeparatorChar);
+            if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
+                Driver.Clang = clangLocal;
+
             Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile);
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
