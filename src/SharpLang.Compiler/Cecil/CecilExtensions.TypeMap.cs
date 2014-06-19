@@ -70,14 +70,14 @@ namespace SharpLang.CompilerServices.Cecil
             if (candidate.Name != method.Name)
                 return false;
 
-            if (!TypeMatch(candidate.ReturnType, method.ReturnType))
+            if (!TypeMatch(ResolveGenericsVisitor.Process(candidate, candidate.ReturnType), ResolveGenericsVisitor.Process(method, method.ReturnType)))
                 return false;
 
             if (candidate.Parameters.Count != method.Parameters.Count)
                 return false;
 
             for (int i = 0; i < candidate.Parameters.Count; i++)
-                if (!TypeMatch(candidate.Parameters[i].ParameterType, method.Parameters[i].ParameterType))
+                if (!TypeMatch(ResolveGenericsVisitor.Process(candidate, candidate.Parameters[i].ParameterType), ResolveGenericsVisitor.Process(method, method.Parameters[i].ParameterType)))
                     return false;
 
             return true;

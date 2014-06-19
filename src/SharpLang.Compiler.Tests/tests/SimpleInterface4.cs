@@ -14,14 +14,24 @@ public static class Program
     {
         public override string A()
         {
-            return "Test1";
+            return "Test2";
+        }
+    }
+
+    public class Test3 : ITest<string>
+    {
+        public string A()
+        {
+            return "Test3";
         }
     }
 
     public static void Main()
     {
-        ITest<string> test1 = new Test2();
+        ITest<string> test2 = new Test2();
+        ITest<string> test3 = new Test3();
 
-        System.Console.WriteLine(test1.A());
+        System.Console.WriteLine(test2.A());
+        System.Console.WriteLine(test3.A());
     }
 }
