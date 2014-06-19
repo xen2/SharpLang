@@ -28,6 +28,7 @@ namespace SharpLang.CompilerServices
         private Type int64;
         private Type @float;
         private Type @double;
+        private Type @object;
         private TypeRef intPtrType; // Native integer, pointer representation
         private int intPtrSize;
         private TypeRef nativeIntType; // Native integer, integer representation
@@ -70,6 +71,8 @@ namespace SharpLang.CompilerServices
             int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName));
             @float = GetType(corlib.MainModule.GetType(typeof(float).FullName));
             @double = GetType(corlib.MainModule.GetType(typeof(double).FullName));
+
+            @object = GetType(corlib.MainModule.GetType(typeof(object).FullName));
 
             // struct IMTEntry { i32 functionId, i8* functionPtr }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");

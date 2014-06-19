@@ -183,10 +183,8 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdnull(List<StackValue> stack)
         {
-            var objectType = GetType(corlib.MainModule.GetType(typeof(object).FullName));
-
             // Add constant integer value to stack
-            stack.Add(new StackValue(StackValueType.Object, objectType, LLVM.ConstNull(objectType.DefaultType)));
+            stack.Add(new StackValue(StackValueType.Object, @object, LLVM.ConstNull(@object.DefaultType)));
         }
 
         private void EmitCall(List<StackValue> stack, FunctionSignature targetMethod, ValueRef overrideMethod)

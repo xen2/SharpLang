@@ -981,12 +981,18 @@ namespace SharpLang.CompilerServices
                         var value1 = operand1.Value;
                         var value2 = operand2.Value;
 
+                        // Downcast objects to typeof(object) so that they are comparables
+                        if (operand1.StackType == StackValueType.Object)
+                            value1 = ConvertFromStackToLocal(@object, operand1);
+                        if (operand2.StackType == StackValueType.Object)
+                            value2 = ConvertFromStackToLocal(@object, operand2);
+
                         if ((operand1.StackType == StackValueType.NativeInt && operand2.StackType != StackValueType.NativeInt)
                             || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
                             throw new NotImplementedException("Comparison between native int and int types.");
 
                         if (operand1.StackType != operand2.StackType
-                            || operand1.Type != operand2.Type)
+                            || LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
                             throw new InvalidOperationException("Comparison between operands of different types.");
 
                         ValueRef compareResult;
