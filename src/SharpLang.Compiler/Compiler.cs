@@ -20,6 +20,7 @@ namespace SharpLang.CompilerServices
         // RuntimeInline
         private ValueRef allocObjectFunction;
         private ValueRef resolveInterfaceCallFunction;
+        private ValueRef isInstInterfaceFunction;
 
         // Builder for normal instructions
         private BuilderRef builder;
@@ -57,6 +58,7 @@ namespace SharpLang.CompilerServices
             RuntimeInline.Runtime.makeLLVMModuleContents(module);
             allocObjectFunction = LLVM.GetNamedFunction(module, "allocObject");
             resolveInterfaceCallFunction = LLVM.GetNamedFunction(module, "resolveInterfaceCall");
+            isInstInterfaceFunction = LLVM.GetNamedFunction(module, "isInstInterface");
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);

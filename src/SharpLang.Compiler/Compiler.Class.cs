@@ -248,20 +248,26 @@ namespace SharpLang.CompilerServices
                     // Build super types
                     // Helpful for fast is/as checks on class hierarchy
                     var superTypeCount = LLVM.ConstInt(int32Type, (ulong)@class.Depth + 1, false);
-                    ValueRef superTypesGlobal;
+                    var interfacesCount = LLVM.ConstInt(int32Type, (ulong)@class.Interfaces.Count, false);
+
+                    var zero = LLVM.ConstInt(int32Type, 0, false);
 
                     // Super types global
                     var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)superTypes.Count), string.Empty);
+                    var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] { zero, zero });
 
-                    var zero = LLVM.ConstInt(int32Type, 0, false);
-                    superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] { zero, zero });
+                    // Interface map global
+                    var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)@class.Interfaces.Count), string.Empty);
+                    var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] { zero, zero });
 
                     // Build RTTI
                     var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[]
                     {
                         parentRuntimeTypeInfo,
                         superTypeCount,
+                        interfacesCount,
                         superTypesGlobal,
+                        interfacesGlobal,
                         interfaceMethodTableConstant,
                         vtableConstant,
                         staticFieldsEmpty,
@@ -275,6 +281,11 @@ namespace SharpLang.CompilerServices
                     var superTypesConstant = LLVM.ConstArray(intPtrType,
                         superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
                     LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
+
+                    // Build interface map
+                    var interfacesConstant = LLVM.ConstArray(intPtrType,
+                        @class.Interfaces.Select(@interface => LLVM.ConstPointerCast(@interface.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
+                    LLVM.SetInitializer(interfacesConstantGlobal, interfacesConstant);
                 }
 
                 // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).

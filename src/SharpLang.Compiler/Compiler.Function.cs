@@ -477,11 +477,6 @@ namespace SharpLang.CompilerServices
 
                         var obj = stack.Pop();
 
-                        if (@class.TypeReference.Resolve().IsInterface)
-                        {
-                            throw new NotImplementedException();
-                        }
-
                         // Get RTTI pointer
                         var indices = new[]
                         {
@@ -492,52 +487,78 @@ namespace SharpLang.CompilerServices
                         var rttiPointer = LLVM.BuildInBoundsGEP(builder, obj.Value, indices, string.Empty);
                         rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
 
-                        // Get super type count
-                        // Get method stored in IMT slot
-                        indices = new[]
-                        {
-                            LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
-                            LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypeCount, false),         // Super type count
-                        };
+                        // castedPointerObject is valid only from typeCheckBlock
+                        var castedPointerType = LLVM.PointerType(@class.Type.ObjectType, 0);
+                        ValueRef castedPointerObject;
 
-                        var typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                        // Prepare basic blocks (for PHI instruction)
                         var typeNotMatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
                         var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                        BasicBlockRef typeCheckBlock;
 
-                        var superTypeCount = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
-                        superTypeCount = LLVM.BuildLoad(builder, superTypeCount, string.Empty);
-                        
-                        var depthCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntSGE, superTypeCount, LLVM.ConstInt(int32Type, (ulong)@class.Depth, false), string.Empty);
-                        LLVM.BuildCondBr(builder, depthCompareResult, typeCheckBlock, typeNotMatchBlock);
-
-                        // Start new typeCheckBlock
-                        LLVM.PositionBuilderAtEnd(builder, typeCheckBlock);
-
-                        // Get super types
-                        indices = new[]
+                        if (@class.TypeReference.Resolve().IsInterface)
                         {
-                            LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
-                            LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypes, false),             // Super types
-                        };
+                            // Cast as appropriate pointer type (for next PHI incoming if success)
+                            castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
 
-                        var superTypes = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
-                        superTypes = LLVM.BuildLoad(builder, superTypes, string.Empty);
+                            var inlineRuntimeTypeInfoType = LLVM.TypeOf(LLVM.GetParam(isInstInterfaceFunction, 0));
+                            var isInstInterfaceResult = LLVM.BuildCall(builder, isInstInterfaceFunction, new[]
+                            {
+                                LLVM.BuildPointerCast(builder, rttiPointer, inlineRuntimeTypeInfoType, string.Empty),
+                                LLVM.BuildPointerCast(builder, @class.GeneratedRuntimeTypeInfoGlobal, inlineRuntimeTypeInfoType, string.Empty),
+                            }, string.Empty);
 
-                        // Get actual super type
-                        indices = new[]
+                            LLVM.BuildCondBr(builder, isInstInterfaceResult, typeCheckDoneBlock, typeNotMatchBlock);
+
+                            typeCheckBlock = LLVM.GetInsertBlock(builder);
+                        }
+                        else
                         {
-                            LLVM.ConstInt(int32Type, (ulong)@class.Depth, false),                                 // Pointer indirection
-                        };
-                        var superType = LLVM.BuildGEP(builder, superTypes, indices, string.Empty);
-                        superType = LLVM.BuildLoad(builder, superType, string.Empty);
+                            // TODO: Probably better to rewrite this in C, but need to make sure depth will be inlined as constant
+                            // Get super type count
+                            // Get method stored in IMT slot
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
+                                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypeCount, false),         // Super type count
+                            };
+    
+                            typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+    
+                            var superTypeCount = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+                            superTypeCount = LLVM.BuildLoad(builder, superTypeCount, string.Empty);
+                            
+                            var depthCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntSGE, superTypeCount, LLVM.ConstInt(int32Type, (ulong)@class.Depth, false), string.Empty);
+                            LLVM.BuildCondBr(builder, depthCompareResult, typeCheckBlock, typeNotMatchBlock);
+    
+                            // Start new typeCheckBlock
+                            LLVM.PositionBuilderAtEnd(builder, typeCheckBlock);
+    
+                            // Get super types
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
+                                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypes, false),             // Super types
+                            };
+    
+                            var superTypes = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+                            superTypes = LLVM.BuildLoad(builder, superTypes, string.Empty);
+    
+                            // Get actual super type
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, (ulong)@class.Depth, false),                                 // Pointer indirection
+                            };
+                            var superType = LLVM.BuildGEP(builder, superTypes, indices, string.Empty);
+                            superType = LLVM.BuildLoad(builder, superType, string.Empty);
 
-                        // Cast as appropriate pointer type (for next PHI incoming if success)
-                        var castedPointerType = LLVM.PointerType(@class.Type.ObjectType, 0);
-                        var castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
-
-                        // Compare super type in array at given depth with expected one
-                        var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedRuntimeTypeInfoGlobal, intPtrType), string.Empty);
-                        LLVM.BuildCondBr(builder, typeCompareResult, typeCheckDoneBlock, typeNotMatchBlock);
+                            // Cast as appropriate pointer type (for next PHI incoming if success)
+                            castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
+    
+                            // Compare super type in array at given depth with expected one
+                            var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedRuntimeTypeInfoGlobal, intPtrType), string.Empty);
+                            LLVM.BuildCondBr(builder, typeCompareResult, typeCheckDoneBlock, typeNotMatchBlock);
+                        }
 
                         // Start new typeNotMatchBlock: set object to null and jump to typeCheckDoneBlock
                         LLVM.PositionBuilderAtEnd(builder, typeNotMatchBlock);

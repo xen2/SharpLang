@@ -61,6 +61,9 @@ namespace SharpLang.CompilerServices
                         stackType = stackType.Resolve().BaseType;
                     }
                 }
+
+                // Fallback: allow everything for now...
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
             }
 
             if (stack.StackType == StackValueType.Float && stack.Type == localType)

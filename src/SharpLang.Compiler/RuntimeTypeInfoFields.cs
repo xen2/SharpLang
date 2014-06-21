@@ -7,7 +7,9 @@ namespace SharpLang.CompilerServices
     {
         Base = 0,
         SuperTypeCount,
+        InterfacesCount,
         SuperTypes,
+        InterfaceMap,
         InterfaceMethodTable,
         VirtualTable,
         StaticFields,

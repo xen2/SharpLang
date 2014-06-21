@@ -1,6 +1,30 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+typedef struct RuntimeTypeInfo
+{
+	RuntimeTypeInfo* base;
+	uint32_t superTypeCount;
+	uint32_t interfacesCount;
+	RuntimeTypeInfo** superTypes;
+	RuntimeTypeInfo** interfaceMap;
+	void* interfaceMethodTable[19];
+	void* virtualTable[0];
+} RuntimeTypeInfo;
+
+extern "C" bool isInstInterface(const RuntimeTypeInfo* runtimeTypeInfo, const RuntimeTypeInfo* expectedInterface)
+{
+	auto currentInterface = runtimeTypeInfo->interfaceMap;
+	for (int i = 0; i < runtimeTypeInfo->interfacesCount; ++i)
+	{
+		if (*currentInterface == expectedInterface)
+			return true;
+		currentInterface++;
+	}
+
+	return false;
+}
+
 extern "C" void* allocObject(uint32_t size)
 {
     return malloc(size);
