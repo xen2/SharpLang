@@ -473,7 +473,7 @@ namespace SharpLang.CompilerServices
                     case Code.Isinst:
                     {
                         var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, typeReference));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
 
                         var obj = stack.Pop();
 
@@ -589,7 +589,7 @@ namespace SharpLang.CompilerServices
                     case Code.Box:
                     {
                         var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, typeReference));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
 
                         var valueType = stack.Pop();
 
@@ -610,7 +610,7 @@ namespace SharpLang.CompilerServices
                     case Code.Unbox_Any:
                     {
                         var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, typeReference));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
 
                         var obj = stack.Pop();
 
@@ -638,7 +638,7 @@ namespace SharpLang.CompilerServices
                     #region Array opcodes (Newarr, Ldlen, Stelem_Ref, etc...)
                     case Code.Newarr:
                     {
-                        var elementType = GetType((TypeReference)instruction.Operand);
+                        var elementType = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
 
                         EmitNewarr(stack, elementType);
  
@@ -788,7 +788,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitLdfld(stack, field);
@@ -800,7 +800,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitLdsfld(stack, field);
@@ -832,7 +832,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitStfld(stack, field);
@@ -845,7 +845,7 @@ namespace SharpLang.CompilerServices
                         var fieldReference = (FieldReference)instruction.Operand;
 
                         // Resolve class and field
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference.DeclaringType, fieldReference.DeclaringType));
+                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
                         EmitStsfld(stack, field);
