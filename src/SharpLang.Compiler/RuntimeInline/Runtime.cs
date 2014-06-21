@@ -11,13 +11,8 @@ namespace SharpLang.RuntimeInline {
 using SharpLLVM;
 
 public class Runtime {
-  public static ValueRef define_allocObject(ModuleRef mod) {
-      ValueRef ret = new ValueRef(RuntimePINVOKE.define_allocObject(mod.Value));
-      return ret;
-    }
-
-  public static ValueRef define_resolveInterfaceCall(ModuleRef mod) {
-      ValueRef ret = new ValueRef(RuntimePINVOKE.define_resolveInterfaceCall(mod.Value));
+  public static ModuleRef makeLLVMModuleContents(ModuleRef mod) {
+      ModuleRef ret = new ModuleRef(RuntimePINVOKE.makeLLVMModuleContents(mod.Value));
       return ret;
     }
 

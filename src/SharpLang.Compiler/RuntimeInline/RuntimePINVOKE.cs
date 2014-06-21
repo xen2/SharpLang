@@ -186,11 +186,8 @@ class RuntimePINVOKE {
   }
 
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLang.RuntimeInline.dll", EntryPoint="CSharp_define_allocObject")]
-  public static extern System.IntPtr define_allocObject(System.IntPtr jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("SharpLang.RuntimeInline.dll", EntryPoint="CSharp_define_resolveInterfaceCall")]
-  public static extern System.IntPtr define_resolveInterfaceCall(System.IntPtr jarg1);
+  [global::System.Runtime.InteropServices.DllImport("SharpLang.RuntimeInline.dll", EntryPoint="CSharp_makeLLVMModuleContents")]
+  public static extern System.IntPtr makeLLVMModuleContents(System.IntPtr jarg1);
 }
 
 }
