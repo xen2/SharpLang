@@ -89,6 +89,8 @@ function SetupLLVMLibs()
       "LLVMX86Disassembler",
       "LLVMX86Info",
       "LLVMX86Utils",
+      "LLVMCppBackendCodeGen",
+      "LLVMCppBackendInfo",
     }
     
   configuration(c)
