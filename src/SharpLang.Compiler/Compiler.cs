@@ -54,8 +54,9 @@ namespace SharpLang.CompilerServices
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
 
-            allocObjectFunction = RuntimeInline.Runtime.define_allocObject(module);
-            resolveInterfaceCallFunction = RuntimeInline.Runtime.define_resolveInterfaceCall(module);
+            RuntimeInline.Runtime.makeLLVMModuleContents(module);
+            allocObjectFunction = LLVM.GetNamedFunction(module, "allocObject");
+            resolveInterfaceCallFunction = LLVM.GetNamedFunction(module, "resolveInterfaceCall");
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);

@@ -268,25 +268,13 @@ using namespace llvm;
 extern "C" {
 #endif
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_define_allocObject(void * jarg1) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_makeLLVMModuleContents(void * jarg1) {
   void * jresult ;
   Module *arg1 = (Module *) 0 ;
-  Function *result = 0 ;
+  Module *result = 0 ;
   
   arg1 = (Module *)jarg1; 
-  result = (Function *)define_allocObject(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_define_resolveInterfaceCall(void * jarg1) {
-  void * jresult ;
-  Module *arg1 = (Module *) 0 ;
-  Function *result = 0 ;
-  
-  arg1 = (Module *)jarg1; 
-  result = (Function *)define_resolveInterfaceCall(arg1);
+  result = (Module *)makeLLVMModuleContents(arg1);
   jresult = (void *)result; 
   return jresult;
 }
