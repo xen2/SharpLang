@@ -86,7 +86,7 @@ namespace SharpLang.CompilerServices
             var dataType = type.DataType;
             var stackType = type.StackType;
 
-            @class = new Class(type, typeReference, dataType, boxedType, stackType);
+            @class = new Class(type);
             classes.Add(typeReference, @class);
 
             if (processClass)
@@ -159,9 +159,9 @@ namespace SharpLang.CompilerServices
     
                     foreach (var @interface in @class.Interfaces)
                     {
-                        foreach (var interfaceMethod in @interface.TypeReference.Resolve().Methods)
+                        foreach (var interfaceMethod in @interface.Type.TypeReference.Resolve().Methods)
                         {
-                            var resolvedInterfaceMethod = ResolveGenericMethod(@interface.TypeReference, interfaceMethod);
+                            var resolvedInterfaceMethod = ResolveGenericMethod(@interface.Type.TypeReference, interfaceMethod);
 
                             // If method is not fully resolved (generic method in interface), ignore it
                             // We are waiting for actual closed uses.
@@ -296,7 +296,7 @@ namespace SharpLang.CompilerServices
                     // Add fields and vtable slots from parent class
                     if (parentClass != null && typeReference.MetadataType == MetadataType.Class)
                     {
-                        fieldTypes.Add(parentClass.DataType);
+                        fieldTypes.Add(parentClass.Type.DataType);
                     }
 
                     foreach (var field in typeDefinition.Fields)

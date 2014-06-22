@@ -169,14 +169,14 @@ namespace SharpLang.CompilerServices
 
             @class.MethodCompiled = true;
 
-            var typeDefinition = @class.TypeReference.Resolve();
+            var typeDefinition = @class.Type.TypeReference.Resolve();
 
             bool isInterface = typeDefinition.IsInterface;
 
             // Process methods
             foreach (var method in typeDefinition.Methods)
             {
-                var methodReference = ResolveGenericMethod(@class.TypeReference, method);
+                var methodReference = ResolveGenericMethod(@class.Type.TypeReference, method);
 
                 // If a method contains generic parameters, skip it
                 // Its closed instantiations (with generic arguments) is what needs to be generated.
@@ -217,7 +217,7 @@ namespace SharpLang.CompilerServices
                         }
 
                         if (matchedMethod == null)
-                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.TypeReference));
+                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.Type.TypeReference));
 
                         function.VirtualSlot = matchedMethod.VirtualSlot;
                         @class.VirtualTable[function.VirtualSlot] = function;

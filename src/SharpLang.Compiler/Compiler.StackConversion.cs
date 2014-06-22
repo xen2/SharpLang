@@ -38,7 +38,7 @@ namespace SharpLang.CompilerServices
                     var stackClass = GetClass(stack.Type.TypeReference);
                     foreach (var @interface in stackClass.Interfaces)
                     {
-                        if (MemberEqualityComparer.Default.Equals(@interface.TypeReference, localType.TypeReference))
+                        if (MemberEqualityComparer.Default.Equals(@interface.Type.TypeReference, localType.TypeReference))
                         {
                             return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
                         }

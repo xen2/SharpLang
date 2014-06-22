@@ -149,7 +149,7 @@ namespace SharpLang.CompilerServices
 
             // 1. Load static function pointers (arg0->_methodPtrAux)
             var @this = LLVM.GetParam(invokeMethodHelper, 0);
-            var indices = BuildFieldIndices(GetClass(delegateType).Fields[methodPtrAuxField], StackValueType.Object, GetType(declaringClass.TypeReference));
+            var indices = BuildFieldIndices(GetClass(delegateType).Fields[methodPtrAuxField], StackValueType.Object, GetType(declaringClass.Type.TypeReference));
 
             //    Find field address using GEP
             var fieldAddress = LLVM.BuildInBoundsGEP(builder2, @this, indices, string.Empty);

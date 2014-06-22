@@ -169,7 +169,7 @@ namespace SharpLang.CompilerServices
 
                 // Generate IL for various methods
                 if (declaringClass.BaseType != null &&
-                    declaringClass.BaseType.TypeReference.FullName == typeof(MulticastDelegate).FullName)
+                    declaringClass.BaseType.Type.TypeReference.FullName == typeof(MulticastDelegate).FullName)
                 {
                     body = GenerateDelegateMethod(method, declaringClass);
                     if (body == null)
@@ -496,7 +496,7 @@ namespace SharpLang.CompilerServices
                         var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
                         BasicBlockRef typeCheckBlock;
 
-                        if (@class.TypeReference.Resolve().IsInterface)
+                        if (@class.Type.TypeReference.Resolve().IsInterface)
                         {
                             // Cast as appropriate pointer type (for next PHI incoming if success)
                             castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
@@ -617,7 +617,7 @@ namespace SharpLang.CompilerServices
                         if (typeReference.IsValueType)
                         {
                             // TODO: check type?
-                            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(@class.ObjectType, 0), string.Empty);
+                            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(@class.Type.ObjectType, 0), string.Empty);
 
                             var dataPointer = GetDataPointer(objCast);
 

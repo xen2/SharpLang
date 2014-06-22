@@ -1,3 +1,4 @@
+using System;
 using Mono.Cecil;
 using SharpLLVM;
 
@@ -14,8 +15,29 @@ namespace SharpLang.CompilerServices
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
-            DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
+            DefaultType = (stackType == StackValueType.Object || stackType == StackValueType.Reference) ? LLVM.PointerType(ObjectType, 0) : DataType;
             StackType = stackType;
+
+            switch (stackType)
+            {
+                case StackValueType.NativeInt:
+                    TypeOnStack = LLVM.PointerType(LLVM.Int8TypeInContext(LLVM.GetTypeContext(dataType)), 0);
+                    break;
+                case StackValueType.Float:
+                    TypeOnStack = LLVM.DoubleTypeInContext(LLVM.GetTypeContext(dataType));
+                    break;
+                case StackValueType.Int32:
+                    TypeOnStack = LLVM.Int32TypeInContext(LLVM.GetTypeContext(dataType));
+                    break;
+                case StackValueType.Int64:
+                    TypeOnStack = LLVM.Int64TypeInContext(LLVM.GetTypeContext(dataType));
+                    break;
+                case StackValueType.Value:
+                case StackValueType.Object:
+                case StackValueType.Reference:
+                    TypeOnStack = DefaultType;
+                    break;
+            }
         }
 
         /// <summary>
@@ -41,6 +63,14 @@ namespace SharpLang.CompilerServices
         /// The LLVM data type (fields).
         /// </value>
         public TypeRef DataType { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM type when on the stack.
+        /// </summary>
+        /// <value>
+        /// The LLVM type when on the stack.
+        /// </value>
+        public TypeRef TypeOnStack { get; private set; }
 
         public TypeReference TypeReference { get; private set; }
 
