@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
+using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
