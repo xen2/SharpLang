@@ -416,9 +416,10 @@ namespace SharpLang.CompilerServices
 
             // Create array
             var arrayConstant = LLVM.ConstNamedStruct(arrayType.DefaultType,
-                new[] { numElementsAsPointer, LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
+                new[] { LLVM.ConstPointerNull(intPtrType), LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
 
             // Update array with allocated pointer
+            arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, numElementsAsPointer, 0, string.Empty);
             arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, values, 1, string.Empty);
 
             // Push on stack
