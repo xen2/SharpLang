@@ -165,7 +165,7 @@ namespace SharpLang.CompilerServices
 
             if (body == null && (method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
             {
-                var declaringClass = GetClass(function.DeclaringType.TypeReference);
+                var declaringClass = GetClass(function.DeclaringType);
 
                 // Generate IL for various methods
                 if (declaringClass.BaseType != null &&
@@ -378,7 +378,7 @@ namespace SharpLang.CompilerServices
                             };
 
                             var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
-                            var @class = GetClass(thisObject.Type.TypeReference);
+                            var @class = GetClass(thisObject.Type);
 
                             // TODO: Checking actual type stored in thisObject we might be able to statically resolve method?
 

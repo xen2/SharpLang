@@ -52,6 +52,9 @@ namespace SharpLang.CompilerServices
         /// <returns></returns>
         private Type BuildType(TypeReference typeReference)
         {
+            if (typeReference.ContainsGenericParameter())
+                return null;
+
             TypeRef dataType;
             StackValueType stackType;
 
@@ -136,6 +139,7 @@ namespace SharpLang.CompilerServices
                         new[] { intPtrType, LLVM.PointerType(elementType.DefaultType, 0) }, false);
                     stackType = StackValueType.Value;
                     break;
+                case MetadataType.TypedByReference:
                 case MetadataType.GenericInstance:
                 case MetadataType.ValueType:
                 case MetadataType.Class:
@@ -169,7 +173,15 @@ namespace SharpLang.CompilerServices
             // Create class version (boxed version with VTable)
             var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
 
-            return new Type(typeReference, dataType, boxedType, stackType);
+            var result = new Type(typeReference, dataType, boxedType, stackType);
+            result.IsLocal = typeReference.Resolve().Module.Assembly != assembly;
+
+            if (result.IsLocal)
+            {
+                classesToGenerate.Enqueue(result);
+            }
+
+            return result;
         }
     }
 }

@@ -9,6 +9,9 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Type
     {
+        internal Class Class;
+        internal bool IsLocal;
+
         public Type(TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
         {
             TypeReference = typeReference;

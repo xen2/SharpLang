@@ -20,13 +20,9 @@ namespace SharpLang.CompilerServices
         /// <returns></returns>
         private Class GetClass(TypeReference typeReference)
         {
-            Class @class;
-            if (classes.TryGetValue(typeReference, out @class))
-                return @class;
+            var type = GetType(typeReference);
 
-            @class = CreateClass(typeReference);
-
-            return @class;
+            return GetClass(type);
         }
 
         /// <summary>
@@ -34,18 +30,19 @@ namespace SharpLang.CompilerServices
         /// </summary>
         /// <param name="typeReference">The type definition.</param>
         /// <returns></returns>
-        private Class CreateClass(TypeReference typeReference)
+        private Class GetClass(Type type)
         {
-            Class @class;
-            if (classes.TryGetValue(typeReference, out @class))
-                return @class;
-
             bool processClass = false;
             bool processFields = false;
+            var typeReference = type.TypeReference;
 
             switch (typeReference.MetadataType)
             {
+                case MetadataType.Array:
+                case MetadataType.ByReference:
                 case MetadataType.Void:
+                case MetadataType.Pointer:
+                    return null;
                 case MetadataType.Boolean:
                 case MetadataType.Char:
                 case MetadataType.Byte:
@@ -65,6 +62,7 @@ namespace SharpLang.CompilerServices
                     processClass = true;
                     break;
                 }
+                case MetadataType.TypedByReference:
                 case MetadataType.ValueType:
                 case MetadataType.Class:
                 case MetadataType.Object:
@@ -79,15 +77,16 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
             }
 
-            var type = GetType(typeReference);
-
             // Create class version (boxed version with VTable)
             var boxedType = type.ObjectType;
             var dataType = type.DataType;
-            var stackType = type.StackType;
 
-            @class = new Class(type);
-            classes.Add(typeReference, @class);
+            if (type.Class != null)
+            {
+                return type.Class;
+            }
+
+            var @class = type.Class = new Class(type);
 
             if (processClass)
             {
@@ -127,7 +126,7 @@ namespace SharpLang.CompilerServices
                 // Build methods slots
                 // TODO: This will trigger their compilation, but maybe we might want to defer that later
                 // (esp. since vtable is not built yet => recursion issues)
-                CompileClassMethods(@class);
+                PrepareClassMethods(type);
 
                 if (typeDefinition.IsInterface)
                 {

@@ -35,7 +35,7 @@ namespace SharpLang.CompilerServices
                 if (localType.TypeReference.Resolve().IsInterface)
                 {
                     // Interface upcast
-                    var stackClass = GetClass(stack.Type.TypeReference);
+                    var stackClass = GetClass(stack.Type);
                     foreach (var @interface in stackClass.Interfaces)
                     {
                         if (MemberEqualityComparer.Default.Equals(@interface.Type.TypeReference, localType.TypeReference))

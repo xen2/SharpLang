@@ -44,8 +44,8 @@ namespace SharpLang.CompilerServices
         private AssemblyDefinition corlib;
 
         private Dictionary<TypeReference, Type> types = new Dictionary<TypeReference, Type>(MemberEqualityComparer.Default);
-        private Dictionary<TypeReference, Class> classes = new Dictionary<TypeReference, Class>(MemberEqualityComparer.Default);
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
+        private Queue<Type> classesToGenerate = new Queue<Type>();
 
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
@@ -118,9 +118,13 @@ namespace SharpLang.CompilerServices
             }
 
             // Process methods
-            foreach (var @class in classes)
+            while (classesToGenerate.Count > 0)
             {
-                CompileClassMethods(@class.Value);
+                var classToGenerate = classesToGenerate.Dequeue();
+                if (classToGenerate.Class != null)
+                {
+                    PrepareClassMethods(classToGenerate);
+                }
             }
 
             // Generate code
@@ -161,10 +165,12 @@ namespace SharpLang.CompilerServices
             return module;
         }
 
-        void CompileClassMethods(Class @class)
+        void PrepareClassMethods(Type type)
         {
+            var @class = GetClass(type);
+
             // Already processed?
-            if (@class.MethodCompiled)
+            if (@class == null || @class.MethodCompiled)
                 return;
 
             @class.MethodCompiled = true;

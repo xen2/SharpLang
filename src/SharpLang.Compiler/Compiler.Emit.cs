@@ -100,7 +100,7 @@ namespace SharpLang.CompilerServices
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
             // Resolve class
-            var @class = GetClass(type.TypeReference);
+            var @class = GetClass(type);
 
             // Store vtable global into first field of the object
             var indices = new[]
@@ -326,7 +326,7 @@ namespace SharpLang.CompilerServices
                 // - cast
                 // - store class depth (and just do a substraction)
                 int depth = 0;
-                var @class = GetClass(type.TypeReference);
+                var @class = GetClass(type);
                 while (@class != null)
                 {
                     if (@class == field.DeclaringClass)
