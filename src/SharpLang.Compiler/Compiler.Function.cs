@@ -453,7 +453,7 @@ namespace SharpLang.CompilerServices
                     case Code.Initobj:
                     {
                         var address = stack.Pop();
-                        var typeReference = (TypeReference)instruction.Operand;
+                        var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
                         var type = GetType(typeReference);
                         EmitInitobj(address, type);
                         break;
@@ -472,8 +472,8 @@ namespace SharpLang.CompilerServices
 
                     case Code.Isinst:
                     {
-                        var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
+                        var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
+                        var @class = GetClass(typeReference);
 
                         var obj = stack.Pop();
 
@@ -588,8 +588,8 @@ namespace SharpLang.CompilerServices
                     #region Box/Unbox opcodes
                     case Code.Box:
                     {
-                        var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
+                        var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
+                        var @class = GetClass(typeReference);
 
                         var valueType = stack.Pop();
 
@@ -609,8 +609,8 @@ namespace SharpLang.CompilerServices
 
                     case Code.Unbox_Any:
                     {
-                        var typeReference = (TypeReference)instruction.Operand;
-                        var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, typeReference));
+                        var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
+                        var @class = GetClass(typeReference);
 
                         var obj = stack.Pop();
 
