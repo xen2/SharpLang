@@ -334,7 +334,7 @@ namespace SharpLang.CompilerServices
                     }
                     case Code.Call:
                     {
-                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                         var targetMethod = GetFunction(targetMethodReference);
 
                         EmitCall(stack, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
@@ -364,7 +364,7 @@ namespace SharpLang.CompilerServices
                     }
                     case Code.Callvirt:
                     {
-                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                         var targetMethod = GetFunction(targetMethodReference);
 
                         // TODO: Interface calls & virtual calls
@@ -461,7 +461,7 @@ namespace SharpLang.CompilerServices
 
                     case Code.Newobj:
                     {
-                        var ctorReference = (MethodReference)instruction.Operand;
+                        var ctorReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                         var ctor = GetFunction(ctorReference);
                         var type = GetType(ctorReference.DeclaringType);
 
@@ -577,7 +577,7 @@ namespace SharpLang.CompilerServices
 
                     case Code.Ldftn:
                     {
-                        var targetMethodReference = (MethodReference)instruction.Operand;
+                        var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                         var targetMethod = GetFunction(targetMethodReference);
 
                         stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrType, string.Empty)));

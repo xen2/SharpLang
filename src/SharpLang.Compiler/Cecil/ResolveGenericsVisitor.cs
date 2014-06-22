@@ -95,30 +95,82 @@ namespace SharpLang.CompilerServices.Cecil
             return result;
         }
 
-        public static MethodReference Process(MethodReference method)
+        public static MethodReference Process(MethodReference context, MethodReference method)
         {
-            var reference = new MethodReference(method.Name, Process(method, method.ReturnType), Process(method, method.DeclaringType))
+            var genericInstanceMethod = method as GenericInstanceMethod;
+            if (genericInstanceMethod == null)
             {
-                HasThis = method.HasThis,
-                ExplicitThis = method.ExplicitThis,
-                CallingConvention = method.CallingConvention,
-            };
+                // Resolve declaring type
+                var declaringType = method.DeclaringType;
+                var newDeclaringType = Process(context, declaringType);
+                if (newDeclaringType != declaringType)
+                {
+                    var result1 = new MethodReference(method.Name, method.ReturnType, newDeclaringType)
+                    {
+                        HasThis = method.HasThis,
+                        ExplicitThis = method.ExplicitThis,
+                        CallingConvention = method.CallingConvention,
+                    };
+                
+                    foreach (var parameter in method.Parameters)
+                        result1.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+                
+                    foreach (var generic_parameter in method.GenericParameters)
+                        result1.GenericParameters.Add(new GenericParameter(generic_parameter.Name, result1));
 
-            foreach (var parameter in method.Parameters)
-                reference.Parameters.Add(new ParameterDefinition(Process(method, parameter.ParameterType)));
+                    return result1;
+                }
 
-            foreach (var generic_parameter in method.GenericParameters)
-                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+                return method;
+            }
 
-            return reference;
+            var result2 = new GenericInstanceMethod(Process(context, Process(context, genericInstanceMethod.ElementMethod)));
+
+            foreach (var genericArgument in genericInstanceMethod.GenericArguments)
+                result2.GenericArguments.Add(Process(context, genericArgument));
+
+            return result2;
+            //else
+            //{
+            //    result = new MethodReference(method.Name, Process(context, method.ReturnType), Process(context, method.DeclaringType))
+            //    {
+            //        HasThis = method.HasThis,
+            //        ExplicitThis = method.ExplicitThis,
+            //        CallingConvention = method.CallingConvention,
+            //    };
+            //
+            //    foreach (var parameter in method.Parameters)
+            //        result.Parameters.Add(new ParameterDefinition(Process(context, parameter.ParameterType)));
+            //}
+            //
+            //foreach (var generic_parameter in method.GenericParameters)
+            //    result.GenericParameters.Add(new GenericParameter(generic_parameter.Name, result));
         }
 
         public static bool ContainsGenericParameters(MethodReference method)
         {
             // Determine if method contains any open generic type.
             // TODO: Might need a more robust generic resolver/analyzer system soon.
-            method = Process(method);
-            return method.ContainsGenericParameter();
+
+            // First, check resolved declaring type
+            if (Process(method, method.DeclaringType).ContainsGenericParameter())
+                return true;
+
+            var genericInstanceMethod = method as GenericInstanceMethod;
+            if (genericInstanceMethod != null)
+            {
+                // Check that each generic argument is closed
+                foreach (var genericArgument in genericInstanceMethod.GenericArguments)
+                    if (Process(method, genericArgument).ContainsGenericParameter())
+                        return true;
+
+                return false;
+            }
+            else
+            {
+                // If it's not a GenericInstanceMethod, it shouldn't have any generic parameters
+                return method.HasGenericParameters;
+            }
         }
 
         public override TypeReference Visit(GenericParameter type)
