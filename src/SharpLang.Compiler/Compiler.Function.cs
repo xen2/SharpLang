@@ -1547,8 +1547,8 @@ namespace SharpLang.CompilerServices
             if (targetStack == null)
             {
                 targetStack = new StackValue[sourceStack.Count];
-                if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero)
-                    throw new InvalidOperationException("Target basic block should have no instruction yet.");
+                if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero && sourceStack.Count != 0)
+                    throw new InvalidOperationException("Target basic block should have no instruction yet, or stack should be empty.");
                 LLVM.PositionBuilderAtEnd(builder2, targetBasicBlock);
             }
 
