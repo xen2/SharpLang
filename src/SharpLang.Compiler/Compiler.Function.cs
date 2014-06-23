@@ -346,8 +346,8 @@ namespace SharpLang.CompilerServices
                         var callSite = (CallSite)instruction.Operand;
 
                         // TODO: Unify with CreateFunction code
-                        var returnType = GetType(callSite.ReturnType).DefaultType;
-                        var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(x.ParameterType).DefaultType).ToArray();
+                        var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType)).DefaultType;
+                        var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType)).DefaultType).ToArray();
 
                         // Generate function type
                         var functionType = LLVM.FunctionType(returnType, parameterTypesLLVM, false);
