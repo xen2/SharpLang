@@ -270,7 +270,7 @@ namespace SharpLang.CompilerServices
             EmitBrCommon(stack.Pop(), IntPredicate.IntNE, targetBasicBlock, nextBasicBlock);
         }
 
-        private void EmitStfld(List<StackValue> stack, Field field)
+        private void EmitStfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
             var @object = stack.Pop();
@@ -285,10 +285,13 @@ namespace SharpLang.CompilerServices
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
 
             // Store value in field
-            LLVM.BuildStore(builder, fieldValue, fieldAddress);
+            var storeInst = LLVM.BuildStore(builder, fieldValue, fieldAddress);
+
+            // Set instruction flags
+            SetInstructionFlags(storeInst, instructionFlags);
         }
 
-        private void EmitLdfld(List<StackValue> stack, Field field)
+        private void EmitLdfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
             var @object = stack.Pop();
 
@@ -301,11 +304,23 @@ namespace SharpLang.CompilerServices
             // Load value from field and create "fake" local
             var value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
 
+            // Set instruction flags
+            SetInstructionFlags(value, instructionFlags);
+
             // Convert from local to stack value
             value = ConvertFromLocalToStack(field.Type, value);
 
             // Add value to stack
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
+        }
+
+        private static void SetInstructionFlags(ValueRef instruction, InstructionFlags instructionFlags)
+        {
+            // Set instruction flags (if necessary)
+            if ((instructionFlags & InstructionFlags.Volatile) != 0)
+                LLVM.SetVolatile(instruction, true);
+            if ((instructionFlags & InstructionFlags.Unaligned) != 0)
+                LLVM.SetAlignment(instruction, 1);
         }
 
         private ValueRef[] BuildFieldIndices(Field field, StackValueType stackValueType, Type type)
@@ -349,7 +364,7 @@ namespace SharpLang.CompilerServices
             return indices.ToArray();
         }
 
-        private void EmitStsfld(List<StackValue> stack, Field field)
+        private void EmitStsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
 
@@ -365,10 +380,13 @@ namespace SharpLang.CompilerServices
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
 
             // Store value in static field
-            LLVM.BuildStore(builder, fieldValue, staticFieldAddress);
+            var storeInst = LLVM.BuildStore(builder, fieldValue, staticFieldAddress);
+
+            // Set instruction flags
+            SetInstructionFlags(storeInst, instructionFlags);
         }
 
-        private void EmitLdsfld(List<StackValue> stack, Field field)
+        private void EmitLdsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
             var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
 
@@ -383,6 +401,9 @@ namespace SharpLang.CompilerServices
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(field.Type, value);
+
+            // Set instruction flags
+            SetInstructionFlags(value, instructionFlags);
 
             // Add value to stack
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));

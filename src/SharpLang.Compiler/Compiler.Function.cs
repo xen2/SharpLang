@@ -253,6 +253,8 @@ namespace SharpLang.CompilerServices
             // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
             bool flowingToNextBlock = true;
 
+            var instructionFlags = InstructionFlags.None;
+
             foreach (var instruction in body.Instructions)
             {
                 var branchTarget = branchTargets[instruction.Offset];
@@ -791,7 +793,8 @@ namespace SharpLang.CompilerServices
                         var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
-                        EmitLdfld(stack, field);
+                        EmitLdfld(stack, field, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
 
                         break;
                     }
@@ -803,7 +806,8 @@ namespace SharpLang.CompilerServices
                         var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
-                        EmitLdsfld(stack, field);
+                        EmitLdsfld(stack, field, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
 
                         break;
                     }
@@ -835,7 +839,8 @@ namespace SharpLang.CompilerServices
                         var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
-                        EmitStfld(stack, field);
+                        EmitStfld(stack, field, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
 
                         break;
                     }
@@ -848,7 +853,9 @@ namespace SharpLang.CompilerServices
                         var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
-                        EmitStsfld(stack, field);
+                        EmitStsfld(stack, field, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
+
                         break;
                     }
                     #endregion
@@ -1493,6 +1500,15 @@ namespace SharpLang.CompilerServices
                     InvalidBinaryOperation:
                         throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", opcode, operand1.StackType, operand2.StackType));
                     }
+                    #endregion
+
+                    #region Instruction flags (Unaligned, Volatile)
+                    case Code.Volatile:
+                        instructionFlags |= InstructionFlags.Volatile;
+                        break;
+                    case Code.Unaligned:
+                        instructionFlags |= InstructionFlags.Unaligned;
+                        break;
                     #endregion
 
                     case Code.Castclass:
