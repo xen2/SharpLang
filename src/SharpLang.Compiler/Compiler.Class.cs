@@ -313,7 +313,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Build actual type data (fields)
                     // Add fields and vtable slots from parent class
-                    if (parentClass != null && typeReference.MetadataType == MetadataType.Class)
+                    if (parentClass != null && type.StackType == StackValueType.Object)
                     {
                         fieldTypes.Add(parentClass.Type.DataType);
                     }
