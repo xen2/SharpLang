@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Mono.Cecil;
 using SharpLang.Compiler.Utils;
+using SharpLang.CompilerServices.Cecil;
 using SharpLang.Toolsets;
 using SharpLLVM;
 
@@ -42,13 +43,16 @@ namespace SharpLang.CompilerServices
             // Force PdbReader to be referenced
             typeof(Mono.Cecil.Pdb.PdbReader).ToString();
 
-            var assemblyResolver = new DefaultAssemblyResolver();
+            var assemblyResolver = new CustomAssemblyResolver();
 
             // Check if there is a PDB
             var readPdb = File.Exists(System.IO.Path.ChangeExtension(inputFile, "pdb"));
 
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(inputFile,
                 new ReaderParameters { AssemblyResolver = assemblyResolver, ReadSymbols = readPdb });
+
+            // Register self to assembly resolver
+            assemblyResolver.Register(assemblyDefinition);
 
             var compiler = new Compiler();
             var module = compiler.CompileAssembly(assemblyDefinition);
