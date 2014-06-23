@@ -138,10 +138,9 @@ namespace SharpLang.CompilerServices
                 else
                 {
                     // Get parent type RTTI
-                    var runtimeTypeInfoType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
                     var parentRuntimeTypeInfo = parentClass != null
-                        ? LLVM.ConstPointerCast(parentClass.GeneratedRuntimeTypeInfoGlobal, runtimeTypeInfoType)
-                        : LLVM.ConstPointerNull(runtimeTypeInfoType);
+                        ? LLVM.ConstPointerCast(parentClass.GeneratedRuntimeTypeInfoGlobal, intPtrType)
+                        : LLVM.ConstPointerNull(intPtrType);
     
                     // Build vtable
                     var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
@@ -244,47 +243,68 @@ namespace SharpLang.CompilerServices
                     var staticFieldsEmpty = LLVM.ConstNull(LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false));
                     fieldTypes.Clear(); // Reused for non-static fields after
 
-                    // Build super types
-                    // Helpful for fast is/as checks on class hierarchy
-                    var superTypeCount = LLVM.ConstInt(int32Type, (ulong)@class.Depth + 1, false);
-                    var interfacesCount = LLVM.ConstInt(int32Type, (ulong)@class.Interfaces.Count, false);
-
-                    var zero = LLVM.ConstInt(int32Type, 0, false);
-
-                    // Super types global
-                    var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)superTypes.Count), string.Empty);
-                    var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] { zero, zero });
-
-                    // Interface map global
-                    var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)@class.Interfaces.Count), string.Empty);
-                    var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] { zero, zero });
-
-                    // Build RTTI
-                    var runtimeTypeInfoConstant = LLVM.ConstStructInContext(context, new[]
+                    var runtimeTypeInfoType = LLVM.StructTypeInContext(context, new []
                     {
-                        parentRuntimeTypeInfo,
-                        superTypeCount,
-                        interfacesCount,
-                        superTypesGlobal,
-                        interfacesGlobal,
-                        interfaceMethodTableConstant,
-                        vtableConstant,
-                        staticFieldsEmpty,
+                        LLVM.TypeOf(parentRuntimeTypeInfo),
+                        int32Type,
+                        int32Type,
+                        LLVM.PointerType(intPtrType, 0),
+                        LLVM.PointerType(intPtrType, 0),
+                        LLVM.ArrayType(intPtrType, InterfaceMethodTableSize),
+                        LLVM.TypeOf(vtableConstant),
+                        LLVM.TypeOf(staticFieldsEmpty),
                     }, false);
-                    var vtableGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(runtimeTypeInfoConstant), string.Empty);
-                    LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
+
+                    var vtableGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, string.Empty);
                     @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
 
-                    // Build super type list (after RTTI since we need pointer to RTTI)
-                    var superTypesConstant = LLVM.ConstArray(intPtrType,
-                        superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
-                    LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
+                    if (@class.Type.IsLocal)
+                    {
+                        // Build super types
+                        // Helpful for fast is/as checks on class hierarchy
+                        var superTypeCount = LLVM.ConstInt(int32Type, (ulong)@class.Depth + 1, false);
+                        var interfacesCount = LLVM.ConstInt(int32Type, (ulong)@class.Interfaces.Count, false);
 
-                    // Build interface map
-                    var interfacesConstant = LLVM.ConstArray(intPtrType,
-                        @class.Interfaces.Select(@interface => LLVM.ConstPointerCast(@interface.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
-                    LLVM.SetInitializer(interfacesConstantGlobal, interfacesConstant);
+                        var zero = LLVM.ConstInt(int32Type, 0, false);
+
+                        // Super types global
+                        var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)superTypes.Count), string.Empty);
+                        var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] { zero, zero });
+
+                        // Interface map global
+                        var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint)@class.Interfaces.Count), string.Empty);
+                        var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] { zero, zero });
+
+                        // Build RTTI
+                        var runtimeTypeInfoConstant = LLVM.ConstNamedStruct(runtimeTypeInfoType, new[]
+                        {
+                            parentRuntimeTypeInfo,
+                            superTypeCount,
+                            interfacesCount,
+                            superTypesGlobal,
+                            interfacesGlobal,
+                            interfaceMethodTableConstant,
+                            vtableConstant,
+                            staticFieldsEmpty,
+                        });
+                        LLVM.SetInitializer(vtableGlobal, runtimeTypeInfoConstant);
+
+                        // Build super type list (after RTTI since we need pointer to RTTI)
+                        var superTypesConstant = LLVM.ConstArray(intPtrType,
+                            superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
+                        LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
+
+                        // Build interface map
+                        var interfacesConstant = LLVM.ConstArray(intPtrType,
+                            @class.Interfaces.Select(@interface => LLVM.ConstPointerCast(@interface.GeneratedRuntimeTypeInfoGlobal, intPtrType)).ToArray());
+                        LLVM.SetInitializer(interfacesConstantGlobal, interfacesConstant);
+                    }
+                    else
+                    {
+                        LLVM.SetLinkage(vtableGlobal, Linkage.ExternalWeakLinkage);
+                    }
+
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
                 }
 
                 // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).

@@ -121,7 +121,7 @@ namespace SharpLang.CompilerServices
             while (classesToGenerate.Count > 0)
             {
                 var classToGenerate = classesToGenerate.Dequeue();
-                if (classToGenerate.Class != null)
+                if (classToGenerate.IsLocal)
                 {
                     PrepareClassMethods(classToGenerate);
                 }
@@ -216,7 +216,7 @@ namespace SharpLang.CompilerServices
                         Function matchedMethod = null;
                         while (baseType != null)
                         {
-                            matchedMethod = CecilExtensions.TryMatchMethod(baseType, method);
+                            matchedMethod = CecilExtensions.TryMatchMethod(baseType, methodReference);
                             if (matchedMethod != null)
                                 break;
                             baseType = baseType.BaseType;
