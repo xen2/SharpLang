@@ -195,7 +195,7 @@ namespace SharpLang.CompilerServices
                 if (local.IsPinned)
                     throw new NotSupportedException();
 
-                var type = CreateType(local.VariableType);
+                var type = CreateType(ResolveGenericsVisitor.Process(methodReference, local.VariableType));
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
             }
 
