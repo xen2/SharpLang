@@ -175,7 +175,7 @@ namespace SharpLang.CompilerServices
             var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
 
             var result = new Type(typeReference, dataType, boxedType, stackType);
-            result.IsLocal = typeReference.Resolve().Module.Assembly != assembly;
+            result.IsLocal = typeReference.Resolve().Module.Assembly == assembly;
 
             if (result.IsLocal)
             {
