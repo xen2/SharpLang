@@ -90,7 +90,7 @@ namespace SharpLang.CompilerServices
 
             if (processClass)
             {
-                var typeDefinition = typeReference.Resolve();
+                var typeDefinition = GetMethodTypeDefinition(typeReference);
 
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
 

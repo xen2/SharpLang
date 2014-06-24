@@ -165,6 +165,22 @@ namespace SharpLang.CompilerServices
             return module;
         }
 
+        /// <summary>
+        /// Gets the type definition containing all the methods for the given type.
+        /// </summary>
+        /// <returns></returns>
+        TypeDefinition GetMethodTypeDefinition(TypeReference typeReference)
+        {
+            if (typeReference is ArrayType)
+            {
+                // Return ArrayType
+                return corlib.MainModule.GetType(typeof(Array).FullName);
+            }
+
+            // Default: resolve to get real type
+            return typeReference.Resolve();
+        }
+
         void PrepareClassMethods(Type type)
         {
             var @class = GetClass(type);
@@ -175,7 +191,7 @@ namespace SharpLang.CompilerServices
 
             @class.MethodCompiled = true;
 
-            var typeDefinition = @class.Type.TypeReference.Resolve();
+            var typeDefinition = GetMethodTypeDefinition(@class.Type.TypeReference);
 
             bool isInterface = typeDefinition.IsInterface;
 
