@@ -38,7 +38,6 @@ namespace SharpLang.CompilerServices
 
             switch (typeReference.MetadataType)
             {
-                case MetadataType.Array:
                 case MetadataType.ByReference:
                 case MetadataType.Void:
                 case MetadataType.Pointer:
@@ -57,11 +56,12 @@ namespace SharpLang.CompilerServices
                 case MetadataType.UIntPtr:
                 case MetadataType.Single:
                 case MetadataType.Double:
-                case MetadataType.String:
                 {
                     processClass = true;
                     break;
                 }
+                case MetadataType.Array:
+                case MetadataType.String:
                 case MetadataType.TypedByReference:
                 case MetadataType.ValueType:
                 case MetadataType.Class:
@@ -318,14 +318,32 @@ namespace SharpLang.CompilerServices
                         fieldTypes.Add(parentClass.Type.DataType);
                     }
 
-                    foreach (var field in typeDefinition.Fields)
+                    // Special cases: Array and String
+                    if (typeReference.MetadataType == MetadataType.String)
                     {
-                        if (field.IsStatic)
-                            continue;
+                        // String: length (native int) + char pointer
+                        fieldTypes.Add(intPtrType);
+                        fieldTypes.Add(intPtrType);
+                    }
+                    else if (typeReference.MetadataType == MetadataType.Array)
+                    {
+                        // String: length (native int) + first element pointer
+                        var arrayType = (ArrayType)typeReference;
+                        var elementType = CreateType(arrayType.ElementType);
+                        fieldTypes.Add(intPtrType);
+                        fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
+                    }
+                    else
+                    {
+                        foreach (var field in typeDefinition.Fields)
+                        {
+                            if (field.IsStatic)
+                                continue;
 
-                        var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
-                        @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
-                        fieldTypes.Add(fieldType.DefaultType);
+                            var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+                            @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                            fieldTypes.Add(fieldType.DefaultType);
+                        }
                     }
 
                     LLVM.StructSetBody(dataType, fieldTypes.ToArray(), false);

@@ -52,4 +52,3 @@ It's still a early work in progress. Any help/feedback is welcome!
 Here for now, until later moved to a more specific documentation.
 
 * UTF8 string (UTF16 was choosed mainly because of Windows API, but UTF8 is more space efficient, API compatible with char* and avoid many conversions)
-* String and arrays are internally structures that contains length/pointer (instead of concatening length with data) for easier interop with other languages, and sub-arrays/sub-strings operations

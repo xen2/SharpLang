@@ -134,7 +134,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdstr(List<StackValue> stack, string operand)
         {
-            var stringType = GetType(corlib.MainModule.GetType(typeof(string).FullName));
+            var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
             // Create string data global
             var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
@@ -145,12 +145,27 @@ namespace SharpLang.CompilerServices
             var zero = LLVM.ConstInt(int32Type, 0, false);
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
 
-            // Create string
-            var stringConstant = LLVM.ConstNamedStruct(stringType.DefaultType,
-                new[] { LLVM.ConstIntToPtr(LLVM.ConstInt(int64Type, (ulong)operand.Length, false), intPtrType), stringConstantDataGlobal });
+            // Allocate object
+            var allocatedObject = AllocateObject(stringClass.Type);
+
+            // Prepare indices
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
+                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+            };
+
+            // Update array with size and 0 data
+            var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            LLVM.BuildStore(builder, LLVM.ConstIntToPtr(LLVM.ConstInt(int64Type, (ulong)operand.Length, false), intPtrType), sizeLocation);
+
+            indices[2] = LLVM.ConstInt(int32Type, 2, false);                // Access data pointer
+            var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            LLVM.BuildStore(builder, stringConstantDataGlobal, dataPointerLocation);
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Value, stringType, stringConstant));
+            stack.Add(new StackValue(StackValueType.Value, stringClass.Type, allocatedObject));
         }
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
@@ -423,7 +438,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitNewarr(List<StackValue> stack, Type elementType)
         {
-            var arrayType = GetType(new ArrayType(elementType.TypeReference));
+            var arrayClass = GetClass(new ArrayType(elementType.TypeReference));
 
             var numElements = stack.Pop();
 
@@ -435,24 +450,44 @@ namespace SharpLang.CompilerServices
 
             var numElementsAsPointer = LLVM.BuildIntToPtr(builder, numElements.Value, intPtrType, string.Empty);
 
-            // Create array
-            var arrayConstant = LLVM.ConstNamedStruct(arrayType.DefaultType,
-                new[] { LLVM.ConstPointerNull(intPtrType), LLVM.ConstPointerNull(LLVM.PointerType(elementType.DefaultType, 0)) });
+            // Allocate object
+            var allocatedObject = AllocateObject(arrayClass.Type);
 
-            // Update array with allocated pointer
-            arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, numElementsAsPointer, 0, string.Empty);
-            arrayConstant = LLVM.BuildInsertValue(builder, arrayConstant, values, 1, string.Empty);
+            // Prepare indices
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
+                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+            };
+
+            // Update array with size and 0 data
+            var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            LLVM.BuildStore(builder, numElementsAsPointer, sizeLocation);
+
+            indices[2] = LLVM.ConstInt(int32Type, 2, false);                // Access data pointer
+            var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            LLVM.BuildStore(builder, values, dataPointerLocation);
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Value, arrayType, arrayConstant));
+            stack.Add(new StackValue(StackValueType.Value, arrayClass.Type, allocatedObject));
         }
 
         private void EmitLdlen(List<StackValue> stack)
         {
             var array = stack.Pop();
 
-            // Compute element location
-            var arraySize = LLVM.BuildExtractValue(builder, array.Value, 0, string.Empty);
+            // Prepare indices
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false),   // Data
+                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+            };
+
+            // Load data pointer
+            var arraySizeLocation = LLVM.BuildInBoundsGEP(builder, array.Value, indices, string.Empty);
+            var arraySize = LLVM.BuildLoad(builder, arraySizeLocation, string.Empty);
 
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, arraySize));
@@ -466,8 +501,8 @@ namespace SharpLang.CompilerServices
             // Get element type
             var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
 
-            // Load first element pointer
-            var arrayFirstElement = LLVM.BuildExtractValue(builder, array.Value, 1, string.Empty);
+            // Load array data pointer
+            var arrayFirstElement = LoadArrayDataPointer(array);
 
             // Find pointer of element at requested index
             var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
@@ -491,8 +526,8 @@ namespace SharpLang.CompilerServices
             // Get element type
             var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
 
-            // Load first element pointer
-            var arrayFirstElement = LLVM.BuildExtractValue(builder, array.Value, 1, string.Empty);
+            // Load array data pointer
+            var arrayFirstElement = LoadArrayDataPointer(array);
 
             // Find pointer of element at requested index
             var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
@@ -502,6 +537,23 @@ namespace SharpLang.CompilerServices
 
             // Store element
             LLVM.BuildStore(builder, convertedElement, arrayElementPointer);
+        }
+
+        private ValueRef LoadArrayDataPointer(StackValue array)
+        {
+            // Prepare indices
+            var indices = new[]
+            {
+                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false),   // Data
+                LLVM.ConstInt(int32Type, 2, false),                         // Access data pointer
+            };
+
+            // Load data pointer
+            var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, array.Value, indices, string.Empty);
+            var dataPointer = LLVM.BuildLoad(builder, dataPointerLocation, string.Empty);
+
+            return dataPointer;
         }
     }
 }
