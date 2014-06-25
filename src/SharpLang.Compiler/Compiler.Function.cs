@@ -664,6 +664,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ldelem_Any:
                     case Code.Ldelem_Ref:
                     {
+                        // TODO: Properly use opcode for type conversion
                         EmitLdelem(stack);
 
                         break;
@@ -677,6 +678,7 @@ namespace SharpLang.CompilerServices
                     case Code.Stelem_Any:
                     case Code.Stelem_Ref:
                     {
+                        // TODO: Properly use opcode for type conversion
                         EmitStelem(stack);
 
                         break;
