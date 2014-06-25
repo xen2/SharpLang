@@ -452,6 +452,8 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+
+                    #region Obj opcodes (Initobj, Newobj, Stobj, Ldobj, etc...)
                     case Code.Initobj:
                     {
                         var address = stack.Pop();
@@ -471,6 +473,24 @@ namespace SharpLang.CompilerServices
 
                         break;
                     }
+
+                    case Code.Stobj:
+                    {
+                        var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+
+                        instructionFlags = EmitStobj(stack, type, instructionFlags);
+
+                        break;
+                    }
+                    case Code.Ldobj:
+                    {
+                        var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+
+                        instructionFlags = EmitLdobj(stack, type, instructionFlags);
+
+                        break;
+                    }
+                    #endregion
 
                     case Code.Isinst:
                     {
@@ -649,6 +669,14 @@ namespace SharpLang.CompilerServices
                     case Code.Ldlen:
                     {
                         EmitLdlen(stack);
+
+                        break;
+                    }
+                    case Code.Ldelema:
+                    {
+                        var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+
+                        EmitLdelema(stack, type);
 
                         break;
                     }

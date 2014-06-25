@@ -56,6 +56,40 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
         }
 
+        private InstructionFlags EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        {
+            var address = stack.Pop();
+
+            // Load value at address
+            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+            var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
+            SetInstructionFlags(loadInst, instructionFlags);
+            instructionFlags = InstructionFlags.None;
+
+            // Convert to stack type
+            var value = ConvertFromLocalToStack(type, loadInst);
+
+            // Add to stack
+            stack.Add(new StackValue(type.StackType, type, value));
+            return instructionFlags;
+        }
+
+        private InstructionFlags EmitStobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        {
+            var value = stack.Pop();
+            var address = stack.Pop();
+
+            // Convert to local type
+            var sourceValue = ConvertFromStackToLocal(type, value);
+
+            // Store value at address
+            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+            var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
+            SetInstructionFlags(storeInst, instructionFlags);
+            instructionFlags = InstructionFlags.None;
+            return instructionFlags;
+        }
+
         private void EmitInitobj(StackValue address, Type type)
         {
             var value = address.Value;
@@ -494,6 +528,26 @@ namespace SharpLang.CompilerServices
 
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, arraySize));
+        }
+
+        private void EmitLdelema(List<StackValue> stack, Type elementType)
+        {
+            var index = stack.Pop();
+            var array = stack.Pop();
+
+            var refType = GetType(elementType.TypeReference.MakeByReferenceType());
+
+            // Load array data pointer
+            var arrayFirstElement = LoadArrayDataPointer(array);
+
+            // Find pointer of element at requested index
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+
+            // Convert
+            arrayElementPointer = ConvertFromLocalToStack(elementType, arrayElementPointer);
+
+            // Push loaded element address onto the stack
+            stack.Add(new StackValue(refType.StackType, refType, arrayElementPointer));
         }
 
         private void EmitLdelem(List<StackValue> stack)
