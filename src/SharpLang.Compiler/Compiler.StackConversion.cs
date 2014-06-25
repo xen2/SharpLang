@@ -18,7 +18,8 @@ namespace SharpLang.CompilerServices
 
             // Same type, return as is
             if ((stack.StackType == StackValueType.Value
-                    || stack.StackType == StackValueType.NativeInt)
+                    || stack.StackType == StackValueType.NativeInt
+                    || stack.StackType == StackValueType.Reference)
                 && localType.DefaultType == stack.Type.DefaultType)
             {
                 return stackValue;
@@ -118,6 +119,7 @@ namespace SharpLang.CompilerServices
                 case StackValueType.Value:
                     // Value type, no conversion should be needed
                     break;
+                case StackValueType.Reference:
                 case StackValueType.Object:
                     // TODO: Check type conversions (upcasts, etc...)
                     break;

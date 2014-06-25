@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
@@ -38,12 +39,14 @@ namespace SharpLang.CompilerServices
         {
             var local = locals[operandIndex];
 
+            var refType = GetType(local.Type.TypeReference.MakeByReferenceType());
+
             // Convert from local to stack value
-            var value = ConvertFromLocalToStack(local.Type, local.Value);
+            var value = ConvertFromLocalToStack(refType, local.Value);
 
             // Add value to stack
             // TODO: Choose appropriate type + conversions
-            stack.Add(new StackValue(StackValueType.Reference, local.Type, value));
+            stack.Add(new StackValue(StackValueType.Reference, refType, value));
         }
 
         private void EmitLdarg(List<StackValue> stack, List<StackValue> args, int operandIndex)

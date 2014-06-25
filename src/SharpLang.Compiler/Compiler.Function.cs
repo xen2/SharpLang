@@ -813,6 +813,100 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Indirect opcodes (Stind, Ldind, etc...)
+                    case Code.Stind_I:
+                    case Code.Stind_I1:
+                    case Code.Stind_I2:
+                    case Code.Stind_I4:
+                    case Code.Stind_I8:
+                    case Code.Stind_R4:
+                    case Code.Stind_R8:
+                    case Code.Stind_Ref:
+                    {
+                        var value = stack.Pop();
+                        var address = stack.Pop();
+
+                        // Determine type
+                        Type type;
+                        switch (opcode)
+                        {
+                            case Code.Stind_I: type = intPtr; break;
+                            case Code.Stind_I1: type = int8; break;
+                            case Code.Stind_I2: type = int16; break;
+                            case Code.Stind_I4: type = int32; break;
+                            case Code.Stind_I8: type = int64; break;
+                            case Code.Stind_R4: type = @float; break;
+                            case Code.Stind_R8: type = @double; break;
+                            case Code.Stind_Ref:
+                                type = value.Type;
+                                break;
+                            default:
+                                throw new ArgumentException("opcode");
+                        }
+
+                        // Convert to local type
+                        var sourceValue = ConvertFromStackToLocal(type, value);
+
+                        // Store value at address
+                        var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+                        var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
+                        SetInstructionFlags(storeInst, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
+                        
+                        break;
+                    }
+
+                    case Code.Ldind_I:
+                    case Code.Ldind_I1:
+                    case Code.Ldind_I2:
+                    case Code.Ldind_I4:
+                    case Code.Ldind_I8:
+                    case Code.Ldind_U1:
+                    case Code.Ldind_U2:
+                    case Code.Ldind_U4:
+                    case Code.Ldind_R4:
+                    case Code.Ldind_R8:
+                    case Code.Ldind_Ref:
+                    {
+                        var address = stack.Pop();
+
+                        // Determine type
+                        Type type;
+                        switch (opcode)
+                        {
+                            case Code.Ldind_I:      type = intPtr; break;
+                            case Code.Ldind_I1:     type = int8; break;
+                            case Code.Ldind_I2:     type = int16; break;
+                            case Code.Ldind_I4:     type = int32; break;
+                            case Code.Ldind_I8:     type = int64; break;
+                            case Code.Ldind_U1:     type = int8; break;
+                            case Code.Ldind_U2:     type = int16; break;
+                            case Code.Ldind_U4:     type = int32; break;
+                            case Code.Ldind_R4:     type = @float; break;
+                            case Code.Ldind_R8:     type = @double; break;
+                            case Code.Ldind_Ref:
+                                type = GetType(((ByReferenceType)address.Type.TypeReference).ElementType);
+                                break;
+                            default:
+                                throw new ArgumentException("opcode");
+                        }
+
+                        // Load value at address
+                        var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+                        var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
+                        SetInstructionFlags(loadInst, instructionFlags);
+                        instructionFlags = InstructionFlags.None;
+
+                        // Convert to stack type
+                        var value = ConvertFromLocalToStack(type, loadInst);
+
+                        // Add to stack
+                        stack.Add(new StackValue(type.StackType, type, value));
+                        
+                        break;
+                    }
+                    #endregion
+
                     #region Store opcodes (Stloc, etc...)
                     // Stloc
                     case Code.Stloc_0:

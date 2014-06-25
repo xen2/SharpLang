@@ -18,7 +18,7 @@ namespace SharpLang.CompilerServices
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
-            DefaultType = (stackType == StackValueType.Object || stackType == StackValueType.Reference) ? LLVM.PointerType(ObjectType, 0) : DataType;
+            DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
             StackType = stackType;
 
             switch (stackType)
