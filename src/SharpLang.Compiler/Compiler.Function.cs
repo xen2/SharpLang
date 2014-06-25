@@ -618,18 +618,22 @@ namespace SharpLang.CompilerServices
                         var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
                         var @class = GetClass(typeReference);
 
-                        var valueType = stack.Pop();
+                        // Only value types need to be boxed
+                        if (@class.Type.TypeReference.IsValueType)
+                        {
+                            var valueType = stack.Pop();
 
-                        // Allocate object
-                        var allocatedObject = AllocateObject(@class.Type);
+                            // Allocate object
+                            var allocatedObject = AllocateObject(@class.Type);
 
-                        var dataPointer = GetDataPointer(allocatedObject);
+                            var dataPointer = GetDataPointer(allocatedObject);
 
-                        // Copy data
-                        LLVM.BuildStore(builder, valueType.Value, dataPointer);
+                            // Copy data
+                            LLVM.BuildStore(builder, valueType.Value, dataPointer);
 
-                        // Add created object on the stack
-                        stack.Add(new StackValue(StackValueType.Object, @class.Type, allocatedObject));
+                            // Add created object on the stack
+                            stack.Add(new StackValue(StackValueType.Object, @class.Type, allocatedObject));
+                        }
 
                         break;
                     }
