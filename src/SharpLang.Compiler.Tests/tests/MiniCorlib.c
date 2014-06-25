@@ -12,6 +12,24 @@ typedef struct String
 	char* value;
 } String;
 
+// Empty functions that pretend to set culture on thread UI so that real .NET execute them.
+// No need to worry anymore about culture when using Console.WriteLine.
+void System_Void_System_Globalization_CultureInfo___ctor_System_String_(void* a, void* b)
+{
+	// Ignored
+}
+
+void System_Void_System_Threading_Thread__set_CurrentCulture_System_Globalization_CultureInfo_(void* a, void* b)
+{
+	// Ignored
+}
+
+void* System_Threading_Thread_System_Threading_Thread__get_CurrentThread__()
+{
+	// Ignored
+	return NULL;
+}
+
 // void System.Console.WriteLine(string)
 void System_Void_System_Console__WriteLine_System_String_(String* str)
 {
