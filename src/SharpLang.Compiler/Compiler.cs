@@ -25,8 +25,14 @@ namespace SharpLang.CompilerServices
         // Builder for normal instructions
         private BuilderRef builder;
         private Type intPtr;
+        private Type int8;
+        private Type int16;
         private Type int32;
         private Type int64;
+        private Type uint8;
+        private Type uint16;
+        private Type uint32;
+        private Type uint64;
         private Type @float;
         private Type @double;
         private Type @object;
@@ -70,8 +76,14 @@ namespace SharpLang.CompilerServices
             builder2 = LLVM.CreateBuilderInContext(context);
 
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
+            int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName));
+            int16 = GetType(corlib.MainModule.GetType(typeof(short).FullName));
             int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName));
             int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName));
+            uint8 = GetType(corlib.MainModule.GetType(typeof(byte).FullName));
+            uint16 = GetType(corlib.MainModule.GetType(typeof(ushort).FullName));
+            uint32 = GetType(corlib.MainModule.GetType(typeof(uint).FullName));
+            uint64 = GetType(corlib.MainModule.GetType(typeof(ulong).FullName));
             @float = GetType(corlib.MainModule.GetType(typeof(float).FullName));
             @double = GetType(corlib.MainModule.GetType(typeof(double).FullName));
 
