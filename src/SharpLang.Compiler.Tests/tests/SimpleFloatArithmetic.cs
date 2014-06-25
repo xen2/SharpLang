@@ -46,6 +46,9 @@ public static class Program
 
     public static void Main()
     {
+        // Make sure culture info is en-US
+        System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
         TestSingle();
         TestDouble();
     }
