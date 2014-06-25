@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
@@ -80,6 +81,10 @@ namespace SharpLang.CompilerServices
                 if (method.HasThis && index == 0)
                 {
                     parameterTypeReference = declaringType.TypeReference;
+
+                    // Value type uses ByReference type for this
+                    if (parameterTypeReference.IsValueType)
+                        parameterTypeReference = parameterTypeReference.MakeByReferenceType();
                 }
                 else
                 {
