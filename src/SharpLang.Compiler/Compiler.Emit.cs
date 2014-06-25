@@ -93,14 +93,14 @@ namespace SharpLang.CompilerServices
 
         private ValueRef AllocateObject(Type type)
         {
+            // Resolve class
+            var @class = GetClass(type);
+
             // TODO: Improve performance (better inlining, etc...)
             // Invoke malloc
             var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), int32Type, string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] {typeSize}, string.Empty);
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
-
-            // Resolve class
-            var @class = GetClass(type);
 
             // Store vtable global into first field of the object
             var indices = new[]
