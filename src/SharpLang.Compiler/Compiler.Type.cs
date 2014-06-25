@@ -63,7 +63,7 @@ namespace SharpLang.CompilerServices
             {
                 case MetadataType.Pointer:
                 {
-                    var type = BuildType(((PointerType)typeReference).ElementType);
+                    var type = GetType(((PointerType)typeReference).ElementType);
                     // Special case: void*
                     if (LLVM.VoidTypeInContext(context) == type.DataType)
                         dataType = intPtrType;
@@ -74,14 +74,14 @@ namespace SharpLang.CompilerServices
                 }
                 case MetadataType.ByReference:
                 {
-                    var type = BuildType(((ByReferenceType)typeReference).ElementType);
-                    dataType = LLVM.PointerType(type.DataType, 0);
+                    var type = GetType(((ByReferenceType)typeReference).ElementType);
+                    dataType = LLVM.PointerType(type.TypeOnStack, 0);
                     stackType = StackValueType.Reference;
                     break;
                 }
                 case MetadataType.RequiredModifier:
                     // TODO: Add support for this feature
-                    return BuildType(((RequiredModifierType)typeReference).ElementType);
+                    return GetType(((RequiredModifierType)typeReference).ElementType);
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
                     stackType = StackValueType.Unknown;
