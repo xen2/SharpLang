@@ -1003,7 +1003,6 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBrfalse(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
-                        flowingToNextBlock = false;
                         break;
                     }
                     case Code.Brtrue:
@@ -1011,7 +1010,6 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
-                        flowingToNextBlock = false;
                         break;
                     }
                     #endregion
