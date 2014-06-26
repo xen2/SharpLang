@@ -244,6 +244,15 @@ namespace SharpLang.CompilerServices
                 }
             }
 
+            // Exception handlers blocks are also branch targets
+            if (body.HasExceptionHandlers)
+            {
+                foreach (var exceptionHandler in body.ExceptionHandlers)
+                {
+                    branchTargets[exceptionHandler.HandlerStart.Offset] = true;
+                }
+            }
+
             // Create basic block
             // TODO: Could be done during previous pass
             for (int offset = 0; offset < branchTargets.Length; offset++)
