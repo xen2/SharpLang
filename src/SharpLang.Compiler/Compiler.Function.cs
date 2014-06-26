@@ -256,7 +256,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
-            bool flowingToNextBlock = true;
+            var flowingNextInstructionMode = FlowingNextInstructionMode.Automatic;
 
             var instructionFlags = InstructionFlags.None;
 
@@ -271,12 +271,16 @@ namespace SharpLang.CompilerServices
 
                     var forwardStack = forwardStacks[instruction.Offset];
 
-                    if (flowingToNextBlock)
+                    if (flowingNextInstructionMode == FlowingNextInstructionMode.Automatic)
                     {
                         // Add a jump from previous block to new block
                         LLVM.BuildBr(builder, basicBlock);
+                    }
 
-                        // Flow stack and build PHI nodes
+                    if (flowingNextInstructionMode != FlowingNextInstructionMode.None)
+                    {
+                        // If flowing either automatically or explicitely,
+                        // flow stack and build PHI nodes
                         MergeStack(stack, previousBasicBlock, ref forwardStack, basicBlock);
                         forwardStacks[instruction.Offset] = forwardStack;
                     }
@@ -302,7 +306,7 @@ namespace SharpLang.CompilerServices
                 }
 
                 // Reset states
-                flowingToNextBlock = true;
+                flowingNextInstructionMode = FlowingNextInstructionMode.Automatic;
 
                 var opcode = instruction.OpCode.Code;
 
@@ -336,7 +340,7 @@ namespace SharpLang.CompilerServices
                     case Code.Ret:
                     {
                         EmitRet(stack, methodReference);
-                        flowingToNextBlock = false;
+                        flowingNextInstructionMode = FlowingNextInstructionMode.None;
                         break;
                     }
                     case Code.Call:
@@ -999,7 +1003,7 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBr(basicBlocks[targetInstruction.Offset]);
-                        flowingToNextBlock = false;
+                        flowingNextInstructionMode = FlowingNextInstructionMode.None;
                         break;
                     }
                     case Code.Brfalse:
@@ -1007,6 +1011,7 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBrfalse(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
                         break;
                     }
                     case Code.Brtrue:
@@ -1014,6 +1019,7 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
                         break;
                     }
                     #endregion
@@ -1121,7 +1127,7 @@ namespace SharpLang.CompilerServices
                         // Branch depending on previous test
                         LLVM.BuildCondBr(builder, compareResult, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
                         
-                        flowingToNextBlock = false;
+                        flowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
 
                         break;
                     }
