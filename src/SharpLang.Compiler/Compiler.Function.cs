@@ -165,8 +165,9 @@ namespace SharpLang.CompilerServices
             var codeSize = body != null ? body.CodeSize : 0;
             var functionGlobal = function.GeneratedValue;
 
-            var basicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
-            LLVM.PositionBuilderAtEnd(builder, basicBlock);
+            var functionContext = new FunctionCompilerContext(function);
+            functionContext.BasicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+            LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
 
             if (body == null && (method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
             {
@@ -193,6 +194,8 @@ namespace SharpLang.CompilerServices
             var stack = new List<StackValue>(body.MaxStackSize);
             var locals = new List<StackValue>(body.Variables.Count);
             var args = new List<StackValue>(numParams);
+
+            functionContext.Stack = stack;
 
             // Process locals
             foreach (var local in body.Variables)
@@ -275,22 +278,22 @@ namespace SharpLang.CompilerServices
 
                 if (branchTarget)
                 {
-                    var previousBasicBlock = basicBlock;
-                    basicBlock = basicBlocks[instruction.Offset];
+                    var previousBasicBlock = functionContext.BasicBlock;
+                    functionContext.BasicBlock = basicBlocks[instruction.Offset];
 
                     var forwardStack = forwardStacks[instruction.Offset];
 
                     if (flowingNextInstructionMode == FlowingNextInstructionMode.Implicit)
                     {
                         // Add a jump from previous block to new block
-                        LLVM.BuildBr(builder, basicBlock);
+                        LLVM.BuildBr(builder, functionContext.BasicBlock);
                     }
 
                     if (flowingNextInstructionMode != FlowingNextInstructionMode.None)
                     {
                         // If flowing either automatically or explicitely,
                         // flow stack and build PHI nodes
-                        MergeStack(stack, previousBasicBlock, ref forwardStack, basicBlock);
+                        MergeStack(stack, previousBasicBlock, ref forwardStack, functionContext.BasicBlock);
                         forwardStacks[instruction.Offset] = forwardStack;
                     }
 
@@ -311,7 +314,7 @@ namespace SharpLang.CompilerServices
                     }
 
                     // Position builder to write at beginning of new block
-                    LLVM.PositionBuilderAtEnd(builder, basicBlock);
+                    LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
                 }
 
                 // Reset states
@@ -357,7 +360,7 @@ namespace SharpLang.CompilerServices
                         var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                         var targetMethod = GetFunction(targetMethodReference);
 
-                        EmitCall(stack, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
+                        EmitCall(functionContext, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
 
                         break;
                     }
@@ -378,7 +381,7 @@ namespace SharpLang.CompilerServices
 
                         var signature = CreateFunctionSignature(methodReference, callSite);
 
-                        EmitCall(stack, signature, castedMethodPtr);
+                        EmitCall(functionContext, signature, castedMethodPtr);
 
                         break;
                     }
@@ -438,7 +441,7 @@ namespace SharpLang.CompilerServices
                                 resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
 
                                 // Emit call
-                                EmitCall(stack, targetMethod.Signature, resolvedMethod);
+                                EmitCall(functionContext, targetMethod.Signature, resolvedMethod);
                             }
                             else
                             {
@@ -456,7 +459,7 @@ namespace SharpLang.CompilerServices
                                 var resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
 
                                 // Emit call
-                                EmitCall(stack, targetMethod.Signature, resolvedMethod);
+                                EmitCall(functionContext, targetMethod.Signature, resolvedMethod);
                             }
                         }
                         else
@@ -465,7 +468,7 @@ namespace SharpLang.CompilerServices
                             // Callvirt on non-virtual function is only done to force "this" NULL check
                             // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
                             // so maybe we should keep this as is?
-                            EmitCall(stack, targetMethod.Signature, targetMethod.GeneratedValue);
+                            EmitCall(functionContext, targetMethod.Signature, targetMethod.GeneratedValue);
                         }
 
                         break;
@@ -487,7 +490,7 @@ namespace SharpLang.CompilerServices
                         var ctor = GetFunction(ctorReference);
                         var type = GetType(ctorReference.DeclaringType);
 
-                        EmitNewobj(stack, type, ctor);
+                        EmitNewobj(functionContext, type, ctor);
 
                         break;
                     }
@@ -1678,7 +1681,7 @@ namespace SharpLang.CompilerServices
                     }
 
                     // Merge stack (add PHI incoming)
-                    MergeStack(stack, basicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
+                    MergeStack(stack, functionContext.BasicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
                 }
             }
         }

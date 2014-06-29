@@ -105,8 +105,10 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, LLVM.ConstNull(type.DefaultType), value);
         }
 
-        private void EmitNewobj(List<StackValue> stack, Type type, Function ctor)
+        private void EmitNewobj(FunctionCompilerContext functionContext, Type type, Function ctor)
         {
+            var stack = functionContext.Stack;
+
             if (type.StackType == StackValueType.Object)
             {
                 var allocatedObject = AllocateObject(type);
@@ -116,7 +118,7 @@ namespace SharpLang.CompilerServices
                 stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
 
                 // Invoke ctor
-                EmitCall(stack, ctor.Signature, ctor.GeneratedValue);
+                EmitCall(functionContext, ctor.Signature, ctor.GeneratedValue);
 
                 // Add created object on the stack
                 stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
@@ -239,8 +241,10 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Object, @object, LLVM.ConstNull(@object.DefaultType)));
         }
 
-        private void EmitCall(List<StackValue> stack, FunctionSignature targetMethod, ValueRef overrideMethod)
+        private void EmitCall(FunctionCompilerContext functionContext, FunctionSignature targetMethod, ValueRef overrideMethod)
         {
+            var stack = functionContext.Stack;
+
             // Build argument list
             var targetNumParams = targetMethod.ParameterTypes.Length;
             var args = new ValueRef[targetNumParams];
@@ -255,8 +259,20 @@ namespace SharpLang.CompilerServices
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
 
             // Invoke method
+            ValueRef callResult;
             var actualMethod = overrideMethod;
-            var call = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
+
+            if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
+            {
+                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
+                callResult = LLVM.BuildInvoke(builder, actualMethod, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
+                LLVM.PositionBuilderAtEnd(builder, nextBlock);
+                functionContext.BasicBlock = nextBlock;
+            }
+            else
+            {
+                callResult = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
+            }
 
             // Mark method as needed (if non-virtual call)
             if (LLVM.IsAGlobalVariable(actualMethod).Value != IntPtr.Zero)
@@ -268,7 +284,7 @@ namespace SharpLang.CompilerServices
             if (targetMethod.ReturnType.TypeReference.MetadataType != MetadataType.Void)
             {
                 // Convert return value from local to stack value
-                var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, call);
+                var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, callResult);
 
                 // Add value to stack
                 stack.Add(new StackValue(targetMethod.ReturnType.StackType, targetMethod.ReturnType, returnValue));
