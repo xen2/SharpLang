@@ -265,7 +265,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
-            var flowingNextInstructionMode = FlowingNextInstructionMode.Automatic;
+            var flowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
 
             var instructionFlags = InstructionFlags.None;
 
@@ -280,7 +280,7 @@ namespace SharpLang.CompilerServices
 
                     var forwardStack = forwardStacks[instruction.Offset];
 
-                    if (flowingNextInstructionMode == FlowingNextInstructionMode.Automatic)
+                    if (flowingNextInstructionMode == FlowingNextInstructionMode.Implicit)
                     {
                         // Add a jump from previous block to new block
                         LLVM.BuildBr(builder, basicBlock);
@@ -315,7 +315,7 @@ namespace SharpLang.CompilerServices
                 }
 
                 // Reset states
-                flowingNextInstructionMode = FlowingNextInstructionMode.Automatic;
+                flowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
 
                 var opcode = instruction.OpCode.Code;
 
