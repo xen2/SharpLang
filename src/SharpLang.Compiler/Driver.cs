@@ -77,18 +77,37 @@ namespace SharpLang.CompilerServices
             filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
             filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
 
+            var arguments = new StringBuilder();
+            arguments.AppendFormat("{0} -o {1}", string.Join(" ", filesToLink), outputFile);
+
             // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
+            //var isWindowsOS = Environment.OSVersion.Platform == PlatformID.Win32NT;
             var isWindowsOS = Environment.OSVersion.Platform == PlatformID.Win32NT;
-            if (isWindowsOS)
-                CreateCompilerWrapper();
+            var useMSVCToolchain = isWindowsOS && false; // currently disabled until we can improve exception support (libunwind, SEH, etc...)
 
             var processStartInfo = new ProcessStartInfo
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
-                FileName = isWindowsOS ? ClangWrapper : Clang,
-                Arguments = string.Format("{0} -o {1}", string.Join(" ", filesToLink), outputFile)
+                FileName = useMSVCToolchain ? ClangWrapper : Clang,
             };
+            
+            if (isWindowsOS)
+            {
+                if (useMSVCToolchain)
+                {
+                    CreateCompilerWrapper();
+                }
+                else
+                {
+                    // Add mingw32 paths
+                    arguments.AppendFormat(" --target=i686-pc-mingw32");
+                    processStartInfo.EnvironmentVariables.Add("CPATH", @"..\..\..\..\deps\mingw32\i686-w64-mingw32\include");
+                    processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
+                }
+            }
+
+            processStartInfo.Arguments = arguments.ToString();
 
             string processLinkerOutput;
             var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);

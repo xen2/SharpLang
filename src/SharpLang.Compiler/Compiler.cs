@@ -61,6 +61,9 @@ namespace SharpLang.CompilerServices
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
 
+            // TODO: Choose appropriate triple depending on target
+            LLVM.SetTarget(module, "i686-pc-mingw32");
+
             RuntimeInline.Runtime.makeLLVMModuleContents(module);
             allocObjectFunction = LLVM.GetNamedFunction(module, "allocObject");
             resolveInterfaceCallFunction = LLVM.GetNamedFunction(module, "resolveInterfaceCall");
