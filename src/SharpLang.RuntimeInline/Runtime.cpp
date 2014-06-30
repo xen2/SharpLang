@@ -1,5 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <unwind.h>
+#include <string.h>
+#include <stdio.h>
 
 typedef struct RuntimeTypeInfo
 {
@@ -11,6 +14,32 @@ typedef struct RuntimeTypeInfo
 	void* interfaceMethodTable[19];
 	void* virtualTable[0];
 } RuntimeTypeInfo;
+
+void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
+{
+	printf("cleanup exception\n");
+	if (ex != NULL)
+		free(ex);
+}
+
+extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action actions, uint64_t exceptionClass, struct _Unwind_Exception* exceptionObject, struct _Unwind_Context* context)
+{
+	printf("personality exception\n");
+	return _URC_CONTINUE_UNWIND;
+}
+
+// Temporarily here to force _Unwind_RaiseException to be emitted.
+extern "C" void throwException() __attribute__((noreturn));
+extern "C" void throwException()
+{
+	printf("raise exception\n");
+	struct _Unwind_Exception* ex = (struct _Unwind_Exception*)malloc(sizeof(struct _Unwind_Exception));
+	memset(ex, 0, sizeof(*ex));
+	ex->exception_class = 0x0101010101010101; // TODO
+	ex->exception_cleanup = cleanupException;
+	_Unwind_RaiseException(ex);
+	__builtin_unreachable();
+}
 
 extern "C" bool isInstInterface(const RuntimeTypeInfo* runtimeTypeInfo, const RuntimeTypeInfo* expectedInterface)
 {

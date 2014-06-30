@@ -272,9 +272,83 @@ namespace SharpLang.CompilerServices
 
             var instructionFlags = InstructionFlags.None;
 
+            var exceptionHandlers = new List<ExceptionHandler>();
+
             foreach (var instruction in body.Instructions)
             {
                 var branchTarget = branchTargets[instruction.Offset];
+
+                // Check if any exception handlers might have changed
+                if (body.HasExceptionHandlers)
+                {
+                    bool exceptionHandlersChanged = false;
+
+                    // Exit finished exception handlers
+                    for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
+                    {
+                        var exceptionHandler = exceptionHandlers[index];
+                        if (instruction == exceptionHandler.TryEnd)
+                        {
+                            exceptionHandlers.RemoveAt(index);
+                            exceptionHandlersChanged = true;
+                        }
+                        else
+                            break;
+                    }
+
+                    // Add new exception handlers
+                    for (int index = body.ExceptionHandlers.Count - 1; index >= 0; index--)
+                    {
+                        var exceptionHandler = body.ExceptionHandlers[index];
+                        if (instruction == exceptionHandler.TryStart)
+                        {
+                            exceptionHandlers.Add(exceptionHandler);
+                            exceptionHandlersChanged = true;
+                        }
+                        else
+                            break;
+                    }
+
+                    if (exceptionHandlersChanged)
+                    {
+                        // Need to generate a new landing pad
+                        for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
+                        {
+                            var exceptionHandler = exceptionHandlers[index];
+                            switch (exceptionHandler.HandlerType)
+                            {
+                                case ExceptionHandlerType.Catch:
+                                    break;
+                            }
+                        }
+
+                        if (exceptionHandlers.Count > 0)
+                        {
+                            var handlerStart = exceptionHandlers.Last().HandlerStart.Offset;
+                            functionContext.LandingPadBlock = basicBlocks[handlerStart];
+
+                            var @catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandlers[0].CatchType));
+
+                            // Prepare landing pad block
+                            LLVM.PositionBuilderAtEnd(builder2, functionContext.LandingPadBlock);
+                            var landingPad = LLVM.BuildLandingPad(builder2, caughtResultType, sharpPersonalityFunction, 1, string.Empty);
+                            LLVM.AddClause(landingPad, @catchClass.GeneratedRuntimeTypeInfoGlobal);
+
+                            // Extract exception
+                            var exceptionObject = LLVM.BuildExtractValue(builder2, landingPad, 0, string.Empty);
+                            exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, @catchClass.Type.DefaultType, string.Empty);
+
+                            forwardStacks[handlerStart] = new[]
+                            {
+                                new StackValue(@catchClass.Type.StackType, @catchClass.Type, exceptionObject)
+                            };
+                        }
+                        else
+                        {
+                            functionContext.LandingPadBlock = new BasicBlockRef();
+                        }
+                    }
+                }
 
                 if (branchTarget)
                 {
@@ -1648,6 +1722,29 @@ namespace SharpLang.CompilerServices
 
                     InvalidBinaryOperation:
                         throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", opcode, operand1.StackType, operand2.StackType));
+                    }
+                    #endregion
+
+                    #region Exception handling opcodes (Leave, Endfinally, etc...)
+                    case Code.Throw:
+                    {
+                        var exceptionObject = stack.Pop();
+
+                        LLVM.BuildCall(builder, throwExceptionFunction, new ValueRef[0], string.Empty);
+                        LLVM.BuildUnreachable(builder);
+
+                        flowingNextInstructionMode = FlowingNextInstructionMode.None;
+                        break;
+                    }
+                    case Code.Leave:
+                    case Code.Leave_S:
+                    {
+                        // TODO: Exception handling. For now, fallback to Br.
+                        goto case Code.Br;
+                    }
+                    case Code.Endfinally:
+                    {
+                        break;
                     }
                     #endregion
 
