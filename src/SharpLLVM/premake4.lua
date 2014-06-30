@@ -6,7 +6,7 @@ project "SharpLLVM"
 
   SetupManagedProject()
 
-  files { "*.cs", "**.i" }
+  files { "**.cs", "**.i" }
 
   dependson { "SharpLLVM.Native" }
 
