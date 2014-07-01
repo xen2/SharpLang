@@ -264,10 +264,7 @@ namespace SharpLang.CompilerServices
 
             if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
             {
-                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
-                callResult = LLVM.BuildInvoke(builder, actualMethod, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
-                LLVM.PositionBuilderAtEnd(builder, nextBlock);
-                functionContext.BasicBlock = nextBlock;
+                callResult = GenerateInvoke(functionContext, actualMethod, args);
             }
             else
             {
@@ -627,6 +624,16 @@ namespace SharpLang.CompilerServices
             var dataPointer = LLVM.BuildLoad(builder, dataPointerLocation, string.Empty);
 
             return dataPointer;
+        }
+
+        private ValueRef GenerateInvoke(FunctionCompilerContext functionContext, ValueRef function, ValueRef[] args)
+        {
+            ValueRef callResult;
+            var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
+            callResult = LLVM.BuildInvoke(builder, function, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
+            LLVM.PositionBuilderAtEnd(builder, nextBlock);
+            functionContext.BasicBlock = nextBlock;
+            return callResult;
         }
     }
 }

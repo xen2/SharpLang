@@ -1730,7 +1730,7 @@ namespace SharpLang.CompilerServices
                     {
                         var exceptionObject = stack.Pop();
 
-                        LLVM.BuildCall(builder, throwExceptionFunction, new ValueRef[0], string.Empty);
+                        GenerateInvoke(functionContext, throwExceptionFunction, new ValueRef[0]);
                         LLVM.BuildUnreachable(builder);
 
                         flowingNextInstructionMode = FlowingNextInstructionMode.None;
