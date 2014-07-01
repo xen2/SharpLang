@@ -9,7 +9,7 @@ public static class Program
         }
         catch (System.Exception e)
         {
-            System.Console.WriteLine(e.Message);
+            System.Console.WriteLine("Exception caught");
         }
     }
 
