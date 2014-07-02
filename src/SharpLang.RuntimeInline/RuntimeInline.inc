@@ -11,69 +11,125 @@ ArrayType* ArrayTy_0 = ArrayType::get(IntegerType::get(mod->getContext(), 32), 1
 PointerType* PointerTy_1 = PointerType::get(ArrayTy_0, 0);
 
 std::vector<Type*>FuncTy_2_args;
-FuncTy_2_args.push_back(IntegerType::get(mod->getContext(), 32));
+StructType *StructTy_struct_RuntimeTypeInfo = mod->getTypeByName("struct.RuntimeTypeInfo");
+if (!StructTy_struct_RuntimeTypeInfo) {
+StructTy_struct_RuntimeTypeInfo = StructType::create(mod->getContext(), "struct.RuntimeTypeInfo");
+}
+std::vector<Type*>StructTy_struct_RuntimeTypeInfo_fields;
+PointerType* PointerTy_3 = PointerType::get(StructTy_struct_RuntimeTypeInfo, 0);
+
+StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_3);
+StructTy_struct_RuntimeTypeInfo_fields.push_back(IntegerType::get(mod->getContext(), 32));
+StructTy_struct_RuntimeTypeInfo_fields.push_back(IntegerType::get(mod->getContext(), 32));
+PointerType* PointerTy_4 = PointerType::get(PointerTy_3, 0);
+
+StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_4);
+StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_4);
+PointerType* PointerTy_6 = PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
+
+ArrayType* ArrayTy_5 = ArrayType::get(PointerTy_6, 19);
+
+StructTy_struct_RuntimeTypeInfo_fields.push_back(ArrayTy_5);
+ArrayType* ArrayTy_7 = ArrayType::get(PointerTy_6, 0);
+
+StructTy_struct_RuntimeTypeInfo_fields.push_back(ArrayTy_7);
+if (StructTy_struct_RuntimeTypeInfo->isOpaque()) {
+StructTy_struct_RuntimeTypeInfo->setBody(StructTy_struct_RuntimeTypeInfo_fields, /*isPacked=*/false);
+}
+
+
+FuncTy_2_args.push_back(PointerTy_3);
+FuncTy_2_args.push_back(PointerTy_3);
+FunctionType* FuncTy_2 = FunctionType::get(
+ /*Result=*/IntegerType::get(mod->getContext(), 1),
+ /*Params=*/FuncTy_2_args,
+ /*isVarArg=*/false);
+
+PointerType* PointerTy_8 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
+
+PointerType* PointerTy_9 = PointerType::get(PointerTy_4, 0);
+
+std::vector<Type*>FuncTy_10_args;
+FuncTy_10_args.push_back(IntegerType::get(mod->getContext(), 32));
+FunctionType* FuncTy_10 = FunctionType::get(
+ /*Result=*/PointerTy_6,
+ /*Params=*/FuncTy_10_args,
+ /*isVarArg=*/false);
+
+PointerType* PointerTy_11 = PointerType::get(FuncTy_10, 0);
+
+std::vector<Type*>FuncTy_12_args;
+FuncTy_12_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_12_args.push_back(PointerTy_6);
+FunctionType* FuncTy_12 = FunctionType::get(
+ /*Result=*/PointerTy_6,
+ /*Params=*/FuncTy_12_args,
+ /*isVarArg=*/false);
+
+StructType *StructTy_struct_IMTEntry = mod->getTypeByName("struct.IMTEntry");
+if (!StructTy_struct_IMTEntry) {
+StructTy_struct_IMTEntry = StructType::create(mod->getContext(), "struct.IMTEntry");
+}
+std::vector<Type*>StructTy_struct_IMTEntry_fields;
+StructTy_struct_IMTEntry_fields.push_back(IntegerType::get(mod->getContext(), 32));
+StructTy_struct_IMTEntry_fields.push_back(PointerTy_6);
+if (StructTy_struct_IMTEntry->isOpaque()) {
+StructTy_struct_IMTEntry->setBody(StructTy_struct_IMTEntry_fields, /*isPacked=*/false);
+}
+
+PointerType* PointerTy_13 = PointerType::get(StructTy_struct_IMTEntry, 0);
+
+PointerType* PointerTy_14 = PointerType::get(PointerTy_6, 0);
+
+std::vector<Type*>FuncTy_15_args;
+FuncTy_15_args.push_back(IntegerType::get(mod->getContext(), 8));
+FunctionType* FuncTy_15 = FunctionType::get(
+ /*Result=*/IntegerType::get(mod->getContext(), 32),
+ /*Params=*/FuncTy_15_args,
+ /*isVarArg=*/false);
+
+std::vector<Type*>FuncTy_17_args;
+FunctionType* FuncTy_17 = FunctionType::get(
+ /*Result=*/Type::getVoidTy(mod->getContext()),
+ /*Params=*/FuncTy_17_args,
+ /*isVarArg=*/false);
+
+PointerType* PointerTy_16 = PointerType::get(FuncTy_17, 0);
+
+std::vector<Type*>FuncTy_18_args;
+FuncTy_18_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_18_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_18_args.push_back(IntegerType::get(mod->getContext(), 64));
 StructType *StructTy_struct__Unwind_Exception = mod->getTypeByName("struct._Unwind_Exception");
 if (!StructTy_struct__Unwind_Exception) {
 StructTy_struct__Unwind_Exception = StructType::create(mod->getContext(), "struct._Unwind_Exception");
 }
 std::vector<Type*>StructTy_struct__Unwind_Exception_fields;
 StructTy_struct__Unwind_Exception_fields.push_back(IntegerType::get(mod->getContext(), 64));
-std::vector<Type*>StructTy_5_fields;
-StructType *StructTy_5 = StructType::get(mod->getContext(), StructTy_5_fields, /*isPacked=*/false);
+std::vector<Type*>FuncTy_21_args;
+FuncTy_21_args.push_back(IntegerType::get(mod->getContext(), 32));
+PointerType* PointerTy_19 = PointerType::get(StructTy_struct__Unwind_Exception, 0);
 
-PointerType* PointerTy_4 = PointerType::get(StructTy_5, 0);
+FuncTy_21_args.push_back(PointerTy_19);
+FunctionType* FuncTy_21 = FunctionType::get(
+ /*Result=*/Type::getVoidTy(mod->getContext()),
+ /*Params=*/FuncTy_21_args,
+ /*isVarArg=*/false);
 
-StructTy_struct__Unwind_Exception_fields.push_back(PointerTy_4);
+PointerType* PointerTy_20 = PointerType::get(FuncTy_21, 0);
+
+StructTy_struct__Unwind_Exception_fields.push_back(PointerTy_20);
 StructTy_struct__Unwind_Exception_fields.push_back(IntegerType::get(mod->getContext(), 32));
 StructTy_struct__Unwind_Exception_fields.push_back(IntegerType::get(mod->getContext(), 32));
-ArrayType* ArrayTy_6 = ArrayType::get(IntegerType::get(mod->getContext(), 8), 12);
+ArrayType* ArrayTy_22 = ArrayType::get(IntegerType::get(mod->getContext(), 8), 12);
 
-StructTy_struct__Unwind_Exception_fields.push_back(ArrayTy_6);
+StructTy_struct__Unwind_Exception_fields.push_back(ArrayTy_22);
 if (StructTy_struct__Unwind_Exception->isOpaque()) {
 StructTy_struct__Unwind_Exception->setBody(StructTy_struct__Unwind_Exception_fields, /*isPacked=*/false);
 }
 
-PointerType* PointerTy_3 = PointerType::get(StructTy_struct__Unwind_Exception, 0);
 
-FuncTy_2_args.push_back(PointerTy_3);
-FunctionType* FuncTy_2 = FunctionType::get(
- /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_2_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_7 = PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
-
-std::vector<Type*>FuncTy_9_args;
-FuncTy_9_args.push_back(PointerTy_7);
-FunctionType* FuncTy_9 = FunctionType::get(
- /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_9_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_8 = PointerType::get(FuncTy_9, 0);
-
-std::vector<Type*>FuncTy_10_args;
-FuncTy_10_args.push_back(IntegerType::get(mod->getContext(), 8));
-FunctionType* FuncTy_10 = FunctionType::get(
- /*Result=*/IntegerType::get(mod->getContext(), 32),
- /*Params=*/FuncTy_10_args,
- /*isVarArg=*/false);
-
-std::vector<Type*>FuncTy_12_args;
-FunctionType* FuncTy_12 = FunctionType::get(
- /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_12_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_11 = PointerType::get(FuncTy_12, 0);
-
-PointerType* PointerTy_13 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
-
-std::vector<Type*>FuncTy_14_args;
-FuncTy_14_args.push_back(IntegerType::get(mod->getContext(), 32));
-FuncTy_14_args.push_back(IntegerType::get(mod->getContext(), 32));
-FuncTy_14_args.push_back(IntegerType::get(mod->getContext(), 64));
-FuncTy_14_args.push_back(PointerTy_3);
+FuncTy_18_args.push_back(PointerTy_19);
 StructType *StructTy_struct__Unwind_Context = mod->getTypeByName("struct._Unwind_Context");
 if (!StructTy_struct__Unwind_Context) {
 StructTy_struct__Unwind_Context = StructType::create(mod->getContext(), "struct._Unwind_Context");
@@ -83,529 +139,107 @@ if (StructTy_struct__Unwind_Context->isOpaque()) {
 StructTy_struct__Unwind_Context->setBody(StructTy_struct__Unwind_Context_fields, /*isPacked=*/false);
 }
 
-PointerType* PointerTy_15 = PointerType::get(StructTy_struct__Unwind_Context, 0);
+PointerType* PointerTy_23 = PointerType::get(StructTy_struct__Unwind_Context, 0);
 
-FuncTy_14_args.push_back(PointerTy_15);
-FunctionType* FuncTy_14 = FunctionType::get(
- /*Result=*/IntegerType::get(mod->getContext(), 32),
- /*Params=*/FuncTy_14_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_16 = PointerType::get(PointerTy_7, 0);
-
-std::vector<Type*>FuncTy_18_args;
-FuncTy_18_args.push_back(PointerTy_15);
+FuncTy_18_args.push_back(PointerTy_23);
 FunctionType* FuncTy_18 = FunctionType::get(
- /*Result=*/PointerTy_7,
+ /*Result=*/IntegerType::get(mod->getContext(), 32),
  /*Params=*/FuncTy_18_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_17 = PointerType::get(FuncTy_18, 0);
+std::vector<Type*>FuncTy_25_args;
+FuncTy_25_args.push_back(PointerTy_23);
+FunctionType* FuncTy_25 = FunctionType::get(
+ /*Result=*/PointerTy_6,
+ /*Params=*/FuncTy_25_args,
+ /*isVarArg=*/false);
 
-std::vector<Type*>FuncTy_20_args;
-FuncTy_20_args.push_back(PointerTy_15);
-FunctionType* FuncTy_20 = FunctionType::get(
+PointerType* PointerTy_24 = PointerType::get(FuncTy_25, 0);
+
+std::vector<Type*>FuncTy_27_args;
+FuncTy_27_args.push_back(PointerTy_23);
+FunctionType* FuncTy_27 = FunctionType::get(
  /*Result=*/IntegerType::get(mod->getContext(), 32),
- /*Params=*/FuncTy_20_args,
+ /*Params=*/FuncTy_27_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_19 = PointerType::get(FuncTy_20, 0);
+PointerType* PointerTy_26 = PointerType::get(FuncTy_27, 0);
 
-std::vector<Type*>FuncTy_22_args;
-FuncTy_22_args.push_back(PointerTy_16);
-FuncTy_22_args.push_back(IntegerType::get(mod->getContext(), 8));
-FunctionType* FuncTy_22 = FunctionType::get(
+std::vector<Type*>FuncTy_29_args;
+FuncTy_29_args.push_back(PointerTy_14);
+FuncTy_29_args.push_back(IntegerType::get(mod->getContext(), 8));
+FunctionType* FuncTy_29 = FunctionType::get(
  /*Result=*/IntegerType::get(mod->getContext(), 32),
- /*Params=*/FuncTy_22_args,
+ /*Params=*/FuncTy_29_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_21 = PointerType::get(FuncTy_22, 0);
+PointerType* PointerTy_28 = PointerType::get(FuncTy_29, 0);
 
-std::vector<Type*>FuncTy_24_args;
-FuncTy_24_args.push_back(PointerTy_15);
-FuncTy_24_args.push_back(IntegerType::get(mod->getContext(), 32));
-FuncTy_24_args.push_back(IntegerType::get(mod->getContext(), 32));
-FunctionType* FuncTy_24 = FunctionType::get(
+std::vector<Type*>FuncTy_31_args;
+FuncTy_31_args.push_back(PointerTy_23);
+FuncTy_31_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_31_args.push_back(IntegerType::get(mod->getContext(), 32));
+FunctionType* FuncTy_31 = FunctionType::get(
  /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_24_args,
+ /*Params=*/FuncTy_31_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_23 = PointerType::get(FuncTy_24, 0);
+PointerType* PointerTy_30 = PointerType::get(FuncTy_31, 0);
 
-std::vector<Type*>FuncTy_26_args;
-FuncTy_26_args.push_back(PointerTy_15);
-FuncTy_26_args.push_back(IntegerType::get(mod->getContext(), 32));
-FunctionType* FuncTy_26 = FunctionType::get(
+std::vector<Type*>FuncTy_33_args;
+FuncTy_33_args.push_back(PointerTy_23);
+FuncTy_33_args.push_back(IntegerType::get(mod->getContext(), 32));
+FunctionType* FuncTy_33 = FunctionType::get(
  /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_26_args,
+ /*Params=*/FuncTy_33_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_25 = PointerType::get(FuncTy_26, 0);
+PointerType* PointerTy_32 = PointerType::get(FuncTy_33, 0);
 
-PointerType* PointerTy_27 = PointerType::get(IntegerType::get(mod->getContext(), 16), 0);
-
-PointerType* PointerTy_28 = PointerType::get(IntegerType::get(mod->getContext(), 64), 0);
-
-std::vector<Type*>FuncTy_30_args;
-FuncTy_30_args.push_back(IntegerType::get(mod->getContext(), 32));
-FunctionType* FuncTy_30 = FunctionType::get(
- /*Result=*/PointerTy_7,
- /*Params=*/FuncTy_30_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_29 = PointerType::get(FuncTy_30, 0);
-
-PointerType* PointerTy_32 = PointerType::get(FuncTy_2, 0);
-
-PointerType* PointerTy_31 = PointerType::get(PointerTy_32, 0);
-
-std::vector<Type*>FuncTy_34_args;
-FuncTy_34_args.push_back(PointerTy_7);
-FuncTy_34_args.push_back(IntegerType::get(mod->getContext(), 8));
-FuncTy_34_args.push_back(IntegerType::get(mod->getContext(), 64));
-FuncTy_34_args.push_back(IntegerType::get(mod->getContext(), 32));
-FuncTy_34_args.push_back(IntegerType::get(mod->getContext(), 1));
-FunctionType* FuncTy_34 = FunctionType::get(
+std::vector<Type*>FuncTy_35_args;
+FuncTy_35_args.push_back(PointerTy_6);
+FunctionType* FuncTy_35 = FunctionType::get(
  /*Result=*/Type::getVoidTy(mod->getContext()),
- /*Params=*/FuncTy_34_args,
+ /*Params=*/FuncTy_35_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_33 = PointerType::get(FuncTy_34, 0);
+PointerType* PointerTy_34 = PointerType::get(FuncTy_35, 0);
 
-std::vector<Type*>FuncTy_36_args;
-FuncTy_36_args.push_back(PointerTy_3);
-FunctionType* FuncTy_36 = FunctionType::get(
+PointerType* PointerTy_36 = PointerType::get(PointerTy_20, 0);
+
+std::vector<Type*>FuncTy_38_args;
+FuncTy_38_args.push_back(PointerTy_6);
+FuncTy_38_args.push_back(IntegerType::get(mod->getContext(), 8));
+FuncTy_38_args.push_back(IntegerType::get(mod->getContext(), 64));
+FuncTy_38_args.push_back(IntegerType::get(mod->getContext(), 32));
+FuncTy_38_args.push_back(IntegerType::get(mod->getContext(), 1));
+FunctionType* FuncTy_38 = FunctionType::get(
+ /*Result=*/Type::getVoidTy(mod->getContext()),
+ /*Params=*/FuncTy_38_args,
+ /*isVarArg=*/false);
+
+PointerType* PointerTy_37 = PointerType::get(FuncTy_38, 0);
+
+std::vector<Type*>FuncTy_40_args;
+FuncTy_40_args.push_back(PointerTy_19);
+FunctionType* FuncTy_40 = FunctionType::get(
  /*Result=*/IntegerType::get(mod->getContext(), 32),
- /*Params=*/FuncTy_36_args,
+ /*Params=*/FuncTy_40_args,
  /*isVarArg=*/false);
 
-PointerType* PointerTy_35 = PointerType::get(FuncTy_36, 0);
+PointerType* PointerTy_39 = PointerType::get(FuncTy_40, 0);
 
-std::vector<Type*>FuncTy_37_args;
-StructType *StructTy_struct_RuntimeTypeInfo = mod->getTypeByName("struct.RuntimeTypeInfo");
-if (!StructTy_struct_RuntimeTypeInfo) {
-StructTy_struct_RuntimeTypeInfo = StructType::create(mod->getContext(), "struct.RuntimeTypeInfo");
-}
-std::vector<Type*>StructTy_struct_RuntimeTypeInfo_fields;
-PointerType* PointerTy_38 = PointerType::get(StructTy_struct_RuntimeTypeInfo, 0);
+PointerType* PointerTy_41 = PointerType::get(IntegerType::get(mod->getContext(), 16), 0);
 
-StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_38);
-StructTy_struct_RuntimeTypeInfo_fields.push_back(IntegerType::get(mod->getContext(), 32));
-StructTy_struct_RuntimeTypeInfo_fields.push_back(IntegerType::get(mod->getContext(), 32));
-PointerType* PointerTy_39 = PointerType::get(PointerTy_38, 0);
-
-StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_39);
-StructTy_struct_RuntimeTypeInfo_fields.push_back(PointerTy_39);
-ArrayType* ArrayTy_40 = ArrayType::get(PointerTy_7, 19);
-
-StructTy_struct_RuntimeTypeInfo_fields.push_back(ArrayTy_40);
-ArrayType* ArrayTy_41 = ArrayType::get(PointerTy_7, 0);
-
-StructTy_struct_RuntimeTypeInfo_fields.push_back(ArrayTy_41);
-if (StructTy_struct_RuntimeTypeInfo->isOpaque()) {
-StructTy_struct_RuntimeTypeInfo->setBody(StructTy_struct_RuntimeTypeInfo_fields, /*isPacked=*/false);
-}
-
-
-FuncTy_37_args.push_back(PointerTy_38);
-FuncTy_37_args.push_back(PointerTy_38);
-FunctionType* FuncTy_37 = FunctionType::get(
- /*Result=*/IntegerType::get(mod->getContext(), 1),
- /*Params=*/FuncTy_37_args,
- /*isVarArg=*/false);
-
-PointerType* PointerTy_42 = PointerType::get(PointerTy_39, 0);
-
-std::vector<Type*>FuncTy_43_args;
-FuncTy_43_args.push_back(IntegerType::get(mod->getContext(), 32));
-FuncTy_43_args.push_back(PointerTy_7);
-FunctionType* FuncTy_43 = FunctionType::get(
- /*Result=*/PointerTy_7,
- /*Params=*/FuncTy_43_args,
- /*isVarArg=*/false);
-
-StructType *StructTy_struct_IMTEntry = mod->getTypeByName("struct.IMTEntry");
-if (!StructTy_struct_IMTEntry) {
-StructTy_struct_IMTEntry = StructType::create(mod->getContext(), "struct.IMTEntry");
-}
-std::vector<Type*>StructTy_struct_IMTEntry_fields;
-StructTy_struct_IMTEntry_fields.push_back(IntegerType::get(mod->getContext(), 32));
-StructTy_struct_IMTEntry_fields.push_back(PointerTy_7);
-if (StructTy_struct_IMTEntry->isOpaque()) {
-StructTy_struct_IMTEntry->setBody(StructTy_struct_IMTEntry_fields, /*isPacked=*/false);
-}
-
-PointerType* PointerTy_44 = PointerType::get(StructTy_struct_IMTEntry, 0);
+PointerType* PointerTy_42 = PointerType::get(IntegerType::get(mod->getContext(), 64), 0);
 
 
 // Function Declarations
 
-Function* func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z = mod->getFunction("\x01?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z");
-if (!func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z) {
-func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z = Function::Create(
- /*Type=*/FuncTy_2,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"\x01?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z", mod); 
-func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->setCallingConv(CallingConv::C);
-}
-AttributeSet func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoUnwind);
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->setAttributes(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL);
-
-Function* func_free = mod->getFunction("free");
-if (!func_free) {
-func_free = Function::Create(
- /*Type=*/FuncTy_9,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"free", mod); // (external, no body)
-func_free->setCallingConv(CallingConv::C);
-}
-AttributeSet func_free_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoCapture);
-   PAS = AttributeSet::get(mod->getContext(), 1U, B);
-  }
- 
- Attrs.push_back(PAS);
- {
-  AttrBuilder B;
-  B.addAttribute(Attribute::NoUnwind);
-  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
- }
-
-Attrs.push_back(PAS);
-func_free_PAL = AttributeSet::get(mod->getContext(), Attrs);
-
-}
-func_free->setAttributes(func_free_PAL);
-
-Function* func___getEncodingSize__YAIE_Z = mod->getFunction("\x01?getEncodingSize@@YAIE@Z");
-if (!func___getEncodingSize__YAIE_Z) {
-func___getEncodingSize__YAIE_Z = Function::Create(
- /*Type=*/FuncTy_10,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"\x01?getEncodingSize@@YAIE@Z", mod); 
-func___getEncodingSize__YAIE_Z->setCallingConv(CallingConv::C);
-}
-AttributeSet func___getEncodingSize__YAIE_Z_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::ZExt);
-   PAS = AttributeSet::get(mod->getContext(), 1U, B);
-  }
- 
- Attrs.push_back(PAS);
- {
-  AttrBuilder B;
-  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
- }
-
-Attrs.push_back(PAS);
-func___getEncodingSize__YAIE_Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
-
-}
-func___getEncodingSize__YAIE_Z->setAttributes(func___getEncodingSize__YAIE_Z_PAL);
-
-Function* func_abort = mod->getFunction("abort");
-if (!func_abort) {
-func_abort = Function::Create(
- /*Type=*/FuncTy_12,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"abort", mod); // (external, no body)
-func_abort->setCallingConv(CallingConv::C);
-}
-AttributeSet func_abort_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoReturn);
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func_abort_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func_abort->setAttributes(func_abort_PAL);
-
-Function* func_sharpPersonality = mod->getFunction("sharpPersonality");
-if (!func_sharpPersonality) {
-func_sharpPersonality = Function::Create(
- /*Type=*/FuncTy_14,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"sharpPersonality", mod); 
-func_sharpPersonality->setCallingConv(CallingConv::C);
-}
-AttributeSet func_sharpPersonality_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func_sharpPersonality_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func_sharpPersonality->setAttributes(func_sharpPersonality_PAL);
-
-Function* func__Unwind_GetLanguageSpecificData = mod->getFunction("_Unwind_GetLanguageSpecificData");
-if (!func__Unwind_GetLanguageSpecificData) {
-func__Unwind_GetLanguageSpecificData = Function::Create(
- /*Type=*/FuncTy_18,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_GetLanguageSpecificData", mod); // (external, no body)
-func__Unwind_GetLanguageSpecificData->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_GetLanguageSpecificData_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_GetLanguageSpecificData_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_GetLanguageSpecificData->setAttributes(func__Unwind_GetLanguageSpecificData_PAL);
-
-Function* func__Unwind_GetIP = mod->getFunction("_Unwind_GetIP");
-if (!func__Unwind_GetIP) {
-func__Unwind_GetIP = Function::Create(
- /*Type=*/FuncTy_20,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_GetIP", mod); // (external, no body)
-func__Unwind_GetIP->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_GetIP_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_GetIP_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_GetIP->setAttributes(func__Unwind_GetIP_PAL);
-
-Function* func__Unwind_GetRegionStart = mod->getFunction("_Unwind_GetRegionStart");
-if (!func__Unwind_GetRegionStart) {
-func__Unwind_GetRegionStart = Function::Create(
- /*Type=*/FuncTy_20,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_GetRegionStart", mod); // (external, no body)
-func__Unwind_GetRegionStart->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_GetRegionStart_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_GetRegionStart_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_GetRegionStart->setAttributes(func__Unwind_GetRegionStart_PAL);
-
-Function* func___readEncodedPointer__YAIPAPBEE_Z = mod->getFunction("\x01?readEncodedPointer@@YAIPAPBEE@Z");
-if (!func___readEncodedPointer__YAIPAPBEE_Z) {
-func___readEncodedPointer__YAIPAPBEE_Z = Function::Create(
- /*Type=*/FuncTy_22,
- /*Linkage=*/GlobalValue::InternalLinkage,
- /*Name=*/"\x01?readEncodedPointer@@YAIPAPBEE@Z", mod); 
-func___readEncodedPointer__YAIPAPBEE_Z->setCallingConv(CallingConv::Fast);
-}
-AttributeSet func___readEncodedPointer__YAIPAPBEE_Z_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoCapture);
-   PAS = AttributeSet::get(mod->getContext(), 1U, B);
-  }
- 
- Attrs.push_back(PAS);
- {
-  AttrBuilder B;
-  B.addAttribute(Attribute::ZExt);
-  PAS = AttributeSet::get(mod->getContext(), 2U, B);
- }
-
-Attrs.push_back(PAS);
-{
- AttrBuilder B;
- PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-}
-
-Attrs.push_back(PAS);
-func___readEncodedPointer__YAIPAPBEE_Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
-
-}
-func___readEncodedPointer__YAIPAPBEE_Z->setAttributes(func___readEncodedPointer__YAIPAPBEE_Z_PAL);
-
-Function* func__Unwind_SetGR = mod->getFunction("_Unwind_SetGR");
-if (!func__Unwind_SetGR) {
-func__Unwind_SetGR = Function::Create(
- /*Type=*/FuncTy_24,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_SetGR", mod); // (external, no body)
-func__Unwind_SetGR->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_SetGR_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_SetGR_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_SetGR->setAttributes(func__Unwind_SetGR_PAL);
-
-Function* func__Unwind_SetIP = mod->getFunction("_Unwind_SetIP");
-if (!func__Unwind_SetIP) {
-func__Unwind_SetIP = Function::Create(
- /*Type=*/FuncTy_26,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_SetIP", mod); // (external, no body)
-func__Unwind_SetIP->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_SetIP_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_SetIP_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_SetIP->setAttributes(func__Unwind_SetIP_PAL);
-
-Function* func_throwException = mod->getFunction("throwException");
-if (!func_throwException) {
-func_throwException = Function::Create(
- /*Type=*/FuncTy_12,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"throwException", mod); 
-func_throwException->setCallingConv(CallingConv::C);
-}
-AttributeSet func_throwException_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoReturn);
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func_throwException_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func_throwException->setAttributes(func_throwException_PAL);
-
-Function* func_malloc = mod->getFunction("malloc");
-if (!func_malloc) {
-func_malloc = Function::Create(
- /*Type=*/FuncTy_30,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"malloc", mod); // (external, no body)
-func_malloc->setCallingConv(CallingConv::C);
-}
-AttributeSet func_malloc_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   B.addAttribute(Attribute::NoAlias);
-   PAS = AttributeSet::get(mod->getContext(), 0U, B);
-  }
- 
- Attrs.push_back(PAS);
- {
-  AttrBuilder B;
-  B.addAttribute(Attribute::NoUnwind);
-  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
- }
-
-Attrs.push_back(PAS);
-func_malloc_PAL = AttributeSet::get(mod->getContext(), Attrs);
-
-}
-func_malloc->setAttributes(func_malloc_PAL);
-
-Function* func__Unwind_RaiseException = mod->getFunction("_Unwind_RaiseException");
-if (!func__Unwind_RaiseException) {
-func__Unwind_RaiseException = Function::Create(
- /*Type=*/FuncTy_36,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Name=*/"_Unwind_RaiseException", mod); // (external, no body)
-func__Unwind_RaiseException->setCallingConv(CallingConv::C);
-}
-AttributeSet func__Unwind_RaiseException_PAL;
-{
- SmallVector<AttributeSet, 4> Attrs;
- AttributeSet PAS;
-  {
-   AttrBuilder B;
-   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-  }
- 
- Attrs.push_back(PAS);
- func__Unwind_RaiseException_PAL = AttributeSet::get(mod->getContext(), Attrs);
- 
-}
-func__Unwind_RaiseException->setAttributes(func__Unwind_RaiseException_PAL);
-
 Function* func_isInstInterface = mod->getFunction("isInstInterface");
 if (!func_isInstInterface) {
 func_isInstInterface = Function::Create(
- /*Type=*/FuncTy_37,
+ /*Type=*/FuncTy_2,
  /*Linkage=*/GlobalValue::ExternalLinkage,
  /*Name=*/"isInstInterface", mod); 
 func_isInstInterface->setCallingConv(CallingConv::C);
@@ -652,7 +286,7 @@ func_isInstInterface->setAttributes(func_isInstInterface_PAL);
 Function* func_allocObject = mod->getFunction("allocObject");
 if (!func_allocObject) {
 func_allocObject = Function::Create(
- /*Type=*/FuncTy_30,
+ /*Type=*/FuncTy_10,
  /*Linkage=*/GlobalValue::ExternalLinkage,
  /*Name=*/"allocObject", mod); 
 func_allocObject->setCallingConv(CallingConv::C);
@@ -680,10 +314,41 @@ func_allocObject_PAL = AttributeSet::get(mod->getContext(), Attrs);
 }
 func_allocObject->setAttributes(func_allocObject_PAL);
 
+Function* func_malloc = mod->getFunction("malloc");
+if (!func_malloc) {
+func_malloc = Function::Create(
+ /*Type=*/FuncTy_10,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"malloc", mod); // (external, no body)
+func_malloc->setCallingConv(CallingConv::C);
+}
+AttributeSet func_malloc_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoAlias);
+   PAS = AttributeSet::get(mod->getContext(), 0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ {
+  AttrBuilder B;
+  B.addAttribute(Attribute::NoUnwind);
+  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+ }
+
+Attrs.push_back(PAS);
+func_malloc_PAL = AttributeSet::get(mod->getContext(), Attrs);
+
+}
+func_malloc->setAttributes(func_malloc_PAL);
+
 Function* func_resolveInterfaceCall = mod->getFunction("resolveInterfaceCall");
 if (!func_resolveInterfaceCall) {
 func_resolveInterfaceCall = Function::Create(
- /*Type=*/FuncTy_43,
+ /*Type=*/FuncTy_12,
  /*Linkage=*/GlobalValue::ExternalLinkage,
  /*Name=*/"resolveInterfaceCall", mod); 
 func_resolveInterfaceCall->setCallingConv(CallingConv::C);
@@ -705,10 +370,304 @@ AttributeSet func_resolveInterfaceCall_PAL;
 }
 func_resolveInterfaceCall->setAttributes(func_resolveInterfaceCall_PAL);
 
+Function* func___getEncodingSize__YAIE_Z = mod->getFunction("\x01?getEncodingSize@@YAIE@Z");
+if (!func___getEncodingSize__YAIE_Z) {
+func___getEncodingSize__YAIE_Z = Function::Create(
+ /*Type=*/FuncTy_15,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"\x01?getEncodingSize@@YAIE@Z", mod); 
+func___getEncodingSize__YAIE_Z->setCallingConv(CallingConv::C);
+}
+AttributeSet func___getEncodingSize__YAIE_Z_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::ZExt);
+   PAS = AttributeSet::get(mod->getContext(), 1U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ {
+  AttrBuilder B;
+  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+ }
+
+Attrs.push_back(PAS);
+func___getEncodingSize__YAIE_Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
+
+}
+func___getEncodingSize__YAIE_Z->setAttributes(func___getEncodingSize__YAIE_Z_PAL);
+
+Function* func_abort = mod->getFunction("abort");
+if (!func_abort) {
+func_abort = Function::Create(
+ /*Type=*/FuncTy_17,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"abort", mod); // (external, no body)
+func_abort->setCallingConv(CallingConv::C);
+}
+AttributeSet func_abort_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoReturn);
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func_abort_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func_abort->setAttributes(func_abort_PAL);
+
+Function* func_sharpPersonality = mod->getFunction("sharpPersonality");
+if (!func_sharpPersonality) {
+func_sharpPersonality = Function::Create(
+ /*Type=*/FuncTy_18,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"sharpPersonality", mod); 
+func_sharpPersonality->setCallingConv(CallingConv::C);
+}
+AttributeSet func_sharpPersonality_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func_sharpPersonality_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func_sharpPersonality->setAttributes(func_sharpPersonality_PAL);
+
+Function* func__Unwind_GetLanguageSpecificData = mod->getFunction("_Unwind_GetLanguageSpecificData");
+if (!func__Unwind_GetLanguageSpecificData) {
+func__Unwind_GetLanguageSpecificData = Function::Create(
+ /*Type=*/FuncTy_25,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_GetLanguageSpecificData", mod); // (external, no body)
+func__Unwind_GetLanguageSpecificData->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_GetLanguageSpecificData_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_GetLanguageSpecificData_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_GetLanguageSpecificData->setAttributes(func__Unwind_GetLanguageSpecificData_PAL);
+
+Function* func__Unwind_GetIP = mod->getFunction("_Unwind_GetIP");
+if (!func__Unwind_GetIP) {
+func__Unwind_GetIP = Function::Create(
+ /*Type=*/FuncTy_27,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_GetIP", mod); // (external, no body)
+func__Unwind_GetIP->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_GetIP_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_GetIP_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_GetIP->setAttributes(func__Unwind_GetIP_PAL);
+
+Function* func__Unwind_GetRegionStart = mod->getFunction("_Unwind_GetRegionStart");
+if (!func__Unwind_GetRegionStart) {
+func__Unwind_GetRegionStart = Function::Create(
+ /*Type=*/FuncTy_27,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_GetRegionStart", mod); // (external, no body)
+func__Unwind_GetRegionStart->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_GetRegionStart_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_GetRegionStart_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_GetRegionStart->setAttributes(func__Unwind_GetRegionStart_PAL);
+
+Function* func__Unwind_SetGR = mod->getFunction("_Unwind_SetGR");
+if (!func__Unwind_SetGR) {
+func__Unwind_SetGR = Function::Create(
+ /*Type=*/FuncTy_31,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_SetGR", mod); // (external, no body)
+func__Unwind_SetGR->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_SetGR_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_SetGR_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_SetGR->setAttributes(func__Unwind_SetGR_PAL);
+
+Function* func__Unwind_SetIP = mod->getFunction("_Unwind_SetIP");
+if (!func__Unwind_SetIP) {
+func__Unwind_SetIP = Function::Create(
+ /*Type=*/FuncTy_33,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_SetIP", mod); // (external, no body)
+func__Unwind_SetIP->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_SetIP_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_SetIP_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_SetIP->setAttributes(func__Unwind_SetIP_PAL);
+
+Function* func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z = mod->getFunction("\x01?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z");
+if (!func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z) {
+func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z = Function::Create(
+ /*Type=*/FuncTy_21,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"\x01?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z", mod); 
+func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->setCallingConv(CallingConv::C);
+}
+AttributeSet func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoUnwind);
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->setAttributes(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z_PAL);
+
+Function* func_free = mod->getFunction("free");
+if (!func_free) {
+func_free = Function::Create(
+ /*Type=*/FuncTy_35,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"free", mod); // (external, no body)
+func_free->setCallingConv(CallingConv::C);
+}
+AttributeSet func_free_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoCapture);
+   PAS = AttributeSet::get(mod->getContext(), 1U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ {
+  AttrBuilder B;
+  B.addAttribute(Attribute::NoUnwind);
+  PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+ }
+
+Attrs.push_back(PAS);
+func_free_PAL = AttributeSet::get(mod->getContext(), Attrs);
+
+}
+func_free->setAttributes(func_free_PAL);
+
+Function* func_throwException = mod->getFunction("throwException");
+if (!func_throwException) {
+func_throwException = Function::Create(
+ /*Type=*/FuncTy_17,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"throwException", mod); 
+func_throwException->setCallingConv(CallingConv::C);
+}
+AttributeSet func_throwException_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoReturn);
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func_throwException_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func_throwException->setAttributes(func_throwException_PAL);
+
+Function* func__Unwind_RaiseException = mod->getFunction("_Unwind_RaiseException");
+if (!func__Unwind_RaiseException) {
+func__Unwind_RaiseException = Function::Create(
+ /*Type=*/FuncTy_40,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Name=*/"_Unwind_RaiseException", mod); // (external, no body)
+func__Unwind_RaiseException->setCallingConv(CallingConv::C);
+}
+AttributeSet func__Unwind_RaiseException_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ func__Unwind_RaiseException_PAL = AttributeSet::get(mod->getContext(), Attrs);
+ 
+}
+func__Unwind_RaiseException->setAttributes(func__Unwind_RaiseException_PAL);
+
 Function* func_llvm_memset_p0i8_i64 = mod->getFunction("llvm.memset.p0i8.i64");
 if (!func_llvm_memset_p0i8_i64) {
 func_llvm_memset_p0i8_i64 = Function::Create(
- /*Type=*/FuncTy_34,
+ /*Type=*/FuncTy_38,
  /*Linkage=*/GlobalValue::ExternalLinkage,
  /*Name=*/"llvm.memset.p0i8.i64", mod); // (external, no body)
 func_llvm_memset_p0i8_i64->setCallingConv(CallingConv::C);
@@ -736,6 +695,43 @@ func_llvm_memset_p0i8_i64_PAL = AttributeSet::get(mod->getContext(), Attrs);
 }
 func_llvm_memset_p0i8_i64->setAttributes(func_llvm_memset_p0i8_i64_PAL);
 
+Function* func___readEncodedPointer__YAIPAPBEE_Z = mod->getFunction("\x01?readEncodedPointer@@YAIPAPBEE@Z");
+if (!func___readEncodedPointer__YAIPAPBEE_Z) {
+func___readEncodedPointer__YAIPAPBEE_Z = Function::Create(
+ /*Type=*/FuncTy_29,
+ /*Linkage=*/GlobalValue::InternalLinkage,
+ /*Name=*/"\x01?readEncodedPointer@@YAIPAPBEE@Z", mod); 
+func___readEncodedPointer__YAIPAPBEE_Z->setCallingConv(CallingConv::Fast);
+}
+AttributeSet func___readEncodedPointer__YAIPAPBEE_Z_PAL;
+{
+ SmallVector<AttributeSet, 4> Attrs;
+ AttributeSet PAS;
+  {
+   AttrBuilder B;
+   B.addAttribute(Attribute::NoCapture);
+   PAS = AttributeSet::get(mod->getContext(), 1U, B);
+  }
+ 
+ Attrs.push_back(PAS);
+ {
+  AttrBuilder B;
+  B.addAttribute(Attribute::ZExt);
+  PAS = AttributeSet::get(mod->getContext(), 2U, B);
+ }
+
+Attrs.push_back(PAS);
+{
+ AttrBuilder B;
+ PAS = AttributeSet::get(mod->getContext(), ~0U, B);
+}
+
+Attrs.push_back(PAS);
+func___readEncodedPointer__YAIPAPBEE_Z_PAL = AttributeSet::get(mod->getContext(), Attrs);
+
+}
+func___readEncodedPointer__YAIPAPBEE_Z->setAttributes(func___readEncodedPointer__YAIPAPBEE_Z_PAL);
+
 // Global Variable Declarations
 
 
@@ -747,86 +743,217 @@ GlobalVariable* gvar_array_switch_table = new GlobalVariable(/*Module=*/*mod,
 /*Name=*/"switch.table");
 
 // Constant Definitions
-std::vector<Constant*> const_array_45_elems;
-ConstantInt* const_int32_46 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("4"), 10));
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_46);
-ConstantInt* const_int32_47 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("2"), 10));
-const_array_45_elems.push_back(const_int32_47);
-const_array_45_elems.push_back(const_int32_46);
-ConstantInt* const_int32_48 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("8"), 10));
-const_array_45_elems.push_back(const_int32_48);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_47);
-const_array_45_elems.push_back(const_int32_46);
-const_array_45_elems.push_back(const_int32_48);
-Constant* const_array_45 = ConstantArray::get(ArrayTy_0, const_array_45_elems);
-ConstantPointerNull* const_ptr_49 = ConstantPointerNull::get(PointerTy_3);
-ConstantInt* const_int8_50 = ConstantInt::get(mod->getContext(), APInt(8, StringRef("-1"), 10));
-ConstantInt* const_int32_51 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("15"), 10));
-ConstantInt* const_int32_52 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("13"), 10));
-ConstantInt* const_int13_53 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("-995"), 10));
-ConstantInt* const_int13_54 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("1"), 10));
-ConstantInt* const_int13_55 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("0"), 10));
-ConstantInt* const_int32_56 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
-ConstantInt* const_int32_57 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
+std::vector<Constant*> const_array_43_elems;
+ConstantInt* const_int32_44 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("4"), 10));
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_44);
+ConstantInt* const_int32_45 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("2"), 10));
+const_array_43_elems.push_back(const_int32_45);
+const_array_43_elems.push_back(const_int32_44);
+ConstantInt* const_int32_46 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("8"), 10));
+const_array_43_elems.push_back(const_int32_46);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_45);
+const_array_43_elems.push_back(const_int32_44);
+const_array_43_elems.push_back(const_int32_46);
+Constant* const_array_43 = ConstantArray::get(ArrayTy_0, const_array_43_elems);
+ConstantInt* const_int32_47 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
+ConstantInt* const_int32_48 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
+ConstantInt* const_int1_49 = ConstantInt::get(mod->getContext(), APInt(1, StringRef("0"), 10));
+ConstantInt* const_int1_50 = ConstantInt::get(mod->getContext(), APInt(1, StringRef("-1"), 10));
+ConstantInt* const_int32_51 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("-2"), 10));
+ConstantInt* const_int8_52 = ConstantInt::get(mod->getContext(), APInt(8, StringRef("-1"), 10));
+ConstantInt* const_int32_53 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("15"), 10));
+ConstantInt* const_int32_54 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("13"), 10));
+ConstantInt* const_int13_55 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("-995"), 10));
+ConstantInt* const_int13_56 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("1"), 10));
+ConstantInt* const_int13_57 = ConstantInt::get(mod->getContext(), APInt(13, StringRef("0"), 10));
 ConstantInt* const_int32_58 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("-1"), 10));
 ConstantInt* const_int32_59 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("127"), 10));
 ConstantInt* const_int32_60 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("7"), 10));
 ConstantInt* const_int32_61 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("128"), 10));
 ConstantInt* const_int32_62 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("6"), 10));
-ConstantInt* const_int32_63 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("9"), 10));
-ConstantInt* const_int32_64 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("3"), 10));
-ConstantInt* const_int32_65 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("10"), 10));
-ConstantInt* const_int32_66 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("11"), 10));
-ConstantInt* const_int32_67 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("12"), 10));
-ConstantInt* const_int32_68 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("64"), 10));
-ConstantInt* const_int32_69 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("32"), 10));
-ConstantInt* const_int32_70 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("112"), 10));
-ConstantInt* const_int32_71 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("16"), 10));
-ConstantInt* const_int8_72 = ConstantInt::get(mod->getContext(), APInt(8, StringRef("0"), 10));
-ConstantInt* const_int64_73 = ConstantInt::get(mod->getContext(), APInt(64, StringRef("32"), 10));
-ConstantInt* const_int1_74 = ConstantInt::get(mod->getContext(), APInt(1, StringRef("0"), 10));
-ConstantInt* const_int1_75 = ConstantInt::get(mod->getContext(), APInt(1, StringRef("-1"), 10));
-ConstantInt* const_int32_76 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("-2"), 10));
+ConstantPointerNull* const_ptr_63 = ConstantPointerNull::get(PointerTy_19);
+ConstantInt* const_int32_64 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("32"), 10));
+ConstantInt* const_int8_65 = ConstantInt::get(mod->getContext(), APInt(8, StringRef("0"), 10));
+ConstantInt* const_int64_66 = ConstantInt::get(mod->getContext(), APInt(64, StringRef("32"), 10));
+ConstantInt* const_int32_67 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("9"), 10));
+ConstantInt* const_int32_68 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("3"), 10));
+ConstantInt* const_int32_69 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("10"), 10));
+ConstantInt* const_int32_70 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("11"), 10));
+ConstantInt* const_int32_71 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("12"), 10));
+ConstantInt* const_int32_72 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("64"), 10));
+ConstantInt* const_int32_73 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("112"), 10));
+ConstantInt* const_int32_74 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("16"), 10));
 
 // Global Variable Definitions
-gvar_array_switch_table->setInitializer(const_array_45);
+gvar_array_switch_table->setInitializer(const_array_43);
 
 // Function Definitions
 
-// Function: ?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z (func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z)
+// Function: isInstInterface (func_isInstInterface)
 {
- Function::arg_iterator args = func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->arg_begin();
- Value* int32_reason = args++;
- int32_reason->setName("reason");
- Value* ptr_ex = args++;
- ptr_ex->setName("ex");
+ Function::arg_iterator args = func_isInstInterface->arg_begin();
+ Value* ptr_runtimeTypeInfo = args++;
+ ptr_runtimeTypeInfo->setName("runtimeTypeInfo");
+ Value* ptr_expectedInterface = args++;
+ ptr_expectedInterface->setName("expectedInterface");
  
- BasicBlock* label_77 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
- BasicBlock* label_78 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
- BasicBlock* label_79 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_75 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
+ BasicBlock* label__lr_ph = BasicBlock::Create(mod->getContext(), ".lr.ph",func_isInstInterface,0);
+ BasicBlock* label_76 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
+ BasicBlock* label_77 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
+ BasicBlock* label___crit_edge_loopexit = BasicBlock::Create(mod->getContext(), "._crit_edge.loopexit",func_isInstInterface,0);
+ BasicBlock* label___crit_edge = BasicBlock::Create(mod->getContext(), "._crit_edge",func_isInstInterface,0);
+ 
+ // Block  (label_75)
+ std::vector<Value*> ptr_78_indices;
+ ptr_78_indices.push_back(const_int32_47);
+ ptr_78_indices.push_back(const_int32_45);
+ Instruction* ptr_78 = GetElementPtrInst::Create(ptr_runtimeTypeInfo, ptr_78_indices, "", label_75);
+ LoadInst* int32_79 = new LoadInst(ptr_78, "", false, label_75);
+ int32_79->setAlignment(4);
+ ICmpInst* int1_80 = new ICmpInst(*label_75, ICmpInst::ICMP_EQ, int32_79, const_int32_47, "");
+ BranchInst::Create(label___crit_edge, label__lr_ph, int1_80, label_75);
+ 
+ // Block .lr.ph (label__lr_ph)
+ std::vector<Value*> ptr_82_indices;
+ ptr_82_indices.push_back(const_int32_47);
+ ptr_82_indices.push_back(const_int32_44);
+ Instruction* ptr_82 = GetElementPtrInst::Create(ptr_runtimeTypeInfo, ptr_82_indices, "", label__lr_ph);
+ LoadInst* ptr_83 = new LoadInst(ptr_82, "", false, label__lr_ph);
+ ptr_83->setAlignment(4);
+ BranchInst::Create(label_76, label__lr_ph);
+ 
+ // Block  (label_76)
+ Argument* fwdref_85 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_i_02 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "i.02", label_76);
+ int32_i_02->addIncoming(const_int32_47, label__lr_ph);
+ int32_i_02->addIncoming(fwdref_85, label_77);
+ 
+ Argument* fwdref_86 = new Argument(PointerTy_4);
+ PHINode* ptr_currentInterface_01 = PHINode::Create(PointerTy_4, 2, "currentInterface.01", label_76);
+ ptr_currentInterface_01->addIncoming(ptr_83, label__lr_ph);
+ ptr_currentInterface_01->addIncoming(fwdref_86, label_77);
+ 
+ LoadInst* ptr_87 = new LoadInst(ptr_currentInterface_01, "", false, label_76);
+ ptr_87->setAlignment(4);
+ ICmpInst* int1_88 = new ICmpInst(*label_76, ICmpInst::ICMP_EQ, ptr_87, ptr_expectedInterface, "");
+ BranchInst::Create(label___crit_edge_loopexit, label_77, int1_88, label_76);
  
  // Block  (label_77)
- ICmpInst* int1_80 = new ICmpInst(*label_77, ICmpInst::ICMP_EQ, ptr_ex, const_ptr_49, "");
- BranchInst::Create(label_79, label_78, int1_80, label_77);
+ GetElementPtrInst* ptr_90 = GetElementPtrInst::Create(ptr_currentInterface_01, const_int32_48, "", label_77);
+ BinaryOperator* int32_91 = BinaryOperator::Create(Instruction::Add, int32_i_02, const_int32_48, "", label_77);
+ ICmpInst* int1_92 = new ICmpInst(*label_77, ICmpInst::ICMP_ULT, int32_91, int32_79, "");
+ BranchInst::Create(label_76, label___crit_edge_loopexit, int1_92, label_77);
  
- // Block  (label_78)
- CastInst* ptr_82 = new BitCastInst(ptr_ex, PointerTy_7, "", label_78);
- CallInst* void_83 = CallInst::Create(func_free, ptr_82, "", label_78);
- void_83->setCallingConv(CallingConv::C);
- void_83->setTailCall(true);
- AttributeSet void_83_PAL;
- void_83->setAttributes(void_83_PAL);
+ // Block ._crit_edge.loopexit (label___crit_edge_loopexit)
+ PHINode* int1__0_ph = PHINode::Create(IntegerType::get(mod->getContext(), 1), 2, ".0.ph", label___crit_edge_loopexit);
+ int1__0_ph->addIncoming(const_int1_49, label_77);
+ int1__0_ph->addIncoming(const_int1_50, label_76);
  
- BranchInst::Create(label_79, label_78);
+ BranchInst::Create(label___crit_edge, label___crit_edge_loopexit);
  
- // Block  (label_79)
- ReturnInst::Create(mod->getContext(), label_79);
+ // Block ._crit_edge (label___crit_edge)
+ PHINode* int1__0 = PHINode::Create(IntegerType::get(mod->getContext(), 1), 2, ".0", label___crit_edge);
+ int1__0->addIncoming(const_int1_49, label_75);
+ int1__0->addIncoming(int1__0_ph, label___crit_edge_loopexit);
+ 
+ ReturnInst::Create(mod->getContext(), int1__0, label___crit_edge);
+ 
+ // Resolve Forward References
+ fwdref_85->replaceAllUsesWith(int32_91); delete fwdref_85;
+ fwdref_86->replaceAllUsesWith(ptr_90); delete fwdref_86;
+ 
+}
+
+// Function: allocObject (func_allocObject)
+{
+ Function::arg_iterator args = func_allocObject->arg_begin();
+ Value* int32_size = args++;
+ int32_size->setName("size");
+ 
+ BasicBlock* label_96 = BasicBlock::Create(mod->getContext(), "",func_allocObject,0);
+ 
+ // Block  (label_96)
+ CallInst* ptr_97 = CallInst::Create(func_malloc, int32_size, "", label_96);
+ ptr_97->setCallingConv(CallingConv::C);
+ ptr_97->setTailCall(true);
+ AttributeSet ptr_97_PAL;
+ ptr_97->setAttributes(ptr_97_PAL);
+ 
+ ReturnInst::Create(mod->getContext(), ptr_97, label_96);
+ 
+}
+
+// Function: resolveInterfaceCall (func_resolveInterfaceCall)
+{
+ Function::arg_iterator args = func_resolveInterfaceCall->arg_begin();
+ Value* int32_method = args++;
+ int32_method->setName("method");
+ Value* ptr_content = args++;
+ ptr_content->setName("content");
+ 
+ BasicBlock* label_99 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+ BasicBlock* label_100 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+ BasicBlock* label_101 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+ BasicBlock* label_102 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+ BasicBlock* label_103 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
+ 
+ // Block  (label_99)
+ CastInst* int32_104 = new PtrToIntInst(ptr_content, IntegerType::get(mod->getContext(), 32), "", label_99);
+ BinaryOperator* int32_105 = BinaryOperator::Create(Instruction::And, int32_104, const_int32_48, "", label_99);
+ ICmpInst* int1_106 = new ICmpInst(*label_99, ICmpInst::ICMP_EQ, int32_105, const_int32_47, "");
+ BranchInst::Create(label_103, label_100, int1_106, label_99);
+ 
+ // Block  (label_100)
+ BinaryOperator* int32_108 = BinaryOperator::Create(Instruction::And, int32_104, const_int32_51, "", label_100);
+ CastInst* ptr_109 = new IntToPtrInst(int32_108, PointerTy_13, "", label_100);
+ BranchInst::Create(label_101, label_100);
+ 
+ // Block  (label_101)
+ Argument* fwdref_111 = new Argument(PointerTy_13);
+ PHINode* ptr_imtEntry_0 = PHINode::Create(PointerTy_13, 2, "imtEntry.0", label_101);
+ ptr_imtEntry_0->addIncoming(ptr_109, label_100);
+ ptr_imtEntry_0->addIncoming(fwdref_111, label_101);
+ 
+ std::vector<Value*> ptr_112_indices;
+ ptr_112_indices.push_back(const_int32_47);
+ ptr_112_indices.push_back(const_int32_47);
+ Instruction* ptr_112 = GetElementPtrInst::Create(ptr_imtEntry_0, ptr_112_indices, "", label_101);
+ LoadInst* int32_113 = new LoadInst(ptr_112, "", false, label_101);
+ int32_113->setAlignment(4);
+ ICmpInst* int1_114 = new ICmpInst(*label_101, ICmpInst::ICMP_NE, int32_113, const_int32_47, "");
+ ICmpInst* int1_not_ = new ICmpInst(*label_101, ICmpInst::ICMP_NE, int32_113, int32_method, "not.");
+ BinaryOperator* int1__ = BinaryOperator::Create(Instruction::And, int1_114, int1_not_, ".", label_101);
+ GetElementPtrInst* ptr_115 = GetElementPtrInst::Create(ptr_imtEntry_0, const_int32_48, "", label_101);
+ BranchInst::Create(label_101, label_102, int1__, label_101);
+ 
+ // Block  (label_102)
+ PHINode* ptr_imtEntry_0_lcssa = PHINode::Create(PointerTy_13, 1, "imtEntry.0.lcssa", label_102);
+ ptr_imtEntry_0_lcssa->addIncoming(ptr_imtEntry_0, label_101);
+ 
+ std::vector<Value*> ptr_117_indices;
+ ptr_117_indices.push_back(const_int32_47);
+ ptr_117_indices.push_back(const_int32_48);
+ Instruction* ptr_117 = GetElementPtrInst::Create(ptr_imtEntry_0_lcssa, ptr_117_indices, "", label_102);
+ LoadInst* ptr_118 = new LoadInst(ptr_117, "", false, label_102);
+ ptr_118->setAlignment(4);
+ BranchInst::Create(label_103, label_102);
+ 
+ // Block  (label_103)
+ PHINode* ptr_result_0 = PHINode::Create(PointerTy_6, 2, "result.0", label_103);
+ ptr_result_0->addIncoming(ptr_118, label_102);
+ ptr_result_0->addIncoming(ptr_content, label_99);
+ 
+ ReturnInst::Create(mod->getContext(), ptr_result_0, label_103);
+ 
+ // Resolve Forward References
+ fwdref_111->replaceAllUsesWith(ptr_115); delete fwdref_111;
  
 }
 
@@ -836,28 +963,28 @@ gvar_array_switch_table->setInitializer(const_array_45);
  Value* int8_Encoding = args++;
  int8_Encoding->setName("Encoding");
  
- BasicBlock* label_86 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
- BasicBlock* label_87 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
- BasicBlock* label_88 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
+ BasicBlock* label_121 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
+ BasicBlock* label_122 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
+ BasicBlock* label_123 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
  BasicBlock* label_switch_hole_check = BasicBlock::Create(mod->getContext(), "switch.hole_check",func___getEncodingSize__YAIE_Z,0);
  BasicBlock* label_switch_lookup = BasicBlock::Create(mod->getContext(), "switch.lookup",func___getEncodingSize__YAIE_Z,0);
- BasicBlock* label_89 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
+ BasicBlock* label_124 = BasicBlock::Create(mod->getContext(), "",func___getEncodingSize__YAIE_Z,0);
  
- // Block  (label_86)
- ICmpInst* int1_90 = new ICmpInst(*label_86, ICmpInst::ICMP_EQ, int8_Encoding, const_int8_50, "");
- BranchInst::Create(label_89, label_87, int1_90, label_86);
+ // Block  (label_121)
+ ICmpInst* int1_125 = new ICmpInst(*label_121, ICmpInst::ICMP_EQ, int8_Encoding, const_int8_52, "");
+ BranchInst::Create(label_124, label_122, int1_125, label_121);
  
- // Block  (label_87)
- CastInst* int32_92 = new ZExtInst(int8_Encoding, IntegerType::get(mod->getContext(), 32), "", label_87);
- BinaryOperator* int32_93 = BinaryOperator::Create(Instruction::And, int32_92, const_int32_51, "", label_87);
- ICmpInst* int1_94 = new ICmpInst(*label_87, ICmpInst::ICMP_ULT, int32_93, const_int32_52, "");
- BranchInst::Create(label_switch_hole_check, label_88, int1_94, label_87);
+ // Block  (label_122)
+ CastInst* int32_127 = new ZExtInst(int8_Encoding, IntegerType::get(mod->getContext(), 32), "", label_122);
+ BinaryOperator* int32_128 = BinaryOperator::Create(Instruction::And, int32_127, const_int32_53, "", label_122);
+ ICmpInst* int1_129 = new ICmpInst(*label_122, ICmpInst::ICMP_ULT, int32_128, const_int32_54, "");
+ BranchInst::Create(label_switch_hole_check, label_123, int1_129, label_122);
  
- // Block  (label_88)
- CallInst* void_96 = CallInst::Create(func_abort, "", label_88);
- void_96->setCallingConv(CallingConv::C);
- void_96->setTailCall(true);
- AttributeSet void_96_PAL;
+ // Block  (label_123)
+ CallInst* void_131 = CallInst::Create(func_abort, "", label_123);
+ void_131->setCallingConv(CallingConv::C);
+ void_131->setTailCall(true);
+ AttributeSet void_131_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -868,31 +995,31 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  void_96_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_131_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_96->setAttributes(void_96_PAL);
+ void_131->setAttributes(void_131_PAL);
  
- new UnreachableInst(mod->getContext(), label_88);
+ new UnreachableInst(mod->getContext(), label_123);
  
  // Block switch.hole_check (label_switch_hole_check)
- CastInst* int13_switch_maskindex = new TruncInst(int32_93, IntegerType::get(mod->getContext(), 13), "switch.maskindex", label_switch_hole_check);
- BinaryOperator* int13_switch_shifted = BinaryOperator::Create(Instruction::LShr, const_int13_53, int13_switch_maskindex, "switch.shifted", label_switch_hole_check);
- BinaryOperator* int13_98 = BinaryOperator::Create(Instruction::And, int13_switch_shifted, const_int13_54, "", label_switch_hole_check);
- ICmpInst* int1_switch_lobit = new ICmpInst(*label_switch_hole_check, ICmpInst::ICMP_EQ, int13_98, const_int13_55, "switch.lobit");
- BranchInst::Create(label_88, label_switch_lookup, int1_switch_lobit, label_switch_hole_check);
+ CastInst* int13_switch_maskindex = new TruncInst(int32_128, IntegerType::get(mod->getContext(), 13), "switch.maskindex", label_switch_hole_check);
+ BinaryOperator* int13_switch_shifted = BinaryOperator::Create(Instruction::LShr, const_int13_55, int13_switch_maskindex, "switch.shifted", label_switch_hole_check);
+ BinaryOperator* int13_133 = BinaryOperator::Create(Instruction::And, int13_switch_shifted, const_int13_56, "", label_switch_hole_check);
+ ICmpInst* int1_switch_lobit = new ICmpInst(*label_switch_hole_check, ICmpInst::ICMP_EQ, int13_133, const_int13_57, "switch.lobit");
+ BranchInst::Create(label_123, label_switch_lookup, int1_switch_lobit, label_switch_hole_check);
  
  // Block switch.lookup (label_switch_lookup)
  std::vector<Value*> ptr_switch_gep_indices;
- ptr_switch_gep_indices.push_back(const_int32_56);
- ptr_switch_gep_indices.push_back(int32_93);
+ ptr_switch_gep_indices.push_back(const_int32_47);
+ ptr_switch_gep_indices.push_back(int32_128);
  Instruction* ptr_switch_gep = GetElementPtrInst::Create(gvar_array_switch_table, ptr_switch_gep_indices, "switch.gep", label_switch_lookup);
  LoadInst* int32_switch_load = new LoadInst(ptr_switch_gep, "switch.load", false, label_switch_lookup);
  int32_switch_load->setAlignment(4);
  ReturnInst::Create(mod->getContext(), int32_switch_load, label_switch_lookup);
  
- // Block  (label_89)
- ReturnInst::Create(mod->getContext(), const_int32_56, label_89);
+ // Block  (label_124)
+ ReturnInst::Create(mod->getContext(), const_int32_47, label_124);
  
 }
 
@@ -910,68 +1037,68 @@ gvar_array_switch_table->setInitializer(const_array_45);
  Value* ptr_context = args++;
  ptr_context->setName("context");
  
- BasicBlock* label_102 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_103 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_104 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_137 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_138 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_139 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__preheader_preheader = BasicBlock::Create(mod->getContext(), ".preheader.preheader",func_sharpPersonality,0);
  BasicBlock* label__preheader = BasicBlock::Create(mod->getContext(), ".preheader",func_sharpPersonality,0);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func_sharpPersonality,0);
- BasicBlock* label_105 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_106 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_140 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_141 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit10 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit10",func_sharpPersonality,0);
- BasicBlock* label__lr_ph = BasicBlock::Create(mod->getContext(), ".lr.ph",func_sharpPersonality,0);
- BasicBlock* label_107 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_108 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label__lr_ph_142 = BasicBlock::Create(mod->getContext(), ".lr.ph",func_sharpPersonality,0);
+ BasicBlock* label_143 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_144 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit6 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit6",func_sharpPersonality,0);
  BasicBlock* label__backedge = BasicBlock::Create(mod->getContext(), ".backedge",func_sharpPersonality,0);
- BasicBlock* label_109 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_110 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_111 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_112 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_145 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_146 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_147 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_148 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__loopexit_loopexit = BasicBlock::Create(mod->getContext(), ".loopexit.loopexit",func_sharpPersonality,0);
  BasicBlock* label__loopexit = BasicBlock::Create(mod->getContext(), ".loopexit",func_sharpPersonality,0);
  
- // Block  (label_102)
- AllocaInst* ptr_lsda = new AllocaInst(PointerTy_7, "lsda", label_102);
+ // Block  (label_137)
+ AllocaInst* ptr_lsda = new AllocaInst(PointerTy_6, "lsda", label_137);
  ptr_lsda->setAlignment(4);
- AllocaInst* ptr_callSitePtr = new AllocaInst(PointerTy_7, "callSitePtr", label_102);
+ AllocaInst* ptr_callSitePtr = new AllocaInst(PointerTy_6, "callSitePtr", label_137);
  ptr_callSitePtr->setAlignment(4);
- CallInst* ptr_113 = CallInst::Create(func__Unwind_GetLanguageSpecificData, ptr_context, "", label_102);
- ptr_113->setCallingConv(CallingConv::C);
- ptr_113->setTailCall(true);
- AttributeSet ptr_113_PAL;
- ptr_113->setAttributes(ptr_113_PAL);
+ CallInst* ptr_149 = CallInst::Create(func__Unwind_GetLanguageSpecificData, ptr_context, "", label_137);
+ ptr_149->setCallingConv(CallingConv::C);
+ ptr_149->setTailCall(true);
+ AttributeSet ptr_149_PAL;
+ ptr_149->setAttributes(ptr_149_PAL);
  
- CallInst* int32_114 = CallInst::Create(func__Unwind_GetIP, ptr_context, "", label_102);
- int32_114->setCallingConv(CallingConv::C);
- int32_114->setTailCall(true);
- AttributeSet int32_114_PAL;
- int32_114->setAttributes(int32_114_PAL);
+ CallInst* int32_150 = CallInst::Create(func__Unwind_GetIP, ptr_context, "", label_137);
+ int32_150->setCallingConv(CallingConv::C);
+ int32_150->setTailCall(true);
+ AttributeSet int32_150_PAL;
+ int32_150->setAttributes(int32_150_PAL);
  
- BinaryOperator* int32_115 = BinaryOperator::Create(Instruction::Add, int32_114, const_int32_58, "", label_102);
- CallInst* int32_116 = CallInst::Create(func__Unwind_GetRegionStart, ptr_context, "", label_102);
- int32_116->setCallingConv(CallingConv::C);
- int32_116->setTailCall(true);
- AttributeSet int32_116_PAL;
- int32_116->setAttributes(int32_116_PAL);
+ BinaryOperator* int32_151 = BinaryOperator::Create(Instruction::Add, int32_150, const_int32_58, "", label_137);
+ CallInst* int32_152 = CallInst::Create(func__Unwind_GetRegionStart, ptr_context, "", label_137);
+ int32_152->setCallingConv(CallingConv::C);
+ int32_152->setTailCall(true);
+ AttributeSet int32_152_PAL;
+ int32_152->setAttributes(int32_152_PAL);
  
- BinaryOperator* int32_117 = BinaryOperator::Create(Instruction::Sub, int32_115, int32_116, "", label_102);
- GetElementPtrInst* ptr_118 = GetElementPtrInst::Create(ptr_113, const_int32_57, "", label_102);
- StoreInst* void_119 = new StoreInst(ptr_118, ptr_lsda, false, label_102);
- void_119->setAlignment(4);
- LoadInst* int8_120 = new LoadInst(ptr_113, "", false, label_102);
- int8_120->setAlignment(1);
- ICmpInst* int1_121 = new ICmpInst(*label_102, ICmpInst::ICMP_EQ, int8_120, const_int8_50, "");
- BranchInst::Create(label_104, label_103, int1_121, label_102);
+ BinaryOperator* int32_153 = BinaryOperator::Create(Instruction::Sub, int32_151, int32_152, "", label_137);
+ GetElementPtrInst* ptr_154 = GetElementPtrInst::Create(ptr_149, const_int32_48, "", label_137);
+ StoreInst* void_155 = new StoreInst(ptr_154, ptr_lsda, false, label_137);
+ void_155->setAlignment(4);
+ LoadInst* int8_156 = new LoadInst(ptr_149, "", false, label_137);
+ int8_156->setAlignment(1);
+ ICmpInst* int1_157 = new ICmpInst(*label_137, ICmpInst::ICMP_EQ, int8_156, const_int8_52, "");
+ BranchInst::Create(label_139, label_138, int1_157, label_137);
  
- // Block  (label_103)
- std::vector<Value*> int32_123_params;
- int32_123_params.push_back(ptr_lsda);
- int32_123_params.push_back(int8_120);
- CallInst* int32_123 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_123_params, "", label_103);
- int32_123->setCallingConv(CallingConv::Fast);
- int32_123->setTailCall(false);
- AttributeSet int32_123_PAL;
+ // Block  (label_138)
+ std::vector<Value*> int32_159_params;
+ int32_159_params.push_back(ptr_lsda);
+ int32_159_params.push_back(int8_156);
+ CallInst* int32_159 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_159_params, "", label_138);
+ int32_159->setCallingConv(CallingConv::Fast);
+ int32_159->setTailCall(false);
+ AttributeSet int32_159_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -982,133 +1109,133 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  int32_123_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_159_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_123->setAttributes(int32_123_PAL);
+ int32_159->setAttributes(int32_159_PAL);
  
- LoadInst* ptr__pre = new LoadInst(ptr_lsda, ".pre", false, label_103);
+ LoadInst* ptr__pre = new LoadInst(ptr_lsda, ".pre", false, label_138);
  ptr__pre->setAlignment(4);
- BranchInst::Create(label_104, label_103);
+ BranchInst::Create(label_139, label_138);
  
- // Block  (label_104)
- PHINode* ptr_125 = PHINode::Create(PointerTy_7, 2, "", label_104);
- ptr_125->addIncoming(ptr_118, label_102);
- ptr_125->addIncoming(ptr__pre, label_103);
+ // Block  (label_139)
+ PHINode* ptr_161 = PHINode::Create(PointerTy_6, 2, "", label_139);
+ ptr_161->addIncoming(ptr_154, label_137);
+ ptr_161->addIncoming(ptr__pre, label_138);
  
- GetElementPtrInst* ptr_126 = GetElementPtrInst::Create(ptr_125, const_int32_57, "", label_104);
- StoreInst* void_127 = new StoreInst(ptr_126, ptr_lsda, false, label_104);
- void_127->setAlignment(4);
- LoadInst* int8_128 = new LoadInst(ptr_125, "", false, label_104);
- int8_128->setAlignment(1);
- ICmpInst* int1_129 = new ICmpInst(*label_104, ICmpInst::ICMP_EQ, int8_128, const_int8_50, "");
- BranchInst::Create(label_105, label__preheader_preheader, int1_129, label_104);
+ GetElementPtrInst* ptr_162 = GetElementPtrInst::Create(ptr_161, const_int32_48, "", label_139);
+ StoreInst* void_163 = new StoreInst(ptr_162, ptr_lsda, false, label_139);
+ void_163->setAlignment(4);
+ LoadInst* int8_164 = new LoadInst(ptr_161, "", false, label_139);
+ int8_164->setAlignment(1);
+ ICmpInst* int1_165 = new ICmpInst(*label_139, ICmpInst::ICMP_EQ, int8_164, const_int8_52, "");
+ BranchInst::Create(label_140, label__preheader_preheader, int1_165, label_139);
  
  // Block .preheader.preheader (label__preheader_preheader)
  BranchInst::Create(label__preheader, label__preheader_preheader);
  
  // Block .preheader (label__preheader)
- Argument* fwdref_133 = new Argument(PointerTy_7);
- PHINode* ptr_132 = PHINode::Create(PointerTy_7, 2, "", label__preheader);
- ptr_132->addIncoming(fwdref_133, label__preheader);
- ptr_132->addIncoming(ptr_125, label__preheader_preheader);
+ Argument* fwdref_169 = new Argument(PointerTy_6);
+ PHINode* ptr_168 = PHINode::Create(PointerTy_6, 2, "", label__preheader);
+ ptr_168->addIncoming(fwdref_169, label__preheader);
+ ptr_168->addIncoming(ptr_161, label__preheader_preheader);
  
- Argument* fwdref_134 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i = PHINode::Create(PointerTy_7, 2, "p.0.i", label__preheader);
- ptr_p_0_i->addIncoming(fwdref_134, label__preheader);
- ptr_p_0_i->addIncoming(ptr_126, label__preheader_preheader);
+ Argument* fwdref_170 = new Argument(PointerTy_6);
+ PHINode* ptr_p_0_i = PHINode::Create(PointerTy_6, 2, "p.0.i", label__preheader);
+ ptr_p_0_i->addIncoming(fwdref_170, label__preheader);
+ ptr_p_0_i->addIncoming(ptr_162, label__preheader_preheader);
  
- GetElementPtrInst* ptr_135 = GetElementPtrInst::Create(ptr_132, const_int32_47, "", label__preheader);
- LoadInst* int8_136 = new LoadInst(ptr_p_0_i, "", false, label__preheader);
- int8_136->setAlignment(1);
- ICmpInst* int1_137 = new ICmpInst(*label__preheader, ICmpInst::ICMP_SGT, int8_136, const_int8_50, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit, label__preheader, int1_137, label__preheader);
+ GetElementPtrInst* ptr_171 = GetElementPtrInst::Create(ptr_168, const_int32_45, "", label__preheader);
+ LoadInst* int8_172 = new LoadInst(ptr_p_0_i, "", false, label__preheader);
+ int8_172->setAlignment(1);
+ ICmpInst* int1_173 = new ICmpInst(*label__preheader, ICmpInst::ICMP_SGT, int8_172, const_int8_52, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit, label__preheader, int1_173, label__preheader);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit)
- PHINode* ptr__lcssa39 = PHINode::Create(PointerTy_7, 1, ".lcssa39", label___readULEB128__YAIPAPBE_Z_exit);
- ptr__lcssa39->addIncoming(ptr_135, label__preheader);
+ PHINode* ptr__lcssa39 = PHINode::Create(PointerTy_6, 1, ".lcssa39", label___readULEB128__YAIPAPBE_Z_exit);
+ ptr__lcssa39->addIncoming(ptr_171, label__preheader);
  
- StoreInst* void_139 = new StoreInst(ptr__lcssa39, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit);
- void_139->setAlignment(4);
- BranchInst::Create(label_105, label___readULEB128__YAIPAPBE_Z_exit);
+ StoreInst* void_175 = new StoreInst(ptr__lcssa39, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit);
+ void_175->setAlignment(4);
+ BranchInst::Create(label_140, label___readULEB128__YAIPAPBE_Z_exit);
  
- // Block  (label_105)
- PHINode* ptr_141 = PHINode::Create(PointerTy_7, 2, "", label_105);
- ptr_141->addIncoming(ptr_126, label_104);
- ptr_141->addIncoming(ptr__lcssa39, label___readULEB128__YAIPAPBE_Z_exit);
+ // Block  (label_140)
+ PHINode* ptr_177 = PHINode::Create(PointerTy_6, 2, "", label_140);
+ ptr_177->addIncoming(ptr_162, label_139);
+ ptr_177->addIncoming(ptr__lcssa39, label___readULEB128__YAIPAPBE_Z_exit);
  
- GetElementPtrInst* ptr_142 = GetElementPtrInst::Create(ptr_141, const_int32_57, "", label_105);
- StoreInst* void_143 = new StoreInst(ptr_142, ptr_lsda, false, label_105);
- void_143->setAlignment(4);
- LoadInst* int8_144 = new LoadInst(ptr_141, "", false, label_105);
- int8_144->setAlignment(1);
- BranchInst::Create(label_106, label_105);
+ GetElementPtrInst* ptr_178 = GetElementPtrInst::Create(ptr_177, const_int32_48, "", label_140);
+ StoreInst* void_179 = new StoreInst(ptr_178, ptr_lsda, false, label_140);
+ void_179->setAlignment(4);
+ LoadInst* int8_180 = new LoadInst(ptr_177, "", false, label_140);
+ int8_180->setAlignment(1);
+ BranchInst::Create(label_141, label_140);
  
- // Block  (label_106)
- Argument* fwdref_146 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i7 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i7", label_106);
- int32_shift_0_i7->addIncoming(const_int32_56, label_105);
- int32_shift_0_i7->addIncoming(fwdref_146, label_106);
+ // Block  (label_141)
+ Argument* fwdref_182 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i7 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i7", label_141);
+ int32_shift_0_i7->addIncoming(const_int32_47, label_140);
+ int32_shift_0_i7->addIncoming(fwdref_182, label_141);
  
- Argument* fwdref_147 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i8 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i8", label_106);
- int32_result_0_i8->addIncoming(const_int32_56, label_105);
- int32_result_0_i8->addIncoming(fwdref_147, label_106);
+ Argument* fwdref_183 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i8 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i8", label_141);
+ int32_result_0_i8->addIncoming(const_int32_47, label_140);
+ int32_result_0_i8->addIncoming(fwdref_183, label_141);
  
- Argument* fwdref_149 = new Argument(PointerTy_7);
- PHINode* ptr_148 = PHINode::Create(PointerTy_7, 2, "", label_106);
- ptr_148->addIncoming(ptr_141, label_105);
- ptr_148->addIncoming(fwdref_149, label_106);
+ Argument* fwdref_185 = new Argument(PointerTy_6);
+ PHINode* ptr_184 = PHINode::Create(PointerTy_6, 2, "", label_141);
+ ptr_184->addIncoming(ptr_177, label_140);
+ ptr_184->addIncoming(fwdref_185, label_141);
  
- Argument* fwdref_150 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i9 = PHINode::Create(PointerTy_7, 2, "p.0.i9", label_106);
- ptr_p_0_i9->addIncoming(ptr_142, label_105);
- ptr_p_0_i9->addIncoming(fwdref_150, label_106);
+ Argument* fwdref_186 = new Argument(PointerTy_6);
+ PHINode* ptr_p_0_i9 = PHINode::Create(PointerTy_6, 2, "p.0.i9", label_141);
+ ptr_p_0_i9->addIncoming(ptr_178, label_140);
+ ptr_p_0_i9->addIncoming(fwdref_186, label_141);
  
- GetElementPtrInst* ptr_151 = GetElementPtrInst::Create(ptr_148, const_int32_47, "", label_106);
- LoadInst* int8_152 = new LoadInst(ptr_p_0_i9, "", false, label_106);
- int8_152->setAlignment(1);
- CastInst* int32_153 = new ZExtInst(int8_152, IntegerType::get(mod->getContext(), 32), "", label_106);
- BinaryOperator* int32_154 = BinaryOperator::Create(Instruction::And, int32_153, const_int32_59, "", label_106);
- BinaryOperator* int32_155 = BinaryOperator::Create(Instruction::Shl, int32_154, int32_shift_0_i7, "", label_106);
- BinaryOperator* int32_156 = BinaryOperator::Create(Instruction::Or, int32_155, int32_result_0_i8, "", label_106);
- BinaryOperator* int32_157 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i7, const_int32_60, "", label_106);
- BinaryOperator* int32_158 = BinaryOperator::Create(Instruction::And, int32_153, const_int32_61, "", label_106);
- ICmpInst* int1_159 = new ICmpInst(*label_106, ICmpInst::ICMP_EQ, int32_158, const_int32_56, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit10, label_106, int1_159, label_106);
+ GetElementPtrInst* ptr_187 = GetElementPtrInst::Create(ptr_184, const_int32_45, "", label_141);
+ LoadInst* int8_188 = new LoadInst(ptr_p_0_i9, "", false, label_141);
+ int8_188->setAlignment(1);
+ CastInst* int32_189 = new ZExtInst(int8_188, IntegerType::get(mod->getContext(), 32), "", label_141);
+ BinaryOperator* int32_190 = BinaryOperator::Create(Instruction::And, int32_189, const_int32_59, "", label_141);
+ BinaryOperator* int32_191 = BinaryOperator::Create(Instruction::Shl, int32_190, int32_shift_0_i7, "", label_141);
+ BinaryOperator* int32_192 = BinaryOperator::Create(Instruction::Or, int32_191, int32_result_0_i8, "", label_141);
+ BinaryOperator* int32_193 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i7, const_int32_60, "", label_141);
+ BinaryOperator* int32_194 = BinaryOperator::Create(Instruction::And, int32_189, const_int32_61, "", label_141);
+ ICmpInst* int1_195 = new ICmpInst(*label_141, ICmpInst::ICMP_EQ, int32_194, const_int32_47, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit10, label_141, int1_195, label_141);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit10 (label___readULEB128__YAIPAPBE_Z_exit10)
  PHINode* int32__lcssa38 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa38", label___readULEB128__YAIPAPBE_Z_exit10);
- int32__lcssa38->addIncoming(int32_156, label_106);
+ int32__lcssa38->addIncoming(int32_192, label_141);
  
- PHINode* ptr__lcssa37 = PHINode::Create(PointerTy_7, 1, ".lcssa37", label___readULEB128__YAIPAPBE_Z_exit10);
- ptr__lcssa37->addIncoming(ptr_151, label_106);
+ PHINode* ptr__lcssa37 = PHINode::Create(PointerTy_6, 1, ".lcssa37", label___readULEB128__YAIPAPBE_Z_exit10);
+ ptr__lcssa37->addIncoming(ptr_187, label_141);
  
- PHINode* ptr__lcssa36 = PHINode::Create(PointerTy_7, 1, ".lcssa36", label___readULEB128__YAIPAPBE_Z_exit10);
- ptr__lcssa36->addIncoming(ptr_148, label_106);
+ PHINode* ptr__lcssa36 = PHINode::Create(PointerTy_6, 1, ".lcssa36", label___readULEB128__YAIPAPBE_Z_exit10);
+ ptr__lcssa36->addIncoming(ptr_184, label_141);
  
- StoreInst* void_161 = new StoreInst(ptr__lcssa37, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit10);
- void_161->setAlignment(4);
- BinaryOperator* int32__sum = BinaryOperator::Create(Instruction::Add, int32__lcssa38, const_int32_47, ".sum", label___readULEB128__YAIPAPBE_Z_exit10);
- GetElementPtrInst* ptr_162 = GetElementPtrInst::Create(ptr__lcssa36, int32__sum, "", label___readULEB128__YAIPAPBE_Z_exit10);
- StoreInst* void_163 = new StoreInst(ptr__lcssa37, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit10);
- void_163->setAlignment(4);
- ICmpInst* int1_164 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit10, ICmpInst::ICMP_SGT, int32__sum, const_int32_47, "");
- BranchInst::Create(label__lr_ph, label__loopexit, int1_164, label___readULEB128__YAIPAPBE_Z_exit10);
+ StoreInst* void_197 = new StoreInst(ptr__lcssa37, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit10);
+ void_197->setAlignment(4);
+ BinaryOperator* int32__sum = BinaryOperator::Create(Instruction::Add, int32__lcssa38, const_int32_45, ".sum", label___readULEB128__YAIPAPBE_Z_exit10);
+ GetElementPtrInst* ptr_198 = GetElementPtrInst::Create(ptr__lcssa36, int32__sum, "", label___readULEB128__YAIPAPBE_Z_exit10);
+ StoreInst* void_199 = new StoreInst(ptr__lcssa37, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit10);
+ void_199->setAlignment(4);
+ ICmpInst* int1_200 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit10, ICmpInst::ICMP_SGT, int32__sum, const_int32_45, "");
+ BranchInst::Create(label__lr_ph_142, label__loopexit, int1_200, label___readULEB128__YAIPAPBE_Z_exit10);
  
- // Block .lr.ph (label__lr_ph)
- CastInst* int32_166 = new PtrToIntInst(ptr_162, IntegerType::get(mod->getContext(), 32), "", label__lr_ph);
- BinaryOperator* int32_167 = BinaryOperator::Create(Instruction::Add, int32_166, const_int32_58, "", label__lr_ph);
- BranchInst::Create(label_107, label__lr_ph);
+ // Block .lr.ph (label__lr_ph_142)
+ CastInst* int32_202 = new PtrToIntInst(ptr_198, IntegerType::get(mod->getContext(), 32), "", label__lr_ph_142);
+ BinaryOperator* int32_203 = BinaryOperator::Create(Instruction::Add, int32_202, const_int32_58, "", label__lr_ph_142);
+ BranchInst::Create(label_143, label__lr_ph_142);
  
- // Block  (label_107)
- std::vector<Value*> int32_169_params;
- int32_169_params.push_back(ptr_callSitePtr);
- int32_169_params.push_back(int8_144);
- CallInst* int32_169 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_169_params, "", label_107);
- int32_169->setCallingConv(CallingConv::Fast);
- int32_169->setTailCall(false);
- AttributeSet int32_169_PAL;
+ // Block  (label_143)
+ std::vector<Value*> int32_205_params;
+ int32_205_params.push_back(ptr_callSitePtr);
+ int32_205_params.push_back(int8_180);
+ CallInst* int32_205 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_205_params, "", label_143);
+ int32_205->setCallingConv(CallingConv::Fast);
+ int32_205->setTailCall(false);
+ AttributeSet int32_205_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1119,18 +1246,18 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  int32_169_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_205_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_169->setAttributes(int32_169_PAL);
+ int32_205->setAttributes(int32_205_PAL);
  
- std::vector<Value*> int32_170_params;
- int32_170_params.push_back(ptr_callSitePtr);
- int32_170_params.push_back(int8_144);
- CallInst* int32_170 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_170_params, "", label_107);
- int32_170->setCallingConv(CallingConv::Fast);
- int32_170->setTailCall(false);
- AttributeSet int32_170_PAL;
+ std::vector<Value*> int32_206_params;
+ int32_206_params.push_back(ptr_callSitePtr);
+ int32_206_params.push_back(int8_180);
+ CallInst* int32_206 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_206_params, "", label_143);
+ int32_206->setCallingConv(CallingConv::Fast);
+ int32_206->setTailCall(false);
+ AttributeSet int32_206_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1141,18 +1268,18 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  int32_170_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_206_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_170->setAttributes(int32_170_PAL);
+ int32_206->setAttributes(int32_206_PAL);
  
- std::vector<Value*> int32_171_params;
- int32_171_params.push_back(ptr_callSitePtr);
- int32_171_params.push_back(int8_144);
- CallInst* int32_171 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_171_params, "", label_107);
- int32_171->setCallingConv(CallingConv::Fast);
- int32_171->setTailCall(false);
- AttributeSet int32_171_PAL;
+ std::vector<Value*> int32_207_params;
+ int32_207_params.push_back(ptr_callSitePtr);
+ int32_207_params.push_back(int8_180);
+ CallInst* int32_207 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_207_params, "", label_143);
+ int32_207->setCallingConv(CallingConv::Fast);
+ int32_207->setTailCall(false);
+ AttributeSet int32_207_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1163,140 +1290,210 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  int32_171_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_207_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_171->setAttributes(int32_171_PAL);
+ int32_207->setAttributes(int32_207_PAL);
  
- LoadInst* ptr_172 = new LoadInst(ptr_callSitePtr, "", false, label_107);
- ptr_172->setAlignment(4);
- BranchInst::Create(label_108, label_107);
+ LoadInst* ptr_208 = new LoadInst(ptr_callSitePtr, "", false, label_143);
+ ptr_208->setAlignment(4);
+ BranchInst::Create(label_144, label_143);
  
- // Block  (label_108)
- Argument* fwdref_174 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i3 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i3", label_108);
- int32_shift_0_i3->addIncoming(const_int32_56, label_107);
- int32_shift_0_i3->addIncoming(fwdref_174, label_108);
+ // Block  (label_144)
+ Argument* fwdref_210 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i3 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i3", label_144);
+ int32_shift_0_i3->addIncoming(const_int32_47, label_143);
+ int32_shift_0_i3->addIncoming(fwdref_210, label_144);
  
- Argument* fwdref_175 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i4 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i4", label_108);
- int32_result_0_i4->addIncoming(const_int32_56, label_107);
- int32_result_0_i4->addIncoming(fwdref_175, label_108);
+ Argument* fwdref_211 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i4 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i4", label_144);
+ int32_result_0_i4->addIncoming(const_int32_47, label_143);
+ int32_result_0_i4->addIncoming(fwdref_211, label_144);
  
- Argument* fwdref_176 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i5 = PHINode::Create(PointerTy_7, 2, "p.0.i5", label_108);
- ptr_p_0_i5->addIncoming(ptr_172, label_107);
- ptr_p_0_i5->addIncoming(fwdref_176, label_108);
+ Argument* fwdref_212 = new Argument(PointerTy_6);
+ PHINode* ptr_p_0_i5 = PHINode::Create(PointerTy_6, 2, "p.0.i5", label_144);
+ ptr_p_0_i5->addIncoming(ptr_208, label_143);
+ ptr_p_0_i5->addIncoming(fwdref_212, label_144);
  
- GetElementPtrInst* ptr_177 = GetElementPtrInst::Create(ptr_p_0_i5, const_int32_57, "", label_108);
- LoadInst* int8_178 = new LoadInst(ptr_p_0_i5, "", false, label_108);
- int8_178->setAlignment(1);
- CastInst* int32_179 = new ZExtInst(int8_178, IntegerType::get(mod->getContext(), 32), "", label_108);
- BinaryOperator* int32_180 = BinaryOperator::Create(Instruction::And, int32_179, const_int32_59, "", label_108);
- BinaryOperator* int32_181 = BinaryOperator::Create(Instruction::Shl, int32_180, int32_shift_0_i3, "", label_108);
- BinaryOperator* int32_182 = BinaryOperator::Create(Instruction::Or, int32_181, int32_result_0_i4, "", label_108);
- BinaryOperator* int32_183 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i3, const_int32_60, "", label_108);
- BinaryOperator* int32_184 = BinaryOperator::Create(Instruction::And, int32_179, const_int32_61, "", label_108);
- ICmpInst* int1_185 = new ICmpInst(*label_108, ICmpInst::ICMP_EQ, int32_184, const_int32_56, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit6, label_108, int1_185, label_108);
+ GetElementPtrInst* ptr_213 = GetElementPtrInst::Create(ptr_p_0_i5, const_int32_48, "", label_144);
+ LoadInst* int8_214 = new LoadInst(ptr_p_0_i5, "", false, label_144);
+ int8_214->setAlignment(1);
+ CastInst* int32_215 = new ZExtInst(int8_214, IntegerType::get(mod->getContext(), 32), "", label_144);
+ BinaryOperator* int32_216 = BinaryOperator::Create(Instruction::And, int32_215, const_int32_59, "", label_144);
+ BinaryOperator* int32_217 = BinaryOperator::Create(Instruction::Shl, int32_216, int32_shift_0_i3, "", label_144);
+ BinaryOperator* int32_218 = BinaryOperator::Create(Instruction::Or, int32_217, int32_result_0_i4, "", label_144);
+ BinaryOperator* int32_219 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i3, const_int32_60, "", label_144);
+ BinaryOperator* int32_220 = BinaryOperator::Create(Instruction::And, int32_215, const_int32_61, "", label_144);
+ ICmpInst* int1_221 = new ICmpInst(*label_144, ICmpInst::ICMP_EQ, int32_220, const_int32_47, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit6, label_144, int1_221, label_144);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit6 (label___readULEB128__YAIPAPBE_Z_exit6)
  PHINode* int32__lcssa32 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa32", label___readULEB128__YAIPAPBE_Z_exit6);
- int32__lcssa32->addIncoming(int32_182, label_108);
+ int32__lcssa32->addIncoming(int32_218, label_144);
  
- PHINode* ptr__lcssa = PHINode::Create(PointerTy_7, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit6);
- ptr__lcssa->addIncoming(ptr_177, label_108);
+ PHINode* ptr__lcssa = PHINode::Create(PointerTy_6, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit6);
+ ptr__lcssa->addIncoming(ptr_213, label_144);
  
- StoreInst* void_187 = new StoreInst(ptr__lcssa, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit6);
- void_187->setAlignment(4);
- ICmpInst* int1_188 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit6, ICmpInst::ICMP_EQ, int32_171, const_int32_56, "");
- BranchInst::Create(label__backedge, label_109, int1_188, label___readULEB128__YAIPAPBE_Z_exit6);
+ StoreInst* void_223 = new StoreInst(ptr__lcssa, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit6);
+ void_223->setAlignment(4);
+ ICmpInst* int1_224 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit6, ICmpInst::ICMP_EQ, int32_207, const_int32_47, "");
+ BranchInst::Create(label__backedge, label_145, int1_224, label___readULEB128__YAIPAPBE_Z_exit6);
  
  // Block .backedge (label__backedge)
- ICmpInst* int1_190 = new ICmpInst(*label__backedge, ICmpInst::ICMP_ULT, ptr__lcssa, ptr_162, "");
- BranchInst::Create(label_107, label__loopexit_loopexit, int1_190, label__backedge);
+ ICmpInst* int1_226 = new ICmpInst(*label__backedge, ICmpInst::ICMP_ULT, ptr__lcssa, ptr_198, "");
+ BranchInst::Create(label_143, label__loopexit_loopexit, int1_226, label__backedge);
  
- // Block  (label_109)
- ICmpInst* int1_192 = new ICmpInst(*label_109, ICmpInst::ICMP_ULE, int32_169, int32_117, "");
- BinaryOperator* int32_193 = BinaryOperator::Create(Instruction::Add, int32_170, int32_169, "", label_109);
- ICmpInst* int1_194 = new ICmpInst(*label_109, ICmpInst::ICMP_ULT, int32_117, int32_193, "");
- BinaryOperator* int1_or_cond = BinaryOperator::Create(Instruction::And, int1_192, int1_194, "or.cond", label_109);
- BranchInst::Create(label_110, label__backedge, int1_or_cond, label_109);
+ // Block  (label_145)
+ ICmpInst* int1_228 = new ICmpInst(*label_145, ICmpInst::ICMP_ULE, int32_205, int32_153, "");
+ BinaryOperator* int32_229 = BinaryOperator::Create(Instruction::Add, int32_206, int32_205, "", label_145);
+ ICmpInst* int1_230 = new ICmpInst(*label_145, ICmpInst::ICMP_ULT, int32_153, int32_229, "");
+ BinaryOperator* int1_or_cond = BinaryOperator::Create(Instruction::And, int1_228, int1_230, "or.cond", label_145);
+ BranchInst::Create(label_146, label__backedge, int1_or_cond, label_145);
  
- // Block  (label_110)
- PHINode* int32__lcssa32_lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa32.lcssa", label_110);
- int32__lcssa32_lcssa->addIncoming(int32__lcssa32, label_109);
+ // Block  (label_146)
+ PHINode* int32__lcssa32_lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa32.lcssa", label_146);
+ int32__lcssa32_lcssa->addIncoming(int32__lcssa32, label_145);
  
- PHINode* int32__lcssa33 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa33", label_110);
- int32__lcssa33->addIncoming(int32_171, label_109);
+ PHINode* int32__lcssa33 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa33", label_146);
+ int32__lcssa33->addIncoming(int32_207, label_145);
  
- BinaryOperator* int32_196 = BinaryOperator::Create(Instruction::And, int32_actions, const_int32_57, "", label_110);
- ICmpInst* int1_197 = new ICmpInst(*label_110, ICmpInst::ICMP_EQ, int32_196, const_int32_56, "");
- BranchInst::Create(label_111, label_112, int1_197, label_110);
+ BinaryOperator* int32_232 = BinaryOperator::Create(Instruction::And, int32_actions, const_int32_48, "", label_146);
+ ICmpInst* int1_233 = new ICmpInst(*label_146, ICmpInst::ICMP_EQ, int32_232, const_int32_47, "");
+ BranchInst::Create(label_147, label_148, int1_233, label_146);
  
- // Block  (label_111)
- CastInst* int32_199 = new PtrToIntInst(ptr_exceptionObject, IntegerType::get(mod->getContext(), 32), "", label_111);
- std::vector<Value*> void_200_params;
- void_200_params.push_back(ptr_context);
- void_200_params.push_back(const_int32_56);
- void_200_params.push_back(int32_199);
- CallInst* void_200 = CallInst::Create(func__Unwind_SetGR, void_200_params, "", label_111);
- void_200->setCallingConv(CallingConv::C);
- void_200->setTailCall(true);
- AttributeSet void_200_PAL;
- void_200->setAttributes(void_200_PAL);
+ // Block  (label_147)
+ CastInst* int32_235 = new PtrToIntInst(ptr_exceptionObject, IntegerType::get(mod->getContext(), 32), "", label_147);
+ std::vector<Value*> void_236_params;
+ void_236_params.push_back(ptr_context);
+ void_236_params.push_back(const_int32_47);
+ void_236_params.push_back(int32_235);
+ CallInst* void_236 = CallInst::Create(func__Unwind_SetGR, void_236_params, "", label_147);
+ void_236->setCallingConv(CallingConv::C);
+ void_236->setTailCall(true);
+ AttributeSet void_236_PAL;
+ void_236->setAttributes(void_236_PAL);
  
- std::vector<Value*> void_201_params;
- void_201_params.push_back(ptr_context);
- void_201_params.push_back(const_int32_47);
- void_201_params.push_back(const_int32_56);
- CallInst* void_201 = CallInst::Create(func__Unwind_SetGR, void_201_params, "", label_111);
- void_201->setCallingConv(CallingConv::C);
- void_201->setTailCall(true);
- AttributeSet void_201_PAL;
- void_201->setAttributes(void_201_PAL);
+ std::vector<Value*> void_237_params;
+ void_237_params.push_back(ptr_context);
+ void_237_params.push_back(const_int32_45);
+ void_237_params.push_back(const_int32_47);
+ CallInst* void_237 = CallInst::Create(func__Unwind_SetGR, void_237_params, "", label_147);
+ void_237->setCallingConv(CallingConv::C);
+ void_237->setTailCall(true);
+ AttributeSet void_237_PAL;
+ void_237->setAttributes(void_237_PAL);
  
- BinaryOperator* int32_202 = BinaryOperator::Create(Instruction::Add, int32__lcssa33, int32_116, "", label_111);
- std::vector<Value*> void_203_params;
- void_203_params.push_back(ptr_context);
- void_203_params.push_back(int32_202);
- CallInst* void_203 = CallInst::Create(func__Unwind_SetIP, void_203_params, "", label_111);
- void_203->setCallingConv(CallingConv::C);
- void_203->setTailCall(true);
- AttributeSet void_203_PAL;
- void_203->setAttributes(void_203_PAL);
+ BinaryOperator* int32_238 = BinaryOperator::Create(Instruction::Add, int32__lcssa33, int32_152, "", label_147);
+ std::vector<Value*> void_239_params;
+ void_239_params.push_back(ptr_context);
+ void_239_params.push_back(int32_238);
+ CallInst* void_239 = CallInst::Create(func__Unwind_SetIP, void_239_params, "", label_147);
+ void_239->setCallingConv(CallingConv::C);
+ void_239->setTailCall(true);
+ AttributeSet void_239_PAL;
+ void_239->setAttributes(void_239_PAL);
  
- BranchInst::Create(label__loopexit, label_111);
+ BranchInst::Create(label__loopexit, label_147);
  
- // Block  (label_112)
- BinaryOperator* int32_205 = BinaryOperator::Create(Instruction::Sub, const_int32_56, int32__lcssa32_lcssa, "", label_112);
- ICmpInst* int1_206 = new ICmpInst(*label_112, ICmpInst::ICMP_NE, int32_167, int32_205, "");
- ICmpInst* int1_not_ = new ICmpInst(*label_112, ICmpInst::ICMP_NE, int32__lcssa32_lcssa, const_int32_56, "not.");
- BinaryOperator* int1_207 = BinaryOperator::Create(Instruction::And, int1_206, int1_not_, "", label_112);
- SelectInst* int32__2 = SelectInst::Create(int1_207, const_int32_62, const_int32_48, ".2", label_112);
- ReturnInst::Create(mod->getContext(), int32__2, label_112);
+ // Block  (label_148)
+ BinaryOperator* int32_241 = BinaryOperator::Create(Instruction::Sub, const_int32_47, int32__lcssa32_lcssa, "", label_148);
+ ICmpInst* int1_242 = new ICmpInst(*label_148, ICmpInst::ICMP_NE, int32_203, int32_241, "");
+ ICmpInst* int1_not__243 = new ICmpInst(*label_148, ICmpInst::ICMP_NE, int32__lcssa32_lcssa, const_int32_47, "not.");
+ BinaryOperator* int1_244 = BinaryOperator::Create(Instruction::And, int1_242, int1_not__243, "", label_148);
+ SelectInst* int32__2 = SelectInst::Create(int1_244, const_int32_62, const_int32_46, ".2", label_148);
+ ReturnInst::Create(mod->getContext(), int32__2, label_148);
  
  // Block .loopexit.loopexit (label__loopexit_loopexit)
  BranchInst::Create(label__loopexit, label__loopexit_loopexit);
  
  // Block .loopexit (label__loopexit)
  PHINode* int32_ret_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 3, "ret.0", label__loopexit);
- int32_ret_0->addIncoming(const_int32_60, label_111);
- int32_ret_0->addIncoming(const_int32_48, label___readULEB128__YAIPAPBE_Z_exit10);
- int32_ret_0->addIncoming(const_int32_48, label__loopexit_loopexit);
+ int32_ret_0->addIncoming(const_int32_60, label_147);
+ int32_ret_0->addIncoming(const_int32_46, label___readULEB128__YAIPAPBE_Z_exit10);
+ int32_ret_0->addIncoming(const_int32_46, label__loopexit_loopexit);
  
  ReturnInst::Create(mod->getContext(), int32_ret_0, label__loopexit);
  
  // Resolve Forward References
- fwdref_133->replaceAllUsesWith(ptr_p_0_i); delete fwdref_133;
- fwdref_149->replaceAllUsesWith(ptr_p_0_i9); delete fwdref_149;
- fwdref_175->replaceAllUsesWith(int32_182); delete fwdref_175;
- fwdref_174->replaceAllUsesWith(int32_183); delete fwdref_174;
- fwdref_147->replaceAllUsesWith(int32_156); delete fwdref_147;
- fwdref_176->replaceAllUsesWith(ptr_177); delete fwdref_176;
- fwdref_146->replaceAllUsesWith(int32_157); delete fwdref_146;
- fwdref_134->replaceAllUsesWith(ptr_135); delete fwdref_134;
- fwdref_150->replaceAllUsesWith(ptr_151); delete fwdref_150;
+ fwdref_212->replaceAllUsesWith(ptr_213); delete fwdref_212;
+ fwdref_210->replaceAllUsesWith(int32_219); delete fwdref_210;
+ fwdref_211->replaceAllUsesWith(int32_218); delete fwdref_211;
+ fwdref_183->replaceAllUsesWith(int32_192); delete fwdref_183;
+ fwdref_182->replaceAllUsesWith(int32_193); delete fwdref_182;
+ fwdref_186->replaceAllUsesWith(ptr_187); delete fwdref_186;
+ fwdref_170->replaceAllUsesWith(ptr_171); delete fwdref_170;
+ fwdref_169->replaceAllUsesWith(ptr_p_0_i); delete fwdref_169;
+ fwdref_185->replaceAllUsesWith(ptr_p_0_i9); delete fwdref_185;
+ 
+}
+
+// Function: ?cleanupException@@YAXW4_Unwind_Reason_Code@@PAU_Unwind_Exception@@@Z (func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z)
+{
+ Function::arg_iterator args = func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z->arg_begin();
+ Value* int32_reason = args++;
+ int32_reason->setName("reason");
+ Value* ptr_ex = args++;
+ ptr_ex->setName("ex");
+ 
+ BasicBlock* label_248 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_249 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_250 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ 
+ // Block  (label_248)
+ ICmpInst* int1_251 = new ICmpInst(*label_248, ICmpInst::ICMP_EQ, ptr_ex, const_ptr_63, "");
+ BranchInst::Create(label_250, label_249, int1_251, label_248);
+ 
+ // Block  (label_249)
+ CastInst* ptr_253 = new BitCastInst(ptr_ex, PointerTy_6, "", label_249);
+ CallInst* void_254 = CallInst::Create(func_free, ptr_253, "", label_249);
+ void_254->setCallingConv(CallingConv::C);
+ void_254->setTailCall(true);
+ AttributeSet void_254_PAL;
+ void_254->setAttributes(void_254_PAL);
+ 
+ BranchInst::Create(label_250, label_249);
+ 
+ // Block  (label_250)
+ ReturnInst::Create(mod->getContext(), label_250);
+ 
+}
+
+// Function: throwException (func_throwException)
+{
+ 
+ BasicBlock* label_257 = BasicBlock::Create(mod->getContext(), "",func_throwException,0);
+ 
+ // Block  (label_257)
+ CallInst* ptr_258 = CallInst::Create(func_malloc, const_int32_64, "", label_257);
+ ptr_258->setCallingConv(CallingConv::C);
+ ptr_258->setTailCall(true);
+ AttributeSet ptr_258_PAL;
+ ptr_258->setAttributes(ptr_258_PAL);
+ 
+ CastInst* ptr_259 = new BitCastInst(ptr_258, PointerTy_19, "", label_257);
+ GetElementPtrInst* ptr_260 = GetElementPtrInst::Create(ptr_258, const_int32_46, "", label_257);
+ CastInst* ptr_261 = new BitCastInst(ptr_260, PointerTy_36, "", label_257);
+ std::vector<Value*> void_262_params;
+ void_262_params.push_back(ptr_258);
+ void_262_params.push_back(const_int8_65);
+ void_262_params.push_back(const_int64_66);
+ void_262_params.push_back(const_int32_46);
+ void_262_params.push_back(const_int1_49);
+ CallInst* void_262 = CallInst::Create(func_llvm_memset_p0i8_i64, void_262_params, "", label_257);
+ void_262->setCallingConv(CallingConv::C);
+ void_262->setTailCall(false);
+ AttributeSet void_262_PAL;
+ void_262->setAttributes(void_262_PAL);
+ 
+ StoreInst* void_263 = new StoreInst(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z, ptr_261, false, label_257);
+ void_263->setAlignment(4);
+ CallInst* int32_264 = CallInst::Create(func__Unwind_RaiseException, ptr_259, "", label_257);
+ int32_264->setCallingConv(CallingConv::C);
+ int32_264->setTailCall(true);
+ AttributeSet int32_264_PAL;
+ int32_264->setAttributes(int32_264_PAL);
+ 
+ new UnreachableInst(mod->getContext(), label_257);
  
 }
 
@@ -1308,196 +1505,196 @@ gvar_array_switch_table->setInitializer(const_array_45);
  Value* int8_encoding = args++;
  int8_encoding->setName("encoding");
  
- BasicBlock* label_211 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_212 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_266 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_267 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label__preheader4_preheader = BasicBlock::Create(mod->getContext(), ".preheader4.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label__preheader_preheader_213 = BasicBlock::Create(mod->getContext(), ".preheader.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_214 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label__preheader_215 = BasicBlock::Create(mod->getContext(), ".preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label__preheader_preheader_268 = BasicBlock::Create(mod->getContext(), ".preheader.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_269 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label__preheader_270 = BasicBlock::Create(mod->getContext(), ".preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label__preheader4 = BasicBlock::Create(mod->getContext(), ".preheader4",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_216 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_217 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_218 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_219 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_220 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_221 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_222 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_223 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_224 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_271 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_272 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_273 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_274 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_275 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_276 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_277 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_278 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_279 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_loopexit = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit.loopexit",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_225 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_226 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_227 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_228 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_229 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_230 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_231 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_280 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_281 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_282 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_283 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_284 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_285 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_286 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  
- // Block  (label_211)
- LoadInst* ptr_232 = new LoadInst(ptr_data, "", false, label_211);
- ptr_232->setAlignment(4);
- CastInst* int32_233 = new ZExtInst(int8_encoding, IntegerType::get(mod->getContext(), 32), "", label_211);
- ICmpInst* int1_234 = new ICmpInst(*label_211, ICmpInst::ICMP_EQ, int8_encoding, const_int8_50, "");
- BranchInst::Create(label_231, label_212, int1_234, label_211);
+ // Block  (label_266)
+ LoadInst* ptr_287 = new LoadInst(ptr_data, "", false, label_266);
+ ptr_287->setAlignment(4);
+ CastInst* int32_288 = new ZExtInst(int8_encoding, IntegerType::get(mod->getContext(), 32), "", label_266);
+ ICmpInst* int1_289 = new ICmpInst(*label_266, ICmpInst::ICMP_EQ, int8_encoding, const_int8_52, "");
+ BranchInst::Create(label_286, label_267, int1_289, label_266);
  
- // Block  (label_212)
- BinaryOperator* int32_236 = BinaryOperator::Create(Instruction::And, int32_233, const_int32_51, "", label_212);
- SwitchInst* void_237 = SwitchInst::Create(int32_236, label_224, 9, label_212);
- void_237->addCase(const_int32_56, label_214);
- void_237->addCase(const_int32_57, label__preheader_preheader_213);
- void_237->addCase(const_int32_63, label__preheader4_preheader);
- void_237->addCase(const_int32_47, label_218);
- void_237->addCase(const_int32_64, label_219);
- void_237->addCase(const_int32_46, label_220);
- void_237->addCase(const_int32_65, label_221);
- void_237->addCase(const_int32_66, label_222);
- void_237->addCase(const_int32_67, label_223);
+ // Block  (label_267)
+ BinaryOperator* int32_291 = BinaryOperator::Create(Instruction::And, int32_288, const_int32_53, "", label_267);
+ SwitchInst* void_292 = SwitchInst::Create(int32_291, label_279, 9, label_267);
+ void_292->addCase(const_int32_47, label_269);
+ void_292->addCase(const_int32_48, label__preheader_preheader_268);
+ void_292->addCase(const_int32_67, label__preheader4_preheader);
+ void_292->addCase(const_int32_45, label_273);
+ void_292->addCase(const_int32_68, label_274);
+ void_292->addCase(const_int32_44, label_275);
+ void_292->addCase(const_int32_69, label_276);
+ void_292->addCase(const_int32_70, label_277);
+ void_292->addCase(const_int32_71, label_278);
  
  
  // Block .preheader4.preheader (label__preheader4_preheader)
  BranchInst::Create(label__preheader4, label__preheader4_preheader);
  
- // Block .preheader.preheader (label__preheader_preheader_213)
- BranchInst::Create(label__preheader_215, label__preheader_preheader_213);
+ // Block .preheader.preheader (label__preheader_preheader_268)
+ BranchInst::Create(label__preheader_270, label__preheader_preheader_268);
  
- // Block  (label_214)
- CastInst* ptr_240 = new BitCastInst(ptr_232, PointerTy_13, "", label_214);
- LoadInst* int32_241 = new LoadInst(ptr_240, "", false, label_214);
- int32_241->setAlignment(4);
- GetElementPtrInst* ptr_242 = GetElementPtrInst::Create(ptr_232, const_int32_46, "", label_214);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_214);
+ // Block  (label_269)
+ CastInst* ptr_295 = new BitCastInst(ptr_287, PointerTy_8, "", label_269);
+ LoadInst* int32_296 = new LoadInst(ptr_295, "", false, label_269);
+ int32_296->setAlignment(4);
+ GetElementPtrInst* ptr_297 = GetElementPtrInst::Create(ptr_287, const_int32_44, "", label_269);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_269);
  
- // Block .preheader (label__preheader_215)
- Argument* fwdref_244 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i", label__preheader_215);
- int32_shift_0_i->addIncoming(fwdref_244, label__preheader_215);
- int32_shift_0_i->addIncoming(const_int32_56, label__preheader_preheader_213);
+ // Block .preheader (label__preheader_270)
+ Argument* fwdref_299 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i", label__preheader_270);
+ int32_shift_0_i->addIncoming(fwdref_299, label__preheader_270);
+ int32_shift_0_i->addIncoming(const_int32_47, label__preheader_preheader_268);
  
- Argument* fwdref_245 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i", label__preheader_215);
- int32_result_0_i->addIncoming(fwdref_245, label__preheader_215);
- int32_result_0_i->addIncoming(const_int32_56, label__preheader_preheader_213);
+ Argument* fwdref_300 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i", label__preheader_270);
+ int32_result_0_i->addIncoming(fwdref_300, label__preheader_270);
+ int32_result_0_i->addIncoming(const_int32_47, label__preheader_preheader_268);
  
- Argument* fwdref_247 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i_246 = PHINode::Create(PointerTy_7, 2, "p.0.i", label__preheader_215);
- ptr_p_0_i_246->addIncoming(fwdref_247, label__preheader_215);
- ptr_p_0_i_246->addIncoming(ptr_232, label__preheader_preheader_213);
+ Argument* fwdref_302 = new Argument(PointerTy_6);
+ PHINode* ptr_p_0_i_301 = PHINode::Create(PointerTy_6, 2, "p.0.i", label__preheader_270);
+ ptr_p_0_i_301->addIncoming(fwdref_302, label__preheader_270);
+ ptr_p_0_i_301->addIncoming(ptr_287, label__preheader_preheader_268);
  
- GetElementPtrInst* ptr_248 = GetElementPtrInst::Create(ptr_p_0_i_246, const_int32_57, "", label__preheader_215);
- LoadInst* int8_249 = new LoadInst(ptr_p_0_i_246, "", false, label__preheader_215);
- int8_249->setAlignment(1);
- CastInst* int32_250 = new ZExtInst(int8_249, IntegerType::get(mod->getContext(), 32), "", label__preheader_215);
- BinaryOperator* int32_251 = BinaryOperator::Create(Instruction::And, int32_250, const_int32_59, "", label__preheader_215);
- BinaryOperator* int32_252 = BinaryOperator::Create(Instruction::Shl, int32_251, int32_shift_0_i, "", label__preheader_215);
- BinaryOperator* int32_253 = BinaryOperator::Create(Instruction::Or, int32_252, int32_result_0_i, "", label__preheader_215);
- BinaryOperator* int32_254 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i, const_int32_60, "", label__preheader_215);
- BinaryOperator* int32_255 = BinaryOperator::Create(Instruction::And, int32_250, const_int32_61, "", label__preheader_215);
- ICmpInst* int1_256 = new ICmpInst(*label__preheader_215, ICmpInst::ICMP_EQ, int32_255, const_int32_56, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_loopexit, label__preheader_215, int1_256, label__preheader_215);
+ GetElementPtrInst* ptr_303 = GetElementPtrInst::Create(ptr_p_0_i_301, const_int32_48, "", label__preheader_270);
+ LoadInst* int8_304 = new LoadInst(ptr_p_0_i_301, "", false, label__preheader_270);
+ int8_304->setAlignment(1);
+ CastInst* int32_305 = new ZExtInst(int8_304, IntegerType::get(mod->getContext(), 32), "", label__preheader_270);
+ BinaryOperator* int32_306 = BinaryOperator::Create(Instruction::And, int32_305, const_int32_59, "", label__preheader_270);
+ BinaryOperator* int32_307 = BinaryOperator::Create(Instruction::Shl, int32_306, int32_shift_0_i, "", label__preheader_270);
+ BinaryOperator* int32_308 = BinaryOperator::Create(Instruction::Or, int32_307, int32_result_0_i, "", label__preheader_270);
+ BinaryOperator* int32_309 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i, const_int32_60, "", label__preheader_270);
+ BinaryOperator* int32_310 = BinaryOperator::Create(Instruction::And, int32_305, const_int32_61, "", label__preheader_270);
+ ICmpInst* int1_311 = new ICmpInst(*label__preheader_270, ICmpInst::ICMP_EQ, int32_310, const_int32_47, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_loopexit, label__preheader_270, int1_311, label__preheader_270);
  
  // Block .preheader4 (label__preheader4)
- Argument* fwdref_258 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_313 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_shift_0_i1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i1", label__preheader4);
- int32_shift_0_i1->addIncoming(fwdref_258, label__preheader4);
- int32_shift_0_i1->addIncoming(const_int32_56, label__preheader4_preheader);
+ int32_shift_0_i1->addIncoming(fwdref_313, label__preheader4);
+ int32_shift_0_i1->addIncoming(const_int32_47, label__preheader4_preheader);
  
- Argument* fwdref_259 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_314 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_result_0_i2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i2", label__preheader4);
- int32_result_0_i2->addIncoming(fwdref_259, label__preheader4);
- int32_result_0_i2->addIncoming(const_int32_56, label__preheader4_preheader);
+ int32_result_0_i2->addIncoming(fwdref_314, label__preheader4);
+ int32_result_0_i2->addIncoming(const_int32_47, label__preheader4_preheader);
  
- Argument* fwdref_260 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i3 = PHINode::Create(PointerTy_7, 2, "p.0.i3", label__preheader4);
- ptr_p_0_i3->addIncoming(fwdref_260, label__preheader4);
- ptr_p_0_i3->addIncoming(ptr_232, label__preheader4_preheader);
+ Argument* fwdref_315 = new Argument(PointerTy_6);
+ PHINode* ptr_p_0_i3 = PHINode::Create(PointerTy_6, 2, "p.0.i3", label__preheader4);
+ ptr_p_0_i3->addIncoming(fwdref_315, label__preheader4);
+ ptr_p_0_i3->addIncoming(ptr_287, label__preheader4_preheader);
  
- GetElementPtrInst* ptr_261 = GetElementPtrInst::Create(ptr_p_0_i3, const_int32_57, "", label__preheader4);
- LoadInst* int8_262 = new LoadInst(ptr_p_0_i3, "", false, label__preheader4);
- int8_262->setAlignment(1);
- CastInst* int32_263 = new ZExtInst(int8_262, IntegerType::get(mod->getContext(), 32), "", label__preheader4);
- BinaryOperator* int32_264 = BinaryOperator::Create(Instruction::And, int32_263, const_int32_59, "", label__preheader4);
- BinaryOperator* int32_265 = BinaryOperator::Create(Instruction::Shl, int32_264, int32_shift_0_i1, "", label__preheader4);
- BinaryOperator* int32_266 = BinaryOperator::Create(Instruction::Or, int32_265, int32_result_0_i2, "", label__preheader4);
- BinaryOperator* int32_267 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1, const_int32_60, "", label__preheader4);
- BinaryOperator* int32_268 = BinaryOperator::Create(Instruction::And, int32_263, const_int32_61, "", label__preheader4);
- ICmpInst* int1_269 = new ICmpInst(*label__preheader4, ICmpInst::ICMP_EQ, int32_268, const_int32_56, "");
- BranchInst::Create(label_216, label__preheader4, int1_269, label__preheader4);
+ GetElementPtrInst* ptr_316 = GetElementPtrInst::Create(ptr_p_0_i3, const_int32_48, "", label__preheader4);
+ LoadInst* int8_317 = new LoadInst(ptr_p_0_i3, "", false, label__preheader4);
+ int8_317->setAlignment(1);
+ CastInst* int32_318 = new ZExtInst(int8_317, IntegerType::get(mod->getContext(), 32), "", label__preheader4);
+ BinaryOperator* int32_319 = BinaryOperator::Create(Instruction::And, int32_318, const_int32_59, "", label__preheader4);
+ BinaryOperator* int32_320 = BinaryOperator::Create(Instruction::Shl, int32_319, int32_shift_0_i1, "", label__preheader4);
+ BinaryOperator* int32_321 = BinaryOperator::Create(Instruction::Or, int32_320, int32_result_0_i2, "", label__preheader4);
+ BinaryOperator* int32_322 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1, const_int32_60, "", label__preheader4);
+ BinaryOperator* int32_323 = BinaryOperator::Create(Instruction::And, int32_318, const_int32_61, "", label__preheader4);
+ ICmpInst* int1_324 = new ICmpInst(*label__preheader4, ICmpInst::ICMP_EQ, int32_323, const_int32_47, "");
+ BranchInst::Create(label_271, label__preheader4, int1_324, label__preheader4);
  
- // Block  (label_216)
- PHINode* int32__lcssa24 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa24", label_216);
- int32__lcssa24->addIncoming(int32_267, label__preheader4);
+ // Block  (label_271)
+ PHINode* int32__lcssa24 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa24", label_271);
+ int32__lcssa24->addIncoming(int32_322, label__preheader4);
  
- PHINode* int32__lcssa23 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa23", label_216);
- int32__lcssa23->addIncoming(int32_266, label__preheader4);
+ PHINode* int32__lcssa23 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa23", label_271);
+ int32__lcssa23->addIncoming(int32_321, label__preheader4);
  
- PHINode* int32__lcssa22 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa22", label_216);
- int32__lcssa22->addIncoming(int32_263, label__preheader4);
+ PHINode* int32__lcssa22 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa22", label_271);
+ int32__lcssa22->addIncoming(int32_318, label__preheader4);
  
- PHINode* ptr__lcssa21 = PHINode::Create(PointerTy_7, 1, ".lcssa21", label_216);
- ptr__lcssa21->addIncoming(ptr_261, label__preheader4);
+ PHINode* ptr__lcssa21 = PHINode::Create(PointerTy_6, 1, ".lcssa21", label_271);
+ ptr__lcssa21->addIncoming(ptr_316, label__preheader4);
  
- BinaryOperator* int32_271 = BinaryOperator::Create(Instruction::And, int32__lcssa22, const_int32_68, "", label_216);
- ICmpInst* int1_272 = new ICmpInst(*label_216, ICmpInst::ICMP_NE, int32_271, const_int32_56, "");
- ICmpInst* int1_273 = new ICmpInst(*label_216, ICmpInst::ICMP_ULT, int32__lcssa24, const_int32_69, "");
- BinaryOperator* int1_or_cond_i = BinaryOperator::Create(Instruction::And, int1_272, int1_273, "or.cond.i", label_216);
- BranchInst::Create(label_217, label___readULEB128__YAIPAPBE_Z_exit_225, int1_or_cond_i, label_216);
+ BinaryOperator* int32_326 = BinaryOperator::Create(Instruction::And, int32__lcssa22, const_int32_72, "", label_271);
+ ICmpInst* int1_327 = new ICmpInst(*label_271, ICmpInst::ICMP_NE, int32_326, const_int32_47, "");
+ ICmpInst* int1_328 = new ICmpInst(*label_271, ICmpInst::ICMP_ULT, int32__lcssa24, const_int32_64, "");
+ BinaryOperator* int1_or_cond_i = BinaryOperator::Create(Instruction::And, int1_327, int1_328, "or.cond.i", label_271);
+ BranchInst::Create(label_272, label___readULEB128__YAIPAPBE_Z_exit_280, int1_or_cond_i, label_271);
  
- // Block  (label_217)
- BinaryOperator* int32_275 = BinaryOperator::Create(Instruction::Shl, const_int32_58, int32__lcssa24, "", label_217);
- BinaryOperator* int32_276 = BinaryOperator::Create(Instruction::Or, int32__lcssa23, int32_275, "", label_217);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_217);
+ // Block  (label_272)
+ BinaryOperator* int32_330 = BinaryOperator::Create(Instruction::Shl, const_int32_58, int32__lcssa24, "", label_272);
+ BinaryOperator* int32_331 = BinaryOperator::Create(Instruction::Or, int32__lcssa23, int32_330, "", label_272);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_272);
  
- // Block  (label_218)
- CastInst* ptr_278 = new BitCastInst(ptr_232, PointerTy_27, "", label_218);
- LoadInst* int16_279 = new LoadInst(ptr_278, "", false, label_218);
- int16_279->setAlignment(2);
- CastInst* int32_280 = new ZExtInst(int16_279, IntegerType::get(mod->getContext(), 32), "", label_218);
- GetElementPtrInst* ptr_281 = GetElementPtrInst::Create(ptr_232, const_int32_47, "", label_218);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_218);
+ // Block  (label_273)
+ CastInst* ptr_333 = new BitCastInst(ptr_287, PointerTy_41, "", label_273);
+ LoadInst* int16_334 = new LoadInst(ptr_333, "", false, label_273);
+ int16_334->setAlignment(2);
+ CastInst* int32_335 = new ZExtInst(int16_334, IntegerType::get(mod->getContext(), 32), "", label_273);
+ GetElementPtrInst* ptr_336 = GetElementPtrInst::Create(ptr_287, const_int32_45, "", label_273);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_273);
  
- // Block  (label_219)
- CastInst* ptr_283 = new BitCastInst(ptr_232, PointerTy_13, "", label_219);
- LoadInst* int32_284 = new LoadInst(ptr_283, "", false, label_219);
- int32_284->setAlignment(4);
- GetElementPtrInst* ptr_285 = GetElementPtrInst::Create(ptr_232, const_int32_46, "", label_219);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_219);
+ // Block  (label_274)
+ CastInst* ptr_338 = new BitCastInst(ptr_287, PointerTy_8, "", label_274);
+ LoadInst* int32_339 = new LoadInst(ptr_338, "", false, label_274);
+ int32_339->setAlignment(4);
+ GetElementPtrInst* ptr_340 = GetElementPtrInst::Create(ptr_287, const_int32_44, "", label_274);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_274);
  
- // Block  (label_220)
- CastInst* ptr_287 = new BitCastInst(ptr_232, PointerTy_28, "", label_220);
- LoadInst* int64_288 = new LoadInst(ptr_287, "", false, label_220);
- int64_288->setAlignment(8);
- CastInst* int32_289 = new TruncInst(int64_288, IntegerType::get(mod->getContext(), 32), "", label_220);
- GetElementPtrInst* ptr_290 = GetElementPtrInst::Create(ptr_232, const_int32_48, "", label_220);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_220);
+ // Block  (label_275)
+ CastInst* ptr_342 = new BitCastInst(ptr_287, PointerTy_42, "", label_275);
+ LoadInst* int64_343 = new LoadInst(ptr_342, "", false, label_275);
+ int64_343->setAlignment(8);
+ CastInst* int32_344 = new TruncInst(int64_343, IntegerType::get(mod->getContext(), 32), "", label_275);
+ GetElementPtrInst* ptr_345 = GetElementPtrInst::Create(ptr_287, const_int32_46, "", label_275);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_275);
  
- // Block  (label_221)
- CastInst* ptr_292 = new BitCastInst(ptr_232, PointerTy_27, "", label_221);
- LoadInst* int16_293 = new LoadInst(ptr_292, "", false, label_221);
- int16_293->setAlignment(2);
- CastInst* int32_294 = new SExtInst(int16_293, IntegerType::get(mod->getContext(), 32), "", label_221);
- GetElementPtrInst* ptr_295 = GetElementPtrInst::Create(ptr_232, const_int32_47, "", label_221);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_221);
+ // Block  (label_276)
+ CastInst* ptr_347 = new BitCastInst(ptr_287, PointerTy_41, "", label_276);
+ LoadInst* int16_348 = new LoadInst(ptr_347, "", false, label_276);
+ int16_348->setAlignment(2);
+ CastInst* int32_349 = new SExtInst(int16_348, IntegerType::get(mod->getContext(), 32), "", label_276);
+ GetElementPtrInst* ptr_350 = GetElementPtrInst::Create(ptr_287, const_int32_45, "", label_276);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_276);
  
- // Block  (label_222)
- CastInst* ptr_297 = new BitCastInst(ptr_232, PointerTy_13, "", label_222);
- LoadInst* int32_298 = new LoadInst(ptr_297, "", false, label_222);
- int32_298->setAlignment(4);
- GetElementPtrInst* ptr_299 = GetElementPtrInst::Create(ptr_232, const_int32_46, "", label_222);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_222);
+ // Block  (label_277)
+ CastInst* ptr_352 = new BitCastInst(ptr_287, PointerTy_8, "", label_277);
+ LoadInst* int32_353 = new LoadInst(ptr_352, "", false, label_277);
+ int32_353->setAlignment(4);
+ GetElementPtrInst* ptr_354 = GetElementPtrInst::Create(ptr_287, const_int32_44, "", label_277);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_277);
  
- // Block  (label_223)
- CastInst* ptr_301 = new BitCastInst(ptr_232, PointerTy_28, "", label_223);
- LoadInst* int64_302 = new LoadInst(ptr_301, "", false, label_223);
- int64_302->setAlignment(8);
- CastInst* int32_303 = new TruncInst(int64_302, IntegerType::get(mod->getContext(), 32), "", label_223);
- GetElementPtrInst* ptr_304 = GetElementPtrInst::Create(ptr_232, const_int32_48, "", label_223);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label_223);
+ // Block  (label_278)
+ CastInst* ptr_356 = new BitCastInst(ptr_287, PointerTy_42, "", label_278);
+ LoadInst* int64_357 = new LoadInst(ptr_356, "", false, label_278);
+ int64_357->setAlignment(8);
+ CastInst* int32_358 = new TruncInst(int64_357, IntegerType::get(mod->getContext(), 32), "", label_278);
+ GetElementPtrInst* ptr_359 = GetElementPtrInst::Create(ptr_287, const_int32_46, "", label_278);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label_278);
  
- // Block  (label_224)
- CallInst* void_306 = CallInst::Create(func_abort, "", label_224);
- void_306->setCallingConv(CallingConv::C);
- void_306->setTailCall(true);
- AttributeSet void_306_PAL;
+ // Block  (label_279)
+ CallInst* void_361 = CallInst::Create(func_abort, "", label_279);
+ void_361->setCallingConv(CallingConv::C);
+ void_361->setTailCall(true);
+ AttributeSet void_361_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1508,63 +1705,63 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  void_306_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_361_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_306->setAttributes(void_306_PAL);
+ void_361->setAttributes(void_361_PAL);
  
- new UnreachableInst(mod->getContext(), label_224);
+ new UnreachableInst(mod->getContext(), label_279);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit.loopexit (label___readULEB128__YAIPAPBE_Z_exit_loopexit)
  PHINode* int32__lcssa20 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa20", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
- int32__lcssa20->addIncoming(int32_253, label__preheader_215);
+ int32__lcssa20->addIncoming(int32_308, label__preheader_270);
  
- PHINode* ptr__lcssa_308 = PHINode::Create(PointerTy_7, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
- ptr__lcssa_308->addIncoming(ptr_248, label__preheader_215);
+ PHINode* ptr__lcssa_363 = PHINode::Create(PointerTy_6, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ ptr__lcssa_363->addIncoming(ptr_303, label__preheader_270);
  
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_225, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_280, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit_225)
- PHINode* ptr_310 = PHINode::Create(PointerTy_7, 10, "", label___readULEB128__YAIPAPBE_Z_exit_225);
- ptr_310->addIncoming(ptr_304, label_223);
- ptr_310->addIncoming(ptr_299, label_222);
- ptr_310->addIncoming(ptr_295, label_221);
- ptr_310->addIncoming(ptr_290, label_220);
- ptr_310->addIncoming(ptr_285, label_219);
- ptr_310->addIncoming(ptr_281, label_218);
- ptr_310->addIncoming(ptr_242, label_214);
- ptr_310->addIncoming(ptr__lcssa21, label_216);
- ptr_310->addIncoming(ptr__lcssa21, label_217);
- ptr_310->addIncoming(ptr__lcssa_308, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit_280)
+ PHINode* ptr_365 = PHINode::Create(PointerTy_6, 10, "", label___readULEB128__YAIPAPBE_Z_exit_280);
+ ptr_365->addIncoming(ptr_359, label_278);
+ ptr_365->addIncoming(ptr_354, label_277);
+ ptr_365->addIncoming(ptr_350, label_276);
+ ptr_365->addIncoming(ptr_345, label_275);
+ ptr_365->addIncoming(ptr_340, label_274);
+ ptr_365->addIncoming(ptr_336, label_273);
+ ptr_365->addIncoming(ptr_297, label_269);
+ ptr_365->addIncoming(ptr__lcssa21, label_271);
+ ptr_365->addIncoming(ptr__lcssa21, label_272);
+ ptr_365->addIncoming(ptr__lcssa_363, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- PHINode* int32_result_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 10, "result.0", label___readULEB128__YAIPAPBE_Z_exit_225);
- int32_result_0->addIncoming(int32_303, label_223);
- int32_result_0->addIncoming(int32_298, label_222);
- int32_result_0->addIncoming(int32_294, label_221);
- int32_result_0->addIncoming(int32_289, label_220);
- int32_result_0->addIncoming(int32_284, label_219);
- int32_result_0->addIncoming(int32_280, label_218);
- int32_result_0->addIncoming(int32_241, label_214);
- int32_result_0->addIncoming(int32__lcssa23, label_216);
- int32_result_0->addIncoming(int32_276, label_217);
+ PHINode* int32_result_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 10, "result.0", label___readULEB128__YAIPAPBE_Z_exit_280);
+ int32_result_0->addIncoming(int32_358, label_278);
+ int32_result_0->addIncoming(int32_353, label_277);
+ int32_result_0->addIncoming(int32_349, label_276);
+ int32_result_0->addIncoming(int32_344, label_275);
+ int32_result_0->addIncoming(int32_339, label_274);
+ int32_result_0->addIncoming(int32_335, label_273);
+ int32_result_0->addIncoming(int32_296, label_269);
+ int32_result_0->addIncoming(int32__lcssa23, label_271);
+ int32_result_0->addIncoming(int32_331, label_272);
  int32_result_0->addIncoming(int32__lcssa20, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- BinaryOperator* int32_311 = BinaryOperator::Create(Instruction::And, int32_233, const_int32_70, "", label___readULEB128__YAIPAPBE_Z_exit_225);
- SwitchInst* void_312 = SwitchInst::Create(int32_311, label_227, 2, label___readULEB128__YAIPAPBE_Z_exit_225);
- void_312->addCase(const_int32_56, label_228);
- void_312->addCase(const_int32_71, label_226);
+ BinaryOperator* int32_366 = BinaryOperator::Create(Instruction::And, int32_288, const_int32_73, "", label___readULEB128__YAIPAPBE_Z_exit_280);
+ SwitchInst* void_367 = SwitchInst::Create(int32_366, label_282, 2, label___readULEB128__YAIPAPBE_Z_exit_280);
+ void_367->addCase(const_int32_47, label_283);
+ void_367->addCase(const_int32_74, label_281);
  
  
- // Block  (label_226)
- CastInst* int32_313 = new PtrToIntInst(ptr_232, IntegerType::get(mod->getContext(), 32), "", label_226);
- BinaryOperator* int32_314 = BinaryOperator::Create(Instruction::Add, int32_313, int32_result_0, "", label_226);
- BranchInst::Create(label_228, label_226);
+ // Block  (label_281)
+ CastInst* int32_368 = new PtrToIntInst(ptr_287, IntegerType::get(mod->getContext(), 32), "", label_281);
+ BinaryOperator* int32_369 = BinaryOperator::Create(Instruction::Add, int32_368, int32_result_0, "", label_281);
+ BranchInst::Create(label_283, label_281);
  
- // Block  (label_227)
- CallInst* void_316 = CallInst::Create(func_abort, "", label_227);
- void_316->setCallingConv(CallingConv::C);
- void_316->setTailCall(true);
- AttributeSet void_316_PAL;
+ // Block  (label_282)
+ CallInst* void_371 = CallInst::Create(func_abort, "", label_282);
+ void_371->setCallingConv(CallingConv::C);
+ void_371->setTailCall(true);
+ AttributeSet void_371_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1575,252 +1772,51 @@ gvar_array_switch_table->setInitializer(const_array_45);
    }
   
   Attrs.push_back(PAS);
-  void_316_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_371_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_316->setAttributes(void_316_PAL);
+ void_371->setAttributes(void_371_PAL);
  
- new UnreachableInst(mod->getContext(), label_227);
+ new UnreachableInst(mod->getContext(), label_282);
  
- // Block  (label_228)
- PHINode* int32_result_1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1", label_228);
- int32_result_1->addIncoming(int32_314, label_226);
- int32_result_1->addIncoming(int32_result_0, label___readULEB128__YAIPAPBE_Z_exit_225);
+ // Block  (label_283)
+ PHINode* int32_result_1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1", label_283);
+ int32_result_1->addIncoming(int32_369, label_281);
+ int32_result_1->addIncoming(int32_result_0, label___readULEB128__YAIPAPBE_Z_exit_280);
  
- BinaryOperator* int32_318 = BinaryOperator::Create(Instruction::And, int32_233, const_int32_61, "", label_228);
- ICmpInst* int1_319 = new ICmpInst(*label_228, ICmpInst::ICMP_EQ, int32_318, const_int32_56, "");
- BranchInst::Create(label_230, label_229, int1_319, label_228);
+ BinaryOperator* int32_373 = BinaryOperator::Create(Instruction::And, int32_288, const_int32_61, "", label_283);
+ ICmpInst* int1_374 = new ICmpInst(*label_283, ICmpInst::ICMP_EQ, int32_373, const_int32_47, "");
+ BranchInst::Create(label_285, label_284, int1_374, label_283);
  
- // Block  (label_229)
- CastInst* ptr_321 = new IntToPtrInst(int32_result_1, PointerTy_13, "", label_229);
- LoadInst* int32_322 = new LoadInst(ptr_321, "", false, label_229);
- int32_322->setAlignment(4);
- BranchInst::Create(label_230, label_229);
+ // Block  (label_284)
+ CastInst* ptr_376 = new IntToPtrInst(int32_result_1, PointerTy_8, "", label_284);
+ LoadInst* int32_377 = new LoadInst(ptr_376, "", false, label_284);
+ int32_377->setAlignment(4);
+ BranchInst::Create(label_285, label_284);
  
- // Block  (label_230)
- PHINode* int32_result_2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.2", label_230);
- int32_result_2->addIncoming(int32_322, label_229);
- int32_result_2->addIncoming(int32_result_1, label_228);
+ // Block  (label_285)
+ PHINode* int32_result_2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.2", label_285);
+ int32_result_2->addIncoming(int32_377, label_284);
+ int32_result_2->addIncoming(int32_result_1, label_283);
  
- StoreInst* void_324 = new StoreInst(ptr_310, ptr_data, false, label_230);
- void_324->setAlignment(4);
- BranchInst::Create(label_231, label_230);
+ StoreInst* void_379 = new StoreInst(ptr_365, ptr_data, false, label_285);
+ void_379->setAlignment(4);
+ BranchInst::Create(label_286, label_285);
  
- // Block  (label_231)
- PHINode* int32__0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, ".0", label_231);
- int32__0->addIncoming(int32_result_2, label_230);
- int32__0->addIncoming(const_int32_56, label_211);
+ // Block  (label_286)
+ PHINode* int32__0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, ".0", label_286);
+ int32__0->addIncoming(int32_result_2, label_285);
+ int32__0->addIncoming(const_int32_47, label_266);
  
- ReturnInst::Create(mod->getContext(), int32__0, label_231);
- 
- // Resolve Forward References
- fwdref_245->replaceAllUsesWith(int32_253); delete fwdref_245;
- fwdref_247->replaceAllUsesWith(ptr_248); delete fwdref_247;
- fwdref_244->replaceAllUsesWith(int32_254); delete fwdref_244;
- fwdref_260->replaceAllUsesWith(ptr_261); delete fwdref_260;
- fwdref_258->replaceAllUsesWith(int32_267); delete fwdref_258;
- fwdref_259->replaceAllUsesWith(int32_266); delete fwdref_259;
- 
-}
-
-// Function: throwException (func_throwException)
-{
- 
- BasicBlock* label_327 = BasicBlock::Create(mod->getContext(), "",func_throwException,0);
- 
- // Block  (label_327)
- CallInst* ptr_328 = CallInst::Create(func_malloc, const_int32_69, "", label_327);
- ptr_328->setCallingConv(CallingConv::C);
- ptr_328->setTailCall(true);
- AttributeSet ptr_328_PAL;
- ptr_328->setAttributes(ptr_328_PAL);
- 
- CastInst* ptr_329 = new BitCastInst(ptr_328, PointerTy_3, "", label_327);
- GetElementPtrInst* ptr_330 = GetElementPtrInst::Create(ptr_328, const_int32_48, "", label_327);
- CastInst* ptr_331 = new BitCastInst(ptr_330, PointerTy_31, "", label_327);
- std::vector<Value*> void_332_params;
- void_332_params.push_back(ptr_328);
- void_332_params.push_back(const_int8_72);
- void_332_params.push_back(const_int64_73);
- void_332_params.push_back(const_int32_48);
- void_332_params.push_back(const_int1_74);
- CallInst* void_332 = CallInst::Create(func_llvm_memset_p0i8_i64, void_332_params, "", label_327);
- void_332->setCallingConv(CallingConv::C);
- void_332->setTailCall(false);
- AttributeSet void_332_PAL;
- void_332->setAttributes(void_332_PAL);
- 
- StoreInst* void_333 = new StoreInst(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z, ptr_331, false, label_327);
- void_333->setAlignment(4);
- CallInst* int32_334 = CallInst::Create(func__Unwind_RaiseException, ptr_329, "", label_327);
- int32_334->setCallingConv(CallingConv::C);
- int32_334->setTailCall(true);
- AttributeSet int32_334_PAL;
- int32_334->setAttributes(int32_334_PAL);
- 
- new UnreachableInst(mod->getContext(), label_327);
- 
-}
-
-// Function: isInstInterface (func_isInstInterface)
-{
- Function::arg_iterator args = func_isInstInterface->arg_begin();
- Value* ptr_runtimeTypeInfo = args++;
- ptr_runtimeTypeInfo->setName("runtimeTypeInfo");
- Value* ptr_expectedInterface = args++;
- ptr_expectedInterface->setName("expectedInterface");
- 
- BasicBlock* label_336 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
- BasicBlock* label__lr_ph_337 = BasicBlock::Create(mod->getContext(), ".lr.ph",func_isInstInterface,0);
- BasicBlock* label_338 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
- BasicBlock* label_339 = BasicBlock::Create(mod->getContext(), "",func_isInstInterface,0);
- BasicBlock* label___crit_edge_loopexit = BasicBlock::Create(mod->getContext(), "._crit_edge.loopexit",func_isInstInterface,0);
- BasicBlock* label___crit_edge = BasicBlock::Create(mod->getContext(), "._crit_edge",func_isInstInterface,0);
- 
- // Block  (label_336)
- std::vector<Value*> ptr_340_indices;
- ptr_340_indices.push_back(const_int32_56);
- ptr_340_indices.push_back(const_int32_47);
- Instruction* ptr_340 = GetElementPtrInst::Create(ptr_runtimeTypeInfo, ptr_340_indices, "", label_336);
- LoadInst* int32_341 = new LoadInst(ptr_340, "", false, label_336);
- int32_341->setAlignment(4);
- ICmpInst* int1_342 = new ICmpInst(*label_336, ICmpInst::ICMP_EQ, int32_341, const_int32_56, "");
- BranchInst::Create(label___crit_edge, label__lr_ph_337, int1_342, label_336);
- 
- // Block .lr.ph (label__lr_ph_337)
- std::vector<Value*> ptr_344_indices;
- ptr_344_indices.push_back(const_int32_56);
- ptr_344_indices.push_back(const_int32_46);
- Instruction* ptr_344 = GetElementPtrInst::Create(ptr_runtimeTypeInfo, ptr_344_indices, "", label__lr_ph_337);
- LoadInst* ptr_345 = new LoadInst(ptr_344, "", false, label__lr_ph_337);
- ptr_345->setAlignment(4);
- BranchInst::Create(label_338, label__lr_ph_337);
- 
- // Block  (label_338)
- Argument* fwdref_347 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_i_02 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "i.02", label_338);
- int32_i_02->addIncoming(const_int32_56, label__lr_ph_337);
- int32_i_02->addIncoming(fwdref_347, label_339);
- 
- Argument* fwdref_348 = new Argument(PointerTy_39);
- PHINode* ptr_currentInterface_01 = PHINode::Create(PointerTy_39, 2, "currentInterface.01", label_338);
- ptr_currentInterface_01->addIncoming(ptr_345, label__lr_ph_337);
- ptr_currentInterface_01->addIncoming(fwdref_348, label_339);
- 
- LoadInst* ptr_349 = new LoadInst(ptr_currentInterface_01, "", false, label_338);
- ptr_349->setAlignment(4);
- ICmpInst* int1_350 = new ICmpInst(*label_338, ICmpInst::ICMP_EQ, ptr_349, ptr_expectedInterface, "");
- BranchInst::Create(label___crit_edge_loopexit, label_339, int1_350, label_338);
- 
- // Block  (label_339)
- GetElementPtrInst* ptr_352 = GetElementPtrInst::Create(ptr_currentInterface_01, const_int32_57, "", label_339);
- BinaryOperator* int32_353 = BinaryOperator::Create(Instruction::Add, int32_i_02, const_int32_57, "", label_339);
- ICmpInst* int1_354 = new ICmpInst(*label_339, ICmpInst::ICMP_ULT, int32_353, int32_341, "");
- BranchInst::Create(label_338, label___crit_edge_loopexit, int1_354, label_339);
- 
- // Block ._crit_edge.loopexit (label___crit_edge_loopexit)
- PHINode* int1__0_ph = PHINode::Create(IntegerType::get(mod->getContext(), 1), 2, ".0.ph", label___crit_edge_loopexit);
- int1__0_ph->addIncoming(const_int1_74, label_339);
- int1__0_ph->addIncoming(const_int1_75, label_338);
- 
- BranchInst::Create(label___crit_edge, label___crit_edge_loopexit);
- 
- // Block ._crit_edge (label___crit_edge)
- PHINode* int1__0 = PHINode::Create(IntegerType::get(mod->getContext(), 1), 2, ".0", label___crit_edge);
- int1__0->addIncoming(const_int1_74, label_336);
- int1__0->addIncoming(int1__0_ph, label___crit_edge_loopexit);
- 
- ReturnInst::Create(mod->getContext(), int1__0, label___crit_edge);
+ ReturnInst::Create(mod->getContext(), int32__0, label_286);
  
  // Resolve Forward References
- fwdref_347->replaceAllUsesWith(int32_353); delete fwdref_347;
- fwdref_348->replaceAllUsesWith(ptr_352); delete fwdref_348;
- 
-}
-
-// Function: allocObject (func_allocObject)
-{
- Function::arg_iterator args = func_allocObject->arg_begin();
- Value* int32_size = args++;
- int32_size->setName("size");
- 
- BasicBlock* label_358 = BasicBlock::Create(mod->getContext(), "",func_allocObject,0);
- 
- // Block  (label_358)
- CallInst* ptr_359 = CallInst::Create(func_malloc, int32_size, "", label_358);
- ptr_359->setCallingConv(CallingConv::C);
- ptr_359->setTailCall(true);
- AttributeSet ptr_359_PAL;
- ptr_359->setAttributes(ptr_359_PAL);
- 
- ReturnInst::Create(mod->getContext(), ptr_359, label_358);
- 
-}
-
-// Function: resolveInterfaceCall (func_resolveInterfaceCall)
-{
- Function::arg_iterator args = func_resolveInterfaceCall->arg_begin();
- Value* int32_method = args++;
- int32_method->setName("method");
- Value* ptr_content = args++;
- ptr_content->setName("content");
- 
- BasicBlock* label_361 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
- BasicBlock* label_362 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
- BasicBlock* label_363 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
- BasicBlock* label_364 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
- BasicBlock* label_365 = BasicBlock::Create(mod->getContext(), "",func_resolveInterfaceCall,0);
- 
- // Block  (label_361)
- CastInst* int32_366 = new PtrToIntInst(ptr_content, IntegerType::get(mod->getContext(), 32), "", label_361);
- BinaryOperator* int32_367 = BinaryOperator::Create(Instruction::And, int32_366, const_int32_57, "", label_361);
- ICmpInst* int1_368 = new ICmpInst(*label_361, ICmpInst::ICMP_EQ, int32_367, const_int32_56, "");
- BranchInst::Create(label_365, label_362, int1_368, label_361);
- 
- // Block  (label_362)
- BinaryOperator* int32_370 = BinaryOperator::Create(Instruction::And, int32_366, const_int32_76, "", label_362);
- CastInst* ptr_371 = new IntToPtrInst(int32_370, PointerTy_44, "", label_362);
- BranchInst::Create(label_363, label_362);
- 
- // Block  (label_363)
- Argument* fwdref_373 = new Argument(PointerTy_44);
- PHINode* ptr_imtEntry_0 = PHINode::Create(PointerTy_44, 2, "imtEntry.0", label_363);
- ptr_imtEntry_0->addIncoming(ptr_371, label_362);
- ptr_imtEntry_0->addIncoming(fwdref_373, label_363);
- 
- std::vector<Value*> ptr_374_indices;
- ptr_374_indices.push_back(const_int32_56);
- ptr_374_indices.push_back(const_int32_56);
- Instruction* ptr_374 = GetElementPtrInst::Create(ptr_imtEntry_0, ptr_374_indices, "", label_363);
- LoadInst* int32_375 = new LoadInst(ptr_374, "", false, label_363);
- int32_375->setAlignment(4);
- ICmpInst* int1_376 = new ICmpInst(*label_363, ICmpInst::ICMP_NE, int32_375, const_int32_56, "");
- ICmpInst* int1_not__377 = new ICmpInst(*label_363, ICmpInst::ICMP_NE, int32_375, int32_method, "not.");
- BinaryOperator* int1__ = BinaryOperator::Create(Instruction::And, int1_376, int1_not__377, ".", label_363);
- GetElementPtrInst* ptr_378 = GetElementPtrInst::Create(ptr_imtEntry_0, const_int32_57, "", label_363);
- BranchInst::Create(label_363, label_364, int1__, label_363);
- 
- // Block  (label_364)
- PHINode* ptr_imtEntry_0_lcssa = PHINode::Create(PointerTy_44, 1, "imtEntry.0.lcssa", label_364);
- ptr_imtEntry_0_lcssa->addIncoming(ptr_imtEntry_0, label_363);
- 
- std::vector<Value*> ptr_380_indices;
- ptr_380_indices.push_back(const_int32_56);
- ptr_380_indices.push_back(const_int32_57);
- Instruction* ptr_380 = GetElementPtrInst::Create(ptr_imtEntry_0_lcssa, ptr_380_indices, "", label_364);
- LoadInst* ptr_381 = new LoadInst(ptr_380, "", false, label_364);
- ptr_381->setAlignment(4);
- BranchInst::Create(label_365, label_364);
- 
- // Block  (label_365)
- PHINode* ptr_result_0 = PHINode::Create(PointerTy_7, 2, "result.0", label_365);
- ptr_result_0->addIncoming(ptr_381, label_364);
- ptr_result_0->addIncoming(ptr_content, label_361);
- 
- ReturnInst::Create(mod->getContext(), ptr_result_0, label_365);
- 
- // Resolve Forward References
- fwdref_373->replaceAllUsesWith(ptr_378); delete fwdref_373;
+ fwdref_302->replaceAllUsesWith(ptr_303); delete fwdref_302;
+ fwdref_300->replaceAllUsesWith(int32_308); delete fwdref_300;
+ fwdref_315->replaceAllUsesWith(ptr_316); delete fwdref_315;
+ fwdref_314->replaceAllUsesWith(int32_321); delete fwdref_314;
+ fwdref_313->replaceAllUsesWith(int32_322); delete fwdref_313;
+ fwdref_299->replaceAllUsesWith(int32_309); delete fwdref_299;
  
 }
 

@@ -6,23 +6,6 @@
 
 #include "llvm/Support/Dwarf.h"
 
-typedef struct RuntimeTypeInfo
-{
-	RuntimeTypeInfo* base;
-	uint32_t superTypeCount;
-	uint32_t interfacesCount;
-	RuntimeTypeInfo** superTypes;
-	RuntimeTypeInfo** interfaceMap;
-	void* interfaceMethodTable[19];
-	void* virtualTable[0];
-} RuntimeTypeInfo;
-
-void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
-{
-	if (ex != NULL)
-		free(ex);
-}
-
 /// Read a uleb128 encoded value and advance pointer
 /// See Variable Length Data in:
 /// @link http://dwarfstd.org/Dwarf3.pdf @unlink
@@ -244,31 +227,16 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 		//}
 
 		if (landingPad == 0) {
-#ifdef DEBUG
-			fprintf(stderr,
-				"handleLsda(...): No landing pad found.\n");
-#endif
-
 			continue; // no landing pad for this entry
 		}
 
 		if (actionEntry) {
 			actionEntry += ((uintptr_t) actionTableStart) - 1;
 		}
-		else {
-#ifdef DEBUG
-			fprintf(stderr,
-				"handleLsda(...):No action table found.\n");
-#endif
-		}
 
 		bool exceptionMatched = false;
 
 		if ((start <= pcOffset) && (pcOffset < (start + length))) {
-#ifdef DEBUG
-			fprintf(stderr,
-				"handleLsda(...): Landing pad found.\n");
-#endif
 			int64_t actionValue = 0;
 
 			if (actionEntry) {
@@ -282,12 +250,6 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 			}
 
 			if (!(actions & _UA_SEARCH_PHASE)) {
-#ifdef DEBUG
-				fprintf(stderr,
-					"handleLsda(...): installed landing pad "
-					"context.\n");
-#endif
-
 				// Found landing pad for the PC.
 				// Set Instruction Pointer to so we re-enter function
 				// at landing pad. The landing pad is created by the
@@ -317,10 +279,6 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 				ret = _URC_INSTALL_CONTEXT;
 			}
 			else if (exceptionMatched) {
-#ifdef DEBUG
-				fprintf(stderr,
-					"handleLsda(...): setting handler found.\n");
-#endif
 				ret = _URC_HANDLER_FOUND;
 			}
 			else {
@@ -328,10 +286,6 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 				//       found. Otherwise the clean up handlers will be
 				//       re-found and executed during the clean up
 				//       phase.
-#ifdef DEBUG
-				fprintf(stderr,
-					"handleLsda(...): cleanup handler found.\n");
-#endif
 			}
 
 			break;
@@ -339,6 +293,12 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 	}
 
 	return(ret);
+}
+
+void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
+{
+	if (ex != NULL)
+		free(ex);
 }
 
 extern "C" void throwException()
@@ -349,52 +309,4 @@ extern "C" void throwException()
 	ex->exception_cleanup = cleanupException;
 	_Unwind_RaiseException(ex);
 	__builtin_unreachable();
-}
-
-extern "C" bool isInstInterface(const RuntimeTypeInfo* runtimeTypeInfo, const RuntimeTypeInfo* expectedInterface)
-{
-	auto currentInterface = runtimeTypeInfo->interfaceMap;
-	for (int i = 0; i < runtimeTypeInfo->interfacesCount; ++i)
-	{
-		if (*currentInterface == expectedInterface)
-			return true;
-		currentInterface++;
-	}
-
-	return false;
-}
-
-extern "C" void* allocObject(uint32_t size)
-{
-    return malloc(size);
-}
-
-typedef struct IMTEntry
-{
-	int32_t methodId;
-	void* methodPointer;
-} IMTEntry;
-
-extern "C" void* resolveInterfaceCall(uint32_t method, void* content)
-{
-	void* result;
-
-	if (((size_t)content & 1) == 0)
-	{
-		// Fast path: only one entry in this IMT slot
-		result = (void*)content;
-	}
-	else
-	{
-		// Normal path: multiple entry in this IMT slot, go through the list
-		IMTEntry* imtEntry = (IMTEntry*)((size_t)content & ~1);
-		while (imtEntry->methodId != method && imtEntry->methodId != 0) { imtEntry++; }
-
-		result = imtEntry->methodPointer;
-
-		// TODO: Slow path: dispatch to add new entry (should only happen with either variance or generics methods)
-		//assert(result != 0);
-	}
-
-	return result;
 }
