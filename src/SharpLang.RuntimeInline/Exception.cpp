@@ -6,6 +6,16 @@
 
 #include "llvm/Support/Dwarf.h"
 
+#include "RuntimeType.h"
+
+struct ExceptionType
+{
+	RuntimeTypeInfo* runtimeTypeInfo;
+	struct _Unwind_Exception unwindException;
+};
+
+int64_t exceptionBaseFromUnwindOffset = ((uintptr_t) (((ExceptionType*) (NULL)))) - ((uintptr_t) &(((ExceptionType*) (NULL))->unwindException));
+
 /// Read a uleb128 encoded value and advance pointer
 /// See Variable Length Data in:
 /// @link http://dwarfstd.org/Dwarf3.pdf @unlink
@@ -164,6 +174,54 @@ static uintptr_t readEncodedPointer(const uint8_t **data, uint8_t encoding) {
 	return result;
 }
 
+static bool handleActionValue(int64_t *resultAction,
+	uint8_t TTypeEncoding,
+	const uint8_t *classInfo,
+	uintptr_t actionEntry,
+	uint64_t exceptionClass,
+struct _Unwind_Exception *exceptionObject)
+{
+	const uint8_t *actionPos = (uint8_t*)actionEntry;
+
+	for (int i = 0; true; ++i)
+	{
+		// Each emitted dwarf action corresponds to a 2 tuple of
+		// type info address offset, and action offset to the next
+		// emitted action.
+		int64_t typeOffset = readSLEB128(&actionPos);
+		const uint8_t* tempActionPos = actionPos;
+		int64_t actionOffset = readSLEB128(&tempActionPos);
+
+		// Note: A typeOffset == 0 implies that a cleanup llvm.eh.selector
+		//       argument has been matched.
+		if (typeOffset > 0)
+		{
+			unsigned EncSize = getEncodingSize(TTypeEncoding);
+			const uint8_t *EntryP = classInfo - typeOffset * EncSize;
+			uintptr_t P = readEncodedPointer(&EntryP, TTypeEncoding);
+			
+			// Expected exception type
+			struct RuntimeTypeInfo* expectedExceptionType = reinterpret_cast<struct RuntimeTypeInfo*>(P);
+
+			// Actual exception
+			struct ExceptionType* exception = (struct ExceptionType*)((char*) exceptionObject + exceptionBaseFromUnwindOffset);
+			struct RuntimeTypeInfo* exceptionType = exception->runtimeTypeInfo;
+
+			// Check if they match (by testing each class in hierarchy)
+			while (exceptionType != NULL)
+			{
+				if (exceptionType == expectedExceptionType)
+					return true;
+
+				exceptionType = exceptionType->base;
+			}
+		}
+	}
+
+	// No match
+	return false;
+}
+
 extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action actions, uint64_t exceptionClass, struct _Unwind_Exception* exceptionObject, struct _Unwind_Context* context)
 {
 	const uint8_t *lsda = (const uint8_t*)_Unwind_GetLanguageSpecificData(context);
@@ -175,7 +233,7 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 	// emitted dwarf code)
 	uintptr_t funcStart = _Unwind_GetRegionStart(context);
 	uintptr_t pcOffset = pc - funcStart;
-	const uint8_t *ClassInfo = NULL;
+	const uint8_t *classInfo = NULL;
 
 	// Note: See JITDwarfEmitter::EmitExceptionTable(...) for corresponding
 	//       dwarf emission
@@ -195,7 +253,7 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 		// were flagged by type info arguments to llvm.eh.selector
 		// intrinsic
 		classInfoOffset = readULEB128(&lsda);
-		ClassInfo = lsda + classInfoOffset;
+		classInfo = lsda + classInfoOffset;
 	}
 
 	// Walk call-site table looking for range that
@@ -240,13 +298,12 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 			int64_t actionValue = 0;
 
 			if (actionEntry) {
-				exceptionMatched = true;
-				//exceptionMatched = handleActionValue(&actionValue,
-				//	ttypeEncoding,
-				//	ClassInfo,
-				//	actionEntry,
-				//	exceptionClass,
-				//	exceptionObject);
+				exceptionMatched = handleActionValue(&actionValue,
+					ttypeEncoding,
+					classInfo,
+					actionEntry,
+					exceptionClass,
+					exceptionObject);
 			}
 
 			if (!(actions & _UA_SEARCH_PHASE)) {
@@ -298,15 +355,19 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
 {
 	if (ex != NULL)
-		free(ex);
+	{
+		// TODO: Check exception class
+		free((char*) ex + exceptionBaseFromUnwindOffset);
+	}
 }
 
-extern "C" void throwException()
+extern "C" void throwException(Object* obj)
 {
-	struct _Unwind_Exception* ex = (struct _Unwind_Exception*)malloc(sizeof(struct _Unwind_Exception));
+	struct ExceptionType* ex = (struct ExceptionType*)malloc(sizeof(struct ExceptionType));
 	memset(ex, 0, sizeof(*ex));
-	ex->exception_class = 0; // TODO
-	ex->exception_cleanup = cleanupException;
-	_Unwind_RaiseException(ex);
+	ex->runtimeTypeInfo = obj->runtimeTypeInfo;
+	ex->unwindException.exception_class = 0; // TODO
+	ex->unwindException.exception_cleanup = cleanupException;
+	_Unwind_RaiseException(&ex->unwindException);
 	__builtin_unreachable();
 }

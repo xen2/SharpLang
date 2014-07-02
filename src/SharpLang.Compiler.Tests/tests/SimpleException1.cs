@@ -1,13 +1,21 @@
 public static class Program
 {
+    class Exception1 : System.Exception
+    {
+    }
+
+    class Exception2 : Exception1
+    {
+    }
+
     public static void TestException(bool shouldThrow)
     {
         try
         {
             if (shouldThrow)
-                throw new System.Exception("Test");
+                throw new Exception2();
         }
-        catch (System.Exception e)
+        catch (Exception1 e)
         {
             System.Console.WriteLine("Exception caught");
         }

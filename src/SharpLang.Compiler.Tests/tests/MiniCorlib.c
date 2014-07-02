@@ -31,7 +31,7 @@ void* System_Threading_Thread_System_Threading_Thread__get_CurrentThread__()
 }
 
 // System.Exception..ctor(string)
-void System_Void_System_Exception___ctor_System_String_(void* exception, String* str)
+void System_Void_System_Exception___ctor__(void* exception)
 {
 }
 
