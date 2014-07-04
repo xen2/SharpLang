@@ -19,4 +19,16 @@ typedef struct Object
 	RuntimeTypeInfo* runtimeTypeInfo;
 } Object;
 
+typedef struct Exception
+{
+	Object base;
+} Exception;
+
+typedef struct String
+{
+	Object base;
+	size_t length;
+	char* value;
+} String;
+
 #endif
