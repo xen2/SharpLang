@@ -262,14 +262,7 @@ namespace SharpLang.CompilerServices
             ValueRef callResult;
             var actualMethod = overrideMethod;
 
-            if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
-            {
-                callResult = GenerateInvoke(functionContext, actualMethod, args);
-            }
-            else
-            {
-                callResult = LLVM.BuildCall(builder, actualMethod, args, string.Empty);
-            }
+            callResult = GenerateInvoke(functionContext, actualMethod, args);
 
             // Mark method as needed (if non-virtual call)
             if (LLVM.IsAGlobalVariable(actualMethod).Value != IntPtr.Zero)
@@ -626,13 +619,29 @@ namespace SharpLang.CompilerServices
             return dataPointer;
         }
 
+        /// <summary>
+        /// Generates invoke if inside a try block, otherwise a call.
+        /// </summary>
+        /// <param name="functionContext">The function context.</param>
+        /// <param name="function">The function.</param>
+        /// <param name="args">The arguments.</param>
+        /// <returns></returns>
         private ValueRef GenerateInvoke(FunctionCompilerContext functionContext, ValueRef function, ValueRef[] args)
         {
             ValueRef callResult;
-            var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
-            callResult = LLVM.BuildInvoke(builder, function, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
-            LLVM.PositionBuilderAtEnd(builder, nextBlock);
-            functionContext.BasicBlock = nextBlock;
+
+            if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
+            {
+                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
+                callResult = LLVM.BuildInvoke(builder, function, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
+                LLVM.PositionBuilderAtEnd(builder, nextBlock);
+                functionContext.BasicBlock = nextBlock;
+            }
+            else
+            {
+                callResult = LLVM.BuildCall(builder, function, args, string.Empty);
+            }
+
             return callResult;
         }
     }
