@@ -204,18 +204,26 @@ struct _Unwind_Exception *exceptionObject)
 			struct RuntimeTypeInfo* expectedExceptionType = reinterpret_cast<struct RuntimeTypeInfo*>(P);
 
 			// Actual exception
-			struct ExceptionType* exception = (struct ExceptionType*)((char*) exceptionObject + exceptionBaseFromUnwindOffset);
+			struct ExceptionType* exception = (struct ExceptionType*)((char*)exceptionObject + exceptionBaseFromUnwindOffset);
 			struct RuntimeTypeInfo* exceptionType = exception->runtimeTypeInfo;
 
 			// Check if they match (by testing each class in hierarchy)
 			while (exceptionType != NULL)
 			{
 				if (exceptionType == expectedExceptionType)
+				{
+					*resultAction = typeOffset;
 					return true;
+				}
 
 				exceptionType = exceptionType->base;
 			}
 		}
+
+		if (!actionOffset)
+			break;
+
+		actionPos += actionOffset;
 	}
 
 	// No match

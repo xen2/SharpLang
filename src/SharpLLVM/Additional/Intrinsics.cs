@@ -1,7 +1,7 @@
 ﻿
 namespace SharpLLVM
 {
-	enum Intrinsics
+	public enum Intrinsics
 	{
 	    not_intrinsic = 0,   // Must be zero
         AMDGPU_div_fixup,                         // llvm.AMDGPU.div.fixup

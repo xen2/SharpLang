@@ -1128,55 +1128,61 @@ gvar_array_switch_table->setInitializer(const_array_48);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func_sharpPersonality,0);
  BasicBlock* label_150 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_151 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label___readULEB128__YAIPAPBE_Z_exit5 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit5",func_sharpPersonality,0);
+ BasicBlock* label___readULEB128__YAIPAPBE_Z_exit6 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit6",func_sharpPersonality,0);
  BasicBlock* label__lr_ph_152 = BasicBlock::Create(mod->getContext(), ".lr.ph",func_sharpPersonality,0);
  BasicBlock* label_153 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_154 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label___readULEB128__YAIPAPBE_Z_exit9 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit9",func_sharpPersonality,0);
+ BasicBlock* label___readULEB128__YAIPAPBE_Z_exit10 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit10",func_sharpPersonality,0);
  BasicBlock* label__backedge = BasicBlock::Create(mod->getContext(), ".backedge",func_sharpPersonality,0);
  BasicBlock* label_155 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_156 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_157 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__split_us_i_preheader = BasicBlock::Create(mod->getContext(), ".split.us.i.preheader",func_sharpPersonality,0);
  BasicBlock* label___split_crit_edge_i_preheader = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.preheader",func_sharpPersonality,0);
- BasicBlock* label___split_crit_edge_i_preheader41 = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.preheader41",func_sharpPersonality,0);
- BasicBlock* label___split_crit_edge_i_us_preheader = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.us.preheader",func_sharpPersonality,0);
- BasicBlock* label___split_crit_edge_i_us = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.us",func_sharpPersonality,0);
- BasicBlock* label_158 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label_159 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit_i_us = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit.i.us",func_sharpPersonality,0);
- BasicBlock* label_160 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit6_i_us = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit6.i.us",func_sharpPersonality,0);
- BasicBlock* label___split_crit_edge_i_us_backedge = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.us.backedge",func_sharpPersonality,0);
- BasicBlock* label__split_us_i_loopexit = BasicBlock::Create(mod->getContext(), ".split.us.i.loopexit",func_sharpPersonality,0);
  BasicBlock* label__split_us_i = BasicBlock::Create(mod->getContext(), ".split.us.i",func_sharpPersonality,0);
  BasicBlock* label__split_us_i_backedge = BasicBlock::Create(mod->getContext(), ".split.us.i.backedge",func_sharpPersonality,0);
+ BasicBlock* label_158 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_159 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit_us_i = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit.us.i",func_sharpPersonality,0);
+ BasicBlock* label_160 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_161 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_162 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
- BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit_us_i = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit.us.i",func_sharpPersonality,0);
- BasicBlock* label_163 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit6_us_i = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit6.us.i",func_sharpPersonality,0);
  BasicBlock* label___getEncodingSize__YAIE_Z_exit_us_i = BasicBlock::Create(mod->getContext(), "\x01?getEncodingSize@@YAIE@Z.exit.us.i",func_sharpPersonality,0);
  BasicBlock* label__lr_ph_us_i_preheader = BasicBlock::Create(mod->getContext(), ".lr.ph.us.i.preheader",func_sharpPersonality,0);
- BasicBlock* label_164 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_163 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__lr_ph_us_i = BasicBlock::Create(mod->getContext(), ".lr.ph.us.i",func_sharpPersonality,0);
- BasicBlock* label___split_crit_edge_i_loopexit = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.loopexit",func_sharpPersonality,0);
+ BasicBlock* label__loopexit_us_i_loopexit = BasicBlock::Create(mod->getContext(), ".loopexit.us.i.loopexit",func_sharpPersonality,0);
+ BasicBlock* label__loopexit_us_i = BasicBlock::Create(mod->getContext(), ".loopexit.us.i",func_sharpPersonality,0);
+ BasicBlock* label_164 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___split_crit_edge_i = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i",func_sharpPersonality,0);
  BasicBlock* label___split_crit_edge_i_backedge = BasicBlock::Create(mod->getContext(), "..split_crit_edge.i.backedge",func_sharpPersonality,0);
  BasicBlock* label_165 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label_166 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit_i = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit.i",func_sharpPersonality,0);
  BasicBlock* label_167 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_168 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_169 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___readSLEB128__YAIPAPBE_Z_exit6_i = BasicBlock::Create(mod->getContext(), "\x01?readSLEB128@@YAIPAPBE@Z.exit6.i",func_sharpPersonality,0);
+ BasicBlock* label_170 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__us_lcssa_i = BasicBlock::Create(mod->getContext(), ".us-lcssa.i",func_sharpPersonality,0);
  BasicBlock* label___getEncodingSize__YAIE_Z_exit_i = BasicBlock::Create(mod->getContext(), "\x01?getEncodingSize@@YAIE@Z.exit.i",func_sharpPersonality,0);
  BasicBlock* label__lr_ph_i_preheader = BasicBlock::Create(mod->getContext(), ".lr.ph.i.preheader",func_sharpPersonality,0);
- BasicBlock* label_168 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_171 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__lr_ph_i = BasicBlock::Create(mod->getContext(), ".lr.ph.i",func_sharpPersonality,0);
+ BasicBlock* label__loopexit_i_loopexit = BasicBlock::Create(mod->getContext(), ".loopexit.i.loopexit",func_sharpPersonality,0);
+ BasicBlock* label__loopexit_i = BasicBlock::Create(mod->getContext(), ".loopexit.i",func_sharpPersonality,0);
+ BasicBlock* label_172 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit",func_sharpPersonality,0);
- BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit40 = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit40",func_sharpPersonality,0);
+ BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72 = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit72",func_sharpPersonality,0);
+ BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73 = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit73",func_sharpPersonality,0);
+ BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74 = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit74",func_sharpPersonality,0);
  BasicBlock* label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit = BasicBlock::Create(mod->getContext(), "\x01?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit",func_sharpPersonality,0);
- BasicBlock* label_169 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_173 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_174 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_175 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_176 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
+ BasicBlock* label_177 = BasicBlock::Create(mod->getContext(), "",func_sharpPersonality,0);
  BasicBlock* label__loopexit_loopexit = BasicBlock::Create(mod->getContext(), ".loopexit.loopexit",func_sharpPersonality,0);
  BasicBlock* label__loopexit = BasicBlock::Create(mod->getContext(), ".loopexit",func_sharpPersonality,0);
  
@@ -1187,42 +1193,42 @@ gvar_array_switch_table->setInitializer(const_array_48);
  ptr_lsda->setAlignment(4);
  AllocaInst* ptr_callSitePtr = new AllocaInst(PointerTy_7, "callSitePtr", label_147);
  ptr_callSitePtr->setAlignment(4);
- CallInst* ptr_170 = CallInst::Create(func__Unwind_GetLanguageSpecificData, ptr_context, "", label_147);
- ptr_170->setCallingConv(CallingConv::C);
- ptr_170->setTailCall(true);
- AttributeSet ptr_170_PAL;
- ptr_170->setAttributes(ptr_170_PAL);
+ CallInst* ptr_178 = CallInst::Create(func__Unwind_GetLanguageSpecificData, ptr_context, "", label_147);
+ ptr_178->setCallingConv(CallingConv::C);
+ ptr_178->setTailCall(true);
+ AttributeSet ptr_178_PAL;
+ ptr_178->setAttributes(ptr_178_PAL);
  
- CallInst* int32_171 = CallInst::Create(func__Unwind_GetIP, ptr_context, "", label_147);
- int32_171->setCallingConv(CallingConv::C);
- int32_171->setTailCall(true);
- AttributeSet int32_171_PAL;
- int32_171->setAttributes(int32_171_PAL);
+ CallInst* int32_179 = CallInst::Create(func__Unwind_GetIP, ptr_context, "", label_147);
+ int32_179->setCallingConv(CallingConv::C);
+ int32_179->setTailCall(true);
+ AttributeSet int32_179_PAL;
+ int32_179->setAttributes(int32_179_PAL);
  
- BinaryOperator* int32_172 = BinaryOperator::Create(Instruction::Add, int32_171, const_int32_63, "", label_147);
- CallInst* int32_173 = CallInst::Create(func__Unwind_GetRegionStart, ptr_context, "", label_147);
- int32_173->setCallingConv(CallingConv::C);
- int32_173->setTailCall(true);
- AttributeSet int32_173_PAL;
- int32_173->setAttributes(int32_173_PAL);
+ BinaryOperator* int32_180 = BinaryOperator::Create(Instruction::Add, int32_179, const_int32_63, "", label_147);
+ CallInst* int32_181 = CallInst::Create(func__Unwind_GetRegionStart, ptr_context, "", label_147);
+ int32_181->setCallingConv(CallingConv::C);
+ int32_181->setTailCall(true);
+ AttributeSet int32_181_PAL;
+ int32_181->setAttributes(int32_181_PAL);
  
- BinaryOperator* int32_174 = BinaryOperator::Create(Instruction::Sub, int32_172, int32_173, "", label_147);
- GetElementPtrInst* ptr_175 = GetElementPtrInst::Create(ptr_170, const_int32_53, "", label_147);
- StoreInst* void_176 = new StoreInst(ptr_175, ptr_lsda, false, label_147);
- void_176->setAlignment(4);
- LoadInst* int8_177 = new LoadInst(ptr_170, "", false, label_147);
- int8_177->setAlignment(1);
- ICmpInst* int1_178 = new ICmpInst(*label_147, ICmpInst::ICMP_EQ, int8_177, const_int8_57, "");
- BranchInst::Create(label_149, label_148, int1_178, label_147);
+ BinaryOperator* int32_182 = BinaryOperator::Create(Instruction::Sub, int32_180, int32_181, "", label_147);
+ GetElementPtrInst* ptr_183 = GetElementPtrInst::Create(ptr_178, const_int32_53, "", label_147);
+ StoreInst* void_184 = new StoreInst(ptr_183, ptr_lsda, false, label_147);
+ void_184->setAlignment(4);
+ LoadInst* int8_185 = new LoadInst(ptr_178, "", false, label_147);
+ int8_185->setAlignment(1);
+ ICmpInst* int1_186 = new ICmpInst(*label_147, ICmpInst::ICMP_EQ, int8_185, const_int8_57, "");
+ BranchInst::Create(label_149, label_148, int1_186, label_147);
  
  // Block  (label_148)
- std::vector<Value*> int32_180_params;
- int32_180_params.push_back(ptr_lsda);
- int32_180_params.push_back(int8_177);
- CallInst* int32_180 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_180_params, "", label_148);
- int32_180->setCallingConv(CallingConv::Fast);
- int32_180->setTailCall(false);
- AttributeSet int32_180_PAL;
+ std::vector<Value*> int32_188_params;
+ int32_188_params.push_back(ptr_lsda);
+ int32_188_params.push_back(int8_185);
+ CallInst* int32_188 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_188_params, "", label_148);
+ int32_188->setCallingConv(CallingConv::Fast);
+ int32_188->setTailCall(false);
+ AttributeSet int32_188_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1233,161 +1239,161 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  int32_180_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_188_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_180->setAttributes(int32_180_PAL);
+ int32_188->setAttributes(int32_188_PAL);
  
  LoadInst* ptr__pre = new LoadInst(ptr_lsda, ".pre", false, label_148);
  ptr__pre->setAlignment(4);
  BranchInst::Create(label_149, label_148);
  
  // Block  (label_149)
- PHINode* ptr_182 = PHINode::Create(PointerTy_7, 2, "", label_149);
- ptr_182->addIncoming(ptr_175, label_147);
- ptr_182->addIncoming(ptr__pre, label_148);
+ PHINode* ptr_190 = PHINode::Create(PointerTy_7, 2, "", label_149);
+ ptr_190->addIncoming(ptr_183, label_147);
+ ptr_190->addIncoming(ptr__pre, label_148);
  
- GetElementPtrInst* ptr_183 = GetElementPtrInst::Create(ptr_182, const_int32_53, "", label_149);
- StoreInst* void_184 = new StoreInst(ptr_183, ptr_lsda, false, label_149);
- void_184->setAlignment(4);
- LoadInst* int8_185 = new LoadInst(ptr_182, "", false, label_149);
- int8_185->setAlignment(1);
- ICmpInst* int1_186 = new ICmpInst(*label_149, ICmpInst::ICMP_EQ, int8_185, const_int8_57, "");
- BranchInst::Create(label_150, label__preheader_preheader, int1_186, label_149);
+ GetElementPtrInst* ptr_191 = GetElementPtrInst::Create(ptr_190, const_int32_53, "", label_149);
+ StoreInst* void_192 = new StoreInst(ptr_191, ptr_lsda, false, label_149);
+ void_192->setAlignment(4);
+ LoadInst* int8_193 = new LoadInst(ptr_190, "", false, label_149);
+ int8_193->setAlignment(1);
+ ICmpInst* int1_194 = new ICmpInst(*label_149, ICmpInst::ICMP_EQ, int8_193, const_int8_57, "");
+ BranchInst::Create(label_150, label__preheader_preheader, int1_194, label_149);
  
  // Block .preheader.preheader (label__preheader_preheader)
  BranchInst::Create(label__preheader, label__preheader_preheader);
  
  // Block .preheader (label__preheader)
- Argument* fwdref_189 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_197 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_shift_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i", label__preheader);
- int32_shift_0_i->addIncoming(fwdref_189, label__preheader);
+ int32_shift_0_i->addIncoming(fwdref_197, label__preheader);
  int32_shift_0_i->addIncoming(const_int32_52, label__preheader_preheader);
  
- Argument* fwdref_190 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_198 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_result_0_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i", label__preheader);
- int32_result_0_i->addIncoming(fwdref_190, label__preheader);
+ int32_result_0_i->addIncoming(fwdref_198, label__preheader);
  int32_result_0_i->addIncoming(const_int32_52, label__preheader_preheader);
  
- Argument* fwdref_192 = new Argument(PointerTy_7);
- PHINode* ptr_191 = PHINode::Create(PointerTy_7, 2, "", label__preheader);
- ptr_191->addIncoming(fwdref_192, label__preheader);
- ptr_191->addIncoming(ptr_182, label__preheader_preheader);
+ Argument* fwdref_200 = new Argument(PointerTy_7);
+ PHINode* ptr_199 = PHINode::Create(PointerTy_7, 2, "", label__preheader);
+ ptr_199->addIncoming(fwdref_200, label__preheader);
+ ptr_199->addIncoming(ptr_190, label__preheader_preheader);
  
- Argument* fwdref_193 = new Argument(PointerTy_7);
+ Argument* fwdref_201 = new Argument(PointerTy_7);
  PHINode* ptr_p_0_i = PHINode::Create(PointerTy_7, 2, "p.0.i", label__preheader);
- ptr_p_0_i->addIncoming(fwdref_193, label__preheader);
- ptr_p_0_i->addIncoming(ptr_183, label__preheader_preheader);
+ ptr_p_0_i->addIncoming(fwdref_201, label__preheader);
+ ptr_p_0_i->addIncoming(ptr_191, label__preheader_preheader);
  
- GetElementPtrInst* ptr_194 = GetElementPtrInst::Create(ptr_191, const_int32_50, "", label__preheader);
- LoadInst* int8_195 = new LoadInst(ptr_p_0_i, "", false, label__preheader);
- int8_195->setAlignment(1);
- CastInst* int32_196 = new ZExtInst(int8_195, IntegerType::get(mod->getContext(), 32), "", label__preheader);
- BinaryOperator* int32_197 = BinaryOperator::Create(Instruction::And, int32_196, const_int32_64, "", label__preheader);
- BinaryOperator* int32_198 = BinaryOperator::Create(Instruction::Shl, int32_197, int32_shift_0_i, "", label__preheader);
- BinaryOperator* int32_199 = BinaryOperator::Create(Instruction::Or, int32_198, int32_result_0_i, "", label__preheader);
- BinaryOperator* int32_200 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i, const_int32_65, "", label__preheader);
- BinaryOperator* int32_201 = BinaryOperator::Create(Instruction::And, int32_196, const_int32_66, "", label__preheader);
- ICmpInst* int1_202 = new ICmpInst(*label__preheader, ICmpInst::ICMP_EQ, int32_201, const_int32_52, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit, label__preheader, int1_202, label__preheader);
+ GetElementPtrInst* ptr_202 = GetElementPtrInst::Create(ptr_199, const_int32_50, "", label__preheader);
+ LoadInst* int8_203 = new LoadInst(ptr_p_0_i, "", false, label__preheader);
+ int8_203->setAlignment(1);
+ CastInst* int32_204 = new ZExtInst(int8_203, IntegerType::get(mod->getContext(), 32), "", label__preheader);
+ BinaryOperator* int32_205 = BinaryOperator::Create(Instruction::And, int32_204, const_int32_64, "", label__preheader);
+ BinaryOperator* int32_206 = BinaryOperator::Create(Instruction::Shl, int32_205, int32_shift_0_i, "", label__preheader);
+ BinaryOperator* int32_207 = BinaryOperator::Create(Instruction::Or, int32_206, int32_result_0_i, "", label__preheader);
+ BinaryOperator* int32_208 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i, const_int32_65, "", label__preheader);
+ BinaryOperator* int32_209 = BinaryOperator::Create(Instruction::And, int32_204, const_int32_66, "", label__preheader);
+ ICmpInst* int1_210 = new ICmpInst(*label__preheader, ICmpInst::ICMP_EQ, int32_209, const_int32_52, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit, label__preheader, int1_210, label__preheader);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit)
- PHINode* int32__lcssa50 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa50", label___readULEB128__YAIPAPBE_Z_exit);
- int32__lcssa50->addIncoming(int32_199, label__preheader);
+ PHINode* int32__lcssa92 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa92", label___readULEB128__YAIPAPBE_Z_exit);
+ int32__lcssa92->addIncoming(int32_207, label__preheader);
  
- PHINode* ptr__lcssa49 = PHINode::Create(PointerTy_7, 1, ".lcssa49", label___readULEB128__YAIPAPBE_Z_exit);
- ptr__lcssa49->addIncoming(ptr_194, label__preheader);
+ PHINode* ptr__lcssa91 = PHINode::Create(PointerTy_7, 1, ".lcssa91", label___readULEB128__YAIPAPBE_Z_exit);
+ ptr__lcssa91->addIncoming(ptr_202, label__preheader);
  
- PHINode* ptr__lcssa48 = PHINode::Create(PointerTy_7, 1, ".lcssa48", label___readULEB128__YAIPAPBE_Z_exit);
- ptr__lcssa48->addIncoming(ptr_191, label__preheader);
+ PHINode* ptr__lcssa90 = PHINode::Create(PointerTy_7, 1, ".lcssa90", label___readULEB128__YAIPAPBE_Z_exit);
+ ptr__lcssa90->addIncoming(ptr_199, label__preheader);
  
- StoreInst* void_204 = new StoreInst(ptr__lcssa49, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit);
- void_204->setAlignment(4);
- BinaryOperator* int32__sum = BinaryOperator::Create(Instruction::Add, int32__lcssa50, const_int32_50, ".sum", label___readULEB128__YAIPAPBE_Z_exit);
- GetElementPtrInst* ptr_205 = GetElementPtrInst::Create(ptr__lcssa48, int32__sum, "", label___readULEB128__YAIPAPBE_Z_exit);
+ StoreInst* void_212 = new StoreInst(ptr__lcssa91, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit);
+ void_212->setAlignment(4);
+ BinaryOperator* int32__sum = BinaryOperator::Create(Instruction::Add, int32__lcssa92, const_int32_50, ".sum", label___readULEB128__YAIPAPBE_Z_exit);
+ GetElementPtrInst* ptr_213 = GetElementPtrInst::Create(ptr__lcssa90, int32__sum, "", label___readULEB128__YAIPAPBE_Z_exit);
  BranchInst::Create(label_150, label___readULEB128__YAIPAPBE_Z_exit);
  
  // Block  (label_150)
- PHINode* ptr_207 = PHINode::Create(PointerTy_7, 2, "", label_150);
- ptr_207->addIncoming(ptr__lcssa49, label___readULEB128__YAIPAPBE_Z_exit);
- ptr_207->addIncoming(ptr_183, label_149);
+ PHINode* ptr_215 = PHINode::Create(PointerTy_7, 2, "", label_150);
+ ptr_215->addIncoming(ptr__lcssa91, label___readULEB128__YAIPAPBE_Z_exit);
+ ptr_215->addIncoming(ptr_191, label_149);
  
  PHINode* ptr_classInfo_0 = PHINode::Create(PointerTy_7, 2, "classInfo.0", label_150);
- ptr_classInfo_0->addIncoming(ptr_205, label___readULEB128__YAIPAPBE_Z_exit);
+ ptr_classInfo_0->addIncoming(ptr_213, label___readULEB128__YAIPAPBE_Z_exit);
  ptr_classInfo_0->addIncoming(const_ptr_67, label_149);
  
- GetElementPtrInst* ptr_208 = GetElementPtrInst::Create(ptr_207, const_int32_53, "", label_150);
- StoreInst* void_209 = new StoreInst(ptr_208, ptr_lsda, false, label_150);
- void_209->setAlignment(4);
- LoadInst* int8_210 = new LoadInst(ptr_207, "", false, label_150);
- int8_210->setAlignment(1);
+ GetElementPtrInst* ptr_216 = GetElementPtrInst::Create(ptr_215, const_int32_53, "", label_150);
+ StoreInst* void_217 = new StoreInst(ptr_216, ptr_lsda, false, label_150);
+ void_217->setAlignment(4);
+ LoadInst* int8_218 = new LoadInst(ptr_215, "", false, label_150);
+ int8_218->setAlignment(1);
  BranchInst::Create(label_151, label_150);
  
  // Block  (label_151)
- Argument* fwdref_212 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i2", label_151);
- int32_shift_0_i2->addIncoming(const_int32_52, label_150);
- int32_shift_0_i2->addIncoming(fwdref_212, label_151);
+ Argument* fwdref_220 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i3 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i3", label_151);
+ int32_shift_0_i3->addIncoming(const_int32_52, label_150);
+ int32_shift_0_i3->addIncoming(fwdref_220, label_151);
  
- Argument* fwdref_213 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i3 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i3", label_151);
- int32_result_0_i3->addIncoming(const_int32_52, label_150);
- int32_result_0_i3->addIncoming(fwdref_213, label_151);
+ Argument* fwdref_221 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i4 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i4", label_151);
+ int32_result_0_i4->addIncoming(const_int32_52, label_150);
+ int32_result_0_i4->addIncoming(fwdref_221, label_151);
  
- Argument* fwdref_215 = new Argument(PointerTy_7);
- PHINode* ptr_214 = PHINode::Create(PointerTy_7, 2, "", label_151);
- ptr_214->addIncoming(ptr_207, label_150);
- ptr_214->addIncoming(fwdref_215, label_151);
+ Argument* fwdref_223 = new Argument(PointerTy_7);
+ PHINode* ptr_222 = PHINode::Create(PointerTy_7, 2, "", label_151);
+ ptr_222->addIncoming(ptr_215, label_150);
+ ptr_222->addIncoming(fwdref_223, label_151);
  
- Argument* fwdref_216 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i4 = PHINode::Create(PointerTy_7, 2, "p.0.i4", label_151);
- ptr_p_0_i4->addIncoming(ptr_208, label_150);
- ptr_p_0_i4->addIncoming(fwdref_216, label_151);
+ Argument* fwdref_224 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i5 = PHINode::Create(PointerTy_7, 2, "p.0.i5", label_151);
+ ptr_p_0_i5->addIncoming(ptr_216, label_150);
+ ptr_p_0_i5->addIncoming(fwdref_224, label_151);
  
- GetElementPtrInst* ptr_217 = GetElementPtrInst::Create(ptr_214, const_int32_50, "", label_151);
- LoadInst* int8_218 = new LoadInst(ptr_p_0_i4, "", false, label_151);
- int8_218->setAlignment(1);
- CastInst* int32_219 = new ZExtInst(int8_218, IntegerType::get(mod->getContext(), 32), "", label_151);
- BinaryOperator* int32_220 = BinaryOperator::Create(Instruction::And, int32_219, const_int32_64, "", label_151);
- BinaryOperator* int32_221 = BinaryOperator::Create(Instruction::Shl, int32_220, int32_shift_0_i2, "", label_151);
- BinaryOperator* int32_222 = BinaryOperator::Create(Instruction::Or, int32_221, int32_result_0_i3, "", label_151);
- BinaryOperator* int32_223 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i2, const_int32_65, "", label_151);
- BinaryOperator* int32_224 = BinaryOperator::Create(Instruction::And, int32_219, const_int32_66, "", label_151);
- ICmpInst* int1_225 = new ICmpInst(*label_151, ICmpInst::ICMP_EQ, int32_224, const_int32_52, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit5, label_151, int1_225, label_151);
+ GetElementPtrInst* ptr_225 = GetElementPtrInst::Create(ptr_222, const_int32_50, "", label_151);
+ LoadInst* int8_226 = new LoadInst(ptr_p_0_i5, "", false, label_151);
+ int8_226->setAlignment(1);
+ CastInst* int32_227 = new ZExtInst(int8_226, IntegerType::get(mod->getContext(), 32), "", label_151);
+ BinaryOperator* int32_228 = BinaryOperator::Create(Instruction::And, int32_227, const_int32_64, "", label_151);
+ BinaryOperator* int32_229 = BinaryOperator::Create(Instruction::Shl, int32_228, int32_shift_0_i3, "", label_151);
+ BinaryOperator* int32_230 = BinaryOperator::Create(Instruction::Or, int32_229, int32_result_0_i4, "", label_151);
+ BinaryOperator* int32_231 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i3, const_int32_65, "", label_151);
+ BinaryOperator* int32_232 = BinaryOperator::Create(Instruction::And, int32_227, const_int32_66, "", label_151);
+ ICmpInst* int1_233 = new ICmpInst(*label_151, ICmpInst::ICMP_EQ, int32_232, const_int32_52, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit6, label_151, int1_233, label_151);
  
- // Block ?readULEB128@@YAIPAPBE@Z.exit5 (label___readULEB128__YAIPAPBE_Z_exit5)
- PHINode* int32__lcssa47 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa47", label___readULEB128__YAIPAPBE_Z_exit5);
- int32__lcssa47->addIncoming(int32_222, label_151);
+ // Block ?readULEB128@@YAIPAPBE@Z.exit6 (label___readULEB128__YAIPAPBE_Z_exit6)
+ PHINode* int32__lcssa89 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa89", label___readULEB128__YAIPAPBE_Z_exit6);
+ int32__lcssa89->addIncoming(int32_230, label_151);
  
- PHINode* ptr__lcssa46 = PHINode::Create(PointerTy_7, 1, ".lcssa46", label___readULEB128__YAIPAPBE_Z_exit5);
- ptr__lcssa46->addIncoming(ptr_217, label_151);
+ PHINode* ptr__lcssa88 = PHINode::Create(PointerTy_7, 1, ".lcssa88", label___readULEB128__YAIPAPBE_Z_exit6);
+ ptr__lcssa88->addIncoming(ptr_225, label_151);
  
- PHINode* ptr__lcssa45 = PHINode::Create(PointerTy_7, 1, ".lcssa45", label___readULEB128__YAIPAPBE_Z_exit5);
- ptr__lcssa45->addIncoming(ptr_214, label_151);
+ PHINode* ptr__lcssa87 = PHINode::Create(PointerTy_7, 1, ".lcssa87", label___readULEB128__YAIPAPBE_Z_exit6);
+ ptr__lcssa87->addIncoming(ptr_222, label_151);
  
- StoreInst* void_227 = new StoreInst(ptr__lcssa46, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit5);
- void_227->setAlignment(4);
- BinaryOperator* int32__sum10 = BinaryOperator::Create(Instruction::Add, int32__lcssa47, const_int32_50, ".sum10", label___readULEB128__YAIPAPBE_Z_exit5);
- GetElementPtrInst* ptr_228 = GetElementPtrInst::Create(ptr__lcssa45, int32__sum10, "", label___readULEB128__YAIPAPBE_Z_exit5);
- StoreInst* void_229 = new StoreInst(ptr__lcssa46, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit5);
- void_229->setAlignment(4);
- ICmpInst* int1_230 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit5, ICmpInst::ICMP_SGT, int32__sum10, const_int32_50, "");
- BranchInst::Create(label__lr_ph_152, label__loopexit, int1_230, label___readULEB128__YAIPAPBE_Z_exit5);
+ StoreInst* void_235 = new StoreInst(ptr__lcssa88, ptr_lsda, false, label___readULEB128__YAIPAPBE_Z_exit6);
+ void_235->setAlignment(4);
+ BinaryOperator* int32__sum11 = BinaryOperator::Create(Instruction::Add, int32__lcssa89, const_int32_50, ".sum11", label___readULEB128__YAIPAPBE_Z_exit6);
+ GetElementPtrInst* ptr_236 = GetElementPtrInst::Create(ptr__lcssa87, int32__sum11, "", label___readULEB128__YAIPAPBE_Z_exit6);
+ StoreInst* void_237 = new StoreInst(ptr__lcssa88, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit6);
+ void_237->setAlignment(4);
+ ICmpInst* int1_238 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit6, ICmpInst::ICMP_SGT, int32__sum11, const_int32_50, "");
+ BranchInst::Create(label__lr_ph_152, label__loopexit, int1_238, label___readULEB128__YAIPAPBE_Z_exit6);
  
  // Block .lr.ph (label__lr_ph_152)
- CastInst* int32_232 = new PtrToIntInst(ptr_228, IntegerType::get(mod->getContext(), 32), "", label__lr_ph_152);
- BinaryOperator* int32_233 = BinaryOperator::Create(Instruction::Add, int32_232, const_int32_63, "", label__lr_ph_152);
+ CastInst* int32_240 = new PtrToIntInst(ptr_236, IntegerType::get(mod->getContext(), 32), "", label__lr_ph_152);
+ BinaryOperator* int32_241 = BinaryOperator::Create(Instruction::Add, int32_240, const_int32_63, "", label__lr_ph_152);
  BranchInst::Create(label_153, label__lr_ph_152);
  
  // Block  (label_153)
- std::vector<Value*> int32_235_params;
- int32_235_params.push_back(ptr_callSitePtr);
- int32_235_params.push_back(int8_210);
- CallInst* int32_235 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_235_params, "", label_153);
- int32_235->setCallingConv(CallingConv::Fast);
- int32_235->setTailCall(false);
- AttributeSet int32_235_PAL;
+ std::vector<Value*> int32_243_params;
+ int32_243_params.push_back(ptr_callSitePtr);
+ int32_243_params.push_back(int8_218);
+ CallInst* int32_243 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_243_params, "", label_153);
+ int32_243->setCallingConv(CallingConv::Fast);
+ int32_243->setTailCall(false);
+ AttributeSet int32_243_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1398,18 +1404,18 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  int32_235_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_243_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_235->setAttributes(int32_235_PAL);
+ int32_243->setAttributes(int32_243_PAL);
  
- std::vector<Value*> int32_236_params;
- int32_236_params.push_back(ptr_callSitePtr);
- int32_236_params.push_back(int8_210);
- CallInst* int32_236 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_236_params, "", label_153);
- int32_236->setCallingConv(CallingConv::Fast);
- int32_236->setTailCall(false);
- AttributeSet int32_236_PAL;
+ std::vector<Value*> int32_244_params;
+ int32_244_params.push_back(ptr_callSitePtr);
+ int32_244_params.push_back(int8_218);
+ CallInst* int32_244 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_244_params, "", label_153);
+ int32_244->setCallingConv(CallingConv::Fast);
+ int32_244->setTailCall(false);
+ AttributeSet int32_244_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1420,18 +1426,18 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  int32_236_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_244_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_236->setAttributes(int32_236_PAL);
+ int32_244->setAttributes(int32_244_PAL);
  
- std::vector<Value*> int32_237_params;
- int32_237_params.push_back(ptr_callSitePtr);
- int32_237_params.push_back(int8_210);
- CallInst* int32_237 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_237_params, "", label_153);
- int32_237->setCallingConv(CallingConv::Fast);
- int32_237->setTailCall(false);
- AttributeSet int32_237_PAL;
+ std::vector<Value*> int32_245_params;
+ int32_245_params.push_back(ptr_callSitePtr);
+ int32_245_params.push_back(int8_218);
+ CallInst* int32_245 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_245_params, "", label_153);
+ int32_245->setCallingConv(CallingConv::Fast);
+ int32_245->setTailCall(false);
+ AttributeSet int32_245_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1442,409 +1448,417 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  int32_237_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_245_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_237->setAttributes(int32_237_PAL);
+ int32_245->setAttributes(int32_245_PAL);
  
- LoadInst* ptr_238 = new LoadInst(ptr_callSitePtr, "", false, label_153);
- ptr_238->setAlignment(4);
+ LoadInst* ptr_246 = new LoadInst(ptr_callSitePtr, "", false, label_153);
+ ptr_246->setAlignment(4);
  BranchInst::Create(label_154, label_153);
  
  // Block  (label_154)
- Argument* fwdref_240 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i6 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i6", label_154);
- int32_shift_0_i6->addIncoming(const_int32_52, label_153);
- int32_shift_0_i6->addIncoming(fwdref_240, label_154);
+ Argument* fwdref_248 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i7 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i7", label_154);
+ int32_shift_0_i7->addIncoming(const_int32_52, label_153);
+ int32_shift_0_i7->addIncoming(fwdref_248, label_154);
  
- Argument* fwdref_241 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i7 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i7", label_154);
- int32_result_0_i7->addIncoming(const_int32_52, label_153);
- int32_result_0_i7->addIncoming(fwdref_241, label_154);
+ Argument* fwdref_249 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i8 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i8", label_154);
+ int32_result_0_i8->addIncoming(const_int32_52, label_153);
+ int32_result_0_i8->addIncoming(fwdref_249, label_154);
  
- Argument* fwdref_242 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i8 = PHINode::Create(PointerTy_7, 2, "p.0.i8", label_154);
- ptr_p_0_i8->addIncoming(ptr_238, label_153);
- ptr_p_0_i8->addIncoming(fwdref_242, label_154);
+ Argument* fwdref_250 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i9 = PHINode::Create(PointerTy_7, 2, "p.0.i9", label_154);
+ ptr_p_0_i9->addIncoming(ptr_246, label_153);
+ ptr_p_0_i9->addIncoming(fwdref_250, label_154);
  
- GetElementPtrInst* ptr_243 = GetElementPtrInst::Create(ptr_p_0_i8, const_int32_53, "", label_154);
- LoadInst* int8_244 = new LoadInst(ptr_p_0_i8, "", false, label_154);
- int8_244->setAlignment(1);
- CastInst* int32_245 = new ZExtInst(int8_244, IntegerType::get(mod->getContext(), 32), "", label_154);
- BinaryOperator* int32_246 = BinaryOperator::Create(Instruction::And, int32_245, const_int32_64, "", label_154);
- BinaryOperator* int32_247 = BinaryOperator::Create(Instruction::Shl, int32_246, int32_shift_0_i6, "", label_154);
- BinaryOperator* int32_248 = BinaryOperator::Create(Instruction::Or, int32_247, int32_result_0_i7, "", label_154);
- BinaryOperator* int32_249 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i6, const_int32_65, "", label_154);
- BinaryOperator* int32_250 = BinaryOperator::Create(Instruction::And, int32_245, const_int32_66, "", label_154);
- ICmpInst* int1_251 = new ICmpInst(*label_154, ICmpInst::ICMP_EQ, int32_250, const_int32_52, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit9, label_154, int1_251, label_154);
+ GetElementPtrInst* ptr_251 = GetElementPtrInst::Create(ptr_p_0_i9, const_int32_53, "", label_154);
+ LoadInst* int8_252 = new LoadInst(ptr_p_0_i9, "", false, label_154);
+ int8_252->setAlignment(1);
+ CastInst* int32_253 = new ZExtInst(int8_252, IntegerType::get(mod->getContext(), 32), "", label_154);
+ BinaryOperator* int32_254 = BinaryOperator::Create(Instruction::And, int32_253, const_int32_64, "", label_154);
+ BinaryOperator* int32_255 = BinaryOperator::Create(Instruction::Shl, int32_254, int32_shift_0_i7, "", label_154);
+ BinaryOperator* int32_256 = BinaryOperator::Create(Instruction::Or, int32_255, int32_result_0_i8, "", label_154);
+ BinaryOperator* int32_257 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i7, const_int32_65, "", label_154);
+ BinaryOperator* int32_258 = BinaryOperator::Create(Instruction::And, int32_253, const_int32_66, "", label_154);
+ ICmpInst* int1_259 = new ICmpInst(*label_154, ICmpInst::ICMP_EQ, int32_258, const_int32_52, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit10, label_154, int1_259, label_154);
  
- // Block ?readULEB128@@YAIPAPBE@Z.exit9 (label___readULEB128__YAIPAPBE_Z_exit9)
- PHINode* int32__lcssa42 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa42", label___readULEB128__YAIPAPBE_Z_exit9);
- int32__lcssa42->addIncoming(int32_248, label_154);
+ // Block ?readULEB128@@YAIPAPBE@Z.exit10 (label___readULEB128__YAIPAPBE_Z_exit10)
+ PHINode* int32__lcssa84 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa84", label___readULEB128__YAIPAPBE_Z_exit10);
+ int32__lcssa84->addIncoming(int32_256, label_154);
  
- PHINode* ptr__lcssa = PHINode::Create(PointerTy_7, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit9);
- ptr__lcssa->addIncoming(ptr_243, label_154);
+ PHINode* ptr__lcssa83 = PHINode::Create(PointerTy_7, 1, ".lcssa83", label___readULEB128__YAIPAPBE_Z_exit10);
+ ptr__lcssa83->addIncoming(ptr_251, label_154);
  
- StoreInst* void_253 = new StoreInst(ptr__lcssa, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit9);
- void_253->setAlignment(4);
- ICmpInst* int1_254 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit9, ICmpInst::ICMP_EQ, int32_237, const_int32_52, "");
- BranchInst::Create(label__backedge, label_155, int1_254, label___readULEB128__YAIPAPBE_Z_exit9);
+ StoreInst* void_261 = new StoreInst(ptr__lcssa83, ptr_callSitePtr, false, label___readULEB128__YAIPAPBE_Z_exit10);
+ void_261->setAlignment(4);
+ ICmpInst* int1_262 = new ICmpInst(*label___readULEB128__YAIPAPBE_Z_exit10, ICmpInst::ICMP_EQ, int32_245, const_int32_52, "");
+ BranchInst::Create(label__backedge, label_155, int1_262, label___readULEB128__YAIPAPBE_Z_exit10);
  
  // Block .backedge (label__backedge)
- ICmpInst* int1_256 = new ICmpInst(*label__backedge, ICmpInst::ICMP_ULT, ptr__lcssa, ptr_228, "");
- BranchInst::Create(label_153, label__loopexit_loopexit, int1_256, label__backedge);
+ ICmpInst* int1_264 = new ICmpInst(*label__backedge, ICmpInst::ICMP_ULT, ptr__lcssa83, ptr_236, "");
+ BranchInst::Create(label_153, label__loopexit_loopexit, int1_264, label__backedge);
  
  // Block  (label_155)
- ICmpInst* int1_258 = new ICmpInst(*label_155, ICmpInst::ICMP_EQ, int32__lcssa42, const_int32_52, "");
- BinaryOperator* int32_259 = BinaryOperator::Create(Instruction::Add, int32_233, int32__lcssa42, "", label_155);
- SelectInst* int32__ = SelectInst::Create(int1_258, const_int32_52, int32_259, ".", label_155);
- ICmpInst* int1_260 = new ICmpInst(*label_155, ICmpInst::ICMP_ULE, int32_235, int32_174, "");
- BinaryOperator* int32_261 = BinaryOperator::Create(Instruction::Add, int32_236, int32_235, "", label_155);
- ICmpInst* int1_262 = new ICmpInst(*label_155, ICmpInst::ICMP_ULT, int32_174, int32_261, "");
- BinaryOperator* int1_or_cond = BinaryOperator::Create(Instruction::And, int1_260, int1_262, "or.cond", label_155);
+ ICmpInst* int1_266 = new ICmpInst(*label_155, ICmpInst::ICMP_EQ, int32__lcssa84, const_int32_52, "");
+ BinaryOperator* int32_267 = BinaryOperator::Create(Instruction::Add, int32_241, int32__lcssa84, "", label_155);
+ SelectInst* int32__50 = SelectInst::Create(int1_266, const_int32_52, int32_267, ".50", label_155);
+ ICmpInst* int1_268 = new ICmpInst(*label_155, ICmpInst::ICMP_ULE, int32_243, int32_182, "");
+ BinaryOperator* int32_269 = BinaryOperator::Create(Instruction::Add, int32_244, int32_243, "", label_155);
+ ICmpInst* int1_270 = new ICmpInst(*label_155, ICmpInst::ICMP_ULT, int32_182, int32_269, "");
+ BinaryOperator* int1_or_cond = BinaryOperator::Create(Instruction::And, int1_268, int1_270, "or.cond", label_155);
  BranchInst::Create(label_156, label__backedge, int1_or_cond, label_155);
  
  // Block  (label_156)
- PHINode* int32___lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, "..lcssa", label_156);
- int32___lcssa->addIncoming(int32__, label_155);
+ PHINode* int32__50_lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".50.lcssa", label_156);
+ int32__50_lcssa->addIncoming(int32__50, label_155);
  
- PHINode* int32__lcssa43 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa43", label_156);
- int32__lcssa43->addIncoming(int32_237, label_155);
+ PHINode* int32__lcssa85 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa85", label_156);
+ int32__lcssa85->addIncoming(int32_245, label_155);
  
- ICmpInst* int1_264 = new ICmpInst(*label_156, ICmpInst::ICMP_EQ, int32___lcssa, const_int32_52, "");
- BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label_157, int1_264, label_156);
+ ICmpInst* int1_272 = new ICmpInst(*label_156, ICmpInst::ICMP_NE, int32__50_lcssa, const_int32_52, "");
+ BranchInst::Create(label_157, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, int1_272, label_156);
  
  // Block  (label_157)
- CastInst* ptr_266 = new BitCastInst(ptr_EntryP_i, PointerTy_7, "", label_157);
- std::vector<Value*> void_267_params;
- void_267_params.push_back(const_int64_68);
- void_267_params.push_back(ptr_266);
- CallInst* void_267 = CallInst::Create(func_llvm_lifetime_start, void_267_params, "", label_157);
- void_267->setCallingConv(CallingConv::C);
- void_267->setTailCall(false);
- AttributeSet void_267_PAL;
- void_267->setAttributes(void_267_PAL);
+ CastInst* ptr_274 = new BitCastInst(ptr_EntryP_i, PointerTy_7, "", label_157);
+ std::vector<Value*> void_275_params;
+ void_275_params.push_back(const_int64_68);
+ void_275_params.push_back(ptr_274);
+ CallInst* void_275 = CallInst::Create(func_llvm_lifetime_start, void_275_params, "", label_157);
+ void_275->setCallingConv(CallingConv::C);
+ void_275->setTailCall(false);
+ AttributeSet void_275_PAL;
+ void_275->setAttributes(void_275_PAL);
  
- CastInst* ptr_268 = new IntToPtrInst(int32___lcssa, PointerTy_7, "", label_157);
- CastInst* ptr_269 = new BitCastInst(ptr_exceptionObject, PointerTy_7, "", label_157);
- CastInst* int32_270 = new ZExtInst(int8_185, IntegerType::get(mod->getContext(), 32), "", label_157);
- BinaryOperator* int32_271 = BinaryOperator::Create(Instruction::And, int32_270, const_int32_58, "", label_157);
+ CastInst* ptr_276 = new IntToPtrInst(int32__50_lcssa, PointerTy_7, "", label_157);
+ CastInst* ptr_277 = new BitCastInst(ptr_exceptionObject, PointerTy_7, "", label_157);
+ CastInst* int32_278 = new ZExtInst(int8_193, IntegerType::get(mod->getContext(), 32), "", label_157);
+ BinaryOperator* int32_279 = BinaryOperator::Create(Instruction::And, int32_278, const_int32_58, "", label_157);
  std::vector<Value*> ptr_switch_gep_i_i_indices;
  ptr_switch_gep_i_i_indices.push_back(const_int32_52);
- ptr_switch_gep_i_i_indices.push_back(int32_271);
+ ptr_switch_gep_i_i_indices.push_back(int32_279);
  Instruction* ptr_switch_gep_i_i = GetElementPtrInst::Create(gvar_array_switch_table, ptr_switch_gep_i_i_indices, "switch.gep.i.i", label_157);
- BranchInst::Create(label__split_us_i_preheader, label___split_crit_edge_i_preheader, int1_186, label_157);
+ BranchInst::Create(label__split_us_i_preheader, label___split_crit_edge_i_preheader, int1_194, label_157);
  
  // Block .split.us.i.preheader (label__split_us_i_preheader)
  BranchInst::Create(label__split_us_i, label__split_us_i_preheader);
  
  // Block ..split_crit_edge.i.preheader (label___split_crit_edge_i_preheader)
- CastInst* int13_switch_maskindex_i_i = new TruncInst(int32_271, IntegerType::get(mod->getContext(), 13), "switch.maskindex.i.i", label___split_crit_edge_i_preheader);
+ CastInst* int13_switch_maskindex_i_i = new TruncInst(int32_279, IntegerType::get(mod->getContext(), 13), "switch.maskindex.i.i", label___split_crit_edge_i_preheader);
  BinaryOperator* int13_switch_shifted_i_i = BinaryOperator::Create(Instruction::LShr, const_int13_60, int13_switch_maskindex_i_i, "switch.shifted.i.i", label___split_crit_edge_i_preheader);
- BinaryOperator* int13_274 = BinaryOperator::Create(Instruction::And, int13_switch_shifted_i_i, const_int13_61, "", label___split_crit_edge_i_preheader);
- ICmpInst* int1_switch_lobit_i_i = new ICmpInst(*label___split_crit_edge_i_preheader, ICmpInst::ICMP_EQ, int13_274, const_int13_62, "switch.lobit.i.i");
- ICmpInst* int1__not_i = new ICmpInst(*label___split_crit_edge_i_preheader, ICmpInst::ICMP_UGT, int32_271, const_int32_69, ".not.i");
+ BinaryOperator* int13_282 = BinaryOperator::Create(Instruction::And, int13_switch_shifted_i_i, const_int13_61, "", label___split_crit_edge_i_preheader);
+ ICmpInst* int1_switch_lobit_i_i = new ICmpInst(*label___split_crit_edge_i_preheader, ICmpInst::ICMP_EQ, int13_282, const_int13_62, "switch.lobit.i.i");
+ ICmpInst* int1__not_i = new ICmpInst(*label___split_crit_edge_i_preheader, ICmpInst::ICMP_UGT, int32_279, const_int32_69, ".not.i");
  BinaryOperator* int1_brmerge_i = BinaryOperator::Create(Instruction::Or, int1__not_i, int1_switch_lobit_i_i, "brmerge.i", label___split_crit_edge_i_preheader);
- BranchInst::Create(label___split_crit_edge_i_us_preheader, label___split_crit_edge_i_preheader41, int1_brmerge_i, label___split_crit_edge_i_preheader);
- 
- // Block ..split_crit_edge.i.preheader41 (label___split_crit_edge_i_preheader41)
- BranchInst::Create(label___split_crit_edge_i, label___split_crit_edge_i_preheader41);
- 
- // Block ..split_crit_edge.i.us.preheader (label___split_crit_edge_i_us_preheader)
- BranchInst::Create(label___split_crit_edge_i_us, label___split_crit_edge_i_us_preheader);
- 
- // Block ..split_crit_edge.i.us (label___split_crit_edge_i_us)
- Argument* fwdref_278 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i_i_us = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.i.us", label___split_crit_edge_i_us);
- int32_shift_0_i_i_us->addIncoming(const_int32_52, label___split_crit_edge_i_us_preheader);
- int32_shift_0_i_i_us->addIncoming(fwdref_278, label___split_crit_edge_i_us_backedge);
- 
- Argument* fwdref_279 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i_i_us = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.i.us", label___split_crit_edge_i_us);
- int32_result_0_i_i_us->addIncoming(const_int32_52, label___split_crit_edge_i_us_preheader);
- int32_result_0_i_i_us->addIncoming(fwdref_279, label___split_crit_edge_i_us_backedge);
- 
- Argument* fwdref_280 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i_i_us = PHINode::Create(PointerTy_7, 2, "p.0.i.i.us", label___split_crit_edge_i_us);
- ptr_p_0_i_i_us->addIncoming(ptr_268, label___split_crit_edge_i_us_preheader);
- ptr_p_0_i_i_us->addIncoming(fwdref_280, label___split_crit_edge_i_us_backedge);
- 
- GetElementPtrInst* ptr_281 = GetElementPtrInst::Create(ptr_p_0_i_i_us, const_int32_53, "", label___split_crit_edge_i_us);
- LoadInst* int8_282 = new LoadInst(ptr_p_0_i_i_us, "", false, label___split_crit_edge_i_us);
- int8_282->setAlignment(1);
- CastInst* int32_283 = new ZExtInst(int8_282, IntegerType::get(mod->getContext(), 32), "", label___split_crit_edge_i_us);
- BinaryOperator* int32_284 = BinaryOperator::Create(Instruction::And, int32_283, const_int32_64, "", label___split_crit_edge_i_us);
- BinaryOperator* int32_285 = BinaryOperator::Create(Instruction::Shl, int32_284, int32_shift_0_i_i_us, "", label___split_crit_edge_i_us);
- BinaryOperator* int32_286 = BinaryOperator::Create(Instruction::Or, int32_285, int32_result_0_i_i_us, "", label___split_crit_edge_i_us);
- BinaryOperator* int32_287 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_i_us, const_int32_65, "", label___split_crit_edge_i_us);
- BinaryOperator* int32_288 = BinaryOperator::Create(Instruction::And, int32_283, const_int32_66, "", label___split_crit_edge_i_us);
- ICmpInst* int1_289 = new ICmpInst(*label___split_crit_edge_i_us, ICmpInst::ICMP_EQ, int32_288, const_int32_52, "");
- BranchInst::Create(label_158, label___split_crit_edge_i_us_backedge, int1_289, label___split_crit_edge_i_us);
- 
- // Block  (label_158)
- BinaryOperator* int32_291 = BinaryOperator::Create(Instruction::And, int32_283, const_int32_70, "", label_158);
- ICmpInst* int1_292 = new ICmpInst(*label_158, ICmpInst::ICMP_NE, int32_291, const_int32_52, "");
- ICmpInst* int1_293 = new ICmpInst(*label_158, ICmpInst::ICMP_ULT, int32_287, const_int32_71, "");
- BinaryOperator* int1_or_cond_i_i_us = BinaryOperator::Create(Instruction::And, int1_292, int1_293, "or.cond.i.i.us", label_158);
- BranchInst::Create(label_159, label___readSLEB128__YAIPAPBE_Z_exit_i_us, int1_or_cond_i_i_us, label_158);
- 
- // Block  (label_159)
- BinaryOperator* int32_295 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32_287, "", label_159);
- BinaryOperator* int32_296 = BinaryOperator::Create(Instruction::Or, int32_286, int32_295, "", label_159);
- BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit_i_us, label_159);
- 
- // Block ?readSLEB128@@YAIPAPBE@Z.exit.i.us (label___readSLEB128__YAIPAPBE_Z_exit_i_us)
- PHINode* int32_result_1_i_i_us = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1.i.i.us", label___readSLEB128__YAIPAPBE_Z_exit_i_us);
- int32_result_1_i_i_us->addIncoming(int32_296, label_159);
- int32_result_1_i_i_us->addIncoming(int32_286, label_158);
- 
- BranchInst::Create(label_160, label___readSLEB128__YAIPAPBE_Z_exit_i_us);
- 
- // Block  (label_160)
- Argument* fwdref_300 = new Argument(PointerTy_7);
- PHINode* ptr_299 = PHINode::Create(PointerTy_7, 2, "", label_160);
- ptr_299->addIncoming(ptr_p_0_i_i_us, label___readSLEB128__YAIPAPBE_Z_exit_i_us);
- ptr_299->addIncoming(fwdref_300, label_160);
- 
- Argument* fwdref_301 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i3_i_us = PHINode::Create(PointerTy_7, 2, "p.0.i3.i.us", label_160);
- ptr_p_0_i3_i_us->addIncoming(ptr_281, label___readSLEB128__YAIPAPBE_Z_exit_i_us);
- ptr_p_0_i3_i_us->addIncoming(fwdref_301, label_160);
- 
- GetElementPtrInst* ptr_302 = GetElementPtrInst::Create(ptr_299, const_int32_50, "", label_160);
- LoadInst* int8_303 = new LoadInst(ptr_p_0_i3_i_us, "", false, label_160);
- int8_303->setAlignment(1);
- ICmpInst* int1_304 = new ICmpInst(*label_160, ICmpInst::ICMP_SGT, int8_303, const_int8_57, "");
- BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit6_i_us, label_160, int1_304, label_160);
- 
- // Block ?readSLEB128@@YAIPAPBE@Z.exit6.i.us (label___readSLEB128__YAIPAPBE_Z_exit6_i_us)
- ICmpInst* int1_306 = new ICmpInst(*label___readSLEB128__YAIPAPBE_Z_exit6_i_us, ICmpInst::ICMP_EQ, int32_result_1_i_i_us, const_int32_52, "");
- BranchInst::Create(label___split_crit_edge_i_us_backedge, label__us_lcssa_i, int1_306, label___readSLEB128__YAIPAPBE_Z_exit6_i_us);
- 
- // Block ..split_crit_edge.i.us.backedge (label___split_crit_edge_i_us_backedge)
- PHINode* int32_shift_0_i_i_us_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.i.us.be", label___split_crit_edge_i_us_backedge);
- int32_shift_0_i_i_us_be->addIncoming(int32_287, label___split_crit_edge_i_us);
- int32_shift_0_i_i_us_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_i_us);
- 
- PHINode* int32_result_0_i_i_us_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.i.us.be", label___split_crit_edge_i_us_backedge);
- int32_result_0_i_i_us_be->addIncoming(int32_286, label___split_crit_edge_i_us);
- int32_result_0_i_i_us_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_i_us);
- 
- BranchInst::Create(label___split_crit_edge_i_us, label___split_crit_edge_i_us_backedge);
- 
- // Block .split.us.i.loopexit (label__split_us_i_loopexit)
- BranchInst::Create(label__split_us_i_backedge, label__split_us_i_loopexit);
+ BranchInst::Create(label___split_crit_edge_i, label___split_crit_edge_i_preheader);
  
  // Block .split.us.i (label__split_us_i)
- Argument* fwdref_310 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_284 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_shift_0_i_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.us.i", label__split_us_i);
  int32_shift_0_i_us_i->addIncoming(const_int32_52, label__split_us_i_preheader);
- int32_shift_0_i_us_i->addIncoming(fwdref_310, label__split_us_i_backedge);
+ int32_shift_0_i_us_i->addIncoming(fwdref_284, label__split_us_i_backedge);
  
- Argument* fwdref_311 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_285 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_result_0_i_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.us.i", label__split_us_i);
  int32_result_0_i_us_i->addIncoming(const_int32_52, label__split_us_i_preheader);
- int32_result_0_i_us_i->addIncoming(fwdref_311, label__split_us_i_backedge);
+ int32_result_0_i_us_i->addIncoming(fwdref_285, label__split_us_i_backedge);
  
- Argument* fwdref_312 = new Argument(PointerTy_7);
+ Argument* fwdref_286 = new Argument(PointerTy_7);
  PHINode* ptr_p_0_i_us_i = PHINode::Create(PointerTy_7, 2, "p.0.i.us.i", label__split_us_i);
- ptr_p_0_i_us_i->addIncoming(ptr_268, label__split_us_i_preheader);
- ptr_p_0_i_us_i->addIncoming(fwdref_312, label__split_us_i_backedge);
+ ptr_p_0_i_us_i->addIncoming(ptr_276, label__split_us_i_preheader);
+ ptr_p_0_i_us_i->addIncoming(fwdref_286, label__split_us_i_backedge);
  
- GetElementPtrInst* ptr_313 = GetElementPtrInst::Create(ptr_p_0_i_us_i, const_int32_53, "", label__split_us_i);
- LoadInst* int8_314 = new LoadInst(ptr_p_0_i_us_i, "", false, label__split_us_i);
- int8_314->setAlignment(1);
- CastInst* int32_315 = new ZExtInst(int8_314, IntegerType::get(mod->getContext(), 32), "", label__split_us_i);
- BinaryOperator* int32_316 = BinaryOperator::Create(Instruction::And, int32_315, const_int32_64, "", label__split_us_i);
- BinaryOperator* int32_317 = BinaryOperator::Create(Instruction::Shl, int32_316, int32_shift_0_i_us_i, "", label__split_us_i);
- BinaryOperator* int32_318 = BinaryOperator::Create(Instruction::Or, int32_317, int32_result_0_i_us_i, "", label__split_us_i);
- BinaryOperator* int32_319 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_us_i, const_int32_65, "", label__split_us_i);
- BinaryOperator* int32_320 = BinaryOperator::Create(Instruction::And, int32_315, const_int32_66, "", label__split_us_i);
- ICmpInst* int1_321 = new ICmpInst(*label__split_us_i, ICmpInst::ICMP_EQ, int32_320, const_int32_52, "");
- BranchInst::Create(label_161, label__split_us_i_backedge, int1_321, label__split_us_i);
+ GetElementPtrInst* ptr_287 = GetElementPtrInst::Create(ptr_p_0_i_us_i, const_int32_53, "", label__split_us_i);
+ LoadInst* int8_288 = new LoadInst(ptr_p_0_i_us_i, "", false, label__split_us_i);
+ int8_288->setAlignment(1);
+ CastInst* int32_289 = new ZExtInst(int8_288, IntegerType::get(mod->getContext(), 32), "", label__split_us_i);
+ BinaryOperator* int32_290 = BinaryOperator::Create(Instruction::And, int32_289, const_int32_64, "", label__split_us_i);
+ BinaryOperator* int32_291 = BinaryOperator::Create(Instruction::Shl, int32_290, int32_shift_0_i_us_i, "", label__split_us_i);
+ BinaryOperator* int32_292 = BinaryOperator::Create(Instruction::Or, int32_291, int32_result_0_i_us_i, "", label__split_us_i);
+ BinaryOperator* int32_293 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_us_i, const_int32_65, "", label__split_us_i);
+ BinaryOperator* int32_294 = BinaryOperator::Create(Instruction::And, int32_289, const_int32_66, "", label__split_us_i);
+ ICmpInst* int1_295 = new ICmpInst(*label__split_us_i, ICmpInst::ICMP_EQ, int32_294, const_int32_52, "");
+ BranchInst::Create(label_158, label__split_us_i_backedge, int1_295, label__split_us_i);
  
  // Block .split.us.i.backedge (label__split_us_i_backedge)
- PHINode* int32_shift_0_i_us_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 4, "shift.0.i.us.i.be", label__split_us_i_backedge);
- int32_shift_0_i_us_i_be->addIncoming(int32_319, label__split_us_i);
- int32_shift_0_i_us_i_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_us_i);
- int32_shift_0_i_us_i_be->addIncoming(const_int32_52, label___getEncodingSize__YAIE_Z_exit_us_i);
- int32_shift_0_i_us_i_be->addIncoming(const_int32_52, label__split_us_i_loopexit);
+ PHINode* int32_shift_0_i_us_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.us.i.be", label__split_us_i_backedge);
+ int32_shift_0_i_us_i_be->addIncoming(int32_293, label__split_us_i);
+ int32_shift_0_i_us_i_be->addIncoming(const_int32_52, label_164);
  
- PHINode* int32_result_0_i_us_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 4, "result.0.i.us.i.be", label__split_us_i_backedge);
- int32_result_0_i_us_i_be->addIncoming(int32_318, label__split_us_i);
- int32_result_0_i_us_i_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_us_i);
- int32_result_0_i_us_i_be->addIncoming(const_int32_52, label___getEncodingSize__YAIE_Z_exit_us_i);
- int32_result_0_i_us_i_be->addIncoming(const_int32_52, label__split_us_i_loopexit);
+ PHINode* int32_result_0_i_us_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.us.i.be", label__split_us_i_backedge);
+ int32_result_0_i_us_i_be->addIncoming(int32_292, label__split_us_i);
+ int32_result_0_i_us_i_be->addIncoming(const_int32_52, label_164);
+ 
+ Argument* fwdref_297 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i_us_i_be = PHINode::Create(PointerTy_7, 2, "p.0.i.us.i.be", label__split_us_i_backedge);
+ ptr_p_0_i_us_i_be->addIncoming(ptr_287, label__split_us_i);
+ ptr_p_0_i_us_i_be->addIncoming(fwdref_297, label_164);
  
  BranchInst::Create(label__split_us_i, label__split_us_i_backedge);
  
- // Block  (label_161)
- BinaryOperator* int32_324 = BinaryOperator::Create(Instruction::And, int32_315, const_int32_70, "", label_161);
- ICmpInst* int1_325 = new ICmpInst(*label_161, ICmpInst::ICMP_NE, int32_324, const_int32_52, "");
- ICmpInst* int1_326 = new ICmpInst(*label_161, ICmpInst::ICMP_ULT, int32_319, const_int32_71, "");
- BinaryOperator* int1_or_cond_i_us_i = BinaryOperator::Create(Instruction::And, int1_325, int1_326, "or.cond.i.us.i", label_161);
- BranchInst::Create(label_162, label___readSLEB128__YAIPAPBE_Z_exit_us_i, int1_or_cond_i_us_i, label_161);
+ // Block  (label_158)
+ BinaryOperator* int32_299 = BinaryOperator::Create(Instruction::And, int32_289, const_int32_70, "", label_158);
+ ICmpInst* int1_300 = new ICmpInst(*label_158, ICmpInst::ICMP_NE, int32_299, const_int32_52, "");
+ ICmpInst* int1_301 = new ICmpInst(*label_158, ICmpInst::ICMP_ULT, int32_293, const_int32_71, "");
+ BinaryOperator* int1_or_cond_i_us_i = BinaryOperator::Create(Instruction::And, int1_300, int1_301, "or.cond.i.us.i", label_158);
+ BranchInst::Create(label_159, label___readSLEB128__YAIPAPBE_Z_exit_us_i, int1_or_cond_i_us_i, label_158);
  
- // Block  (label_162)
- BinaryOperator* int32_328 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32_319, "", label_162);
- BinaryOperator* int32_329 = BinaryOperator::Create(Instruction::Or, int32_318, int32_328, "", label_162);
- BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit_us_i, label_162);
+ // Block  (label_159)
+ BinaryOperator* int32_303 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32_293, "", label_159);
+ BinaryOperator* int32_304 = BinaryOperator::Create(Instruction::Or, int32_292, int32_303, "", label_159);
+ BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit_us_i, label_159);
  
  // Block ?readSLEB128@@YAIPAPBE@Z.exit.us.i (label___readSLEB128__YAIPAPBE_Z_exit_us_i)
  PHINode* int32_result_1_i_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1.i.us.i", label___readSLEB128__YAIPAPBE_Z_exit_us_i);
- int32_result_1_i_us_i->addIncoming(int32_329, label_162);
- int32_result_1_i_us_i->addIncoming(int32_318, label_161);
+ int32_result_1_i_us_i->addIncoming(int32_304, label_159);
+ int32_result_1_i_us_i->addIncoming(int32_292, label_158);
  
- BranchInst::Create(label_163, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
+ BranchInst::Create(label_160, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
  
- // Block  (label_163)
- Argument* fwdref_333 = new Argument(PointerTy_7);
- PHINode* ptr_332 = PHINode::Create(PointerTy_7, 2, "", label_163);
- ptr_332->addIncoming(ptr_p_0_i_us_i, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
- ptr_332->addIncoming(fwdref_333, label_163);
+ // Block  (label_160)
+ Argument* fwdref_307 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i1_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i1.us.i", label_160);
+ int32_shift_0_i1_us_i->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
+ int32_shift_0_i1_us_i->addIncoming(fwdref_307, label_160);
  
- Argument* fwdref_334 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i3_us_i = PHINode::Create(PointerTy_7, 2, "p.0.i3.us.i", label_163);
- ptr_p_0_i3_us_i->addIncoming(ptr_313, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
- ptr_p_0_i3_us_i->addIncoming(fwdref_334, label_163);
+ Argument* fwdref_308 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i2_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i2.us.i", label_160);
+ int32_result_0_i2_us_i->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
+ int32_result_0_i2_us_i->addIncoming(fwdref_308, label_160);
  
- GetElementPtrInst* ptr_335 = GetElementPtrInst::Create(ptr_332, const_int32_50, "", label_163);
- LoadInst* int8_336 = new LoadInst(ptr_p_0_i3_us_i, "", false, label_163);
- int8_336->setAlignment(1);
- ICmpInst* int1_337 = new ICmpInst(*label_163, ICmpInst::ICMP_SGT, int8_336, const_int8_57, "");
- BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit6_us_i, label_163, int1_337, label_163);
+ Argument* fwdref_310 = new Argument(PointerTy_7);
+ PHINode* ptr_309 = PHINode::Create(PointerTy_7, 2, "", label_160);
+ ptr_309->addIncoming(ptr_p_0_i_us_i, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
+ ptr_309->addIncoming(fwdref_310, label_160);
+ 
+ Argument* fwdref_311 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i3_us_i = PHINode::Create(PointerTy_7, 2, "p.0.i3.us.i", label_160);
+ ptr_p_0_i3_us_i->addIncoming(ptr_287, label___readSLEB128__YAIPAPBE_Z_exit_us_i);
+ ptr_p_0_i3_us_i->addIncoming(fwdref_311, label_160);
+ 
+ GetElementPtrInst* ptr_312 = GetElementPtrInst::Create(ptr_309, const_int32_50, "", label_160);
+ LoadInst* int8_313 = new LoadInst(ptr_p_0_i3_us_i, "", false, label_160);
+ int8_313->setAlignment(1);
+ CastInst* int32_314 = new ZExtInst(int8_313, IntegerType::get(mod->getContext(), 32), "", label_160);
+ BinaryOperator* int32_315 = BinaryOperator::Create(Instruction::And, int32_314, const_int32_64, "", label_160);
+ BinaryOperator* int32_316 = BinaryOperator::Create(Instruction::Shl, int32_315, int32_shift_0_i1_us_i, "", label_160);
+ BinaryOperator* int32_317 = BinaryOperator::Create(Instruction::Or, int32_316, int32_result_0_i2_us_i, "", label_160);
+ BinaryOperator* int32_318 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1_us_i, const_int32_65, "", label_160);
+ BinaryOperator* int32_319 = BinaryOperator::Create(Instruction::And, int32_314, const_int32_66, "", label_160);
+ ICmpInst* int1_320 = new ICmpInst(*label_160, ICmpInst::ICMP_EQ, int32_319, const_int32_52, "");
+ BranchInst::Create(label_161, label_160, int1_320, label_160);
+ 
+ // Block  (label_161)
+ PHINode* int32__lcssa76 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa76", label_161);
+ int32__lcssa76->addIncoming(int32_318, label_160);
+ 
+ PHINode* int32__lcssa75 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa75", label_161);
+ int32__lcssa75->addIncoming(int32_317, label_160);
+ 
+ PHINode* int32__lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa", label_161);
+ int32__lcssa->addIncoming(int32_314, label_160);
+ 
+ BinaryOperator* int32_322 = BinaryOperator::Create(Instruction::And, int32__lcssa, const_int32_70, "", label_161);
+ ICmpInst* int1_323 = new ICmpInst(*label_161, ICmpInst::ICMP_NE, int32_322, const_int32_52, "");
+ ICmpInst* int1_324 = new ICmpInst(*label_161, ICmpInst::ICMP_ULT, int32__lcssa76, const_int32_71, "");
+ BinaryOperator* int1_or_cond_i4_us_i = BinaryOperator::Create(Instruction::And, int1_323, int1_324, "or.cond.i4.us.i", label_161);
+ BranchInst::Create(label_162, label___readSLEB128__YAIPAPBE_Z_exit6_us_i, int1_or_cond_i4_us_i, label_161);
+ 
+ // Block  (label_162)
+ BinaryOperator* int32_326 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32__lcssa76, "", label_162);
+ BinaryOperator* int32_327 = BinaryOperator::Create(Instruction::Or, int32__lcssa75, int32_326, "", label_162);
+ BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit6_us_i, label_162);
  
  // Block ?readSLEB128@@YAIPAPBE@Z.exit6.us.i (label___readSLEB128__YAIPAPBE_Z_exit6_us_i)
- ICmpInst* int1_339 = new ICmpInst(*label___readSLEB128__YAIPAPBE_Z_exit6_us_i, ICmpInst::ICMP_EQ, int32_result_1_i_us_i, const_int32_52, "");
- BranchInst::Create(label__split_us_i_backedge, label___getEncodingSize__YAIE_Z_exit_us_i, int1_339, label___readSLEB128__YAIPAPBE_Z_exit6_us_i);
+ PHINode* int32_result_1_i5_us_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1.i5.us.i", label___readSLEB128__YAIPAPBE_Z_exit6_us_i);
+ int32_result_1_i5_us_i->addIncoming(int32_327, label_162);
+ int32_result_1_i5_us_i->addIncoming(int32__lcssa75, label_161);
+ 
+ ICmpInst* int1_329 = new ICmpInst(*label___readSLEB128__YAIPAPBE_Z_exit6_us_i, ICmpInst::ICMP_EQ, int32_result_1_i_us_i, const_int32_52, "");
+ BranchInst::Create(label__loopexit_us_i, label___getEncodingSize__YAIE_Z_exit_us_i, int1_329, label___readSLEB128__YAIPAPBE_Z_exit6_us_i);
  
  // Block ?getEncodingSize@@YAIE@Z.exit.us.i (label___getEncodingSize__YAIE_Z_exit_us_i)
- StoreInst* void_341 = new StoreInst(ptr_classInfo_0, ptr_EntryP_i, false, label___getEncodingSize__YAIE_Z_exit_us_i);
- void_341->setAlignment(4);
- LoadInst* int64_342 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label___getEncodingSize__YAIE_Z_exit_us_i);
- int64_342->setAlignment(8);
- CastInst* int32_343 = new TruncInst(int64_342, IntegerType::get(mod->getContext(), 32), "", label___getEncodingSize__YAIE_Z_exit_us_i);
- GetElementPtrInst* ptr_344 = GetElementPtrInst::Create(ptr_269, int32_343, "", label___getEncodingSize__YAIE_Z_exit_us_i);
- CastInst* ptr_345 = new BitCastInst(ptr_344, PointerTy_5, "", label___getEncodingSize__YAIE_Z_exit_us_i);
- LoadInst* ptr_exceptionType_07_us_i = new LoadInst(ptr_345, "exceptionType.07.us.i", false, label___getEncodingSize__YAIE_Z_exit_us_i);
- ptr_exceptionType_07_us_i->setAlignment(4);
- ICmpInst* int1_346 = new ICmpInst(*label___getEncodingSize__YAIE_Z_exit_us_i, ICmpInst::ICMP_EQ, ptr_exceptionType_07_us_i, const_ptr_72, "");
- BranchInst::Create(label__split_us_i_backedge, label__lr_ph_us_i_preheader, int1_346, label___getEncodingSize__YAIE_Z_exit_us_i);
+ StoreInst* void_331 = new StoreInst(ptr_classInfo_0, ptr_EntryP_i, false, label___getEncodingSize__YAIE_Z_exit_us_i);
+ void_331->setAlignment(4);
+ LoadInst* int64_332 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label___getEncodingSize__YAIE_Z_exit_us_i);
+ int64_332->setAlignment(8);
+ CastInst* int32_333 = new TruncInst(int64_332, IntegerType::get(mod->getContext(), 32), "", label___getEncodingSize__YAIE_Z_exit_us_i);
+ GetElementPtrInst* ptr_334 = GetElementPtrInst::Create(ptr_277, int32_333, "", label___getEncodingSize__YAIE_Z_exit_us_i);
+ CastInst* ptr_335 = new BitCastInst(ptr_334, PointerTy_5, "", label___getEncodingSize__YAIE_Z_exit_us_i);
+ LoadInst* ptr_exceptionType_013_us_i = new LoadInst(ptr_335, "exceptionType.013.us.i", false, label___getEncodingSize__YAIE_Z_exit_us_i);
+ ptr_exceptionType_013_us_i->setAlignment(4);
+ ICmpInst* int1_336 = new ICmpInst(*label___getEncodingSize__YAIE_Z_exit_us_i, ICmpInst::ICMP_EQ, ptr_exceptionType_013_us_i, const_ptr_72, "");
+ BranchInst::Create(label__loopexit_us_i, label__lr_ph_us_i_preheader, int1_336, label___getEncodingSize__YAIE_Z_exit_us_i);
  
  // Block .lr.ph.us.i.preheader (label__lr_ph_us_i_preheader)
  BranchInst::Create(label__lr_ph_us_i, label__lr_ph_us_i_preheader);
  
- // Block  (label_164)
- Argument* fwdref_350 = new Argument(PointerTy_4);
- std::vector<Value*> ptr_349_indices;
- ptr_349_indices.push_back(const_int32_52);
- ptr_349_indices.push_back(const_int32_52);
- Instruction* ptr_349 = GetElementPtrInst::Create(fwdref_350, ptr_349_indices, "", label_164);
- LoadInst* ptr_exceptionType_0_us_i = new LoadInst(ptr_349, "exceptionType.0.us.i", false, label_164);
+ // Block  (label_163)
+ Argument* fwdref_340 = new Argument(PointerTy_4);
+ std::vector<Value*> ptr_339_indices;
+ ptr_339_indices.push_back(const_int32_52);
+ ptr_339_indices.push_back(const_int32_52);
+ Instruction* ptr_339 = GetElementPtrInst::Create(fwdref_340, ptr_339_indices, "", label_163);
+ LoadInst* ptr_exceptionType_0_us_i = new LoadInst(ptr_339, "exceptionType.0.us.i", false, label_163);
  ptr_exceptionType_0_us_i->setAlignment(4);
- ICmpInst* int1_351 = new ICmpInst(*label_164, ICmpInst::ICMP_EQ, ptr_exceptionType_0_us_i, const_ptr_72, "");
- BranchInst::Create(label__split_us_i_loopexit, label__lr_ph_us_i, int1_351, label_164);
+ ICmpInst* int1_341 = new ICmpInst(*label_163, ICmpInst::ICMP_EQ, ptr_exceptionType_0_us_i, const_ptr_72, "");
+ BranchInst::Create(label__loopexit_us_i_loopexit, label__lr_ph_us_i, int1_341, label_163);
  
  // Block .lr.ph.us.i (label__lr_ph_us_i)
- PHINode* ptr_exceptionType_08_us_i = PHINode::Create(PointerTy_4, 2, "exceptionType.08.us.i", label__lr_ph_us_i);
- ptr_exceptionType_08_us_i->addIncoming(ptr_exceptionType_0_us_i, label_164);
- ptr_exceptionType_08_us_i->addIncoming(ptr_exceptionType_07_us_i, label__lr_ph_us_i_preheader);
+ PHINode* ptr_exceptionType_014_us_i = PHINode::Create(PointerTy_4, 2, "exceptionType.014.us.i", label__lr_ph_us_i);
+ ptr_exceptionType_014_us_i->addIncoming(ptr_exceptionType_0_us_i, label_163);
+ ptr_exceptionType_014_us_i->addIncoming(ptr_exceptionType_013_us_i, label__lr_ph_us_i_preheader);
  
- ICmpInst* int1_353 = new ICmpInst(*label__lr_ph_us_i, ICmpInst::ICMP_EQ, ptr_exceptionType_08_us_i, const_ptr_72, "");
- BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit, label_164, int1_353, label__lr_ph_us_i);
+ ICmpInst* int1_343 = new ICmpInst(*label__lr_ph_us_i, ICmpInst::ICMP_EQ, ptr_exceptionType_014_us_i, const_ptr_72, "");
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit, label_163, int1_343, label__lr_ph_us_i);
  
- // Block ..split_crit_edge.i.loopexit (label___split_crit_edge_i_loopexit)
- BranchInst::Create(label___split_crit_edge_i_backedge, label___split_crit_edge_i_loopexit);
+ // Block .loopexit.us.i.loopexit (label__loopexit_us_i_loopexit)
+ BranchInst::Create(label__loopexit_us_i, label__loopexit_us_i_loopexit);
+ 
+ // Block .loopexit.us.i (label__loopexit_us_i)
+ ICmpInst* int1_346 = new ICmpInst(*label__loopexit_us_i, ICmpInst::ICMP_EQ, int32_result_1_i5_us_i, const_int32_52, "");
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72, label_164, int1_346, label__loopexit_us_i);
+ 
+ // Block  (label_164)
+ BinaryOperator* int32__sum_us_i = BinaryOperator::Create(Instruction::Add, int32_result_1_i5_us_i, const_int32_53, ".sum.us.i", label_164);
+ GetElementPtrInst* ptr_348 = GetElementPtrInst::Create(ptr_p_0_i_us_i, int32__sum_us_i, "", label_164);
+ BranchInst::Create(label__split_us_i_backedge, label_164);
  
  // Block ..split_crit_edge.i (label___split_crit_edge_i)
- Argument* fwdref_356 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_350 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_shift_0_i_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.i", label___split_crit_edge_i);
- int32_shift_0_i_i->addIncoming(const_int32_52, label___split_crit_edge_i_preheader41);
- int32_shift_0_i_i->addIncoming(fwdref_356, label___split_crit_edge_i_backedge);
+ int32_shift_0_i_i->addIncoming(const_int32_52, label___split_crit_edge_i_preheader);
+ int32_shift_0_i_i->addIncoming(fwdref_350, label___split_crit_edge_i_backedge);
  
- Argument* fwdref_357 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_351 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_result_0_i_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.i", label___split_crit_edge_i);
- int32_result_0_i_i->addIncoming(const_int32_52, label___split_crit_edge_i_preheader41);
- int32_result_0_i_i->addIncoming(fwdref_357, label___split_crit_edge_i_backedge);
+ int32_result_0_i_i->addIncoming(const_int32_52, label___split_crit_edge_i_preheader);
+ int32_result_0_i_i->addIncoming(fwdref_351, label___split_crit_edge_i_backedge);
  
- Argument* fwdref_358 = new Argument(PointerTy_7);
+ Argument* fwdref_352 = new Argument(PointerTy_7);
  PHINode* ptr_p_0_i_i = PHINode::Create(PointerTy_7, 2, "p.0.i.i", label___split_crit_edge_i);
- ptr_p_0_i_i->addIncoming(ptr_268, label___split_crit_edge_i_preheader41);
- ptr_p_0_i_i->addIncoming(fwdref_358, label___split_crit_edge_i_backedge);
+ ptr_p_0_i_i->addIncoming(ptr_276, label___split_crit_edge_i_preheader);
+ ptr_p_0_i_i->addIncoming(fwdref_352, label___split_crit_edge_i_backedge);
  
- GetElementPtrInst* ptr_359 = GetElementPtrInst::Create(ptr_p_0_i_i, const_int32_53, "", label___split_crit_edge_i);
- LoadInst* int8_360 = new LoadInst(ptr_p_0_i_i, "", false, label___split_crit_edge_i);
- int8_360->setAlignment(1);
- CastInst* int32_361 = new ZExtInst(int8_360, IntegerType::get(mod->getContext(), 32), "", label___split_crit_edge_i);
- BinaryOperator* int32_362 = BinaryOperator::Create(Instruction::And, int32_361, const_int32_64, "", label___split_crit_edge_i);
- BinaryOperator* int32_363 = BinaryOperator::Create(Instruction::Shl, int32_362, int32_shift_0_i_i, "", label___split_crit_edge_i);
- BinaryOperator* int32_364 = BinaryOperator::Create(Instruction::Or, int32_363, int32_result_0_i_i, "", label___split_crit_edge_i);
- BinaryOperator* int32_365 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_i, const_int32_65, "", label___split_crit_edge_i);
- BinaryOperator* int32_366 = BinaryOperator::Create(Instruction::And, int32_361, const_int32_66, "", label___split_crit_edge_i);
- ICmpInst* int1_367 = new ICmpInst(*label___split_crit_edge_i, ICmpInst::ICMP_EQ, int32_366, const_int32_52, "");
- BranchInst::Create(label_165, label___split_crit_edge_i_backedge, int1_367, label___split_crit_edge_i);
+ GetElementPtrInst* ptr_353 = GetElementPtrInst::Create(ptr_p_0_i_i, const_int32_53, "", label___split_crit_edge_i);
+ LoadInst* int8_354 = new LoadInst(ptr_p_0_i_i, "", false, label___split_crit_edge_i);
+ int8_354->setAlignment(1);
+ CastInst* int32_355 = new ZExtInst(int8_354, IntegerType::get(mod->getContext(), 32), "", label___split_crit_edge_i);
+ BinaryOperator* int32_356 = BinaryOperator::Create(Instruction::And, int32_355, const_int32_64, "", label___split_crit_edge_i);
+ BinaryOperator* int32_357 = BinaryOperator::Create(Instruction::Shl, int32_356, int32_shift_0_i_i, "", label___split_crit_edge_i);
+ BinaryOperator* int32_358 = BinaryOperator::Create(Instruction::Or, int32_357, int32_result_0_i_i, "", label___split_crit_edge_i);
+ BinaryOperator* int32_359 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_i, const_int32_65, "", label___split_crit_edge_i);
+ BinaryOperator* int32_360 = BinaryOperator::Create(Instruction::And, int32_355, const_int32_66, "", label___split_crit_edge_i);
+ ICmpInst* int1_361 = new ICmpInst(*label___split_crit_edge_i, ICmpInst::ICMP_EQ, int32_360, const_int32_52, "");
+ BranchInst::Create(label_165, label___split_crit_edge_i_backedge, int1_361, label___split_crit_edge_i);
  
  // Block ..split_crit_edge.i.backedge (label___split_crit_edge_i_backedge)
- PHINode* int32_shift_0_i_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 4, "shift.0.i.i.be", label___split_crit_edge_i_backedge);
- int32_shift_0_i_i_be->addIncoming(int32_365, label___split_crit_edge_i);
- int32_shift_0_i_i_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_i);
- int32_shift_0_i_i_be->addIncoming(const_int32_52, label___getEncodingSize__YAIE_Z_exit_i);
- int32_shift_0_i_i_be->addIncoming(const_int32_52, label___split_crit_edge_i_loopexit);
+ PHINode* int32_shift_0_i_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i.i.be", label___split_crit_edge_i_backedge);
+ int32_shift_0_i_i_be->addIncoming(int32_359, label___split_crit_edge_i);
+ int32_shift_0_i_i_be->addIncoming(const_int32_52, label_172);
  
- PHINode* int32_result_0_i_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 4, "result.0.i.i.be", label___split_crit_edge_i_backedge);
- int32_result_0_i_i_be->addIncoming(int32_364, label___split_crit_edge_i);
- int32_result_0_i_i_be->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit6_i);
- int32_result_0_i_i_be->addIncoming(const_int32_52, label___getEncodingSize__YAIE_Z_exit_i);
- int32_result_0_i_i_be->addIncoming(const_int32_52, label___split_crit_edge_i_loopexit);
+ PHINode* int32_result_0_i_i_be = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i.i.be", label___split_crit_edge_i_backedge);
+ int32_result_0_i_i_be->addIncoming(int32_358, label___split_crit_edge_i);
+ int32_result_0_i_i_be->addIncoming(const_int32_52, label_172);
+ 
+ Argument* fwdref_363 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i_i_be = PHINode::Create(PointerTy_7, 2, "p.0.i.i.be", label___split_crit_edge_i_backedge);
+ ptr_p_0_i_i_be->addIncoming(ptr_353, label___split_crit_edge_i);
+ ptr_p_0_i_i_be->addIncoming(fwdref_363, label_172);
  
  BranchInst::Create(label___split_crit_edge_i, label___split_crit_edge_i_backedge);
  
  // Block  (label_165)
- BinaryOperator* int32_370 = BinaryOperator::Create(Instruction::And, int32_361, const_int32_70, "", label_165);
- ICmpInst* int1_371 = new ICmpInst(*label_165, ICmpInst::ICMP_NE, int32_370, const_int32_52, "");
- ICmpInst* int1_372 = new ICmpInst(*label_165, ICmpInst::ICMP_ULT, int32_365, const_int32_71, "");
- BinaryOperator* int1_or_cond_i_i = BinaryOperator::Create(Instruction::And, int1_371, int1_372, "or.cond.i.i", label_165);
+ BinaryOperator* int32_365 = BinaryOperator::Create(Instruction::And, int32_355, const_int32_70, "", label_165);
+ ICmpInst* int1_366 = new ICmpInst(*label_165, ICmpInst::ICMP_NE, int32_365, const_int32_52, "");
+ ICmpInst* int1_367 = new ICmpInst(*label_165, ICmpInst::ICMP_ULT, int32_359, const_int32_71, "");
+ BinaryOperator* int1_or_cond_i_i = BinaryOperator::Create(Instruction::And, int1_366, int1_367, "or.cond.i.i", label_165);
  BranchInst::Create(label_166, label___readSLEB128__YAIPAPBE_Z_exit_i, int1_or_cond_i_i, label_165);
  
  // Block  (label_166)
- BinaryOperator* int32_374 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32_365, "", label_166);
- BinaryOperator* int32_375 = BinaryOperator::Create(Instruction::Or, int32_364, int32_374, "", label_166);
+ BinaryOperator* int32_369 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32_359, "", label_166);
+ BinaryOperator* int32_370 = BinaryOperator::Create(Instruction::Or, int32_358, int32_369, "", label_166);
  BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit_i, label_166);
  
  // Block ?readSLEB128@@YAIPAPBE@Z.exit.i (label___readSLEB128__YAIPAPBE_Z_exit_i)
  PHINode* int32_result_1_i_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1.i.i", label___readSLEB128__YAIPAPBE_Z_exit_i);
- int32_result_1_i_i->addIncoming(int32_375, label_166);
- int32_result_1_i_i->addIncoming(int32_364, label_165);
+ int32_result_1_i_i->addIncoming(int32_370, label_166);
+ int32_result_1_i_i->addIncoming(int32_358, label_165);
  
  BranchInst::Create(label_167, label___readSLEB128__YAIPAPBE_Z_exit_i);
  
  // Block  (label_167)
- Argument* fwdref_379 = new Argument(PointerTy_7);
- PHINode* ptr_378 = PHINode::Create(PointerTy_7, 2, "", label_167);
- ptr_378->addIncoming(ptr_p_0_i_i, label___readSLEB128__YAIPAPBE_Z_exit_i);
- ptr_378->addIncoming(fwdref_379, label_167);
+ Argument* fwdref_373 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i1_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i1.i", label_167);
+ int32_shift_0_i1_i->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit_i);
+ int32_shift_0_i1_i->addIncoming(fwdref_373, label_167);
  
- Argument* fwdref_380 = new Argument(PointerTy_7);
+ Argument* fwdref_374 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i2_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i2.i", label_167);
+ int32_result_0_i2_i->addIncoming(const_int32_52, label___readSLEB128__YAIPAPBE_Z_exit_i);
+ int32_result_0_i2_i->addIncoming(fwdref_374, label_167);
+ 
+ Argument* fwdref_376 = new Argument(PointerTy_7);
+ PHINode* ptr_375 = PHINode::Create(PointerTy_7, 2, "", label_167);
+ ptr_375->addIncoming(ptr_p_0_i_i, label___readSLEB128__YAIPAPBE_Z_exit_i);
+ ptr_375->addIncoming(fwdref_376, label_167);
+ 
+ Argument* fwdref_377 = new Argument(PointerTy_7);
  PHINode* ptr_p_0_i3_i = PHINode::Create(PointerTy_7, 2, "p.0.i3.i", label_167);
- ptr_p_0_i3_i->addIncoming(ptr_359, label___readSLEB128__YAIPAPBE_Z_exit_i);
- ptr_p_0_i3_i->addIncoming(fwdref_380, label_167);
+ ptr_p_0_i3_i->addIncoming(ptr_353, label___readSLEB128__YAIPAPBE_Z_exit_i);
+ ptr_p_0_i3_i->addIncoming(fwdref_377, label_167);
  
- GetElementPtrInst* ptr_381 = GetElementPtrInst::Create(ptr_378, const_int32_50, "", label_167);
- LoadInst* int8_382 = new LoadInst(ptr_p_0_i3_i, "", false, label_167);
- int8_382->setAlignment(1);
- ICmpInst* int1_383 = new ICmpInst(*label_167, ICmpInst::ICMP_SGT, int8_382, const_int8_57, "");
- BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit6_i, label_167, int1_383, label_167);
+ GetElementPtrInst* ptr_378 = GetElementPtrInst::Create(ptr_375, const_int32_50, "", label_167);
+ LoadInst* int8_379 = new LoadInst(ptr_p_0_i3_i, "", false, label_167);
+ int8_379->setAlignment(1);
+ CastInst* int32_380 = new ZExtInst(int8_379, IntegerType::get(mod->getContext(), 32), "", label_167);
+ BinaryOperator* int32_381 = BinaryOperator::Create(Instruction::And, int32_380, const_int32_64, "", label_167);
+ BinaryOperator* int32_382 = BinaryOperator::Create(Instruction::Shl, int32_381, int32_shift_0_i1_i, "", label_167);
+ BinaryOperator* int32_383 = BinaryOperator::Create(Instruction::Or, int32_382, int32_result_0_i2_i, "", label_167);
+ BinaryOperator* int32_384 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1_i, const_int32_65, "", label_167);
+ BinaryOperator* int32_385 = BinaryOperator::Create(Instruction::And, int32_380, const_int32_66, "", label_167);
+ ICmpInst* int1_386 = new ICmpInst(*label_167, ICmpInst::ICMP_EQ, int32_385, const_int32_52, "");
+ BranchInst::Create(label_168, label_167, int1_386, label_167);
+ 
+ // Block  (label_168)
+ PHINode* int32__lcssa80 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa80", label_168);
+ int32__lcssa80->addIncoming(int32_384, label_167);
+ 
+ PHINode* int32__lcssa79 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa79", label_168);
+ int32__lcssa79->addIncoming(int32_383, label_167);
+ 
+ PHINode* int32__lcssa78 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa78", label_168);
+ int32__lcssa78->addIncoming(int32_380, label_167);
+ 
+ BinaryOperator* int32_388 = BinaryOperator::Create(Instruction::And, int32__lcssa78, const_int32_70, "", label_168);
+ ICmpInst* int1_389 = new ICmpInst(*label_168, ICmpInst::ICMP_NE, int32_388, const_int32_52, "");
+ ICmpInst* int1_390 = new ICmpInst(*label_168, ICmpInst::ICMP_ULT, int32__lcssa80, const_int32_71, "");
+ BinaryOperator* int1_or_cond_i4_i = BinaryOperator::Create(Instruction::And, int1_389, int1_390, "or.cond.i4.i", label_168);
+ BranchInst::Create(label_169, label___readSLEB128__YAIPAPBE_Z_exit6_i, int1_or_cond_i4_i, label_168);
+ 
+ // Block  (label_169)
+ BinaryOperator* int32_392 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32__lcssa80, "", label_169);
+ BinaryOperator* int32_393 = BinaryOperator::Create(Instruction::Or, int32__lcssa79, int32_392, "", label_169);
+ BranchInst::Create(label___readSLEB128__YAIPAPBE_Z_exit6_i, label_169);
  
  // Block ?readSLEB128@@YAIPAPBE@Z.exit6.i (label___readSLEB128__YAIPAPBE_Z_exit6_i)
- ICmpInst* int1_385 = new ICmpInst(*label___readSLEB128__YAIPAPBE_Z_exit6_i, ICmpInst::ICMP_EQ, int32_result_1_i_i, const_int32_52, "");
- BranchInst::Create(label___split_crit_edge_i_backedge, label___getEncodingSize__YAIE_Z_exit_i, int1_385, label___readSLEB128__YAIPAPBE_Z_exit6_i);
+ PHINode* int32_result_1_i5_i = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1.i5.i", label___readSLEB128__YAIPAPBE_Z_exit6_i);
+ int32_result_1_i5_i->addIncoming(int32_393, label_169);
+ int32_result_1_i5_i->addIncoming(int32__lcssa79, label_168);
+ 
+ ICmpInst* int1_395 = new ICmpInst(*label___readSLEB128__YAIPAPBE_Z_exit6_i, ICmpInst::ICMP_EQ, int32_result_1_i_i, const_int32_52, "");
+ BranchInst::Create(label__loopexit_i, label_170, int1_395, label___readSLEB128__YAIPAPBE_Z_exit6_i);
+ 
+ // Block  (label_170)
+ BranchInst::Create(label__us_lcssa_i, label___getEncodingSize__YAIE_Z_exit_i, int1_brmerge_i, label_170);
  
  // Block .us-lcssa.i (label__us_lcssa_i)
- CallInst* void_387 = CallInst::Create(func_abort, "", label__us_lcssa_i);
- void_387->setCallingConv(CallingConv::C);
- void_387->setTailCall(true);
- AttributeSet void_387_PAL;
+ CallInst* void_398 = CallInst::Create(func_abort, "", label__us_lcssa_i);
+ void_398->setCallingConv(CallingConv::C);
+ void_398->setTailCall(true);
+ AttributeSet void_398_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1855,28 +1869,28 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  void_387_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_398_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_387->setAttributes(void_387_PAL);
+ void_398->setAttributes(void_398_PAL);
  
  new UnreachableInst(mod->getContext(), label__us_lcssa_i);
  
  // Block ?getEncodingSize@@YAIE@Z.exit.i (label___getEncodingSize__YAIE_Z_exit_i)
  LoadInst* int32_switch_load_i_i = new LoadInst(ptr_switch_gep_i_i, "switch.load.i.i", false, label___getEncodingSize__YAIE_Z_exit_i);
  int32_switch_load_i_i->setAlignment(4);
- BinaryOperator* int32_389 = BinaryOperator::Create(Instruction::Sub, const_int32_52, int32_result_1_i_i, "", label___getEncodingSize__YAIE_Z_exit_i);
- BinaryOperator* int32_390 = BinaryOperator::Create(Instruction::Mul, int32_switch_load_i_i, int32_389, "", label___getEncodingSize__YAIE_Z_exit_i);
- GetElementPtrInst* ptr_391 = GetElementPtrInst::Create(ptr_classInfo_0, int32_390, "", label___getEncodingSize__YAIE_Z_exit_i);
- StoreInst* void_392 = new StoreInst(ptr_391, ptr_EntryP_i, false, label___getEncodingSize__YAIE_Z_exit_i);
- void_392->setAlignment(4);
- std::vector<Value*> int32_393_params;
- int32_393_params.push_back(ptr_EntryP_i);
- int32_393_params.push_back(int8_185);
- CallInst* int32_393 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_393_params, "", label___getEncodingSize__YAIE_Z_exit_i);
- int32_393->setCallingConv(CallingConv::Fast);
- int32_393->setTailCall(false);
- AttributeSet int32_393_PAL;
+ BinaryOperator* int32_400 = BinaryOperator::Create(Instruction::Sub, const_int32_52, int32_result_1_i_i, "", label___getEncodingSize__YAIE_Z_exit_i);
+ BinaryOperator* int32_401 = BinaryOperator::Create(Instruction::Mul, int32_switch_load_i_i, int32_400, "", label___getEncodingSize__YAIE_Z_exit_i);
+ GetElementPtrInst* ptr_402 = GetElementPtrInst::Create(ptr_classInfo_0, int32_401, "", label___getEncodingSize__YAIE_Z_exit_i);
+ StoreInst* void_403 = new StoreInst(ptr_402, ptr_EntryP_i, false, label___getEncodingSize__YAIE_Z_exit_i);
+ void_403->setAlignment(4);
+ std::vector<Value*> int32_404_params;
+ int32_404_params.push_back(ptr_EntryP_i);
+ int32_404_params.push_back(int8_193);
+ CallInst* int32_404 = CallInst::Create(func___readEncodedPointer__YAIPAPBEE_Z, int32_404_params, "", label___getEncodingSize__YAIE_Z_exit_i);
+ int32_404->setCallingConv(CallingConv::Fast);
+ int32_404->setTailCall(false);
+ AttributeSet int32_404_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -1887,135 +1901,192 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  int32_393_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  int32_404_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- int32_393->setAttributes(int32_393_PAL);
+ int32_404->setAttributes(int32_404_PAL);
  
- CastInst* ptr_394 = new IntToPtrInst(int32_393, PointerTy_4, "", label___getEncodingSize__YAIE_Z_exit_i);
- LoadInst* int64_395 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label___getEncodingSize__YAIE_Z_exit_i);
- int64_395->setAlignment(8);
- CastInst* int32_396 = new TruncInst(int64_395, IntegerType::get(mod->getContext(), 32), "", label___getEncodingSize__YAIE_Z_exit_i);
- GetElementPtrInst* ptr_397 = GetElementPtrInst::Create(ptr_269, int32_396, "", label___getEncodingSize__YAIE_Z_exit_i);
- CastInst* ptr_398 = new BitCastInst(ptr_397, PointerTy_5, "", label___getEncodingSize__YAIE_Z_exit_i);
- LoadInst* ptr_exceptionType_07_i = new LoadInst(ptr_398, "exceptionType.07.i", false, label___getEncodingSize__YAIE_Z_exit_i);
- ptr_exceptionType_07_i->setAlignment(4);
- ICmpInst* int1_399 = new ICmpInst(*label___getEncodingSize__YAIE_Z_exit_i, ICmpInst::ICMP_EQ, ptr_exceptionType_07_i, const_ptr_72, "");
- BranchInst::Create(label___split_crit_edge_i_backedge, label__lr_ph_i_preheader, int1_399, label___getEncodingSize__YAIE_Z_exit_i);
+ CastInst* ptr_405 = new IntToPtrInst(int32_404, PointerTy_4, "", label___getEncodingSize__YAIE_Z_exit_i);
+ LoadInst* int64_406 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label___getEncodingSize__YAIE_Z_exit_i);
+ int64_406->setAlignment(8);
+ CastInst* int32_407 = new TruncInst(int64_406, IntegerType::get(mod->getContext(), 32), "", label___getEncodingSize__YAIE_Z_exit_i);
+ GetElementPtrInst* ptr_408 = GetElementPtrInst::Create(ptr_277, int32_407, "", label___getEncodingSize__YAIE_Z_exit_i);
+ CastInst* ptr_409 = new BitCastInst(ptr_408, PointerTy_5, "", label___getEncodingSize__YAIE_Z_exit_i);
+ LoadInst* ptr_exceptionType_013_i = new LoadInst(ptr_409, "exceptionType.013.i", false, label___getEncodingSize__YAIE_Z_exit_i);
+ ptr_exceptionType_013_i->setAlignment(4);
+ ICmpInst* int1_410 = new ICmpInst(*label___getEncodingSize__YAIE_Z_exit_i, ICmpInst::ICMP_EQ, ptr_exceptionType_013_i, const_ptr_72, "");
+ BranchInst::Create(label__loopexit_i, label__lr_ph_i_preheader, int1_410, label___getEncodingSize__YAIE_Z_exit_i);
  
  // Block .lr.ph.i.preheader (label__lr_ph_i_preheader)
  BranchInst::Create(label__lr_ph_i, label__lr_ph_i_preheader);
  
- // Block  (label_168)
- Argument* fwdref_403 = new Argument(PointerTy_4);
- std::vector<Value*> ptr_402_indices;
- ptr_402_indices.push_back(const_int32_52);
- ptr_402_indices.push_back(const_int32_52);
- Instruction* ptr_402 = GetElementPtrInst::Create(fwdref_403, ptr_402_indices, "", label_168);
- LoadInst* ptr_exceptionType_0_i = new LoadInst(ptr_402, "exceptionType.0.i", false, label_168);
+ // Block  (label_171)
+ Argument* fwdref_414 = new Argument(PointerTy_4);
+ std::vector<Value*> ptr_413_indices;
+ ptr_413_indices.push_back(const_int32_52);
+ ptr_413_indices.push_back(const_int32_52);
+ Instruction* ptr_413 = GetElementPtrInst::Create(fwdref_414, ptr_413_indices, "", label_171);
+ LoadInst* ptr_exceptionType_0_i = new LoadInst(ptr_413, "exceptionType.0.i", false, label_171);
  ptr_exceptionType_0_i->setAlignment(4);
- ICmpInst* int1_404 = new ICmpInst(*label_168, ICmpInst::ICMP_EQ, ptr_exceptionType_0_i, const_ptr_72, "");
- BranchInst::Create(label___split_crit_edge_i_loopexit, label__lr_ph_i, int1_404, label_168);
+ ICmpInst* int1_415 = new ICmpInst(*label_171, ICmpInst::ICMP_EQ, ptr_exceptionType_0_i, const_ptr_72, "");
+ BranchInst::Create(label__loopexit_i_loopexit, label__lr_ph_i, int1_415, label_171);
  
  // Block .lr.ph.i (label__lr_ph_i)
- PHINode* ptr_exceptionType_08_i = PHINode::Create(PointerTy_4, 2, "exceptionType.08.i", label__lr_ph_i);
- ptr_exceptionType_08_i->addIncoming(ptr_exceptionType_0_i, label_168);
- ptr_exceptionType_08_i->addIncoming(ptr_exceptionType_07_i, label__lr_ph_i_preheader);
+ PHINode* ptr_exceptionType_014_i = PHINode::Create(PointerTy_4, 2, "exceptionType.014.i", label__lr_ph_i);
+ ptr_exceptionType_014_i->addIncoming(ptr_exceptionType_0_i, label_171);
+ ptr_exceptionType_014_i->addIncoming(ptr_exceptionType_013_i, label__lr_ph_i_preheader);
  
- ICmpInst* int1_406 = new ICmpInst(*label__lr_ph_i, ICmpInst::ICMP_EQ, ptr_exceptionType_08_i, ptr_394, "");
- BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit40, label_168, int1_406, label__lr_ph_i);
+ ICmpInst* int1_417 = new ICmpInst(*label__lr_ph_i, ICmpInst::ICMP_EQ, ptr_exceptionType_014_i, ptr_405, "");
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73, label_171, int1_417, label__lr_ph_i);
+ 
+ // Block .loopexit.i.loopexit (label__loopexit_i_loopexit)
+ BranchInst::Create(label__loopexit_i, label__loopexit_i_loopexit);
+ 
+ // Block .loopexit.i (label__loopexit_i)
+ ICmpInst* int1_420 = new ICmpInst(*label__loopexit_i, ICmpInst::ICMP_EQ, int32_result_1_i5_i, const_int32_52, "");
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74, label_172, int1_420, label__loopexit_i);
+ 
+ // Block  (label_172)
+ BinaryOperator* int32__sum_i = BinaryOperator::Create(Instruction::Add, int32_result_1_i5_i, const_int32_53, ".sum.i", label_172);
+ GetElementPtrInst* ptr_422 = GetElementPtrInst::Create(ptr_p_0_i_i, int32__sum_i, "", label_172);
+ BranchInst::Create(label___split_crit_edge_i_backedge, label_172);
  
  // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit)
+ PHINode* int32_result_1_i_us_i_lcssa = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, "result.1.i.us.i.lcssa", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit);
+ int32_result_1_i_us_i_lcssa->addIncoming(int32_result_1_i_us_i, label__lr_ph_us_i);
+ 
  BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit);
  
- // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit40 (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit40)
- BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit40);
+ // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit72 (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72)
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72);
+ 
+ // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit73 (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73)
+ PHINode* int32_result_1_i_i_lcssa81 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, "result.1.i.i.lcssa81", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73);
+ int32_result_1_i_i_lcssa81->addIncoming(int32_result_1_i_i, label__lr_ph_i);
+ 
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73);
+ 
+ // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit.loopexit74 (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74)
+ BranchInst::Create(label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74);
  
  // Block ?handleActionValue@@YA_NPA_JEPBEI_KPAU_Unwind_Exception@@@Z.exit (label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit)
- PHINode* int32_exceptionMatched_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 3, "exceptionMatched.0", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
- int32_exceptionMatched_0->addIncoming(const_int32_51, label_156);
- int32_exceptionMatched_0->addIncoming(const_int32_73, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit);
- int32_exceptionMatched_0->addIncoming(const_int32_73, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit40);
+ PHINode* int32__off0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 5, ".off0", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
+ int32__off0->addIncoming(const_int32_52, label_156);
+ int32__off0->addIncoming(int32_result_1_i_us_i_lcssa, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit);
+ int32__off0->addIncoming(const_int32_52, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72);
+ int32__off0->addIncoming(int32_result_1_i_i_lcssa81, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73);
+ int32__off0->addIncoming(const_int32_52, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74);
  
- BinaryOperator* int32_410 = BinaryOperator::Create(Instruction::And, int32_actions, const_int32_53, "", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
- ICmpInst* int1_411 = new ICmpInst(*label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, ICmpInst::ICMP_EQ, int32_410, const_int32_52, "");
- BranchInst::Create(label_169, label__loopexit, int1_411, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
+ PHINode* int1_exceptionMatched_0 = PHINode::Create(IntegerType::get(mod->getContext(), 1), 5, "exceptionMatched.0", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
+ int1_exceptionMatched_0->addIncoming(const_int1_54, label_156);
+ int1_exceptionMatched_0->addIncoming(const_int1_55, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit);
+ int1_exceptionMatched_0->addIncoming(const_int1_54, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit72);
+ int1_exceptionMatched_0->addIncoming(const_int1_55, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit73);
+ int1_exceptionMatched_0->addIncoming(const_int1_54, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit_loopexit74);
  
- // Block  (label_169)
- CastInst* int32_413 = new PtrToIntInst(ptr_exceptionObject, IntegerType::get(mod->getContext(), 32), "", label_169);
- std::vector<Value*> void_414_params;
- void_414_params.push_back(ptr_context);
- void_414_params.push_back(const_int32_52);
- void_414_params.push_back(int32_413);
- CallInst* void_414 = CallInst::Create(func__Unwind_SetGR, void_414_params, "", label_169);
- void_414->setCallingConv(CallingConv::C);
- void_414->setTailCall(true);
- AttributeSet void_414_PAL;
- void_414->setAttributes(void_414_PAL);
+ BinaryOperator* int32_428 = BinaryOperator::Create(Instruction::And, int32_actions, const_int32_53, "", label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
+ ICmpInst* int1_429 = new ICmpInst(*label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit, ICmpInst::ICMP_EQ, int32_428, const_int32_52, "");
+ BranchInst::Create(label_173, label_177, int1_429, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
  
- std::vector<Value*> void_415_params;
- void_415_params.push_back(ptr_context);
- void_415_params.push_back(const_int32_50);
- void_415_params.push_back(const_int32_52);
- CallInst* void_415 = CallInst::Create(func__Unwind_SetGR, void_415_params, "", label_169);
- void_415->setCallingConv(CallingConv::C);
- void_415->setTailCall(true);
- AttributeSet void_415_PAL;
- void_415->setAttributes(void_415_PAL);
+ // Block  (label_173)
+ CastInst* int32_431 = new PtrToIntInst(ptr_exceptionObject, IntegerType::get(mod->getContext(), 32), "", label_173);
+ std::vector<Value*> void_432_params;
+ void_432_params.push_back(ptr_context);
+ void_432_params.push_back(const_int32_52);
+ void_432_params.push_back(int32_431);
+ CallInst* void_432 = CallInst::Create(func__Unwind_SetGR, void_432_params, "", label_173);
+ void_432->setCallingConv(CallingConv::C);
+ void_432->setTailCall(true);
+ AttributeSet void_432_PAL;
+ void_432->setAttributes(void_432_PAL);
  
- BinaryOperator* int32_416 = BinaryOperator::Create(Instruction::Add, int32__lcssa43, int32_173, "", label_169);
- std::vector<Value*> void_417_params;
- void_417_params.push_back(ptr_context);
- void_417_params.push_back(int32_416);
- CallInst* void_417 = CallInst::Create(func__Unwind_SetIP, void_417_params, "", label_169);
- void_417->setCallingConv(CallingConv::C);
- void_417->setTailCall(true);
- AttributeSet void_417_PAL;
- void_417->setAttributes(void_417_PAL);
+ BinaryOperator* int1_brmerge_demorgan = BinaryOperator::Create(Instruction::And, int1_272, int1_exceptionMatched_0, "brmerge.demorgan", label_173);
+ BranchInst::Create(label_175, label_174, int1_brmerge_demorgan, label_173);
  
- BranchInst::Create(label__loopexit, label_169);
+ // Block  (label_174)
+ std::vector<Value*> void_434_params;
+ void_434_params.push_back(ptr_context);
+ void_434_params.push_back(const_int32_50);
+ void_434_params.push_back(const_int32_52);
+ CallInst* void_434 = CallInst::Create(func__Unwind_SetGR, void_434_params, "", label_174);
+ void_434->setCallingConv(CallingConv::C);
+ void_434->setTailCall(true);
+ AttributeSet void_434_PAL;
+ void_434->setAttributes(void_434_PAL);
+ 
+ BranchInst::Create(label_176, label_174);
+ 
+ // Block  (label_175)
+ std::vector<Value*> void_436_params;
+ void_436_params.push_back(ptr_context);
+ void_436_params.push_back(const_int32_50);
+ void_436_params.push_back(int32__off0);
+ CallInst* void_436 = CallInst::Create(func__Unwind_SetGR, void_436_params, "", label_175);
+ void_436->setCallingConv(CallingConv::C);
+ void_436->setTailCall(true);
+ AttributeSet void_436_PAL;
+ void_436->setAttributes(void_436_PAL);
+ 
+ BranchInst::Create(label_176, label_175);
+ 
+ // Block  (label_176)
+ BinaryOperator* int32_438 = BinaryOperator::Create(Instruction::Add, int32__lcssa85, int32_181, "", label_176);
+ std::vector<Value*> void_439_params;
+ void_439_params.push_back(ptr_context);
+ void_439_params.push_back(int32_438);
+ CallInst* void_439 = CallInst::Create(func__Unwind_SetIP, void_439_params, "", label_176);
+ void_439->setCallingConv(CallingConv::C);
+ void_439->setTailCall(true);
+ AttributeSet void_439_PAL;
+ void_439->setAttributes(void_439_PAL);
+ 
+ BranchInst::Create(label__loopexit, label_176);
+ 
+ // Block  (label_177)
+ SelectInst* int32__ = SelectInst::Create(int1_exceptionMatched_0, const_int32_73, const_int32_51, ".", label_177);
+ ReturnInst::Create(mod->getContext(), int32__, label_177);
  
  // Block .loopexit.loopexit (label__loopexit_loopexit)
  BranchInst::Create(label__loopexit, label__loopexit_loopexit);
  
  // Block .loopexit (label__loopexit)
- PHINode* int32_merge = PHINode::Create(IntegerType::get(mod->getContext(), 32), 4, "merge", label__loopexit);
- int32_merge->addIncoming(int32_exceptionMatched_0, label___handleActionValue__YA_NPA_JEPBEI_KPAU_Unwind_Exception___Z_exit);
- int32_merge->addIncoming(const_int32_65, label_169);
- int32_merge->addIncoming(const_int32_51, label___readULEB128__YAIPAPBE_Z_exit5);
- int32_merge->addIncoming(const_int32_51, label__loopexit_loopexit);
+ PHINode* int32_ret_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 3, "ret.0", label__loopexit);
+ int32_ret_0->addIncoming(const_int32_65, label_176);
+ int32_ret_0->addIncoming(const_int32_51, label___readULEB128__YAIPAPBE_Z_exit6);
+ int32_ret_0->addIncoming(const_int32_51, label__loopexit_loopexit);
  
- ReturnInst::Create(mod->getContext(), int32_merge, label__loopexit);
+ ReturnInst::Create(mod->getContext(), int32_ret_0, label__loopexit);
  
  // Resolve Forward References
- fwdref_193->replaceAllUsesWith(ptr_194); delete fwdref_193;
- fwdref_192->replaceAllUsesWith(ptr_p_0_i); delete fwdref_192;
- fwdref_300->replaceAllUsesWith(ptr_p_0_i3_i_us); delete fwdref_300;
- fwdref_215->replaceAllUsesWith(ptr_p_0_i4); delete fwdref_215;
- fwdref_278->replaceAllUsesWith(int32_shift_0_i_i_us_be); delete fwdref_278;
- fwdref_279->replaceAllUsesWith(int32_result_0_i_i_us_be); delete fwdref_279;
- fwdref_350->replaceAllUsesWith(ptr_exceptionType_08_us_i); delete fwdref_350;
- fwdref_357->replaceAllUsesWith(int32_result_0_i_i_be); delete fwdref_357;
- fwdref_356->replaceAllUsesWith(int32_shift_0_i_i_be); delete fwdref_356;
- fwdref_310->replaceAllUsesWith(int32_shift_0_i_us_i_be); delete fwdref_310;
- fwdref_333->replaceAllUsesWith(ptr_p_0_i3_us_i); delete fwdref_333;
- fwdref_379->replaceAllUsesWith(ptr_p_0_i3_i); delete fwdref_379;
- fwdref_403->replaceAllUsesWith(ptr_exceptionType_08_i); delete fwdref_403;
- fwdref_311->replaceAllUsesWith(int32_result_0_i_us_i_be); delete fwdref_311;
- fwdref_190->replaceAllUsesWith(int32_199); delete fwdref_190;
- fwdref_213->replaceAllUsesWith(int32_222); delete fwdref_213;
- fwdref_242->replaceAllUsesWith(ptr_243); delete fwdref_242;
- fwdref_240->replaceAllUsesWith(int32_249); delete fwdref_240;
- fwdref_212->replaceAllUsesWith(int32_223); delete fwdref_212;
- fwdref_216->replaceAllUsesWith(ptr_217); delete fwdref_216;
- fwdref_189->replaceAllUsesWith(int32_200); delete fwdref_189;
- fwdref_241->replaceAllUsesWith(int32_248); delete fwdref_241;
- fwdref_280->replaceAllUsesWith(ptr_281); delete fwdref_280;
- fwdref_334->replaceAllUsesWith(ptr_335); delete fwdref_334;
- fwdref_358->replaceAllUsesWith(ptr_359); delete fwdref_358;
- fwdref_312->replaceAllUsesWith(ptr_313); delete fwdref_312;
- fwdref_301->replaceAllUsesWith(ptr_302); delete fwdref_301;
- fwdref_380->replaceAllUsesWith(ptr_381); delete fwdref_380;
+ fwdref_223->replaceAllUsesWith(ptr_p_0_i5); delete fwdref_223;
+ fwdref_200->replaceAllUsesWith(ptr_p_0_i); delete fwdref_200;
+ fwdref_201->replaceAllUsesWith(ptr_202); delete fwdref_201;
+ fwdref_249->replaceAllUsesWith(int32_256); delete fwdref_249;
+ fwdref_220->replaceAllUsesWith(int32_231); delete fwdref_220;
+ fwdref_198->replaceAllUsesWith(int32_207); delete fwdref_198;
+ fwdref_248->replaceAllUsesWith(int32_257); delete fwdref_248;
+ fwdref_224->replaceAllUsesWith(ptr_225); delete fwdref_224;
+ fwdref_197->replaceAllUsesWith(int32_208); delete fwdref_197;
+ fwdref_221->replaceAllUsesWith(int32_230); delete fwdref_221;
+ fwdref_250->replaceAllUsesWith(ptr_251); delete fwdref_250;
+ fwdref_310->replaceAllUsesWith(ptr_p_0_i3_us_i); delete fwdref_310;
+ fwdref_351->replaceAllUsesWith(int32_result_0_i_i_be); delete fwdref_351;
+ fwdref_352->replaceAllUsesWith(ptr_p_0_i_i_be); delete fwdref_352;
+ fwdref_284->replaceAllUsesWith(int32_shift_0_i_us_i_be); delete fwdref_284;
+ fwdref_285->replaceAllUsesWith(int32_result_0_i_us_i_be); delete fwdref_285;
+ fwdref_340->replaceAllUsesWith(ptr_exceptionType_014_us_i); delete fwdref_340;
+ fwdref_286->replaceAllUsesWith(ptr_p_0_i_us_i_be); delete fwdref_286;
+ fwdref_350->replaceAllUsesWith(int32_shift_0_i_i_be); delete fwdref_350;
+ fwdref_414->replaceAllUsesWith(ptr_exceptionType_014_i); delete fwdref_414;
+ fwdref_376->replaceAllUsesWith(ptr_p_0_i3_i); delete fwdref_376;
+ fwdref_311->replaceAllUsesWith(ptr_312); delete fwdref_311;
+ fwdref_307->replaceAllUsesWith(int32_318); delete fwdref_307;
+ fwdref_308->replaceAllUsesWith(int32_317); delete fwdref_308;
+ fwdref_297->replaceAllUsesWith(ptr_348); delete fwdref_297;
+ fwdref_374->replaceAllUsesWith(int32_383); delete fwdref_374;
+ fwdref_373->replaceAllUsesWith(int32_384); delete fwdref_373;
+ fwdref_377->replaceAllUsesWith(ptr_378); delete fwdref_377;
+ fwdref_363->replaceAllUsesWith(ptr_422); delete fwdref_363;
  
 }
 
@@ -2027,30 +2098,30 @@ gvar_array_switch_table->setInitializer(const_array_48);
  Value* ptr_ex = args++;
  ptr_ex->setName("ex");
  
- BasicBlock* label_421 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
- BasicBlock* label_422 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
- BasicBlock* label_423 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_444 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_445 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
+ BasicBlock* label_446 = BasicBlock::Create(mod->getContext(), "",func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z,0);
  
- // Block  (label_421)
- ICmpInst* int1_424 = new ICmpInst(*label_421, ICmpInst::ICMP_EQ, ptr_ex, const_ptr_74, "");
- BranchInst::Create(label_423, label_422, int1_424, label_421);
+ // Block  (label_444)
+ ICmpInst* int1_447 = new ICmpInst(*label_444, ICmpInst::ICMP_EQ, ptr_ex, const_ptr_74, "");
+ BranchInst::Create(label_446, label_445, int1_447, label_444);
  
- // Block  (label_422)
- CastInst* ptr_426 = new BitCastInst(ptr_ex, PointerTy_7, "", label_422);
- LoadInst* int64_427 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label_422);
- int64_427->setAlignment(8);
- CastInst* int32_428 = new TruncInst(int64_427, IntegerType::get(mod->getContext(), 32), "", label_422);
- GetElementPtrInst* ptr_429 = GetElementPtrInst::Create(ptr_426, int32_428, "", label_422);
- CallInst* void_430 = CallInst::Create(func_free, ptr_429, "", label_422);
- void_430->setCallingConv(CallingConv::C);
- void_430->setTailCall(true);
- AttributeSet void_430_PAL;
- void_430->setAttributes(void_430_PAL);
+ // Block  (label_445)
+ CastInst* ptr_449 = new BitCastInst(ptr_ex, PointerTy_7, "", label_445);
+ LoadInst* int64_450 = new LoadInst(gvar_int64___exceptionBaseFromUnwindOffset__3_JA, "", false, label_445);
+ int64_450->setAlignment(8);
+ CastInst* int32_451 = new TruncInst(int64_450, IntegerType::get(mod->getContext(), 32), "", label_445);
+ GetElementPtrInst* ptr_452 = GetElementPtrInst::Create(ptr_449, int32_451, "", label_445);
+ CallInst* void_453 = CallInst::Create(func_free, ptr_452, "", label_445);
+ void_453->setCallingConv(CallingConv::C);
+ void_453->setTailCall(true);
+ AttributeSet void_453_PAL;
+ void_453->setAttributes(void_453_PAL);
  
- BranchInst::Create(label_423, label_422);
+ BranchInst::Create(label_446, label_445);
  
- // Block  (label_423)
- ReturnInst::Create(mod->getContext(), label_423);
+ // Block  (label_446)
+ ReturnInst::Create(mod->getContext(), label_446);
  
 }
 
@@ -2060,52 +2131,52 @@ gvar_array_switch_table->setInitializer(const_array_48);
  Value* ptr_obj = args++;
  ptr_obj->setName("obj");
  
- BasicBlock* label_433 = BasicBlock::Create(mod->getContext(), "",func_throwException,0);
+ BasicBlock* label_456 = BasicBlock::Create(mod->getContext(), "",func_throwException,0);
  
- // Block  (label_433)
- CallInst* ptr_434 = CallInst::Create(func_malloc, const_int32_75, "", label_433);
- ptr_434->setCallingConv(CallingConv::C);
- ptr_434->setTailCall(true);
- AttributeSet ptr_434_PAL;
- ptr_434->setAttributes(ptr_434_PAL);
+ // Block  (label_456)
+ CallInst* ptr_457 = CallInst::Create(func_malloc, const_int32_75, "", label_456);
+ ptr_457->setCallingConv(CallingConv::C);
+ ptr_457->setTailCall(true);
+ AttributeSet ptr_457_PAL;
+ ptr_457->setAttributes(ptr_457_PAL);
  
- std::vector<Value*> void_435_params;
- void_435_params.push_back(ptr_434);
- void_435_params.push_back(const_int8_76);
- void_435_params.push_back(const_int32_75);
- void_435_params.push_back(const_int32_77);
- void_435_params.push_back(const_int1_54);
- CallInst* void_435 = CallInst::Create(func_llvm_memset_p0i8_i32, void_435_params, "", label_433);
- void_435->setCallingConv(CallingConv::C);
- void_435->setTailCall(true);
- AttributeSet void_435_PAL;
- void_435->setAttributes(void_435_PAL);
+ std::vector<Value*> void_458_params;
+ void_458_params.push_back(ptr_457);
+ void_458_params.push_back(const_int8_76);
+ void_458_params.push_back(const_int32_75);
+ void_458_params.push_back(const_int32_77);
+ void_458_params.push_back(const_int1_54);
+ CallInst* void_458 = CallInst::Create(func_llvm_memset_p0i8_i32, void_458_params, "", label_456);
+ void_458->setCallingConv(CallingConv::C);
+ void_458->setTailCall(true);
+ AttributeSet void_458_PAL;
+ void_458->setAttributes(void_458_PAL);
  
- std::vector<Value*> ptr_436_indices;
- ptr_436_indices.push_back(const_int32_52);
- ptr_436_indices.push_back(const_int32_52);
- Instruction* ptr_436 = GetElementPtrInst::Create(ptr_obj, ptr_436_indices, "", label_433);
- LoadInst* ptr_437 = new LoadInst(ptr_436, "", false, label_433);
- ptr_437->setAlignment(4);
- CastInst* ptr_438 = new BitCastInst(ptr_434, PointerTy_5, "", label_433);
- StoreInst* void_439 = new StoreInst(ptr_437, ptr_438, false, label_433);
- void_439->setAlignment(4);
- GetElementPtrInst* ptr_440 = GetElementPtrInst::Create(ptr_434, const_int32_77, "", label_433);
- CastInst* ptr_441 = new BitCastInst(ptr_440, PointerTy_20, "", label_433);
- CastInst* ptr_442 = new BitCastInst(ptr_440, PointerTy_0, "", label_433);
- StoreInst* void_443 = new StoreInst(const_int64_78, ptr_442, false, label_433);
- void_443->setAlignment(8);
- GetElementPtrInst* ptr_444 = GetElementPtrInst::Create(ptr_434, const_int32_79, "", label_433);
- CastInst* ptr_445 = new BitCastInst(ptr_444, PointerTy_43, "", label_433);
- StoreInst* void_446 = new StoreInst(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z, ptr_445, false, label_433);
- void_446->setAlignment(4);
- CallInst* int32_447 = CallInst::Create(func__Unwind_RaiseException, ptr_441, "", label_433);
- int32_447->setCallingConv(CallingConv::C);
- int32_447->setTailCall(true);
- AttributeSet int32_447_PAL;
- int32_447->setAttributes(int32_447_PAL);
+ std::vector<Value*> ptr_459_indices;
+ ptr_459_indices.push_back(const_int32_52);
+ ptr_459_indices.push_back(const_int32_52);
+ Instruction* ptr_459 = GetElementPtrInst::Create(ptr_obj, ptr_459_indices, "", label_456);
+ LoadInst* ptr_460 = new LoadInst(ptr_459, "", false, label_456);
+ ptr_460->setAlignment(4);
+ CastInst* ptr_461 = new BitCastInst(ptr_457, PointerTy_5, "", label_456);
+ StoreInst* void_462 = new StoreInst(ptr_460, ptr_461, false, label_456);
+ void_462->setAlignment(4);
+ GetElementPtrInst* ptr_463 = GetElementPtrInst::Create(ptr_457, const_int32_77, "", label_456);
+ CastInst* ptr_464 = new BitCastInst(ptr_463, PointerTy_20, "", label_456);
+ CastInst* ptr_465 = new BitCastInst(ptr_463, PointerTy_0, "", label_456);
+ StoreInst* void_466 = new StoreInst(const_int64_78, ptr_465, false, label_456);
+ void_466->setAlignment(8);
+ GetElementPtrInst* ptr_467 = GetElementPtrInst::Create(ptr_457, const_int32_79, "", label_456);
+ CastInst* ptr_468 = new BitCastInst(ptr_467, PointerTy_43, "", label_456);
+ StoreInst* void_469 = new StoreInst(func___cleanupException__YAXW4_Unwind_Reason_Code__PAU_Unwind_Exception___Z, ptr_468, false, label_456);
+ void_469->setAlignment(4);
+ CallInst* int32_470 = CallInst::Create(func__Unwind_RaiseException, ptr_464, "", label_456);
+ int32_470->setCallingConv(CallingConv::C);
+ int32_470->setTailCall(true);
+ AttributeSet int32_470_PAL;
+ int32_470->setAttributes(int32_470_PAL);
  
- new UnreachableInst(mod->getContext(), label_433);
+ new UnreachableInst(mod->getContext(), label_456);
  
 }
 
@@ -2117,196 +2188,196 @@ gvar_array_switch_table->setInitializer(const_array_48);
  Value* int8_encoding = args++;
  int8_encoding->setName("encoding");
  
- BasicBlock* label_449 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_450 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_472 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_473 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label__preheader4_preheader = BasicBlock::Create(mod->getContext(), ".preheader4.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label__preheader_preheader_451 = BasicBlock::Create(mod->getContext(), ".preheader.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_452 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label__preheader_453 = BasicBlock::Create(mod->getContext(), ".preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label__preheader_preheader_474 = BasicBlock::Create(mod->getContext(), ".preheader.preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_475 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label__preheader_476 = BasicBlock::Create(mod->getContext(), ".preheader",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label__preheader4 = BasicBlock::Create(mod->getContext(), ".preheader4",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_454 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_455 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_456 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_457 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_458 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_459 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_460 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_461 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_462 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_477 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_478 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_479 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_480 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_481 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_482 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_483 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_484 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_485 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_loopexit = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit.loopexit",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_463 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_464 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_465 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_466 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_467 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_468 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
- BasicBlock* label_469 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label___readULEB128__YAIPAPBE_Z_exit_486 = BasicBlock::Create(mod->getContext(), "\x01?readULEB128@@YAIPAPBE@Z.exit",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_487 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_488 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_489 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_490 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_491 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
+ BasicBlock* label_492 = BasicBlock::Create(mod->getContext(), "",func___readEncodedPointer__YAIPAPBEE_Z,0);
  
- // Block  (label_449)
- LoadInst* ptr_470 = new LoadInst(ptr_data, "", false, label_449);
- ptr_470->setAlignment(4);
- CastInst* int32_471 = new ZExtInst(int8_encoding, IntegerType::get(mod->getContext(), 32), "", label_449);
- ICmpInst* int1_472 = new ICmpInst(*label_449, ICmpInst::ICMP_EQ, int8_encoding, const_int8_57, "");
- BranchInst::Create(label_469, label_450, int1_472, label_449);
+ // Block  (label_472)
+ LoadInst* ptr_493 = new LoadInst(ptr_data, "", false, label_472);
+ ptr_493->setAlignment(4);
+ CastInst* int32_494 = new ZExtInst(int8_encoding, IntegerType::get(mod->getContext(), 32), "", label_472);
+ ICmpInst* int1_495 = new ICmpInst(*label_472, ICmpInst::ICMP_EQ, int8_encoding, const_int8_57, "");
+ BranchInst::Create(label_492, label_473, int1_495, label_472);
  
- // Block  (label_450)
- BinaryOperator* int32_474 = BinaryOperator::Create(Instruction::And, int32_471, const_int32_58, "", label_450);
- SwitchInst* void_475 = SwitchInst::Create(int32_474, label_462, 9, label_450);
- void_475->addCase(const_int32_52, label_452);
- void_475->addCase(const_int32_53, label__preheader_preheader_451);
- void_475->addCase(const_int32_80, label__preheader4_preheader);
- void_475->addCase(const_int32_50, label_456);
- void_475->addCase(const_int32_81, label_457);
- void_475->addCase(const_int32_49, label_458);
- void_475->addCase(const_int32_82, label_459);
- void_475->addCase(const_int32_83, label_460);
- void_475->addCase(const_int32_69, label_461);
+ // Block  (label_473)
+ BinaryOperator* int32_497 = BinaryOperator::Create(Instruction::And, int32_494, const_int32_58, "", label_473);
+ SwitchInst* void_498 = SwitchInst::Create(int32_497, label_485, 9, label_473);
+ void_498->addCase(const_int32_52, label_475);
+ void_498->addCase(const_int32_53, label__preheader_preheader_474);
+ void_498->addCase(const_int32_80, label__preheader4_preheader);
+ void_498->addCase(const_int32_50, label_479);
+ void_498->addCase(const_int32_81, label_480);
+ void_498->addCase(const_int32_49, label_481);
+ void_498->addCase(const_int32_82, label_482);
+ void_498->addCase(const_int32_83, label_483);
+ void_498->addCase(const_int32_69, label_484);
  
  
  // Block .preheader4.preheader (label__preheader4_preheader)
  BranchInst::Create(label__preheader4, label__preheader4_preheader);
  
- // Block .preheader.preheader (label__preheader_preheader_451)
- BranchInst::Create(label__preheader_453, label__preheader_preheader_451);
+ // Block .preheader.preheader (label__preheader_preheader_474)
+ BranchInst::Create(label__preheader_476, label__preheader_preheader_474);
  
- // Block  (label_452)
- CastInst* ptr_478 = new BitCastInst(ptr_470, PointerTy_9, "", label_452);
- LoadInst* int32_479 = new LoadInst(ptr_478, "", false, label_452);
- int32_479->setAlignment(4);
- GetElementPtrInst* ptr_480 = GetElementPtrInst::Create(ptr_470, const_int32_49, "", label_452);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_452);
+ // Block  (label_475)
+ CastInst* ptr_501 = new BitCastInst(ptr_493, PointerTy_9, "", label_475);
+ LoadInst* int32_502 = new LoadInst(ptr_501, "", false, label_475);
+ int32_502->setAlignment(4);
+ GetElementPtrInst* ptr_503 = GetElementPtrInst::Create(ptr_493, const_int32_49, "", label_475);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_475);
  
- // Block .preheader (label__preheader_453)
- Argument* fwdref_483 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_shift_0_i_482 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i", label__preheader_453);
- int32_shift_0_i_482->addIncoming(fwdref_483, label__preheader_453);
- int32_shift_0_i_482->addIncoming(const_int32_52, label__preheader_preheader_451);
+ // Block .preheader (label__preheader_476)
+ Argument* fwdref_506 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_shift_0_i_505 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i", label__preheader_476);
+ int32_shift_0_i_505->addIncoming(fwdref_506, label__preheader_476);
+ int32_shift_0_i_505->addIncoming(const_int32_52, label__preheader_preheader_474);
  
- Argument* fwdref_485 = new Argument(IntegerType::get(mod->getContext(), 32));
- PHINode* int32_result_0_i_484 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i", label__preheader_453);
- int32_result_0_i_484->addIncoming(fwdref_485, label__preheader_453);
- int32_result_0_i_484->addIncoming(const_int32_52, label__preheader_preheader_451);
+ Argument* fwdref_508 = new Argument(IntegerType::get(mod->getContext(), 32));
+ PHINode* int32_result_0_i_507 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i", label__preheader_476);
+ int32_result_0_i_507->addIncoming(fwdref_508, label__preheader_476);
+ int32_result_0_i_507->addIncoming(const_int32_52, label__preheader_preheader_474);
  
- Argument* fwdref_487 = new Argument(PointerTy_7);
- PHINode* ptr_p_0_i_486 = PHINode::Create(PointerTy_7, 2, "p.0.i", label__preheader_453);
- ptr_p_0_i_486->addIncoming(fwdref_487, label__preheader_453);
- ptr_p_0_i_486->addIncoming(ptr_470, label__preheader_preheader_451);
+ Argument* fwdref_510 = new Argument(PointerTy_7);
+ PHINode* ptr_p_0_i_509 = PHINode::Create(PointerTy_7, 2, "p.0.i", label__preheader_476);
+ ptr_p_0_i_509->addIncoming(fwdref_510, label__preheader_476);
+ ptr_p_0_i_509->addIncoming(ptr_493, label__preheader_preheader_474);
  
- GetElementPtrInst* ptr_488 = GetElementPtrInst::Create(ptr_p_0_i_486, const_int32_53, "", label__preheader_453);
- LoadInst* int8_489 = new LoadInst(ptr_p_0_i_486, "", false, label__preheader_453);
- int8_489->setAlignment(1);
- CastInst* int32_490 = new ZExtInst(int8_489, IntegerType::get(mod->getContext(), 32), "", label__preheader_453);
- BinaryOperator* int32_491 = BinaryOperator::Create(Instruction::And, int32_490, const_int32_64, "", label__preheader_453);
- BinaryOperator* int32_492 = BinaryOperator::Create(Instruction::Shl, int32_491, int32_shift_0_i_482, "", label__preheader_453);
- BinaryOperator* int32_493 = BinaryOperator::Create(Instruction::Or, int32_492, int32_result_0_i_484, "", label__preheader_453);
- BinaryOperator* int32_494 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_482, const_int32_65, "", label__preheader_453);
- BinaryOperator* int32_495 = BinaryOperator::Create(Instruction::And, int32_490, const_int32_66, "", label__preheader_453);
- ICmpInst* int1_496 = new ICmpInst(*label__preheader_453, ICmpInst::ICMP_EQ, int32_495, const_int32_52, "");
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_loopexit, label__preheader_453, int1_496, label__preheader_453);
+ GetElementPtrInst* ptr_511 = GetElementPtrInst::Create(ptr_p_0_i_509, const_int32_53, "", label__preheader_476);
+ LoadInst* int8_512 = new LoadInst(ptr_p_0_i_509, "", false, label__preheader_476);
+ int8_512->setAlignment(1);
+ CastInst* int32_513 = new ZExtInst(int8_512, IntegerType::get(mod->getContext(), 32), "", label__preheader_476);
+ BinaryOperator* int32_514 = BinaryOperator::Create(Instruction::And, int32_513, const_int32_64, "", label__preheader_476);
+ BinaryOperator* int32_515 = BinaryOperator::Create(Instruction::Shl, int32_514, int32_shift_0_i_505, "", label__preheader_476);
+ BinaryOperator* int32_516 = BinaryOperator::Create(Instruction::Or, int32_515, int32_result_0_i_507, "", label__preheader_476);
+ BinaryOperator* int32_517 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i_505, const_int32_65, "", label__preheader_476);
+ BinaryOperator* int32_518 = BinaryOperator::Create(Instruction::And, int32_513, const_int32_66, "", label__preheader_476);
+ ICmpInst* int1_519 = new ICmpInst(*label__preheader_476, ICmpInst::ICMP_EQ, int32_518, const_int32_52, "");
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_loopexit, label__preheader_476, int1_519, label__preheader_476);
  
  // Block .preheader4 (label__preheader4)
- Argument* fwdref_498 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_521 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_shift_0_i1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "shift.0.i1", label__preheader4);
- int32_shift_0_i1->addIncoming(fwdref_498, label__preheader4);
+ int32_shift_0_i1->addIncoming(fwdref_521, label__preheader4);
  int32_shift_0_i1->addIncoming(const_int32_52, label__preheader4_preheader);
  
- Argument* fwdref_499 = new Argument(IntegerType::get(mod->getContext(), 32));
+ Argument* fwdref_522 = new Argument(IntegerType::get(mod->getContext(), 32));
  PHINode* int32_result_0_i2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.0.i2", label__preheader4);
- int32_result_0_i2->addIncoming(fwdref_499, label__preheader4);
+ int32_result_0_i2->addIncoming(fwdref_522, label__preheader4);
  int32_result_0_i2->addIncoming(const_int32_52, label__preheader4_preheader);
  
- Argument* fwdref_500 = new Argument(PointerTy_7);
+ Argument* fwdref_523 = new Argument(PointerTy_7);
  PHINode* ptr_p_0_i3 = PHINode::Create(PointerTy_7, 2, "p.0.i3", label__preheader4);
- ptr_p_0_i3->addIncoming(fwdref_500, label__preheader4);
- ptr_p_0_i3->addIncoming(ptr_470, label__preheader4_preheader);
+ ptr_p_0_i3->addIncoming(fwdref_523, label__preheader4);
+ ptr_p_0_i3->addIncoming(ptr_493, label__preheader4_preheader);
  
- GetElementPtrInst* ptr_501 = GetElementPtrInst::Create(ptr_p_0_i3, const_int32_53, "", label__preheader4);
- LoadInst* int8_502 = new LoadInst(ptr_p_0_i3, "", false, label__preheader4);
- int8_502->setAlignment(1);
- CastInst* int32_503 = new ZExtInst(int8_502, IntegerType::get(mod->getContext(), 32), "", label__preheader4);
- BinaryOperator* int32_504 = BinaryOperator::Create(Instruction::And, int32_503, const_int32_64, "", label__preheader4);
- BinaryOperator* int32_505 = BinaryOperator::Create(Instruction::Shl, int32_504, int32_shift_0_i1, "", label__preheader4);
- BinaryOperator* int32_506 = BinaryOperator::Create(Instruction::Or, int32_505, int32_result_0_i2, "", label__preheader4);
- BinaryOperator* int32_507 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1, const_int32_65, "", label__preheader4);
- BinaryOperator* int32_508 = BinaryOperator::Create(Instruction::And, int32_503, const_int32_66, "", label__preheader4);
- ICmpInst* int1_509 = new ICmpInst(*label__preheader4, ICmpInst::ICMP_EQ, int32_508, const_int32_52, "");
- BranchInst::Create(label_454, label__preheader4, int1_509, label__preheader4);
+ GetElementPtrInst* ptr_524 = GetElementPtrInst::Create(ptr_p_0_i3, const_int32_53, "", label__preheader4);
+ LoadInst* int8_525 = new LoadInst(ptr_p_0_i3, "", false, label__preheader4);
+ int8_525->setAlignment(1);
+ CastInst* int32_526 = new ZExtInst(int8_525, IntegerType::get(mod->getContext(), 32), "", label__preheader4);
+ BinaryOperator* int32_527 = BinaryOperator::Create(Instruction::And, int32_526, const_int32_64, "", label__preheader4);
+ BinaryOperator* int32_528 = BinaryOperator::Create(Instruction::Shl, int32_527, int32_shift_0_i1, "", label__preheader4);
+ BinaryOperator* int32_529 = BinaryOperator::Create(Instruction::Or, int32_528, int32_result_0_i2, "", label__preheader4);
+ BinaryOperator* int32_530 = BinaryOperator::Create(Instruction::Add, int32_shift_0_i1, const_int32_65, "", label__preheader4);
+ BinaryOperator* int32_531 = BinaryOperator::Create(Instruction::And, int32_526, const_int32_66, "", label__preheader4);
+ ICmpInst* int1_532 = new ICmpInst(*label__preheader4, ICmpInst::ICMP_EQ, int32_531, const_int32_52, "");
+ BranchInst::Create(label_477, label__preheader4, int1_532, label__preheader4);
  
- // Block  (label_454)
- PHINode* int32__lcssa24 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa24", label_454);
- int32__lcssa24->addIncoming(int32_507, label__preheader4);
+ // Block  (label_477)
+ PHINode* int32__lcssa24 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa24", label_477);
+ int32__lcssa24->addIncoming(int32_530, label__preheader4);
  
- PHINode* int32__lcssa23 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa23", label_454);
- int32__lcssa23->addIncoming(int32_506, label__preheader4);
+ PHINode* int32__lcssa23 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa23", label_477);
+ int32__lcssa23->addIncoming(int32_529, label__preheader4);
  
- PHINode* int32__lcssa22 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa22", label_454);
- int32__lcssa22->addIncoming(int32_503, label__preheader4);
+ PHINode* int32__lcssa22 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa22", label_477);
+ int32__lcssa22->addIncoming(int32_526, label__preheader4);
  
- PHINode* ptr__lcssa21 = PHINode::Create(PointerTy_7, 1, ".lcssa21", label_454);
- ptr__lcssa21->addIncoming(ptr_501, label__preheader4);
+ PHINode* ptr__lcssa21 = PHINode::Create(PointerTy_7, 1, ".lcssa21", label_477);
+ ptr__lcssa21->addIncoming(ptr_524, label__preheader4);
  
- BinaryOperator* int32_511 = BinaryOperator::Create(Instruction::And, int32__lcssa22, const_int32_70, "", label_454);
- ICmpInst* int1_512 = new ICmpInst(*label_454, ICmpInst::ICMP_NE, int32_511, const_int32_52, "");
- ICmpInst* int1_513 = new ICmpInst(*label_454, ICmpInst::ICMP_ULT, int32__lcssa24, const_int32_71, "");
- BinaryOperator* int1_or_cond_i = BinaryOperator::Create(Instruction::And, int1_512, int1_513, "or.cond.i", label_454);
- BranchInst::Create(label_455, label___readULEB128__YAIPAPBE_Z_exit_463, int1_or_cond_i, label_454);
+ BinaryOperator* int32_534 = BinaryOperator::Create(Instruction::And, int32__lcssa22, const_int32_70, "", label_477);
+ ICmpInst* int1_535 = new ICmpInst(*label_477, ICmpInst::ICMP_NE, int32_534, const_int32_52, "");
+ ICmpInst* int1_536 = new ICmpInst(*label_477, ICmpInst::ICMP_ULT, int32__lcssa24, const_int32_71, "");
+ BinaryOperator* int1_or_cond_i = BinaryOperator::Create(Instruction::And, int1_535, int1_536, "or.cond.i", label_477);
+ BranchInst::Create(label_478, label___readULEB128__YAIPAPBE_Z_exit_486, int1_or_cond_i, label_477);
  
- // Block  (label_455)
- BinaryOperator* int32_515 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32__lcssa24, "", label_455);
- BinaryOperator* int32_516 = BinaryOperator::Create(Instruction::Or, int32__lcssa23, int32_515, "", label_455);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_455);
+ // Block  (label_478)
+ BinaryOperator* int32_538 = BinaryOperator::Create(Instruction::Shl, const_int32_63, int32__lcssa24, "", label_478);
+ BinaryOperator* int32_539 = BinaryOperator::Create(Instruction::Or, int32__lcssa23, int32_538, "", label_478);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_478);
  
- // Block  (label_456)
- CastInst* ptr_518 = new BitCastInst(ptr_470, PointerTy_46, "", label_456);
- LoadInst* int16_519 = new LoadInst(ptr_518, "", false, label_456);
- int16_519->setAlignment(2);
- CastInst* int32_520 = new ZExtInst(int16_519, IntegerType::get(mod->getContext(), 32), "", label_456);
- GetElementPtrInst* ptr_521 = GetElementPtrInst::Create(ptr_470, const_int32_50, "", label_456);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_456);
+ // Block  (label_479)
+ CastInst* ptr_541 = new BitCastInst(ptr_493, PointerTy_46, "", label_479);
+ LoadInst* int16_542 = new LoadInst(ptr_541, "", false, label_479);
+ int16_542->setAlignment(2);
+ CastInst* int32_543 = new ZExtInst(int16_542, IntegerType::get(mod->getContext(), 32), "", label_479);
+ GetElementPtrInst* ptr_544 = GetElementPtrInst::Create(ptr_493, const_int32_50, "", label_479);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_479);
  
- // Block  (label_457)
- CastInst* ptr_523 = new BitCastInst(ptr_470, PointerTy_9, "", label_457);
- LoadInst* int32_524 = new LoadInst(ptr_523, "", false, label_457);
- int32_524->setAlignment(4);
- GetElementPtrInst* ptr_525 = GetElementPtrInst::Create(ptr_470, const_int32_49, "", label_457);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_457);
+ // Block  (label_480)
+ CastInst* ptr_546 = new BitCastInst(ptr_493, PointerTy_9, "", label_480);
+ LoadInst* int32_547 = new LoadInst(ptr_546, "", false, label_480);
+ int32_547->setAlignment(4);
+ GetElementPtrInst* ptr_548 = GetElementPtrInst::Create(ptr_493, const_int32_49, "", label_480);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_480);
  
- // Block  (label_458)
- CastInst* ptr_527 = new BitCastInst(ptr_470, PointerTy_0, "", label_458);
- LoadInst* int64_528 = new LoadInst(ptr_527, "", false, label_458);
- int64_528->setAlignment(8);
- CastInst* int32_529 = new TruncInst(int64_528, IntegerType::get(mod->getContext(), 32), "", label_458);
- GetElementPtrInst* ptr_530 = GetElementPtrInst::Create(ptr_470, const_int32_51, "", label_458);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_458);
+ // Block  (label_481)
+ CastInst* ptr_550 = new BitCastInst(ptr_493, PointerTy_0, "", label_481);
+ LoadInst* int64_551 = new LoadInst(ptr_550, "", false, label_481);
+ int64_551->setAlignment(8);
+ CastInst* int32_552 = new TruncInst(int64_551, IntegerType::get(mod->getContext(), 32), "", label_481);
+ GetElementPtrInst* ptr_553 = GetElementPtrInst::Create(ptr_493, const_int32_51, "", label_481);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_481);
  
- // Block  (label_459)
- CastInst* ptr_532 = new BitCastInst(ptr_470, PointerTy_46, "", label_459);
- LoadInst* int16_533 = new LoadInst(ptr_532, "", false, label_459);
- int16_533->setAlignment(2);
- CastInst* int32_534 = new SExtInst(int16_533, IntegerType::get(mod->getContext(), 32), "", label_459);
- GetElementPtrInst* ptr_535 = GetElementPtrInst::Create(ptr_470, const_int32_50, "", label_459);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_459);
+ // Block  (label_482)
+ CastInst* ptr_555 = new BitCastInst(ptr_493, PointerTy_46, "", label_482);
+ LoadInst* int16_556 = new LoadInst(ptr_555, "", false, label_482);
+ int16_556->setAlignment(2);
+ CastInst* int32_557 = new SExtInst(int16_556, IntegerType::get(mod->getContext(), 32), "", label_482);
+ GetElementPtrInst* ptr_558 = GetElementPtrInst::Create(ptr_493, const_int32_50, "", label_482);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_482);
  
- // Block  (label_460)
- CastInst* ptr_537 = new BitCastInst(ptr_470, PointerTy_9, "", label_460);
- LoadInst* int32_538 = new LoadInst(ptr_537, "", false, label_460);
- int32_538->setAlignment(4);
- GetElementPtrInst* ptr_539 = GetElementPtrInst::Create(ptr_470, const_int32_49, "", label_460);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_460);
+ // Block  (label_483)
+ CastInst* ptr_560 = new BitCastInst(ptr_493, PointerTy_9, "", label_483);
+ LoadInst* int32_561 = new LoadInst(ptr_560, "", false, label_483);
+ int32_561->setAlignment(4);
+ GetElementPtrInst* ptr_562 = GetElementPtrInst::Create(ptr_493, const_int32_49, "", label_483);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_483);
  
- // Block  (label_461)
- CastInst* ptr_541 = new BitCastInst(ptr_470, PointerTy_0, "", label_461);
- LoadInst* int64_542 = new LoadInst(ptr_541, "", false, label_461);
- int64_542->setAlignment(8);
- CastInst* int32_543 = new TruncInst(int64_542, IntegerType::get(mod->getContext(), 32), "", label_461);
- GetElementPtrInst* ptr_544 = GetElementPtrInst::Create(ptr_470, const_int32_51, "", label_461);
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label_461);
+ // Block  (label_484)
+ CastInst* ptr_564 = new BitCastInst(ptr_493, PointerTy_0, "", label_484);
+ LoadInst* int64_565 = new LoadInst(ptr_564, "", false, label_484);
+ int64_565->setAlignment(8);
+ CastInst* int32_566 = new TruncInst(int64_565, IntegerType::get(mod->getContext(), 32), "", label_484);
+ GetElementPtrInst* ptr_567 = GetElementPtrInst::Create(ptr_493, const_int32_51, "", label_484);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label_484);
  
- // Block  (label_462)
- CallInst* void_546 = CallInst::Create(func_abort, "", label_462);
- void_546->setCallingConv(CallingConv::C);
- void_546->setTailCall(true);
- AttributeSet void_546_PAL;
+ // Block  (label_485)
+ CallInst* void_569 = CallInst::Create(func_abort, "", label_485);
+ void_569->setCallingConv(CallingConv::C);
+ void_569->setTailCall(true);
+ AttributeSet void_569_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -2317,63 +2388,63 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  void_546_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_569_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_546->setAttributes(void_546_PAL);
+ void_569->setAttributes(void_569_PAL);
  
- new UnreachableInst(mod->getContext(), label_462);
+ new UnreachableInst(mod->getContext(), label_485);
  
  // Block ?readULEB128@@YAIPAPBE@Z.exit.loopexit (label___readULEB128__YAIPAPBE_Z_exit_loopexit)
  PHINode* int32__lcssa20 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 1, ".lcssa20", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
- int32__lcssa20->addIncoming(int32_493, label__preheader_453);
+ int32__lcssa20->addIncoming(int32_516, label__preheader_476);
  
- PHINode* ptr__lcssa_548 = PHINode::Create(PointerTy_7, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
- ptr__lcssa_548->addIncoming(ptr_488, label__preheader_453);
+ PHINode* ptr__lcssa = PHINode::Create(PointerTy_7, 1, ".lcssa", label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ ptr__lcssa->addIncoming(ptr_511, label__preheader_476);
  
- BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_463, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ BranchInst::Create(label___readULEB128__YAIPAPBE_Z_exit_486, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit_463)
- PHINode* ptr_550 = PHINode::Create(PointerTy_7, 10, "", label___readULEB128__YAIPAPBE_Z_exit_463);
- ptr_550->addIncoming(ptr_544, label_461);
- ptr_550->addIncoming(ptr_539, label_460);
- ptr_550->addIncoming(ptr_535, label_459);
- ptr_550->addIncoming(ptr_530, label_458);
- ptr_550->addIncoming(ptr_525, label_457);
- ptr_550->addIncoming(ptr_521, label_456);
- ptr_550->addIncoming(ptr_480, label_452);
- ptr_550->addIncoming(ptr__lcssa21, label_454);
- ptr_550->addIncoming(ptr__lcssa21, label_455);
- ptr_550->addIncoming(ptr__lcssa_548, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
+ // Block ?readULEB128@@YAIPAPBE@Z.exit (label___readULEB128__YAIPAPBE_Z_exit_486)
+ PHINode* ptr_572 = PHINode::Create(PointerTy_7, 10, "", label___readULEB128__YAIPAPBE_Z_exit_486);
+ ptr_572->addIncoming(ptr_567, label_484);
+ ptr_572->addIncoming(ptr_562, label_483);
+ ptr_572->addIncoming(ptr_558, label_482);
+ ptr_572->addIncoming(ptr_553, label_481);
+ ptr_572->addIncoming(ptr_548, label_480);
+ ptr_572->addIncoming(ptr_544, label_479);
+ ptr_572->addIncoming(ptr_503, label_475);
+ ptr_572->addIncoming(ptr__lcssa21, label_477);
+ ptr_572->addIncoming(ptr__lcssa21, label_478);
+ ptr_572->addIncoming(ptr__lcssa, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- PHINode* int32_result_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 10, "result.0", label___readULEB128__YAIPAPBE_Z_exit_463);
- int32_result_0->addIncoming(int32_543, label_461);
- int32_result_0->addIncoming(int32_538, label_460);
- int32_result_0->addIncoming(int32_534, label_459);
- int32_result_0->addIncoming(int32_529, label_458);
- int32_result_0->addIncoming(int32_524, label_457);
- int32_result_0->addIncoming(int32_520, label_456);
- int32_result_0->addIncoming(int32_479, label_452);
- int32_result_0->addIncoming(int32__lcssa23, label_454);
- int32_result_0->addIncoming(int32_516, label_455);
+ PHINode* int32_result_0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 10, "result.0", label___readULEB128__YAIPAPBE_Z_exit_486);
+ int32_result_0->addIncoming(int32_566, label_484);
+ int32_result_0->addIncoming(int32_561, label_483);
+ int32_result_0->addIncoming(int32_557, label_482);
+ int32_result_0->addIncoming(int32_552, label_481);
+ int32_result_0->addIncoming(int32_547, label_480);
+ int32_result_0->addIncoming(int32_543, label_479);
+ int32_result_0->addIncoming(int32_502, label_475);
+ int32_result_0->addIncoming(int32__lcssa23, label_477);
+ int32_result_0->addIncoming(int32_539, label_478);
  int32_result_0->addIncoming(int32__lcssa20, label___readULEB128__YAIPAPBE_Z_exit_loopexit);
  
- BinaryOperator* int32_551 = BinaryOperator::Create(Instruction::And, int32_471, const_int32_84, "", label___readULEB128__YAIPAPBE_Z_exit_463);
- SwitchInst* void_552 = SwitchInst::Create(int32_551, label_465, 2, label___readULEB128__YAIPAPBE_Z_exit_463);
- void_552->addCase(const_int32_52, label_466);
- void_552->addCase(const_int32_77, label_464);
+ BinaryOperator* int32_573 = BinaryOperator::Create(Instruction::And, int32_494, const_int32_84, "", label___readULEB128__YAIPAPBE_Z_exit_486);
+ SwitchInst* void_574 = SwitchInst::Create(int32_573, label_488, 2, label___readULEB128__YAIPAPBE_Z_exit_486);
+ void_574->addCase(const_int32_52, label_489);
+ void_574->addCase(const_int32_77, label_487);
  
  
- // Block  (label_464)
- CastInst* int32_553 = new PtrToIntInst(ptr_470, IntegerType::get(mod->getContext(), 32), "", label_464);
- BinaryOperator* int32_554 = BinaryOperator::Create(Instruction::Add, int32_553, int32_result_0, "", label_464);
- BranchInst::Create(label_466, label_464);
+ // Block  (label_487)
+ CastInst* int32_575 = new PtrToIntInst(ptr_493, IntegerType::get(mod->getContext(), 32), "", label_487);
+ BinaryOperator* int32_576 = BinaryOperator::Create(Instruction::Add, int32_575, int32_result_0, "", label_487);
+ BranchInst::Create(label_489, label_487);
  
- // Block  (label_465)
- CallInst* void_556 = CallInst::Create(func_abort, "", label_465);
- void_556->setCallingConv(CallingConv::C);
- void_556->setTailCall(true);
- AttributeSet void_556_PAL;
+ // Block  (label_488)
+ CallInst* void_578 = CallInst::Create(func_abort, "", label_488);
+ void_578->setCallingConv(CallingConv::C);
+ void_578->setTailCall(true);
+ AttributeSet void_578_PAL;
  {
   SmallVector<AttributeSet, 4> Attrs;
   AttributeSet PAS;
@@ -2384,51 +2455,51 @@ gvar_array_switch_table->setInitializer(const_array_48);
    }
   
   Attrs.push_back(PAS);
-  void_556_PAL = AttributeSet::get(mod->getContext(), Attrs);
+  void_578_PAL = AttributeSet::get(mod->getContext(), Attrs);
   
  }
- void_556->setAttributes(void_556_PAL);
+ void_578->setAttributes(void_578_PAL);
  
- new UnreachableInst(mod->getContext(), label_465);
+ new UnreachableInst(mod->getContext(), label_488);
  
- // Block  (label_466)
- PHINode* int32_result_1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1", label_466);
- int32_result_1->addIncoming(int32_554, label_464);
- int32_result_1->addIncoming(int32_result_0, label___readULEB128__YAIPAPBE_Z_exit_463);
+ // Block  (label_489)
+ PHINode* int32_result_1 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.1", label_489);
+ int32_result_1->addIncoming(int32_576, label_487);
+ int32_result_1->addIncoming(int32_result_0, label___readULEB128__YAIPAPBE_Z_exit_486);
  
- BinaryOperator* int32_558 = BinaryOperator::Create(Instruction::And, int32_471, const_int32_66, "", label_466);
- ICmpInst* int1_559 = new ICmpInst(*label_466, ICmpInst::ICMP_EQ, int32_558, const_int32_52, "");
- BranchInst::Create(label_468, label_467, int1_559, label_466);
+ BinaryOperator* int32_580 = BinaryOperator::Create(Instruction::And, int32_494, const_int32_66, "", label_489);
+ ICmpInst* int1_581 = new ICmpInst(*label_489, ICmpInst::ICMP_EQ, int32_580, const_int32_52, "");
+ BranchInst::Create(label_491, label_490, int1_581, label_489);
  
- // Block  (label_467)
- CastInst* ptr_561 = new IntToPtrInst(int32_result_1, PointerTy_9, "", label_467);
- LoadInst* int32_562 = new LoadInst(ptr_561, "", false, label_467);
- int32_562->setAlignment(4);
- BranchInst::Create(label_468, label_467);
+ // Block  (label_490)
+ CastInst* ptr_583 = new IntToPtrInst(int32_result_1, PointerTy_9, "", label_490);
+ LoadInst* int32_584 = new LoadInst(ptr_583, "", false, label_490);
+ int32_584->setAlignment(4);
+ BranchInst::Create(label_491, label_490);
  
- // Block  (label_468)
- PHINode* int32_result_2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.2", label_468);
- int32_result_2->addIncoming(int32_562, label_467);
- int32_result_2->addIncoming(int32_result_1, label_466);
+ // Block  (label_491)
+ PHINode* int32_result_2 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, "result.2", label_491);
+ int32_result_2->addIncoming(int32_584, label_490);
+ int32_result_2->addIncoming(int32_result_1, label_489);
  
- StoreInst* void_564 = new StoreInst(ptr_550, ptr_data, false, label_468);
- void_564->setAlignment(4);
- BranchInst::Create(label_469, label_468);
+ StoreInst* void_586 = new StoreInst(ptr_572, ptr_data, false, label_491);
+ void_586->setAlignment(4);
+ BranchInst::Create(label_492, label_491);
  
- // Block  (label_469)
- PHINode* int32__0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, ".0", label_469);
- int32__0->addIncoming(int32_result_2, label_468);
- int32__0->addIncoming(const_int32_52, label_449);
+ // Block  (label_492)
+ PHINode* int32__0 = PHINode::Create(IntegerType::get(mod->getContext(), 32), 2, ".0", label_492);
+ int32__0->addIncoming(int32_result_2, label_491);
+ int32__0->addIncoming(const_int32_52, label_472);
  
- ReturnInst::Create(mod->getContext(), int32__0, label_469);
+ ReturnInst::Create(mod->getContext(), int32__0, label_492);
  
  // Resolve Forward References
- fwdref_487->replaceAllUsesWith(ptr_488); delete fwdref_487;
- fwdref_500->replaceAllUsesWith(ptr_501); delete fwdref_500;
- fwdref_498->replaceAllUsesWith(int32_507); delete fwdref_498;
- fwdref_483->replaceAllUsesWith(int32_494); delete fwdref_483;
- fwdref_485->replaceAllUsesWith(int32_493); delete fwdref_485;
- fwdref_499->replaceAllUsesWith(int32_506); delete fwdref_499;
+ fwdref_510->replaceAllUsesWith(ptr_511); delete fwdref_510;
+ fwdref_508->replaceAllUsesWith(int32_516); delete fwdref_508;
+ fwdref_521->replaceAllUsesWith(int32_530); delete fwdref_521;
+ fwdref_522->replaceAllUsesWith(int32_529); delete fwdref_522;
+ fwdref_506->replaceAllUsesWith(int32_517); delete fwdref_506;
+ fwdref_523->replaceAllUsesWith(ptr_524); delete fwdref_523;
  
 }
 

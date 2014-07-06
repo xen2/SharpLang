@@ -194,6 +194,9 @@ namespace SharpLang.CompilerServices
             var stack = new List<StackValue>(body.MaxStackSize);
             var locals = new List<StackValue>(body.Variables.Count);
             var args = new List<StackValue>(numParams);
+            ValueRef ehselectorSlot = new ValueRef();
+            ValueRef exnSlot = new ValueRef();
+            BasicBlockRef resumeExceptionBlock = new BasicBlockRef();
 
             functionContext.Stack = stack;
 
@@ -247,9 +250,26 @@ namespace SharpLang.CompilerServices
                 }
             }
 
-            // Exception handlers blocks are also branch targets
+            // Setup exception handling
             if (body.HasExceptionHandlers)
             {
+                // Add an "ehselector.slot" i32 local, and a "exn.slot" Object reference local
+                ehselectorSlot = LLVM.BuildAlloca(builder, int32Type, "ehselector.slot");
+                exnSlot = LLVM.BuildAlloca(builder, @object.DefaultType, "exn.slot");
+
+                // Create resume exception block
+                resumeExceptionBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "eh.resume");
+                LLVM.PositionBuilderAtEnd(builder2, resumeExceptionBlock);
+                var exceptionObject = LLVM.BuildLoad(builder2, exnSlot, "exn");
+                var ehselectorValue = LLVM.BuildLoad(builder2, ehselectorSlot, "sel");
+
+                exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, intPtrType, "exn");
+                var landingPadValue = LLVM.BuildInsertValue(builder2, LLVM.GetUndef(caughtResultType), exceptionObject, 0, "lpad.val");
+                landingPadValue = LLVM.BuildInsertValue(builder2, landingPadValue, ehselectorValue, 1, "lpad.val");
+
+                LLVM.BuildResume(builder2, landingPadValue);
+
+                // Exception handlers blocks are also branch targets
                 foreach (var exceptionHandler in body.ExceptionHandlers)
                 {
                     branchTargets[exceptionHandler.HandlerStart.Offset] = true;
@@ -267,12 +287,38 @@ namespace SharpLang.CompilerServices
                 }
             }
 
+            // Create catch clause stack
+            if (body.HasExceptionHandlers)
+            {
+                // Exception handlers blocks are also branch targets
+                foreach (var exceptionHandler in body.ExceptionHandlers)
+                {
+                    if (exceptionHandler.HandlerType != ExceptionHandlerType.Catch)
+                        continue;
+
+                    var handlerStart = exceptionHandler.HandlerStart.Offset;
+
+                    var catchBlock = basicBlocks[handlerStart];
+                    var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.CatchType));
+
+                    // Extract exception
+                    LLVM.PositionBuilderAtEnd(builder2, catchBlock);
+                    var exceptionObject = LLVM.BuildLoad(builder2, exnSlot, string.Empty);
+                    exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, catchClass.Type.DefaultType, string.Empty);
+
+                    forwardStacks[handlerStart] = new[]
+                    {
+                        new StackValue(catchClass.Type.StackType, catchClass.Type, exceptionObject)
+                    };
+                }
+            }
+
             // Specify if we have to manually add an unconditional branch to go to next block (flowing) or not (due to a previous explicit conditional branch)
             var flowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
 
             var instructionFlags = InstructionFlags.None;
 
-            var exceptionHandlers = new List<ExceptionHandler>();
+            var exceptionHandlers = new List<ExceptionHandlerInfo>();
 
             foreach (var instruction in body.Instructions)
             {
@@ -287,7 +333,7 @@ namespace SharpLang.CompilerServices
                     for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
                     {
                         var exceptionHandler = exceptionHandlers[index];
-                        if (instruction == exceptionHandler.TryEnd)
+                        if (instruction == exceptionHandler.Source.TryEnd)
                         {
                             exceptionHandlers.RemoveAt(index);
                             exceptionHandlersChanged = true;
@@ -302,11 +348,26 @@ namespace SharpLang.CompilerServices
                         var exceptionHandler = body.ExceptionHandlers[index];
                         if (instruction == exceptionHandler.TryStart)
                         {
-                            exceptionHandlers.Add(exceptionHandler);
+                            var catchDispatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "catch.dispatch");
+                            LLVM.PositionBuilderAtEnd(builder2, catchDispatchBlock);
+
+                            var catchBlock = basicBlocks[exceptionHandler.HandlerStart.Offset];
+                            var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.CatchType));
+
+                            // Compare exception type
+                            var ehselectorValue = LLVM.BuildLoad(builder2, ehselectorSlot, "sel");
+
+                            var ehtypeIdFor = LLVM.IntrinsicGetDeclaration(module, (uint) Intrinsics.eh_typeid_for, new TypeRef[0]);
+                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] { LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType) }, string.Empty);
+
+                            // Jump to catch clause if type matches.
+                            // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
+                            var ehtypeComparisonResult = LLVM.BuildICmp(builder2, IntPredicate.IntEQ, ehselectorValue, ehtypeid, string.Empty);
+                            LLVM.BuildCondBr(builder2, ehtypeComparisonResult, catchBlock, exceptionHandlers.Count > 0 ? exceptionHandlers.Last().CatchDispatch : resumeExceptionBlock);
+
+                            exceptionHandlers.Add(new ExceptionHandlerInfo(exceptionHandler, catchDispatchBlock));
                             exceptionHandlersChanged = true;
                         }
-                        else
-                            break;
                     }
 
                     if (exceptionHandlersChanged)
@@ -315,7 +376,7 @@ namespace SharpLang.CompilerServices
                         for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
                         {
                             var exceptionHandler = exceptionHandlers[index];
-                            switch (exceptionHandler.HandlerType)
+                            switch (exceptionHandler.Source.HandlerType)
                             {
                                 case ExceptionHandlerType.Catch:
                                     break;
@@ -324,24 +385,35 @@ namespace SharpLang.CompilerServices
 
                         if (exceptionHandlers.Count > 0)
                         {
-                            var handlerStart = exceptionHandlers.Last().HandlerStart.Offset;
-                            functionContext.LandingPadBlock = basicBlocks[handlerStart];
-
-                            var @catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandlers[0].CatchType));
+                            //var handlerStart = exceptionHandlers.Last().HandlerStart.Offset;
+                            //functionContext.LandingPadBlock = basicBlocks[handlerStart];
 
                             // Prepare landing pad block
+                            functionContext.LandingPadBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "landingpad");
                             LLVM.PositionBuilderAtEnd(builder2, functionContext.LandingPadBlock);
                             var landingPad = LLVM.BuildLandingPad(builder2, caughtResultType, sharpPersonalityFunction, 1, string.Empty);
-                            LLVM.AddClause(landingPad, @catchClass.GeneratedRuntimeTypeInfoGlobal);
 
-                            // Extract exception
+                            // Extract exception, and store it in exn.slot
                             var exceptionObject = LLVM.BuildExtractValue(builder2, landingPad, 0, string.Empty);
-                            exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, @catchClass.Type.DefaultType, string.Empty);
+                            exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, @object.Class.Type.DefaultType, string.Empty);
+                            LLVM.BuildStore(builder2, exceptionObject, exnSlot);
 
-                            forwardStacks[handlerStart] = new[]
+                            // Extract selector slot, and store it in ehselector.slot
+                            var exceptionType = LLVM.BuildExtractValue(builder2, landingPad, 1, string.Empty);
+                            LLVM.BuildStore(builder2, exceptionType, ehselectorSlot);
+
+                            // Add jump to catch dispatch block
+                            LLVM.BuildBr(builder2, exceptionHandlers.Last().CatchDispatch);
+
+                            // Filter exceptions type by type
+                            for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
                             {
-                                new StackValue(@catchClass.Type.StackType, @catchClass.Type, exceptionObject)
-                            };
+                                var exceptionHandler = exceptionHandlers[index];
+
+                                // Add landing pad type clause
+                                var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
+                                LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType));
+                            }
                         }
                         else
                         {
