@@ -3,9 +3,6 @@
 
 #include <llvm-c/Core.h>
 
-#ifdef __cplusplus
-extern "C"
-#endif
-LLVMValueRef LLVMIntrinsicGetDeclaration(LLVMModuleRef M, unsigned int ID, LLVMTypeRef *ParamTypes, unsigned ParamCount);
+extern "C" LLVMValueRef LLVMIntrinsicGetDeclaration(LLVMModuleRef M, unsigned int ID, LLVMTypeRef *ParamTypes, unsigned ParamCount);
 
 #endif

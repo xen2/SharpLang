@@ -1,7 +1,6 @@
 %module LLVM
 %{
 
-#include <stdbool.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/BitReader.h>
 #include <llvm-c/BitWriter.h>

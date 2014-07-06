@@ -13,7 +13,7 @@
     %typemap(imtype) (TYPE *ARRAY) "System.IntPtr"
 
     // Arrays (ptr + count)
-    %typemap(in) (TYPE *ARRAY, unsigned ARRAYSIZE) "$1 = $1_data; $2 = $input;"
+    %typemap(in) (TYPE *ARRAY, unsigned ARRAYSIZE) "$1 = (TYPE*)$1_data; $2 = $input;"
     %typemap(ctype) (TYPE *ARRAY, unsigned ARRAYSIZE) "void* $1_data, unsigned int"
     %typemap(csin, pre="    fixed (CSTYPE* swig_ptrTo_$csinput = $csinput)")
                      (TYPE *ARRAY, unsigned ARRAYSIZE) "(System.IntPtr)swig_ptrTo_$csinput, (uint)$csinput.Length"

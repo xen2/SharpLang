@@ -3,6 +3,8 @@
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm-c/Core.h>
 
+#include "Additional.h"
+
 using namespace llvm;
 
 extern "C" LLVMValueRef LLVMIntrinsicGetDeclaration(LLVMModuleRef M, unsigned int ID, LLVMTypeRef *ParamTypes, unsigned ParamCount)

@@ -8,7 +8,7 @@ function SetupSWIGBindings()
     local prj = premake.api.scope.project.location
     local gen = path.getrelative(prj, path.getabsolute(gendir))
     local current = path.getrelative(prj, path.getabsolute("."))
-    local out = path.join(current, '%{file.basename}_wrap.c')
+    local out = path.join(current, '%{file.basename}_wrap.cpp')
     local outdir = path.getrelative(prj, path.getabsolute("../SharpLLVM"))
     local llvm = path.getrelative(prj, path.getabsolute(path.join(LLVMRootDir, "include")))
     local swig = path.getrelative(prj, path.getabsolute(path.join(toolsdir, 'swig/swig')))
@@ -20,7 +20,7 @@ function SetupSWIGBindings()
     buildcommands { cmd }
 
     -- One or more outputs resulting from the build (required)
-    buildoutputs { '%{file.basename}_wrap.c' }
+    buildoutputs { '%{file.basename}_wrap.cpp' }
 
   configuration(c)
 end
@@ -37,7 +37,6 @@ project "SharpLLVM.Native"
   {
     "*.h",
     "*.cpp",
-    "LLVM_wrap.c",
     "../SharpLLVM/Bindings/**.i"
   }
 
