@@ -7,18 +7,20 @@ function SetupSWIGBindings()
     -- One or more commands to run (required)
     local prj = premake.api.scope.project.location
     local gen = path.getrelative(prj, path.getabsolute(gendir))
-    local out = path.join(gen, '%{file.basename}_wrap.c')
+    local current = path.getrelative(prj, path.getabsolute("."))
+    local out = path.join(current, '%{file.basename}_wrap.cpp')
+    local outdir = path.getrelative(prj, path.getabsolute("../SharpLLVM"))
     local llvm = path.getrelative(prj, path.getabsolute(path.join(LLVMRootDir, "include")))
     local swig = path.getrelative(prj, path.getabsolute(path.join(toolsdir, 'swig/swig')))
 
-    local cmd = '"' .. swig .. '" -w302 -csharp -I' .. llvm
+    local cmd = '"' .. swig .. '" -w302 -csharp -I' .. llvm .. " -I" .. current
       .. " -namespace SharpLLVM -dllimport SharpLLVM.Native.dll"
-      .. " -outdir " .. gen .. " -o " .. out .. " %{file.relpath}"
+      .. " -outdir " .. outdir .. " -o " .. out .. " %{file.relpath}"
 
     buildcommands { cmd }
 
     -- One or more outputs resulting from the build (required)
-    buildoutputs { path.join(gendir, '%{file.basename}_wrap.c') }
+    buildoutputs { '%{file.basename}_wrap.cpp' }
 
   configuration(c)
 end
@@ -26,14 +28,15 @@ end
 project "SharpLLVM.Native"
 
   kind "SharedLib"
-  language "C"
+  language "C++"
 
   SetupNativeProject()
 
   includedirs { "." }
   files
   {
-    path.join(gendir, "LLVM_wrap.c"),
+    "*.h",
+    "*.cpp",
     "../SharpLLVM/Bindings/**.i"
   }
 

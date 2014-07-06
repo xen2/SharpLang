@@ -30,6 +30,11 @@ void* System_Threading_Thread_System_Threading_Thread__get_CurrentThread__()
 	return NULL;
 }
 
+// System.Exception..ctor(string)
+void System_Void_System_Exception___ctor__(void* exception)
+{
+}
+
 // void System.Console.WriteLine(string)
 void System_Void_System_Console__WriteLine_System_String_(String* str)
 {

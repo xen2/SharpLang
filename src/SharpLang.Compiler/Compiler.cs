@@ -21,6 +21,8 @@ namespace SharpLang.CompilerServices
         private ValueRef allocObjectFunction;
         private ValueRef resolveInterfaceCallFunction;
         private ValueRef isInstInterfaceFunction;
+        private ValueRef throwExceptionFunction;
+        private ValueRef sharpPersonalityFunction;
 
         // Builder for normal instructions
         private BuilderRef builder;
@@ -42,6 +44,7 @@ namespace SharpLang.CompilerServices
         private TypeRef int32Type;
         private TypeRef int64Type;
         private TypeRef imtEntryType;
+        private TypeRef caughtResultType;
 
         // Builder that is used for PHI nodes
         private BuilderRef builder2;
@@ -68,6 +71,8 @@ namespace SharpLang.CompilerServices
             allocObjectFunction = LLVM.GetNamedFunction(module, "allocObject");
             resolveInterfaceCallFunction = LLVM.GetNamedFunction(module, "resolveInterfaceCall");
             isInstInterfaceFunction = LLVM.GetNamedFunction(module, "isInstInterface");
+            throwExceptionFunction = LLVM.GetNamedFunction(module, "throwException");
+            sharpPersonalityFunction = LLVM.GetNamedFunction(module, "sharpPersonality");
 
             context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
@@ -95,6 +100,9 @@ namespace SharpLang.CompilerServices
             // struct IMTEntry { i32 functionId, i8* functionPtr }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
             LLVM.StructSetBody(imtEntryType, new[] { int32Type, intPtrType }, false);
+
+            caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
+            LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
 
             // Process types
             foreach (var assemblyModule in assembly.Modules)
