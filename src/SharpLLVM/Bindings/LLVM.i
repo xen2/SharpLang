@@ -13,6 +13,8 @@
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Analysis.h>
 
+#include "Additional.h"
+
 %}
 
 %csmethodmodifiers "public unsafe"
@@ -20,6 +22,9 @@
 %rename("%(strip:[LLVM])s") "";
 
 %include "LLVMCommon.i"
+
+%ignore LLVMContextSetDiagnosticHandler;
+%ignore LLVMContextSetYieldCallback;
 
 typedef bool LLVMBool;
 typedef unsigned char uint8_t;
@@ -43,6 +48,7 @@ REF_CLASS(LLVMTargetDataRef, TargetDataRef)
 REF_CLASS(LLVMTargetLibraryInfoRef, TargetLibraryInfoRef)
 REF_CLASS(LLVMValueRef, ValueRef)
 REF_CLASS(LLVMUseRef, UseRef)
+REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ParamTypes, unsigned ParamCount)};
@@ -67,3 +73,4 @@ REF_CLASS(LLVMUseRef, UseRef)
 %include "llvm-c/Target.h"
 %include "llvm-c/TargetMachine.h"
 %include "llvm-c/Analysis.h"
+%include "Additional.h"

@@ -216,6 +216,12 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ContextDispose")]
   public static extern void ContextDispose(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetDiagInfoDescription")]
+  public static extern string GetDiagInfoDescription(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetDiagInfoSeverity")]
+  public static extern int GetDiagInfoSeverity(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetMDKindIDInContext")]
   public static extern uint GetMDKindIDInContext(System.IntPtr jarg1, string jarg2, uint jarg3);
 
@@ -543,11 +549,14 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAGlobalValue")]
   public static extern System.IntPtr IsAGlobalValue(System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAFunction")]
-  public static extern System.IntPtr IsAFunction(System.IntPtr jarg1);
-
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAGlobalAlias")]
   public static extern System.IntPtr IsAGlobalAlias(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAGlobalObject")]
+  public static extern System.IntPtr IsAGlobalObject(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAFunction")]
+  public static extern System.IntPtr IsAFunction(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAGlobalVariable")]
   public static extern System.IntPtr IsAGlobalVariable(System.IntPtr jarg1);
@@ -2060,6 +2069,9 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ViewFunctionCFGOnly")]
   public static extern void ViewFunctionCFGOnly(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IntrinsicGetDeclaration")]
+  public static extern System.IntPtr IntrinsicGetDeclaration(System.IntPtr jarg1, uint jarg2, System.IntPtr arg3_data, uint jarg3);
 }
 
 }

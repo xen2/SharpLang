@@ -52,6 +52,16 @@ public class LLVM {
     LLVMPINVOKE.ContextDispose(C.Value);
   }
 
+  public unsafe static string GetDiagInfoDescription(DiagnosticInfoRef DI) {
+    string ret = LLVMPINVOKE.GetDiagInfoDescription(DI.Value);
+    return ret;
+  }
+
+  public unsafe static DiagnosticSeverity GetDiagInfoSeverity(DiagnosticInfoRef DI) {
+    DiagnosticSeverity ret = (DiagnosticSeverity)LLVMPINVOKE.GetDiagInfoSeverity(DI.Value);
+    return ret;
+  }
+
   public unsafe static uint GetMDKindIDInContext(ContextRef C, string Name, uint SLen) {
     uint ret = LLVMPINVOKE.GetMDKindIDInContext(C.Value, Name, SLen);
     return ret;
@@ -595,13 +605,18 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef IsAFunction(ValueRef Val) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.IsAFunction(Val.Value));
+  public unsafe static ValueRef IsAGlobalAlias(ValueRef Val) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.IsAGlobalAlias(Val.Value));
     return ret;
   }
 
-  public unsafe static ValueRef IsAGlobalAlias(ValueRef Val) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.IsAGlobalAlias(Val.Value));
+  public unsafe static ValueRef IsAGlobalObject(ValueRef Val) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.IsAGlobalObject(Val.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef IsAFunction(ValueRef Val) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.IsAFunction(Val.Value));
     return ret;
   }
 
@@ -3040,6 +3055,14 @@ public class LLVM {
 
   public unsafe static void ViewFunctionCFGOnly(ValueRef Fn) {
     LLVMPINVOKE.ViewFunctionCFGOnly(Fn.Value);
+  }
+
+  public unsafe static ValueRef IntrinsicGetDeclaration(ModuleRef M, uint ID, TypeRef[] ParamTypes) {
+    fixed (TypeRef* swig_ptrTo_ParamTypes = ParamTypes)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.IntrinsicGetDeclaration(M.Value, ID, (System.IntPtr)swig_ptrTo_ParamTypes, (uint)ParamTypes.Length));
+      return ret;
+    }
   }
 
 }

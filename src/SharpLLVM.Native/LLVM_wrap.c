@@ -269,6 +269,8 @@ SWIGEXPORT void SWIGSTDCALL SWIGRegisterStringCallback_LLVM(SWIG_CSharpStringHel
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Analysis.h>
 
+#include "Additional.h"
+
 
 
 #ifdef __cplusplus
@@ -351,6 +353,30 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ContextDispose(void * jarg1) {
   
   arg1 = (LLVMContextRef)jarg1; 
   LLVMContextDispose(arg1);
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_GetDiagInfoDescription(void * jarg1) {
+  char * jresult ;
+  LLVMDiagnosticInfoRef arg1 ;
+  char *result = 0 ;
+  
+  arg1 = (LLVMDiagnosticInfoRef)jarg1; 
+  result = (char *)LLVMGetDiagInfoDescription(arg1);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetDiagInfoSeverity(void * jarg1) {
+  int jresult ;
+  LLVMDiagnosticInfoRef arg1 ;
+  LLVMDiagnosticSeverity result;
+  
+  arg1 = (LLVMDiagnosticInfoRef)jarg1; 
+  result = (LLVMDiagnosticSeverity)LLVMGetDiagInfoSeverity(arg1);
+  jresult = (int)result; 
+  return jresult;
 }
 
 
@@ -1650,18 +1676,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IsAGlobalValue(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_IsAFunction(void * jarg1) {
-  void * jresult ;
-  LLVMValueRef arg1 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMValueRef)jarg1; 
-  result = LLVMIsAFunction(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void * SWIGSTDCALL CSharp_IsAGlobalAlias(void * jarg1) {
   void * jresult ;
   LLVMValueRef arg1 ;
@@ -1669,6 +1683,30 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IsAGlobalAlias(void * jarg1) {
   
   arg1 = (LLVMValueRef)jarg1; 
   result = LLVMIsAGlobalAlias(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_IsAGlobalObject(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMIsAGlobalObject(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_IsAFunction(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMIsAFunction(arg1);
   jresult = result; 
   return jresult;
 }
@@ -8181,6 +8219,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ViewFunctionCFGOnly(void * jarg1) {
   
   arg1 = (LLVMValueRef)jarg1; 
   LLVMViewFunctionCFGOnly(arg1);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_IntrinsicGetDeclaration(void * jarg1, unsigned int jarg2, void* arg3_data, unsigned int jarg3) {
+  void * jresult ;
+  LLVMModuleRef arg1 ;
+  unsigned int arg2 ;
+  LLVMTypeRef *arg3 = (LLVMTypeRef *) 0 ;
+  unsigned int arg4 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMModuleRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  arg3 = arg3_data; arg4 = jarg3;
+  result = LLVMIntrinsicGetDeclaration(arg1,arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
 }
 
 
