@@ -58,7 +58,16 @@ namespace SharpLang.CompilerServices.Tests
             if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
                 Driver.Clang = clangLocal;
 
-            Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile);
+            // Probe again for local Ninja builds
+            llcLocal = @"../../../../deps/llvm/build/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+            if (File.Exists(llcLocal) || File.Exists(llcLocal + ".exe"))
+                Driver.LLC = llcLocal;
+
+            clangLocal = @"../../../../deps/llvm/build/bin/clang".Replace('/', Path.DirectorySeparatorChar);
+            if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
+                Driver.Clang = clangLocal;
+
+            Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile, true);
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
                 Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");
