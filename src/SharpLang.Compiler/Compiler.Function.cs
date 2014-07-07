@@ -918,6 +918,7 @@ namespace SharpLang.CompilerServices
 
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
+                    case Code.Ldc_I4_M1:
                     case Code.Ldc_I4_0:
                     case Code.Ldc_I4_1:
                     case Code.Ldc_I4_2:
