@@ -32,8 +32,12 @@ public static class Program
                 System.Console.WriteLine("Exception2 caught");
             }
             catch (Exception1 e)
-            { 
+            {
                 System.Console.WriteLine("Exception1 caught");
+            }
+            finally
+            {
+                System.Console.WriteLine("Finally1");
             }
             System.Console.WriteLine("AfterInner");
         }
@@ -41,10 +45,15 @@ public static class Program
         {
             System.Console.WriteLine("Exception3 caught");
         }
+        finally
+        {
+            System.Console.WriteLine("Finally2");
+        }
     }
 
     public static void Main()
     {
+        TestException(null);
         TestException(new Exception1());
         TestException(new Exception2());
         TestException(new Exception3());

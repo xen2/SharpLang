@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Mono.Cecil.Cil;
 using SharpLLVM;
 
@@ -9,11 +10,10 @@ namespace SharpLang.CompilerServices
         /// Initializes a new instance of the <see cref="ExceptionHandlerInfo"/> class.
         /// </summary>
         /// <param name="source">The Cecil exception handler.</param>
-        /// <param name="catchDispatch">The catch dispatch basic block.</param>
-        public ExceptionHandlerInfo(ExceptionHandler source, BasicBlockRef catchDispatch)
+        public ExceptionHandlerInfo(ExceptionHandler source)
         {
             Source = source;
-            CatchDispatch = catchDispatch;
+            LeaveTargets = new List<Instruction>();
         }
 
         /// <summary>
@@ -31,5 +31,13 @@ namespace SharpLang.CompilerServices
         /// The catch dispatch.
         /// </value>
         public BasicBlockRef CatchDispatch { get; set; }
+
+        /// <summary>
+        /// Gets the leave targets (instructions that can be reached when exiting finally clause).
+        /// </summary>
+        /// <value>
+        /// The leave targets.
+        /// </value>
+        public List<Instruction> LeaveTargets { get; private set; }
     }
 }
