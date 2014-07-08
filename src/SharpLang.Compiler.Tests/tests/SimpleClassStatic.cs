@@ -6,10 +6,19 @@ public static class Program
     {
         public static string TestField;
 
+        public static int C;
+
+        public static Data Data;
+
         public static void TestMethod()
         {
             Console.WriteLine(TestField);
         }
+    }
+
+    public struct Data
+    {
+        public int Value;
     }
 
     public static void Main()
@@ -19,5 +28,11 @@ public static class Program
 
         Test.TestField = "Test2";
         Test.TestMethod();
+
+        Test.C++;
+        Console.WriteLine(Test.C);
+
+        Test.Data.Value++;
+        Console.WriteLine(Test.Data.Value);
     }
 }

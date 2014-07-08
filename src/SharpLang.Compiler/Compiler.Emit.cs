@@ -486,6 +486,22 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
         }
 
+        private void EmitLdsflda(List<StackValue> stack, Field field)
+        {
+            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+
+            var refType = GetType(field.DeclaringClass.Type.TypeReference.MakeByReferenceType());
+
+            // Get static field GEP indices
+            var indices = BuildStaticFieldIndices(field);
+
+            // Find static field address in runtime type info
+            var staticFieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
+
+            // Add value to stack
+            stack.Add(new StackValue(StackValueType.Reference, refType, staticFieldAddress));
+        }
+
         private ValueRef[] BuildStaticFieldIndices(Field field)
         {
             var indices = new[]
