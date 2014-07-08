@@ -402,8 +402,11 @@ namespace SharpLang.CompilerServices
             // Build indices for GEP
             var indices = new List<ValueRef>(3);
 
-            // First pointer indirection
-            indices.Add(LLVM.ConstInt(int32Type, 0, false));
+            if (stackValueType == StackValueType.Reference || stackValueType == StackValueType.Object)
+            {
+                // First pointer indirection
+                indices.Add(LLVM.ConstInt(int32Type, 0, false));
+            }
 
             if (stackValueType == StackValueType.Object)
             {
