@@ -376,7 +376,7 @@ namespace SharpLang.CompilerServices
         {
             var @object = stack.Pop();
 
-            var refType = GetType(field.DeclaringClass.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(field.Type.TypeReference.MakeByReferenceType());
 
             // Build indices for GEP
             var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
@@ -490,7 +490,7 @@ namespace SharpLang.CompilerServices
         {
             var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
 
-            var refType = GetType(field.DeclaringClass.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(field.Type.TypeReference.MakeByReferenceType());
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
