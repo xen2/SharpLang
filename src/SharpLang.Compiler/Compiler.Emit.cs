@@ -372,6 +372,22 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
         }
 
+        private void EmitLdflda(List<StackValue> stack, Field field)
+        {
+            var @object = stack.Pop();
+
+            var refType = GetType(field.DeclaringClass.Type.TypeReference.MakeByReferenceType());
+
+            // Build indices for GEP
+            var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
+
+            // Find field address using GEP
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+
+            // Add value to stack
+            stack.Add(new StackValue(StackValueType.Reference, refType, fieldAddress));
+        }
+
         private static void SetInstructionFlags(ValueRef instruction, InstructionFlags instructionFlags)
         {
             // Set instruction flags (if necessary)

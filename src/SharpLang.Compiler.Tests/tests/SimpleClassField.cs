@@ -4,6 +4,12 @@ public static class Program
     {
         public string A;
         public int B;
+        public Data D;
+    }
+
+    public struct Data
+    {
+        public int C;
     }
 
     public static void Main()
@@ -12,7 +18,11 @@ public static class Program
         test.A = "Test";
         test.B = 32;
 
+        // Emit Ldflda
+        test.D.C++;
+
         System.Console.WriteLine(test.A);
         System.Console.WriteLine(test.B);
+        System.Console.WriteLine(test.D.C);
     }
 }

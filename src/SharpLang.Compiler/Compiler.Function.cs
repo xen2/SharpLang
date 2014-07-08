@@ -1020,6 +1020,7 @@ namespace SharpLang.CompilerServices
                         break;
                     }
                     case Code.Ldfld:
+                    case Code.Ldflda:
                     {
                         var fieldReference = (FieldReference)instruction.Operand;
 
@@ -1027,8 +1028,15 @@ namespace SharpLang.CompilerServices
                         var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                         var field = @class.Fields[fieldReference.Resolve()];
 
-                        EmitLdfld(stack, field, instructionFlags);
-                        instructionFlags = InstructionFlags.None;
+                        if (opcode == Code.Ldflda)
+                        {
+                            EmitLdflda(stack, field);
+                        }
+                        else
+                        {
+                            EmitLdfld(stack, field, instructionFlags);
+                            instructionFlags = InstructionFlags.None;
+                        }
 
                         break;
                     }
