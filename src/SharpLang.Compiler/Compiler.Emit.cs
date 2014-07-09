@@ -52,7 +52,14 @@ namespace SharpLang.CompilerServices
         private void EmitLdarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
         {
             var arg = args[operandIndex];
-            var value = ConvertFromLocalToStack(arg.Type, arg.Value);
+
+            // Load value from local argument
+            var value = LLVM.BuildLoad(builder, arg.Value, string.Empty);
+
+            // Convert from local to stack value
+            value = ConvertFromLocalToStack(arg.Type, value);
+
+            // Add value to stack
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
         }
 

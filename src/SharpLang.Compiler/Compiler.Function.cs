@@ -216,7 +216,12 @@ namespace SharpLang.CompilerServices
             {
                 var argType = function.ParameterTypes[index];
                 var arg = LLVM.GetParam(functionGlobal, (uint)index);
-                args.Add(new StackValue(argType.StackType, argType, arg));
+
+                // Copy argument on stack
+                var storage = LLVM.BuildAlloca(builder, argType.DefaultType, "arg" + index.ToString());
+                LLVM.BuildStore(builder, arg, storage);
+
+                args.Add(new StackValue(argType.StackType, argType, storage));
             }
 
             // Some wasted space due to unused offsets, but we only keep one so it should be fine.
