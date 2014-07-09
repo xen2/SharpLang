@@ -921,6 +921,40 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    #region Argument opcodes (Ldarg, Ldarga, Starg, etc...)
+                    // Ldarg
+                    case Code.Ldarg_0:
+                    case Code.Ldarg_1:
+                    case Code.Ldarg_2:
+                    case Code.Ldarg_3:
+                    {
+                        var value = opcode - Code.Ldarg_0;
+                        EmitLdarg(stack, args, value);
+                        break;
+                    }
+                    case Code.Ldarg_S:
+                    case Code.Ldarg:
+                    {
+                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
+                        EmitLdarg(stack, args, value);
+                        break;
+                    }
+                    case Code.Ldarga:
+                    case Code.Ldarga_S:
+                    {
+                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
+                        EmitLdarga(stack, args, value);
+                        break;
+                    }
+                    case Code.Starg:
+                    case Code.Starg_S:
+                    {
+                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
+                        EmitStarg(stack, args, value);
+                        break;
+                    }
+                    #endregion
+
                     #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
                     // Ldc_I4
                     case Code.Ldc_I4_M1:
@@ -967,30 +1001,6 @@ namespace SharpLang.CompilerServices
                     {
                         var value = (double)instruction.Operand;
                         EmitR8(stack, value);
-                        break;
-                    }
-                    // Ldarg
-                    case Code.Ldarg_0:
-                    case Code.Ldarg_1:
-                    case Code.Ldarg_2:
-                    case Code.Ldarg_3:
-                    {
-                        var value = opcode - Code.Ldarg_0;
-                        EmitLdarg(stack, args, value);
-                        break;
-                    }
-                    case Code.Ldarg_S:
-                    case Code.Ldarg:
-                    {
-                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
-                        EmitLdarg(stack, args, value);
-                        break;
-                    }
-                    case Code.Ldarga:
-                    case Code.Ldarga_S:
-                    {
-                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
-                        EmitLdarga(stack, args, value);
                         break;
                     }
                     case Code.Ldstr:

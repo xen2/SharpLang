@@ -77,6 +77,18 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Reference, refType, value));
         }
 
+        private void EmitStarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
+        {
+            var value = stack.Pop();
+            var arg = args[operandIndex];
+
+            // Convert from stack to local value
+            var stackValue = ConvertFromStackToLocal(arg.Type, value);
+
+            // Store value into local argument
+            LLVM.BuildStore(builder, stackValue, arg.Value);
+        }
+
         private InstructionFlags EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
         {
             var address = stack.Pop();
