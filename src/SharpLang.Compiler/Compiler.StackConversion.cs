@@ -18,15 +18,15 @@ namespace SharpLang.CompilerServices
 
             // Same type, return as is
             if ((stack.StackType == StackValueType.Value
-                    || stack.StackType == StackValueType.NativeInt
-                    || stack.StackType == StackValueType.Reference)
+                    || stack.StackType == StackValueType.NativeInt)
                 && localType.DefaultType == stack.Type.DefaultType)
             {
                 return stackValue;
             }
 
             // Object: allow upcast as well
-            if (stack.StackType == StackValueType.Object)
+            if (stack.StackType == StackValueType.Reference
+                || stack.StackType == StackValueType.Object)
             {
                 if (localType.DefaultType == stack.Type.DefaultType)
                 {

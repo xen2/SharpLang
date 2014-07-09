@@ -36,13 +36,16 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     static partial class CecilExtensions
     {
-        public static Function TryMatchMethod(Class @class, MethodReference method)
+        public static Function TryMatchMethod(Class @class, MethodReference method, bool checkBases = true)
         {
             while (@class != null)
             {
                 foreach (var candidate in @class.Functions)
                     if (MethodMatch(candidate.MethodReference, method))
                         return candidate;
+
+                if (!checkBases)
+                    return null;
 
                 @class = @class.BaseType;
             }

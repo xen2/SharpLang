@@ -5,12 +5,34 @@
 #include <stdint.h>
 
 // Match runtime String struct layout
+typedef struct RuntimeTypeInfo
+{
+	struct RuntimeTypeInfo* base;
+	uint32_t superTypeCount;
+	uint32_t interfacesCount;
+	struct RuntimeTypeInfo** superTypes;
+	struct RuntimeTypeInfo** interfaceMap;
+	void* interfaceMethodTable[19];
+	void* virtualTable[0];
+} RuntimeTypeInfo;
+
+typedef struct Object
+{
+	struct RuntimeTypeInfo* runtimeTypeInfo;
+} Object;
+
 typedef struct String
 {
-	uint8_t* runtimeTypeInfo;
+	struct Object base;
 	size_t length;
 	char* value;
 } String;
+
+typedef struct Int32
+{
+	struct Object base;
+	int32_t value;
+} Int32;
 
 // Empty functions that pretend to set culture on thread UI so that real .NET execute them.
 // No need to worry anymore about culture when using Console.WriteLine.
@@ -117,4 +139,25 @@ void System_Void_System_Console__WriteLine_System_Double_(double f)
 // void System.Object..ctor()
 void System_Void_System_Object___ctor__(void* obj)
 {
+}
+
+// void System.ValueType.Equals(object)
+uint8_t System_Boolean_System_ValueType__Equals_System_Object_(struct Object* boxedValue, struct Object* obj)
+{
+	if (obj == 0)
+		return 0;
+
+	if (boxedValue->runtimeTypeInfo != obj->runtimeTypeInfo)
+		return 0;
+
+	// Compare area after object header
+	// TODO: Store actual size in RuntimeTypeInfo and use it for comparison size.
+	// Currently using 4 for SimpleGenericConstrained.cs.
+	return memcmp(boxedValue + 1, obj + 1, 4) == 0;
+}
+
+// bool System.Int32.Equals(object)
+uint8_t System_Boolean_System_Int32__Equals_System_Object_(int32_t* i, void* obj)
+{
+	return *i == ((Int32*)obj)->value ? 1 : 0;
 }
