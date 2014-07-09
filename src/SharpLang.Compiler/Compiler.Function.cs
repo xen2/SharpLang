@@ -986,6 +986,13 @@ namespace SharpLang.CompilerServices
                         EmitLdarg(stack, args, value);
                         break;
                     }
+                    case Code.Ldarga:
+                    case Code.Ldarga_S:
+                    {
+                        var value = ((ParameterDefinition)instruction.Operand).Index + (method.HasThis ? 1 : 0);
+                        EmitLdarga(stack, args, value);
+                        break;
+                    }
                     case Code.Ldstr:
                     {
                         var operand = (string)instruction.Operand;

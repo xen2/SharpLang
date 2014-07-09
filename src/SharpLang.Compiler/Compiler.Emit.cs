@@ -63,6 +63,20 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
         }
 
+        private void EmitLdarga(List<StackValue> stack, List<StackValue> args, int operandIndex)
+        {
+            var arg = args[operandIndex];
+
+            var refType = GetType(arg.Type.TypeReference.MakeByReferenceType());
+
+            // Convert from local to stack value
+            var value = ConvertFromLocalToStack(arg.Type, arg.Value);
+
+            // Add value to stack
+            // TODO: Choose appropriate type + conversions
+            stack.Add(new StackValue(StackValueType.Reference, refType, value));
+        }
+
         private InstructionFlags EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
         {
             var address = stack.Pop();
