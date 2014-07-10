@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "RuntimeType.h"
 
@@ -18,7 +19,7 @@ extern "C" bool isInstInterface(const RuntimeTypeInfo* runtimeTypeInfo, const Ru
 
 extern "C" void* allocObject(uint32_t size)
 {
-    return malloc(size);
+    return memset(malloc(size), 0, size);
 }
 
 typedef struct IMTEntry
