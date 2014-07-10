@@ -241,10 +241,13 @@ namespace SharpLang.CompilerServices
                 if (flowControl == FlowControl.Cond_Branch
                     || flowControl == FlowControl.Branch)
                 {
-                    var target = (Instruction)instruction.Operand;
+                    var targets = instruction.Operand is Instruction[] ? (Instruction[])instruction.Operand : new[] { (Instruction)instruction.Operand };
 
-                    // Operand Target can be reached
-                    branchTargets[target.Offset] = true;
+                    foreach (var target in targets)
+                    {
+                        // Operand Target can be reached
+                        branchTargets[target.Offset] = true;
+                    }
                 }
 
                 // Need to enforce a block to be created for the next instruction after a conditional branch
@@ -1276,7 +1279,7 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
-                    #region Branching (Brtrue, Brfalse, etc...)
+                    #region Branching (Brtrue, Brfalse, Switch, etc...)
                     case Code.Br:
                     case Code.Br_S:
                     {
@@ -1298,6 +1301,19 @@ namespace SharpLang.CompilerServices
                     {
                         var targetInstruction = (Instruction)instruction.Operand;
                         EmitBrtrue(stack, basicBlocks[targetInstruction.Offset], basicBlocks[instruction.Next.Offset]);
+                        flowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
+                        break;
+                    }
+                    case Code.Switch:
+                    {
+                        var targets = (Instruction[])instruction.Operand;
+                        var operand = stack.Pop();
+                        var @switch = LLVM.BuildSwitch(builder, operand.Value, basicBlocks[instruction.Next.Offset], (uint)targets.Length);
+                        for (int i = 0; i < targets.Length; ++i)
+                        {
+                            var target = targets[i];
+                            LLVM.AddCase(@switch, LLVM.ConstInt(int32Type, (ulong)i, false), basicBlocks[target.Offset]);
+                        }
                         flowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
                         break;
                     }
@@ -2000,18 +2016,21 @@ namespace SharpLang.CompilerServices
                 if (flowControl == FlowControl.Cond_Branch
                     || flowControl == FlowControl.Branch)
                 {
-                    var target = (Instruction)instruction.Operand;
+                    var targets = instruction.Operand is Instruction[] ? (Instruction[])instruction.Operand : new[] { (Instruction)instruction.Operand };
 
-                    // Backward jump? Make sure stack was properly created by a previous forward jump, or empty
-                    if (target.Offset < instruction.Offset)
+                    foreach (var target in targets)
                     {
-                        var forwardStack = forwardStacks[target.Offset];
-                        if (forwardStack != null && forwardStack.Length > 0)
-                            throw new InvalidOperationException("Backward jump with a non-empty stack unknown target.");
-                    }
+                        // Backward jump? Make sure stack was properly created by a previous forward jump, or empty
+                        if (target.Offset < instruction.Offset)
+                        {
+                            var forwardStack = forwardStacks[target.Offset];
+                            if (forwardStack != null && forwardStack.Length > 0)
+                                throw new InvalidOperationException("Backward jump with a non-empty stack unknown target.");
+                        }
 
-                    // Merge stack (add PHI incoming)
-                    MergeStack(stack, functionContext.BasicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
+                        // Merge stack (add PHI incoming)
+                        MergeStack(stack, functionContext.BasicBlock, ref forwardStacks[target.Offset], basicBlocks[target.Offset]);
+                    }
                 }
             }
         }
