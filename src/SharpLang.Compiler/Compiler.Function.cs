@@ -755,6 +755,7 @@ namespace SharpLang.CompilerServices
                     }
                     #endregion
 
+                    case Code.Castclass:
                     case Code.Isinst:
                     {
                         var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
@@ -847,14 +848,36 @@ namespace SharpLang.CompilerServices
 
                         // Start new typeNotMatchBlock: set object to null and jump to typeCheckDoneBlock
                         LLVM.PositionBuilderAtEnd(builder, typeNotMatchBlock);
-                        LLVM.BuildBr(builder, typeCheckDoneBlock);
+                        if (opcode == Code.Castclass)
+                        {
+                            // Create InvalidCastException object
+                            var invalidCastExceptionClass = GetClass(corlib.MainModule.GetType(typeof(InvalidCastException).FullName));
+                            EmitNewobj(functionContext, invalidCastExceptionClass.Type, invalidCastExceptionClass.Functions.Single(x => x.MethodReference.Name == ".ctor" && x.MethodReference.Parameters.Count == 0));
+                            var invalidCastException = stack.Pop();
+                            GenerateInvoke(functionContext, throwExceptionFunction, new[] { LLVM.BuildPointerCast(builder, invalidCastException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                            LLVM.BuildUnreachable(builder);
+                        }
+                        else
+                        {
+                            LLVM.BuildBr(builder, typeCheckDoneBlock);
+                        }
 
                         // Start new typeCheckDoneBlock
                         LLVM.PositionBuilderAtEnd(builder, typeCheckDoneBlock);
 
                         // Put back with appropriate type at end of stack
-                        var mergedVariable = LLVM.BuildPhi(builder, castedPointerType, string.Empty);
-                        LLVM.AddIncoming(mergedVariable, new[] { castedPointerObject, LLVM.ConstPointerNull(castedPointerType) }, new[] { typeCheckBlock, typeNotMatchBlock });
+                        ValueRef mergedVariable;
+                        if (opcode == Code.Castclass)
+                        {
+                            mergedVariable = castedPointerObject;
+                        }
+                        else
+                        {
+                            mergedVariable = LLVM.BuildPhi(builder, castedPointerType, string.Empty);
+                            LLVM.AddIncoming(mergedVariable,
+                                new[] {castedPointerObject, LLVM.ConstPointerNull(castedPointerType)},
+                                new[] {typeCheckBlock, typeNotMatchBlock});
+                        }
                         stack.Add(new StackValue(obj.StackType, @class.Type, mergedVariable));
 
                         break;
@@ -2006,7 +2029,6 @@ namespace SharpLang.CompilerServices
                         break;
                     #endregion
 
-                    case Code.Castclass:
                     default:
                         throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
                 }
