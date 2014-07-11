@@ -142,36 +142,42 @@ namespace SharpLang.CompilerServices
         {
             var stack = functionContext.Stack;
 
-            if (type.StackType == StackValueType.Object)
+            var allocatedObject = AllocateObject(type);
+
+            // Add it to stack, right before arguments
+            var ctorNumParams = ctor.ParameterTypes.Length;
+            stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
+
+            // Invoke ctor
+            EmitCall(functionContext, ctor.Signature, ctor.GeneratedValue);
+
+            if (type.StackType != StackValueType.Object)
             {
-                var allocatedObject = AllocateObject(type);
-
-                // Add it to stack, right before arguments
-                var ctorNumParams = ctor.ParameterTypes.Length;
-                stack.Insert(stack.Count - ctorNumParams + 1, new StackValue(StackValueType.Object, type, allocatedObject));
-
-                // Invoke ctor
-                EmitCall(functionContext, ctor.Signature, ctor.GeneratedValue);
-
-                // Add created object on the stack
-                stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
+                allocatedObject = LLVM.BuildLoad(builder, allocatedObject, string.Empty);
             }
-            else
-            {
-                // TODO: Support value type too
-                throw new NotImplementedException();
-            }
+
+            // Add created object on the stack
+            stack.Add(new StackValue(type.StackType, type, allocatedObject));
         }
 
-        private ValueRef AllocateObject(Type type)
+        private ValueRef AllocateObject(Type type, StackValueType stackValueType = StackValueType.Unknown)
         {
+            if (stackValueType == StackValueType.Unknown)
+                stackValueType = type.StackType;
+
             // Resolve class
             var @class = GetClass(type);
+
+            if (stackValueType != StackValueType.Object)
+            {
+                // Value types are allocated on the stack
+                return LLVM.BuildAlloca(builder, type.DataType, string.Empty);
+            }
 
             // TODO: Improve performance (better inlining, etc...)
             // Invoke malloc
             var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), int32Type, string.Empty);
-            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] {typeSize}, string.Empty);
+            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
             // Store vtable global into first field of the object

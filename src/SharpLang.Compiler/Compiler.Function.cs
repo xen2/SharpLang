@@ -2060,7 +2060,7 @@ namespace SharpLang.CompilerServices
         private ValueRef BoxValueType(Class @class, StackValue valueType)
         {
             // Allocate object
-            var allocatedObject = AllocateObject(@class.Type);
+            var allocatedObject = AllocateObject(@class.Type, StackValueType.Object);
 
             var dataPointer = GetDataPointer(allocatedObject);
 
