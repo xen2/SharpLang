@@ -31,7 +31,7 @@ _ReSharper*/
 /build/vs2012
 /build/vs2013
 /build/gmake
-/deps/llvm
+/deps/mingw32
 /tools/swig
 /src/SharpLang.Compiler.Tests/tests/output/
 /src/**/*.csproj
