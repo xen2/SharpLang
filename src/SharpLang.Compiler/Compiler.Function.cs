@@ -1962,6 +1962,26 @@ namespace SharpLang.CompilerServices
                     {
                         var exceptionObject = stack.Pop();
 
+                        // Throw exception
+                        // TODO: Update callstack
+                        GenerateInvoke(functionContext, throwExceptionFunction, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                        LLVM.BuildUnreachable(builder);
+
+                        flowingNextInstructionMode = FlowingNextInstructionMode.None;
+                        break;
+                    }
+                    case Code.Rethrow:
+                    {
+                        // Find exception that was on stack at beginning of this catch clause
+                        var currentCatchClause = GetCurrentExceptionHandler(exceptionHandlers, instruction.Offset);
+
+                        if (currentCatchClause == null || currentCatchClause.Source.HandlerType != ExceptionHandlerType.Catch)
+                            throw new InvalidOperationException("Can't find catch clause matching this rethrow instruction.");
+
+                        var catchClauseStack = forwardStacks[currentCatchClause.Source.HandlerStart.Offset];
+                        var exceptionObject = catchClauseStack[0];
+
+                        // Rethrow exception
                         GenerateInvoke(functionContext, throwExceptionFunction, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
                         LLVM.BuildUnreachable(builder);
 
@@ -1984,21 +2004,9 @@ namespace SharpLang.CompilerServices
                     }
                     case Code.Endfinally:
                     {
-                        ExceptionHandlerInfo currentFinallyClause = null;
-                        for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
-                        {
-                            var exceptionHandler = exceptionHandlers[index];
+                        var currentFinallyClause = GetCurrentExceptionHandler(exceptionHandlers, instruction.Offset);
 
-                            if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally
-                                && instruction.Offset >= exceptionHandler.Source.HandlerStart.Offset
-                                && instruction.Offset < exceptionHandler.Source.HandlerEnd.Offset)
-                            {
-                                currentFinallyClause = exceptionHandler;
-                                break;
-                            }
-                        }
-
-                        if (currentFinallyClause == null)
+                        if (currentFinallyClause == null || currentFinallyClause.Source.HandlerType != ExceptionHandlerType.Finally)
                             throw new InvalidOperationException("Can't find finally clause matching this endfinally instruction.");
 
                         // Basic block to continue exception handling (if endfinally.jumptarget is -1, but we simply set it on undefined cases)
@@ -2055,6 +2063,23 @@ namespace SharpLang.CompilerServices
                     }
                 }
             }
+        }
+
+        private static ExceptionHandlerInfo GetCurrentExceptionHandler(List<ExceptionHandlerInfo> exceptionHandlers, int offset)
+        {
+            ExceptionHandlerInfo currentExceptionHandler = null;
+            for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
+            {
+                var exceptionHandler = exceptionHandlers[index];
+
+                if (offset >= exceptionHandler.Source.HandlerStart.Offset
+                    && offset < exceptionHandler.Source.HandlerEnd.Offset)
+                {
+                    currentExceptionHandler = exceptionHandler;
+                    break;
+                }
+            }
+            return currentExceptionHandler;
         }
 
         private ValueRef BoxValueType(Class @class, StackValue valueType)
