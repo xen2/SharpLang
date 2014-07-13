@@ -29,7 +29,7 @@ namespace SharpLang.CompilerServices
                     "=== Options ===",
                     string.Empty,
                     { "h|help", "Show this message and exit", v => showHelp = v != null },
-                    { "o", "Output filename. Default to [inputfilename].bc", v => outputFile = v },
+                    { "o|output=", "Output filename. Default to [inputfilename].bc", v => outputFile = v },
                     { "d", "Generate debug LLVM IR assembly output", v => generateIR = true },
                 };
 
