@@ -75,7 +75,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.ByReference:
                 {
                     var type = GetType(((ByReferenceType)typeReference).ElementType);
-                    dataType = LLVM.PointerType(type.TypeOnStack, 0);
+                    dataType = LLVM.PointerType(type.DefaultType, 0);
                     stackType = StackValueType.Reference;
                     break;
                 }
