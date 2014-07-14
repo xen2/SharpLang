@@ -39,6 +39,8 @@ namespace SharpLang.CompilerServices
         public List<ExceptionHandlerInfo> ExceptionHandlers { get; set; }
         public List<ExceptionHandlerInfo> ActiveTryHandlers { get; set; }
         public ValueRef EndfinallyJumpTarget { get; set; }
+        public ValueRef ExceptionSlot { get; set; }
+        public ValueRef ExceptionHandlerSelectorSlot { get; set; }
         public BasicBlockRef ResumeExceptionBlock { get; set; }
         public BasicBlockRef LandingPadBlock { get; set; }
     }
