@@ -89,7 +89,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, stackValue, arg.Value);
         }
 
-        private InstructionFlags EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        private void EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
         {
             var address = stack.Pop();
 
@@ -97,17 +97,15 @@ namespace SharpLang.CompilerServices
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
             var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
             SetInstructionFlags(loadInst, instructionFlags);
-            instructionFlags = InstructionFlags.None;
 
             // Convert to stack type
             var value = ConvertFromLocalToStack(type, loadInst);
 
             // Add to stack
             stack.Add(new StackValue(type.StackType, type, value));
-            return instructionFlags;
         }
 
-        private InstructionFlags EmitStobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        private void EmitStobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
             var address = stack.Pop();
@@ -119,8 +117,6 @@ namespace SharpLang.CompilerServices
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
             var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
             SetInstructionFlags(storeInst, instructionFlags);
-            instructionFlags = InstructionFlags.None;
-            return instructionFlags;
         }
 
         private void EmitInitobj(StackValue address, Type type)
