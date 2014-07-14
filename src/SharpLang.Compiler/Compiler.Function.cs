@@ -962,10 +962,10 @@ namespace SharpLang.CompilerServices
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
                     var @class = GetClass(typeReference);
 
-                    var obj = stack.Pop();
-
                     if (typeReference.IsValueType)
                     {
+                        var obj = stack.Pop();
+                        
                         // TODO: check type?
                         var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(@class.Type.ObjectType, 0), string.Empty);
 
