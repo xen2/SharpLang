@@ -63,7 +63,7 @@ namespace SharpLang.CompilerServices.Cecil
                 return type;
 
             // Build dictionary that will map generic type to their real implementation type
-            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>();
+            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>(TypeReferenceComparer.Default);
             if (genericInstanceTypeContext != null)
             {
                 var resolvedType = genericInstanceTypeContext.ElementType;
@@ -180,6 +180,21 @@ namespace SharpLang.CompilerServices.Cecil
                 return result;
 
             return base.Visit(type);
+        }
+
+        class TypeReferenceComparer : EqualityComparer<TypeReference>
+        {
+            public static readonly EqualityComparer<TypeReference> Default =  new TypeReferenceComparer();
+
+            public override bool Equals(TypeReference x, TypeReference y)
+            {
+                return x.FullName == y.FullName;
+            }
+
+            public override int GetHashCode(TypeReference obj)
+            {
+                return obj.FullName.GetHashCode();
+            }
         }
     }
 }
