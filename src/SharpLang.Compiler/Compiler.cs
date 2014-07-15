@@ -35,6 +35,7 @@ namespace SharpLang.CompilerServices
         private Type uint16;
         private Type uint32;
         private Type uint64;
+        private Type @bool;
         private Type @float;
         private Type @double;
         private Type @object;
@@ -58,7 +59,7 @@ namespace SharpLang.CompilerServices
 
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
-        public ModuleRef CompileAssembly(AssemblyDefinition assembly)
+        public void RegisterMainAssembly(AssemblyDefinition assembly)
         {
             this.assembly = assembly;
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
@@ -92,6 +93,7 @@ namespace SharpLang.CompilerServices
             uint16 = GetType(corlib.MainModule.GetType(typeof(ushort).FullName));
             uint32 = GetType(corlib.MainModule.GetType(typeof(uint).FullName));
             uint64 = GetType(corlib.MainModule.GetType(typeof(ulong).FullName));
+            @bool = GetType(corlib.MainModule.GetType(typeof(bool).FullName));
             @float = GetType(corlib.MainModule.GetType(typeof(float).FullName));
             @double = GetType(corlib.MainModule.GetType(typeof(double).FullName));
 
@@ -104,6 +106,18 @@ namespace SharpLang.CompilerServices
             caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
 
+            RegisterAssembly(assembly);
+        }
+
+        public void RegisterType(TypeReference typeReference)
+        {
+            var type = CreateType(typeReference);
+            EmitType(type);
+            BuildRuntimeType(GetClass(type));
+        }
+
+        public void RegisterAssembly(AssemblyDefinition assembly)
+        {
             // Process types
             foreach (var assemblyModule in assembly.Modules)
             {
@@ -139,7 +153,10 @@ namespace SharpLang.CompilerServices
                     }
                 }
             }
+        }
 
+        public ModuleRef GenerateModule()
+        {
             // Process methods
             while (classesToGenerate.Count > 0)
             {
@@ -154,6 +171,7 @@ namespace SharpLang.CompilerServices
             while (methodsToCompile.Count > 0)
             {
                 var methodToCompile = methodsToCompile.Dequeue();
+                Console.WriteLine("Compiling {0}", methodToCompile.Key.FullName);
                 CompileFunction(methodToCompile.Key, methodToCompile.Value);
             }
 

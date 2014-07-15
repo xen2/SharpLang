@@ -52,8 +52,13 @@ void* System_Threading_Thread_System_Threading_Thread__get_CurrentThread__()
 	return NULL;
 }
 
-// System.Exception..ctor(string)
+// System.Exception..ctor()
 void System_Void_System_Exception___ctor__(void* exception)
+{
+}
+
+// System.InvalidCastException..ctor()
+void System_Void_System_InvalidCastException___ctor__(void* exception)
 {
 }
 

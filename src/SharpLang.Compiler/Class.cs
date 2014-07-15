@@ -10,6 +10,7 @@ namespace SharpLang.CompilerServices
     /// </summary>
     class Class
     {
+        internal bool IsEmitted;
         internal bool MethodCompiled;
 
         public Class(Type type)

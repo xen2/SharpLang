@@ -228,6 +228,11 @@ namespace SharpLang.CompilerServices
 
         private void BuildRuntimeType(Class @class)
         {
+            if (@class.IsEmitted)
+                return;
+
+            @class.IsEmitted = true;
+
             // Build IMT
             var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
             foreach (var @interface in @class.Interfaces)

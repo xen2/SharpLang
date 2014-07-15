@@ -38,24 +38,24 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false)
+        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, System.Type[] additionalTypes = null)
         {
-            // Force PdbReader to be referenced
-            typeof(Mono.Cecil.Pdb.PdbReader).ToString();
-
-            var assemblyResolver = new CustomAssemblyResolver();
-
-            // Check if there is a PDB
-            var readPdb = File.Exists(System.IO.Path.ChangeExtension(inputFile, "pdb"));
-
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(inputFile,
-                new ReaderParameters { AssemblyResolver = assemblyResolver, ReadSymbols = readPdb });
-
-            // Register self to assembly resolver
-            assemblyResolver.Register(assemblyDefinition);
+            var assemblyDefinition = LoadAssembly(inputFile);
 
             var compiler = new Compiler();
-            var module = compiler.CompileAssembly(assemblyDefinition);
+            compiler.RegisterMainAssembly(assemblyDefinition);
+
+            if (additionalTypes != null)
+            {
+                foreach (var type in additionalTypes)
+                {
+                    var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
+                    var resolvedType = assembly.MainModule.GetType(type.FullName);
+                    compiler.RegisterType(resolvedType);
+                }
+            }
+
+            var module = compiler.GenerateModule();
 
             if (generateIR)
             {
@@ -65,6 +65,24 @@ namespace SharpLang.CompilerServices
             }
 
             LLVM.WriteBitcodeToFile(module, outputFile);
+        }
+
+        private static AssemblyDefinition LoadAssembly(string inputFile)
+        {
+            // Force PdbReader to be referenced
+            typeof (Mono.Cecil.Pdb.PdbReader).ToString();
+
+            var assemblyResolver = new CustomAssemblyResolver();
+
+            // Check if there is a PDB
+            var readPdb = File.Exists(System.IO.Path.ChangeExtension(inputFile, "pdb"));
+
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(inputFile,
+                new ReaderParameters {AssemblyResolver = assemblyResolver, ReadSymbols = readPdb});
+
+            // Register self to assembly resolver
+            assemblyResolver.Register(assemblyDefinition);
+            return assemblyDefinition;
         }
 
         const string ClangWrapper = "vs_clang.bat";

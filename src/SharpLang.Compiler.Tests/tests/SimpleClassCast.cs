@@ -35,23 +35,22 @@ public static class Program
         System.Console.WriteLine((Test2)test2 != null);
         System.Console.WriteLine((ITest)test2 != null);
 
-        // TODO: Should work as soon as we emit InvalidCastException locally for tests
-        //try
-        //{
-        //    System.Console.WriteLine((Test2)test1 != null);
-        //}
-        //catch (System.InvalidCastException e)
-        //{
-        //    System.Console.WriteLine("InvalidCast");
-        //}
-        //
-        //try
-        //{
-        //    System.Console.WriteLine((ITest)test1 != null);
-        //}
-        //catch (System.InvalidCastException e)
-        //{
-        //    System.Console.WriteLine("InvalidCast");
-        //}
+        try
+        {
+            System.Console.WriteLine((Test2)test1 != null);
+        }
+        catch (System.InvalidCastException e)
+        {
+            System.Console.WriteLine("InvalidCast");
+        }
+        
+        try
+        {
+            System.Console.WriteLine((ITest)test1 != null);
+        }
+        catch (System.InvalidCastException e)
+        {
+            System.Console.WriteLine("InvalidCast");
+        }
     }
 }

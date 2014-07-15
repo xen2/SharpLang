@@ -67,7 +67,13 @@ namespace SharpLang.CompilerServices.Tests
             if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
                 Driver.Clang = clangLocal;
 
-            Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile, true);
+            // Compile with a few additional corlib types useful for normal execution
+            Driver.CompileAssembly(compilerParameters.OutputAssembly, bitcodeFile, additionalTypes: new[]
+            {
+                typeof(Exception),
+                typeof(OverflowException),
+                typeof(InvalidCastException),
+            });
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
                 Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");

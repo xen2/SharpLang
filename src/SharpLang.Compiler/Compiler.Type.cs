@@ -161,14 +161,21 @@ namespace SharpLang.CompilerServices
             var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
 
             var result = new Type(typeReference, dataType, boxedType, stackType);
-            result.IsLocal = typeReference.Resolve().Module.Assembly == assembly;
 
-            if (result.IsLocal)
-            {
-                classesToGenerate.Enqueue(result);
-            }
+            bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
+            if (isLocal)
+                EmitType(result);
 
             return result;
+        }
+
+        private void EmitType(Type type)
+        {
+            if (type.IsLocal)
+                return;
+
+            type.IsLocal = true;
+            classesToGenerate.Enqueue(type);
         }
     }
 }
