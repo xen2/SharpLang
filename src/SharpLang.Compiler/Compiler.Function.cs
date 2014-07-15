@@ -2240,7 +2240,6 @@ namespace SharpLang.CompilerServices
                 targetStack = new StackValue[sourceStack.Count];
                 if (LLVM.GetLastInstruction(targetBasicBlock).Value != IntPtr.Zero && sourceStack.Count != 0)
                     throw new InvalidOperationException("Target basic block should have no instruction yet, or stack should be empty.");
-                LLVM.PositionBuilderAtEnd(builder2, targetBasicBlock);
             }
 
             for (int index = 0; index < sourceStack.Count; index++)
@@ -2253,12 +2252,23 @@ namespace SharpLang.CompilerServices
                 if (mergedStackValue == null)
                 {
                     // TODO: Check stack type during merging?
+                    LLVM.PositionBuilderAtEnd(builder2, targetBasicBlock);
                     mergedStackValue = new StackValue(stackValue.StackType, stackValue.Type, LLVM.BuildPhi(builder2, LLVM.TypeOf(stackValue.Value), string.Empty));
                     targetStack[index] = mergedStackValue;
                 }
 
+                // Convert type (if necessary)
+                // TOOD: Reuse common code with cast/conversion code
+                var value = stackValue.Value;
+                if (LLVM.TypeOf(value) != LLVM.TypeOf(mergedStackValue.Value) && LLVM.GetTypeKind(LLVM.TypeOf(mergedStackValue.Value)) == TypeKind.PointerTypeKind)
+                {
+                    // Position before last instruction (which should be a branching instruction)
+                    LLVM.PositionBuilderBefore(builder2, LLVM.GetLastInstruction(sourceBasicBlock));
+                    value = LLVM.BuildPointerCast(builder2, value, LLVM.TypeOf(mergedStackValue.Value), string.Empty);
+                }
+
                 // Add values from previous stack value
-                LLVM.AddIncoming(mergedStackValue.Value, new[] { stackValue.Value }, new[] { sourceBasicBlock });
+                LLVM.AddIncoming(mergedStackValue.Value, new[] { value }, new[] { sourceBasicBlock });
             }
         }
     }
