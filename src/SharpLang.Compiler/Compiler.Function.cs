@@ -1927,14 +1927,8 @@ namespace SharpLang.CompilerServices
                         switch (opcode)
                         {
                             case Code.Add:          result = LLVM.BuildAdd(builder, value1, value2, string.Empty); break;
-                            case Code.Add_Ovf:      result = LLVM.BuildNSWAdd(builder, value1, value2, string.Empty); break;
-                            case Code.Add_Ovf_Un:   result = LLVM.BuildNUWAdd(builder, value1, value2, string.Empty); break;
                             case Code.Sub:          result = LLVM.BuildSub(builder, value1, value2, string.Empty); break;
-                            case Code.Sub_Ovf:      result = LLVM.BuildNSWSub(builder, value1, value2, string.Empty); break;
-                            case Code.Sub_Ovf_Un:   result = LLVM.BuildNUWSub(builder, value1, value2, string.Empty); break;
                             case Code.Mul:          result = LLVM.BuildMul(builder, value1, value2, string.Empty); break;
-                            case Code.Mul_Ovf:      result = LLVM.BuildNSWMul(builder, value1, value2, string.Empty); break;
-                            case Code.Mul_Ovf_Un:   result = LLVM.BuildNUWMul(builder, value1, value2, string.Empty); break;
                             case Code.Div:          result = LLVM.BuildSDiv(builder, value1, value2, string.Empty); break;
                             case Code.Div_Un:       result = LLVM.BuildUDiv(builder, value1, value2, string.Empty); break;
                             case Code.Rem:          result = LLVM.BuildSRem(builder, value1, value2, string.Empty); break;
@@ -1945,22 +1939,63 @@ namespace SharpLang.CompilerServices
                             case Code.And:          result = LLVM.BuildAnd(builder, value1, value2, string.Empty); break;
                             case Code.Or:           result = LLVM.BuildOr(builder, value1, value2, string.Empty); break;
                             case Code.Xor:          result = LLVM.BuildXor(builder, value1, value2, string.Empty); break;
-                            default:
-                                goto InvalidBinaryOperation;
-                        }
-
-                        // TODO: Perform overflow check
-                        switch (opcode)
-                        {
                             case Code.Add_Ovf:
                             case Code.Add_Ovf_Un:
                             case Code.Sub_Ovf:
                             case Code.Sub_Ovf_Un:
                             case Code.Mul_Ovf:
                             case Code.Mul_Ovf_Un:
-                                throw new NotImplementedException("Binary operator with overflow check are not implemented.");
-                            default:
+                            {
+                                Intrinsics intrinsicId;
+                                switch (opcode)
+                                {
+                                    case Code.Add_Ovf:
+                                        intrinsicId = Intrinsics.sadd_with_overflow;
+                                        break;
+                                    case Code.Add_Ovf_Un:
+                                        intrinsicId = Intrinsics.uadd_with_overflow;
+                                        break;
+                                    case Code.Sub_Ovf:
+                                        intrinsicId = Intrinsics.ssub_with_overflow;
+                                        break;
+                                    case Code.Sub_Ovf_Un:
+                                        intrinsicId = Intrinsics.usub_with_overflow;
+                                        break;
+                                    case Code.Mul_Ovf:
+                                        intrinsicId = Intrinsics.smul_with_overflow;
+                                        break;
+                                    case Code.Mul_Ovf_Un:
+                                        intrinsicId = Intrinsics.umul_with_overflow;
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                                var intrinsic = LLVM.IntrinsicGetDeclaration(module, (uint)intrinsicId, new[] { LLVM.TypeOf(value1) });
+                                var overflowResult = LLVM.BuildCall(builder, intrinsic, new[] {value1, value2}, string.Empty);
+                                var hasOverflow = LLVM.BuildExtractValue(builder, overflowResult, 1, string.Empty);
+
+                                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                                var overflowBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "overflow");
+
+                                LLVM.BuildCondBr(builder, hasOverflow, overflowBlock, nextBlock);
+
+                                LLVM.PositionBuilderAtEnd(builder, overflowBlock);
+
+                                // Create OverflowException object
+                                var overflowExceptionClass = GetClass(corlib.MainModule.GetType(typeof(OverflowException).FullName));
+                                EmitNewobj(functionContext, overflowExceptionClass.Type, overflowExceptionClass.Functions.Single(x => x.MethodReference.Name == ".ctor" && x.MethodReference.Parameters.Count == 0));
+                                var overflowException = stack.Pop();
+                                GenerateInvoke(functionContext, throwExceptionFunction, new[] { LLVM.BuildPointerCast(builder, overflowException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                                LLVM.BuildUnreachable(builder);
+
+                                functionContext.BasicBlock = nextBlock;
+                                LLVM.PositionBuilderAtEnd(builder, nextBlock);
+                                result = LLVM.BuildExtractValue(builder, overflowResult, 0, string.Empty);
+
                                 break;
+                            }
+                            default:
+                                goto InvalidBinaryOperation;
                         }
                     }
 
