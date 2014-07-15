@@ -347,8 +347,11 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static void GetParamTypes(TypeRef FunctionTy, out TypeRef Dest) {
-    LLVMPINVOKE.GetParamTypes(FunctionTy.Value, out Dest.Value);
+  public unsafe static void GetParamTypes(TypeRef FunctionTy, TypeRef[] Dest) {
+    fixed (TypeRef* swig_ptrTo_Dest = Dest)
+    {
+      LLVMPINVOKE.GetParamTypes(FunctionTy.Value, (System.IntPtr)swig_ptrTo_Dest);
+    }
   }
 
   public unsafe static TypeRef StructTypeInContext(ContextRef C, TypeRef[] ElementTypes, bool Packed) {
@@ -389,8 +392,11 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static void GetStructElementTypes(TypeRef StructTy, out TypeRef Dest) {
-    LLVMPINVOKE.GetStructElementTypes(StructTy.Value, out Dest.Value);
+  public unsafe static void GetStructElementTypes(TypeRef StructTy, TypeRef[] Dest) {
+    fixed (TypeRef* swig_ptrTo_Dest = Dest)
+    {
+      LLVMPINVOKE.GetStructElementTypes(StructTy.Value, (System.IntPtr)swig_ptrTo_Dest);
+    }
   }
 
   public unsafe static bool IsPackedStruct(TypeRef StructTy) {

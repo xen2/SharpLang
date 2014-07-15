@@ -397,7 +397,7 @@ class LLVMPINVOKE {
   public static extern uint CountParamTypes(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetParamTypes")]
-  public static extern void GetParamTypes(System.IntPtr jarg1, out System.IntPtr jarg2);
+  public static extern void GetParamTypes(System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_StructTypeInContext")]
   public static extern System.IntPtr StructTypeInContext(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2, bool jarg4);
@@ -418,7 +418,7 @@ class LLVMPINVOKE {
   public static extern uint CountStructElementTypes(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetStructElementTypes")]
-  public static extern void GetStructElementTypes(System.IntPtr jarg1, out System.IntPtr jarg2);
+  public static extern void GetStructElementTypes(System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsPackedStruct")]
   public static extern bool IsPackedStruct(System.IntPtr jarg1);

@@ -49,6 +49,7 @@ REF_CLASS(LLVMValueRef, ValueRef)
 REF_CLASS(LLVMUseRef, UseRef)
 REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 
+%apply (LLVMTypeRef *ARRAY) {(LLVMTypeRef *Dest)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ParamTypes, unsigned ParamCount)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Vals, unsigned Count)};
