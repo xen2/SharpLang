@@ -2146,8 +2146,11 @@ namespace SharpLang.CompilerServices
 
             var dataPointer = GetDataPointer(allocatedObject);
 
+            // Convert to local type
+            var value = ConvertFromStackToLocal(valueType.Type, valueType);
+
             // Copy data
-            LLVM.BuildStore(builder, valueType.Value, dataPointer);
+            LLVM.BuildStore(builder, value, dataPointer);
             return allocatedObject;
         }
 
