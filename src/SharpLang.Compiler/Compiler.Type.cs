@@ -138,17 +138,18 @@ namespace SharpLang.CompilerServices
                         goto case MetadataType.Void;
                     }
 
-                    if (typeReference.IsValueType && typeReference.Resolve().IsEnum)
+                    var typeDefinition = typeReference.Resolve();
+                    if (typeDefinition.IsValueType && typeDefinition.IsEnum)
                     {
                         // Special case: enum
-                        var enumUnderlyingType = GetType(typeReference.Resolve().GetEnumUnderlyingType());
+                        var enumUnderlyingType = GetType(typeDefinition.GetEnumUnderlyingType());
                         dataType = enumUnderlyingType.DataType;
                         stackType = enumUnderlyingType.StackType;
                     }
                     else
                     {
                         dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
-                        stackType = typeReference.IsValueType ? StackValueType.Value : StackValueType.Object;
+                        stackType = typeReference.MetadataType != MetadataType.Array && typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
                     }
 
                     break;
