@@ -87,7 +87,7 @@ namespace SharpLang.CompilerServices
                     stackType = StackValueType.Unknown;
                     break;
                 case MetadataType.Boolean:
-                    dataType = LLVM.Int1TypeInContext(context);
+                    dataType = LLVM.Int8TypeInContext(context);
                     stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Single:
@@ -98,12 +98,12 @@ namespace SharpLang.CompilerServices
                     dataType = LLVM.DoubleTypeInContext(context);
                     stackType = StackValueType.Float;
                     break;
-                case MetadataType.Char:
                 case MetadataType.Byte:
                 case MetadataType.SByte:
                     dataType = LLVM.Int8TypeInContext(context);
                     stackType = StackValueType.Int32;
                     break;
+                case MetadataType.Char:
                 case MetadataType.Int16:
                 case MetadataType.UInt16:
                     dataType = LLVM.Int16TypeInContext(context);
