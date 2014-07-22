@@ -206,8 +206,9 @@ namespace SharpLang.CompilerServices
             // Process locals
             foreach (var local in body.Variables)
             {
-                if (local.IsPinned)
-                    throw new NotSupportedException();
+                // TODO: Anything to do on pinned objects?
+                //if (local.IsPinned)
+                //    throw new NotSupportedException();
 
                 var type = CreateType(ResolveGenericsVisitor.Process(methodReference, local.VariableType));
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
