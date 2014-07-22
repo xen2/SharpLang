@@ -927,6 +927,26 @@ namespace SharpLang.CompilerServices
                     break;
                 }
 
+                case Code.Ldtoken:
+                {
+                    var token = instruction.Operand;
+
+                    if (token is TypeReference)
+                    {
+                        // TODO: Actually transform type to RTTI token.
+                        var type = (TypeReference)token;
+                        var runtimeTypeHandle = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
+
+                        stack.Add(new StackValue(StackValueType.Value, runtimeTypeHandle.Type, LLVM.ConstNull(runtimeTypeHandle.Type.DataType)));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+
+                    break;
+                }
+
                 case Code.Ldftn:
                 {
                     var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
