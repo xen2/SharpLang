@@ -1261,7 +1261,7 @@ namespace SharpLang.CompilerServices
                     var sourceValue = ConvertFromStackToLocal(type, value);
 
                     // Store value at address
-                    var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+                    var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultType, 0), string.Empty);
                     var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
                     SetInstructionFlags(storeInst, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
@@ -1305,7 +1305,7 @@ namespace SharpLang.CompilerServices
                     }
 
                     // Load value at address
-                    var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.TypeOnStack, 0), string.Empty);
+                    var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultType, 0), string.Empty);
                     var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
                     SetInstructionFlags(loadInst, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
