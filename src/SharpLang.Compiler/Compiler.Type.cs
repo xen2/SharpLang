@@ -138,7 +138,7 @@ namespace SharpLang.CompilerServices
                         goto case MetadataType.Void;
                     }
 
-                    var typeDefinition = typeReference.Resolve();
+                    var typeDefinition = GetMethodTypeDefinition(typeReference);
                     if (typeDefinition.IsValueType && typeDefinition.IsEnum)
                     {
                         // Special case: enum
@@ -149,7 +149,7 @@ namespace SharpLang.CompilerServices
                     else
                     {
                         dataType = LLVM.StructCreateNamed(context, typeReference.FullName);
-                        stackType = typeReference.MetadataType != MetadataType.Array && typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
+                        stackType = typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
                     }
 
                     break;
