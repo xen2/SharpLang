@@ -650,6 +650,14 @@ namespace SharpLang.CompilerServices
                                 {
                                     // If thisType is a value type and implements method, then ptr is passed unmodified
                                     targetMethod = matchingMethod;
+
+                                    // Convert to appropriate type (if necessary)
+                                    var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType());
+                                    if (thisObject.StackType != StackValueType.Reference || thisObject.Type != refType)
+                                    {
+                                        thisObject = new StackValue(refType.StackType, refType,
+                                            LLVM.BuildPointerCast(builder, thisObject.Value, refType.DefaultType, string.Empty));
+                                    }
                                 }
                                 else
                                 {
