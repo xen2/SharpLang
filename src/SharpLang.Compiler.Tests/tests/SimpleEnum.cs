@@ -17,6 +17,10 @@ public static class Program
         Enum1 e = Enum1.V1;
         System.Console.WriteLine(e == Enum1.V1);
         System.Console.WriteLine(e == Enum1.V2);
+        if (e == Enum1.V2)
+        {
+            System.Console.WriteLine(true);
+        }
         Method1(e);
     }
 }

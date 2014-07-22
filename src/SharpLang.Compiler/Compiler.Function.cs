@@ -1441,7 +1441,7 @@ namespace SharpLang.CompilerServices
                         throw new NotImplementedException("Comparison between native int and int types.");
 
                     if (operand1.StackType != operand2.StackType
-                        || operand1.Type != operand2.Type)
+                        || LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
                         throw new InvalidOperationException("Comparison between operands of different types.");
 
                     ValueRef compareResult;
