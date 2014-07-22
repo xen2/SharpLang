@@ -239,7 +239,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, stringConstantDataGlobal, dataPointerLocation);
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Value, stringClass.Type, allocatedObject));
+            stack.Add(new StackValue(StackValueType.Object, stringClass.Type, allocatedObject));
         }
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
