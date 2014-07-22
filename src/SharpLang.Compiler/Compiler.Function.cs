@@ -1627,7 +1627,8 @@ namespace SharpLang.CompilerServices
                     }
                     else if (value.StackType == StackValueType.Reference)
                     {
-                        if (opcode != Code.Conv_U8 && opcode != Code.Conv_U)
+                        if (opcode != Code.Conv_U8 && opcode != Code.Conv_U
+                            && opcode != Code.Conv_I8 && opcode != Code.Conv_I)
                             throw new InvalidOperationException();
 
                         // Convert to integer
