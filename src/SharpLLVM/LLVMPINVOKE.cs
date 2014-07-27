@@ -2072,6 +2072,93 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IntrinsicGetDeclaration")]
   public static extern System.IntPtr IntrinsicGetDeclaration(System.IntPtr jarg1, uint jarg2, System.IntPtr arg3_data, uint jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreate")]
+  public static extern System.IntPtr DIBuilderCreate(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderDispose")]
+  public static extern void DIBuilderDispose(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderFinalize")]
+  public static extern void DIBuilderFinalize(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateCompileUnit")]
+  public static extern void DIBuilderCreateCompileUnit(System.IntPtr jarg1, uint jarg2, string jarg3, string jarg4, string jarg5, bool jarg6, string jarg7, uint jarg8, string jarg9);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateFile")]
+  public static extern System.IntPtr DIBuilderCreateFile(System.IntPtr jarg1, string jarg2, string jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateSubroutineType")]
+  public static extern System.IntPtr DIBuilderCreateSubroutineType(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateFunction")]
+  public static extern System.IntPtr DIBuilderCreateFunction(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, bool jarg9, uint jarg10, uint jarg11, bool jarg12, System.IntPtr jarg13, System.IntPtr jarg14, System.IntPtr jarg15);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateBasicType")]
+  public static extern System.IntPtr DIBuilderCreateBasicType(System.IntPtr jarg1, string jarg2, ulong jarg3, ulong jarg4, uint jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreatePointerType")]
+  public static extern System.IntPtr DIBuilderCreatePointerType(System.IntPtr jarg1, System.IntPtr jarg2, ulong jarg3, ulong jarg4, string jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateStructType")]
+  public static extern System.IntPtr DIBuilderCreateStructType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, uint jarg8, System.IntPtr jarg9, System.IntPtr jarg10, uint jarg11, System.IntPtr jarg12, string jarg13);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateMemberType")]
+  public static extern System.IntPtr DIBuilderCreateMemberType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, ulong jarg8, uint jarg9, System.IntPtr jarg10);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateLexicalBlock")]
+  public static extern System.IntPtr DIBuilderCreateLexicalBlock(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, uint jarg4, uint jarg5, uint jarg6);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateStaticVariable")]
+  public static extern System.IntPtr DIBuilderCreateStaticVariable(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, System.IntPtr jarg9, System.IntPtr jarg10);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateLocalVariable")]
+  public static extern System.IntPtr DIBuilderCreateLocalVariable(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, uint jarg9, uint jarg10);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateArrayType")]
+  public static extern System.IntPtr DIBuilderCreateArrayType(System.IntPtr jarg1, ulong jarg2, ulong jarg3, System.IntPtr jarg4, System.IntPtr jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateVectorType")]
+  public static extern System.IntPtr DIBuilderCreateVectorType(System.IntPtr jarg1, ulong jarg2, ulong jarg3, System.IntPtr jarg4, System.IntPtr jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderGetOrCreateSubrange")]
+  public static extern System.IntPtr DIBuilderGetOrCreateSubrange(System.IntPtr jarg1, long jarg2, long jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderGetOrCreateArray")]
+  public static extern System.IntPtr DIBuilderGetOrCreateArray(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderInsertDeclareAtEnd")]
+  public static extern System.IntPtr DIBuilderInsertDeclareAtEnd(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderInsertDeclareBefore")]
+  public static extern System.IntPtr DIBuilderInsertDeclareBefore(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateEnumerator")]
+  public static extern System.IntPtr DIBuilderCreateEnumerator(System.IntPtr jarg1, string jarg2, ulong jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateEnumerationType")]
+  public static extern System.IntPtr DIBuilderCreateEnumerationType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, System.IntPtr jarg8, System.IntPtr jarg9);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateUnionType")]
+  public static extern System.IntPtr DIBuilderCreateUnionType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, uint jarg8, System.IntPtr jarg9, uint jarg10, string jarg11);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateTemplateTypeParameter")]
+  public static extern System.IntPtr DIBuilderCreateTemplateTypeParameter(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, System.IntPtr jarg5, uint jarg6, uint jarg7);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateOpDeref")]
+  public static extern System.IntPtr DIBuilderCreateOpDeref(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateOpPlus")]
+  public static extern System.IntPtr DIBuilderCreateOpPlus(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateComplexVariable")]
+  public static extern System.IntPtr DIBuilderCreateComplexVariable(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, System.IntPtr arg8_data, uint jarg8, uint jarg10);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateNameSpace")]
+  public static extern System.IntPtr DIBuilderCreateNameSpace(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DICompositeTypeSetTypeArray")]
+  public static extern void DICompositeTypeSetTypeArray(System.IntPtr jarg1, System.IntPtr jarg2);
 }
 
 }

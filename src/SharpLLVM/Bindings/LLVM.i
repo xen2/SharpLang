@@ -13,6 +13,7 @@
 #include <llvm-c/Analysis.h>
 
 #include "Additional.h"
+#include "DebugInfo.h"
 
 %}
 
@@ -28,6 +29,7 @@
 typedef bool LLVMBool;
 typedef unsigned char uint8_t;
 typedef unsigned long long uint64_t;
+typedef long long int64_t;
 
 
 REF_CLASS(LLVMTargetRef, TargetRef)
@@ -48,6 +50,7 @@ REF_CLASS(LLVMTargetLibraryInfoRef, TargetLibraryInfoRef)
 REF_CLASS(LLVMValueRef, ValueRef)
 REF_CLASS(LLVMUseRef, UseRef)
 REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
+REF_CLASS(LLVMDIBuilderRef, DIBuilderRef)
 
 %apply (LLVMTypeRef *ARRAY) {(LLVMTypeRef *Dest)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
@@ -60,6 +63,8 @@ REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Args, unsigned NumArgs)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *RetVals, unsigned N)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Indices, unsigned NumIndices)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Ptr, unsigned Count)};
+%apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *AddrOps, unsigned AddrOpsCount)};
 %apply (LLVMValueRef *ARRAY) {(LLVMValueRef *IncomingValues)};
 %apply (LLVMBasicBlockRef *ARRAY, unsigned ARRAYSIZE) {(LLVMBasicBlockRef *IncomingBlocks, unsigned Count)};
 
@@ -74,3 +79,4 @@ REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 %include "llvm-c/TargetMachine.h"
 %include "llvm-c/Analysis.h"
 %include "Additional.h"
+%include "DebugInfo.h"

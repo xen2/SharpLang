@@ -3071,6 +3071,153 @@ public class LLVM {
     }
   }
 
+  public unsafe static DIBuilderRef DIBuilderCreate(ModuleRef M) {
+    DIBuilderRef ret = new DIBuilderRef(LLVMPINVOKE.DIBuilderCreate(M.Value));
+    return ret;
+  }
+
+  public unsafe static void DIBuilderDispose(DIBuilderRef Builder) {
+    LLVMPINVOKE.DIBuilderDispose(Builder.Value);
+  }
+
+  public unsafe static void DIBuilderFinalize(DIBuilderRef Builder) {
+    LLVMPINVOKE.DIBuilderFinalize(Builder.Value);
+  }
+
+  public unsafe static void DIBuilderCreateCompileUnit(DIBuilderRef Builder, uint Lang, string File, string Dir, string Producer, bool isOptimized, string Flags, uint RuntimeVer, string SplitName) {
+    LLVMPINVOKE.DIBuilderCreateCompileUnit(Builder.Value, Lang, File, Dir, Producer, isOptimized, Flags, RuntimeVer, SplitName);
+  }
+
+  public unsafe static ValueRef DIBuilderCreateFile(DIBuilderRef Builder, string Filename, string Directory) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateFile(Builder.Value, Filename, Directory));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateSubroutineType(DIBuilderRef Builder, ValueRef File, ValueRef ParameterTypes) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateSubroutineType(Builder.Value, File.Value, ParameterTypes.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateFunction(DIBuilderRef Builder, ValueRef Scope, string Name, string LinkageName, ValueRef File, uint LineNo, ValueRef Ty, bool isLocalToUnit, bool isDefinition, uint ScopeLine, uint Flags, bool isOptimized, ValueRef Fn, ValueRef TParam, ValueRef Decl) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateFunction(Builder.Value, Scope.Value, Name, LinkageName, File.Value, LineNo, Ty.Value, isLocalToUnit, isDefinition, ScopeLine, Flags, isOptimized, Fn.Value, TParam.Value, Decl.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateBasicType(DIBuilderRef Builder, string Name, ulong SizeInBits, ulong AlignInBits, uint Encoding) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateBasicType(Builder.Value, Name, SizeInBits, AlignInBits, Encoding));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreatePointerType(DIBuilderRef Builder, ValueRef PointeeTy, ulong SizeInBits, ulong AlignInBits, string Name) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreatePointerType(Builder.Value, PointeeTy.Value, SizeInBits, AlignInBits, Name));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateStructType(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNumber, ulong SizeInBits, ulong AlignInBits, uint Flags, ValueRef DerivedFrom, ValueRef Elements, uint RunTimeLang, ValueRef VTableHolder, string UniqueId) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateStructType(Builder.Value, Scope.Value, Name, File.Value, LineNumber, SizeInBits, AlignInBits, Flags, DerivedFrom.Value, Elements.Value, RunTimeLang, VTableHolder.Value, UniqueId));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateMemberType(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNo, ulong SizeInBits, ulong AlignInBits, ulong OffsetInBits, uint Flags, ValueRef Ty) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateMemberType(Builder.Value, Scope.Value, Name, File.Value, LineNo, SizeInBits, AlignInBits, OffsetInBits, Flags, Ty.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateLexicalBlock(DIBuilderRef Builder, ValueRef Scope, ValueRef File, uint Line, uint Col, uint Discriminator) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateLexicalBlock(Builder.Value, Scope.Value, File.Value, Line, Col, Discriminator));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateStaticVariable(DIBuilderRef Builder, ValueRef Context, string Name, string LinkageName, ValueRef File, uint LineNo, ValueRef Ty, bool isLocalToUnit, ValueRef Val, ValueRef Decl) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateStaticVariable(Builder.Value, Context.Value, Name, LinkageName, File.Value, LineNo, Ty.Value, isLocalToUnit, Val.Value, Decl.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateLocalVariable(DIBuilderRef Builder, uint Tag, ValueRef Scope, string Name, ValueRef File, uint LineNo, ValueRef Ty, bool AlwaysPreserve, uint Flags, uint ArgNo) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateLocalVariable(Builder.Value, Tag, Scope.Value, Name, File.Value, LineNo, Ty.Value, AlwaysPreserve, Flags, ArgNo));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateArrayType(DIBuilderRef Builder, ulong Size, ulong AlignInBits, ValueRef Ty, ValueRef Subscripts) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateArrayType(Builder.Value, Size, AlignInBits, Ty.Value, Subscripts.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateVectorType(DIBuilderRef Builder, ulong Size, ulong AlignInBits, ValueRef Ty, ValueRef Subscripts) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateVectorType(Builder.Value, Size, AlignInBits, Ty.Value, Subscripts.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderGetOrCreateSubrange(DIBuilderRef Builder, long Lo, long Count) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderGetOrCreateSubrange(Builder.Value, Lo, Count));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderGetOrCreateArray(DIBuilderRef Builder, ValueRef[] Ptr) {
+    fixed (ValueRef* swig_ptrTo_Ptr = Ptr)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderGetOrCreateArray(Builder.Value, (System.IntPtr)swig_ptrTo_Ptr, (uint)Ptr.Length));
+      return ret;
+    }
+  }
+
+  public unsafe static ValueRef DIBuilderInsertDeclareAtEnd(DIBuilderRef Builder, ValueRef Val, ValueRef VarInfo, BasicBlockRef InsertAtEnd) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderInsertDeclareAtEnd(Builder.Value, Val.Value, VarInfo.Value, InsertAtEnd.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderInsertDeclareBefore(DIBuilderRef Builder, ValueRef Val, ValueRef VarInfo, ValueRef InsertBefore) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderInsertDeclareBefore(Builder.Value, Val.Value, VarInfo.Value, InsertBefore.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateEnumerator(DIBuilderRef Builder, string Name, ulong Val) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateEnumerator(Builder.Value, Name, Val));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateEnumerationType(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNumber, ulong SizeInBits, ulong AlignInBits, ValueRef Elements, ValueRef ClassType) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateEnumerationType(Builder.Value, Scope.Value, Name, File.Value, LineNumber, SizeInBits, AlignInBits, Elements.Value, ClassType.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateUnionType(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNumber, ulong SizeInBits, ulong AlignInBits, uint Flags, ValueRef Elements, uint RunTimeLang, string UniqueId) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateUnionType(Builder.Value, Scope.Value, Name, File.Value, LineNumber, SizeInBits, AlignInBits, Flags, Elements.Value, RunTimeLang, UniqueId));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateTemplateTypeParameter(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef Ty, ValueRef File, uint LineNo, uint ColumnNo) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateTemplateTypeParameter(Builder.Value, Scope.Value, Name, Ty.Value, File.Value, LineNo, ColumnNo));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateOpDeref(TypeRef IntTy) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateOpDeref(IntTy.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateOpPlus(TypeRef IntTy) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateOpPlus(IntTy.Value));
+    return ret;
+  }
+
+  public unsafe static ValueRef DIBuilderCreateComplexVariable(DIBuilderRef Builder, uint Tag, ValueRef Scope, string Name, ValueRef File, uint LineNo, ValueRef Ty, ValueRef[] AddrOps, uint ArgNo) {
+    fixed (ValueRef* swig_ptrTo_AddrOps = AddrOps)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateComplexVariable(Builder.Value, Tag, Scope.Value, Name, File.Value, LineNo, Ty.Value, (System.IntPtr)swig_ptrTo_AddrOps, (uint)AddrOps.Length, ArgNo));
+      return ret;
+    }
+  }
+
+  public unsafe static ValueRef DIBuilderCreateNameSpace(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNo) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateNameSpace(Builder.Value, Scope.Value, Name, File.Value, LineNo));
+    return ret;
+  }
+
+  public unsafe static void DICompositeTypeSetTypeArray(ValueRef CompositeType, ValueRef TypeArray) {
+    LLVMPINVOKE.DICompositeTypeSetTypeArray(CompositeType.Value, TypeArray.Value);
+  }
+
 }
 
 }
