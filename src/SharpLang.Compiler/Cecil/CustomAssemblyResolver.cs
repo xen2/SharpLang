@@ -12,7 +12,6 @@ namespace SharpLang.CompilerServices.Cecil
         public void Register(AssemblyDefinition assembly)
         {
             this.RegisterAssembly(assembly);
-            this.AddSearchDirectory(Path.GetDirectoryName(assembly.MainModule.FullyQualifiedName));
         }
     }
 }
