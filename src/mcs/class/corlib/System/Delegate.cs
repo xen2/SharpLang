@@ -55,19 +55,16 @@ namespace System
 	{
 		#region Sync with object-internals.h
 #pragma warning disable 169, 414, 649
-		private IntPtr method_ptr;
-		private IntPtr invoke_impl;
-		private object m_target;
-		private IntPtr method;
-		private IntPtr delegate_trampoline;
-		private IntPtr method_code;
-		private MethodInfo method_info;
+		private object _target;
+		private IntPtr _methodPtr;
+		private IntPtr _methodPtrAux;
 
-		// Keep a ref of the MethodInfo passed to CreateDelegate.
-		// Used to keep DynamicMethods alive.
-		private MethodInfo original_method_info;
+		//private IntPtr invoke_impl;
+		//private IntPtr method;
+		//private IntPtr method_code;
+		//private MethodInfo method_info;
 
-		private DelegateData data;
+		//private DelegateData data;
 #pragma warning restore 169, 414, 649
 		#endregion
 
@@ -79,9 +76,7 @@ namespace System
 			if (method == null)
 				throw new ArgumentNullException ("method");
 
-			this.m_target = target;
-			this.data = new DelegateData ();
-			this.data.method_name = method;
+			throw new NotImplementedException();
 		}
 
 		protected Delegate (Type target, string method)
@@ -92,27 +87,18 @@ namespace System
 			if (method == null)
 				throw new ArgumentNullException ("method");
 
-			this.data = new DelegateData ();
-			this.data.method_name = method;
-			this.data.target_type = target;
+			throw new NotImplementedException();
 		}
 
 		public MethodInfo Method {
 			get {
-				if (method_info != null) {
-					return method_info;
-				} else {
-					if (method != IntPtr.Zero) {
-						method_info = (MethodInfo)MethodBase.GetMethodFromHandleNoGenericCheck (new RuntimeMethodHandle (method));
-					}
-					return method_info;
-				}
+				throw new NotImplementedException();
 			}
 		}
 
 		public object Target {
 			get {
-				return m_target;
+				return _target;
 			}
 		}
 
@@ -281,10 +267,7 @@ namespace System
 					return null;
 
 			Delegate d = CreateDelegate_internal (type, target, method, throwOnBindFailure);
-			if (d != null)
-				d.original_method_info = method;
-			if (delegate_data != null)
-				d.data = delegate_data;
+			throw new NotImplementedException();
 			return d;
 		}
 
@@ -407,59 +390,9 @@ namespace System
 			return DynamicInvokeImpl (args);
 		}
 
-		void InitializeDelegateData ()
-		{
-			DelegateData delegate_data = new DelegateData ();
-			if (method_info.IsStatic) {
-				if (m_target != null) {
-					delegate_data.curried_first_arg = true;
-				} else {
-					MethodInfo invoke = GetType ().GetMethod ("Invoke");
-					if (invoke.GetParametersCount () + 1 == method_info.GetParametersCount ())
-						delegate_data.curried_first_arg = true;
-				}
-			}
-			this.data = delegate_data;
-		}
-
 		protected virtual object DynamicInvokeImpl (object[] args)
 		{
-			if (Method == null) {
-				Type[] mtypes = new Type [args.Length];
-				for (int i = 0; i < args.Length; ++i) {
-					mtypes [i] = args [i].GetType ();
-				}
-				method_info = m_target.GetType ().GetMethod (data.method_name, mtypes);
-			}
-
-			var target = m_target;
-			if (this.data == null)
-				InitializeDelegateData ();
-
-			if (Method.IsStatic) {
-				//
-				// The delegate is bound to m_target
-				//
-				if (data.curried_first_arg) {
-					if (args == null) {
-						args = new [] { target };
-					} else {
-						Array.Resize (ref args, args.Length + 1);
-						Array.Copy (args, 0, args, 1, args.Length - 1);
-						args [0] = target;
-					}
-
-					target = null;
-				}
-			} else {
-				if (m_target == null && args != null && args.Length > 0) {
-					target = args [0];
-					Array.Copy (args, 1, args, 0, args.Length - 1);
-					Array.Resize (ref args, args.Length - 1);
-				}
-			}
-
-			return Method.Invoke (target, args);
+			throw new NotImplementedException();
 		}
 
 		public virtual object Clone ()
@@ -471,25 +404,8 @@ namespace System
 		{
 			if (d == null)
 				return false;
-			
-			// Do not compare method_ptr, since it can point to a trampoline
-			if (d.m_target == m_target && d.method == method) {
-				if (d.data != null || data != null) {
-					/* Uncommon case */
-					if (d.data != null && data != null)
-						return (d.data.target_type == data.target_type && d.data.method_name == data.method_name);
-					else {
-						if (d.data != null)
-							return d.data.target_type == null;
-						if (data != null)
-							return data.target_type == null;
-						return false;
-					}
-				}
-				return true;
-			}
 
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public override bool Equals (object obj)
@@ -499,7 +415,8 @@ namespace System
 
 		public override int GetHashCode ()
 		{
-			return method.GetHashCode () ^ (m_target != null ? m_target.GetHashCode () : 0);
+			throw new NotImplementedException();
+			//return method.GetHashCode () ^ (_target != null ? _target.GetHashCode () : 0);
 		}
 
 		protected virtual MethodInfo GetMethodImpl ()
@@ -614,7 +531,7 @@ namespace System
 #if DISABLE_REMOTING
 			return false;
 #else
-			return RemotingServices.IsTransparentProxy (m_target);
+			return RemotingServices.IsTransparentProxy (_target);
 #endif
 		}
 	}

@@ -23,7 +23,7 @@ solution "SharpLang"
   
   configuration "windows"
     defines { "WINDOWS" }
-	
+
   configuration {}
     
   group "Libraries"
@@ -34,3 +34,10 @@ solution "SharpLang"
     include (srcdir .. "/SharpLLVM")
     include (srcdir .. "/SharpLLVM.Native")
     include (srcdir .. "/SharpLLVM.Tests")
+
+  group "Class Libraries"
+    external "corlib-net_4_5"
+        location (srcdir .. "/mcs/class/corlib")
+        uuid "33BF0182-AC5C-464C-995B-C9CFE74E1A95"
+        kind "SharedLib"
+        language "C#"

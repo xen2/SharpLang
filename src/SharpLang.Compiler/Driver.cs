@@ -82,6 +82,8 @@ namespace SharpLang.CompilerServices
 
             // Register self to assembly resolver
             assemblyResolver.Register(assemblyDefinition);
+            assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyDefinition.MainModule.FullyQualifiedName));
+            assemblyResolver.AddSearchDirectory(@"..\..\..\..\src\mcs\class\lib\net_4_5");
             return assemblyDefinition;
         }
 
