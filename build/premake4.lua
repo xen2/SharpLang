@@ -13,7 +13,7 @@ solution "SharpLang"
   configurations { "Debug", "Release" }
   platforms { "x32", "x64" }
   flags { common_flags }
-  
+
   location (builddir)
   objdir (path.join(builddir, "obj"))
   targetdir (libdir)
@@ -41,3 +41,9 @@ solution "SharpLang"
         uuid "33BF0182-AC5C-464C-995B-C9CFE74E1A95"
         kind "SharedLib"
         language "C#"
+        removeplatforms "*"
+        platforms { "Any CPU" }
+        configmap {
+            ["x32"] = "Any CPU",
+            ["x64"] = "Any CPU"
+        }
