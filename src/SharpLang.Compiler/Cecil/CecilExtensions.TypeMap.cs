@@ -62,7 +62,7 @@ namespace SharpLang.CompilerServices.Cecil
             {
                 foreach (var @override in candidateResolved.Overrides)
                 {
-                    if (MethodMatch(@override, method))
+                    if (@override.FullName == method.FullName)
                         return true;
                 }
             }
