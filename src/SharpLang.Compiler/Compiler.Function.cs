@@ -126,12 +126,21 @@ namespace SharpLang.CompilerServices
                 else
                 {
                     // Need to compile
-                    LLVM.SetLinkage(functionGlobal, Linkage.ExternalLinkage);
-                    methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(method, function));
+                    EmitFunction(function);
                 }
             }
 
             return function;
+        }
+
+        private void EmitFunction(Function function)
+        {
+            if (function.IsLocal)
+                return;
+
+            function.IsLocal = true;
+            LLVM.SetLinkage(function.GeneratedValue, Linkage.ExternalLinkage);
+            methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(function.MethodReference, function));
         }
 
         private int UpdateOffsets(MethodBody body)

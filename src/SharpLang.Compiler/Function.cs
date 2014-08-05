@@ -61,6 +61,8 @@ namespace SharpLang.CompilerServices
 
         public int VirtualSlot { get; set; }
 
+        public bool IsLocal { get; set; }
+
         public override string ToString()
         {
             return MethodReference.ToString();
