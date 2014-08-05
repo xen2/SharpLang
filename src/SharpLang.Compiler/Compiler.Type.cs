@@ -166,7 +166,7 @@ namespace SharpLang.CompilerServices
             bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
 
             // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
-            isLocal |= typeReference.MetadataType == MetadataType.Array;
+            //isLocal |= typeReference.MetadataType == MetadataType.Array;
 
             if (isLocal)
                 EmitType(result);
