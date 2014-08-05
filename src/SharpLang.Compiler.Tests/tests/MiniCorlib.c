@@ -67,6 +67,11 @@ void System_Void_System_OverflowException___ctor__(void* exception)
 {
 }
 
+// System.NotSupportedException..ctor(string)
+void System_Void_System_NotSupportedException___ctor_System_String_(void* exception, String* str)
+{
+}
+
 // void System.Console.WriteLine(string)
 void System_Void_System_Console__WriteLine_System_String_(String* str)
 {

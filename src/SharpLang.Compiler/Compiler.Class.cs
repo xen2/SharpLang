@@ -109,6 +109,19 @@ namespace SharpLang.CompilerServices
                     @class.Depth = parentClass.Depth + 1;
                 }
 
+                if (typeReference is ArrayType)
+                {
+                    var elementType = ResolveGenericsVisitor.Process(typeReference, typeReference.GetElementType());
+
+                    // Array types implicitely inherits from IList<T>, ICollection<T>, IReadOnlyList<T>, IReadOnlyCollection<T> and IEnumerable<T>
+                    foreach (var interfaceType in new[] { typeof(IList<>), typeof(ICollection<>), typeof(IReadOnlyCollection<>), typeof(IReadOnlyList<>), typeof(IEnumerable<>) })
+                    {
+                        var @interfaceGeneric = corlib.MainModule.GetType(interfaceType.FullName);
+                        var @interface = @interfaceGeneric.MakeGenericInstanceType(elementType);
+                        @class.Interfaces.Add(GetClass(@interface));
+                    }
+                }
+
                 // Build methods slots
                 // TODO: This will trigger their compilation, but maybe we might want to defer that later
                 // (esp. since vtable is not built yet => recursion issues)
@@ -247,6 +260,26 @@ namespace SharpLang.CompilerServices
                         continue;
 
                     var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+                    if (resolvedFunction == null && @class.Type.TypeReference is ArrayType)
+                    {
+                        var arrayType = corlib.MainModule.GetType(typeof(Array).FullName);
+                        var matchingMethod = (MethodReference)arrayType.Methods.First(x => x.Name.StartsWith("InternalArray_") && x.Name.EndsWith(resolvedInterfaceMethod.Name));
+                        if (matchingMethod != null)
+                        {
+                            if (matchingMethod.HasGenericParameters)
+                            {
+                                matchingMethod = matchingMethod.MakeGenericMethod(@class.Type.TypeReference.GetElementType());
+                            }
+
+                            resolvedFunction = GetFunction(matchingMethod);
+
+                            // Manually emit Array functions locally (until proper mscorlib + generic instantiation exists).
+                            EmitFunction(resolvedFunction);
+                        }
+                    }
+
+                    if (resolvedFunction == null)
+                        throw new InvalidOperationException(string.Format("Could not find matching method for {0} in {1}", resolvedInterfaceMethod, @class));
 
                     var isInterface = resolvedFunction.DeclaringType.TypeReference.Resolve().IsInterface;
                     if (!isInterface && resolvedFunction.VirtualSlot != -1)
