@@ -90,11 +90,12 @@ namespace SharpLang.CompilerServices
 
             if (processClass)
             {
+                var baseType = GetBaseTypeDefinition(typeReference);
                 var typeDefinition = GetMethodTypeDefinition(typeReference);
 
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
 
-                var parentClass = typeDefinition.BaseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType)) : null;
+                var parentClass = baseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, baseType)) : null;
 
                 // Add parent class
                 if (parentClass != null)
