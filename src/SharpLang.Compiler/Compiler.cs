@@ -206,6 +206,18 @@ namespace SharpLang.CompilerServices
             return module;
         }
 
+        TypeReference GetBaseTypeDefinition(TypeReference typeReference)
+        {
+            if (typeReference is ArrayType)
+            {
+                // Return ArrayType
+                return corlib.MainModule.GetType(typeof(Array).FullName);
+            }
+
+            // Default: resolve to get real type
+            return typeReference.Resolve().BaseType;
+        }
+
         /// <summary>
         /// Gets the type definition containing all the methods for the given type.
         /// </summary>
