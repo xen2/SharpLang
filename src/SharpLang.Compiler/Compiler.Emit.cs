@@ -70,7 +70,7 @@ namespace SharpLang.CompilerServices
             var refType = GetType(arg.Type.TypeReference.MakeByReferenceType());
 
             // Convert from local to stack value
-            var value = ConvertFromLocalToStack(arg.Type, arg.Value);
+            var value = ConvertFromLocalToStack(refType, arg.Value);
 
             // Add value to stack
             // TODO: Choose appropriate type + conversions
