@@ -244,6 +244,10 @@ namespace SharpLang.CompilerServices
 
             @class.MethodCompiled = true;
 
+            // Array: no need to do anything (its type definition, Array, has already been processed)
+            if (@class.Type.TypeReference is ArrayType)
+                return;
+
             var typeDefinition = GetMethodTypeDefinition(@class.Type.TypeReference);
 
             bool isInterface = typeDefinition.IsInterface;
