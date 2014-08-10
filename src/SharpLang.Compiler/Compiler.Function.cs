@@ -1011,7 +1011,7 @@ namespace SharpLang.CompilerServices
 
                         var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
 
-                        stack.Add(new StackValue(StackValueType.Value, @class.Type, data));
+                        stack.Add(new StackValue(@class.Type.StackType, @class.Type, data));
                     }
                     else
                     {
