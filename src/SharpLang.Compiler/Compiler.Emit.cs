@@ -555,9 +555,23 @@ namespace SharpLang.CompilerServices
 
             var numElements = stack.Pop();
 
-            // Invoke malloc
+            // Compute object size
             var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
-            var arraySize = LLVM.BuildMul(builder, typeSize, numElements.Value, string.Empty);
+
+            // Compute array size (object size * num elements)
+            // TODO: 64bit support
+            ValueRef numElementsCasted;
+            if (numElements.StackType == StackValueType.NativeInt)
+            {
+                numElementsCasted = LLVM.BuildPtrToInt(builder, numElements.Value, int32Type, string.Empty);
+            }
+            else
+            {
+                numElementsCasted = LLVM.BuildIntCast(builder, numElements.Value, int32Type, string.Empty);
+            }
+            var arraySize = LLVM.BuildMul(builder, typeSize, numElementsCasted, string.Empty);
+
+            // Invoke malloc
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
             var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultType, 0), string.Empty);
 
