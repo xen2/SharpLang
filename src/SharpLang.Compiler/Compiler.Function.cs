@@ -949,18 +949,26 @@ namespace SharpLang.CompilerServices
                 {
                     var token = instruction.Operand;
 
+                    Class runtimeHandleClass;
                     if (token is TypeReference)
                     {
-                        // TODO: Actually transform type to RTTI token.
-                        var type = (TypeReference)token;
-                        var runtimeTypeHandle = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
-
-                        stack.Add(new StackValue(StackValueType.Value, runtimeTypeHandle.Type, LLVM.ConstNull(runtimeTypeHandle.Type.DataType)));
+                        runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
+                    }
+                    else if (token is FieldReference)
+                    {
+                        runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeFieldHandle).FullName));
+                    }
+                    else if (token is MethodReference)
+                    {
+                        runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeMethodHandle).FullName));
                     }
                     else
                     {
-                        throw new NotImplementedException();
+                        throw new NotSupportedException("Invalid ldtoken operand.");
                     }
+
+                    // TODO: Actually transform type to RTTI token.
+                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, LLVM.ConstNull(runtimeHandleClass.Type.DataType)));
 
                     break;
                 }
