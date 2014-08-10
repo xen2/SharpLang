@@ -62,7 +62,8 @@ namespace SharpLang.CompilerServices.Cecil
             {
                 foreach (var @override in candidateResolved.Overrides)
                 {
-                    if (@override.FullName == method.FullName)
+                    var resolvedOverride = ResolveGenericsVisitor.Process(candidate, @override);
+                    if (resolvedOverride.FullName == method.FullName)
                         return true;
                 }
             }
