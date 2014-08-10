@@ -112,7 +112,7 @@ namespace SharpLang.CompilerServices
 
                 if (typeReference is ArrayType)
                 {
-                    var elementType = ResolveGenericsVisitor.Process(typeReference, typeReference.GetElementType());
+                    var elementType = ResolveGenericsVisitor.Process(typeReference, ((ArrayType)typeReference).ElementType);
 
                     // Array types implicitely inherits from IList<T>, ICollection<T>, IReadOnlyList<T>, IReadOnlyCollection<T> and IEnumerable<T>
                     foreach (var interfaceType in new[] { typeof(IList<>), typeof(ICollection<>), typeof(IReadOnlyCollection<>), typeof(IReadOnlyList<>), typeof(IEnumerable<>) })
@@ -269,7 +269,7 @@ namespace SharpLang.CompilerServices
                         {
                             if (matchingMethod.HasGenericParameters)
                             {
-                                matchingMethod = matchingMethod.MakeGenericMethod(@class.Type.TypeReference.GetElementType());
+                                matchingMethod = matchingMethod.MakeGenericMethod(((ArrayType)@class.Type.TypeReference).ElementType);
                             }
 
                             resolvedFunction = GetFunction(matchingMethod);
