@@ -1621,28 +1621,25 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_I4:
                 case Code.Conv_U8:
                 case Code.Conv_I8:
+                case Code.Conv_R4:
+                case Code.Conv_R8:
+                case Code.Conv_Ovf_U:
+                case Code.Conv_Ovf_I:
+                case Code.Conv_Ovf_U1:
+                case Code.Conv_Ovf_I1:
+                case Code.Conv_Ovf_U2:
+                case Code.Conv_Ovf_I2:
+                case Code.Conv_Ovf_U4:
+                case Code.Conv_Ovf_I4:
+                case Code.Conv_Ovf_U8:
+                case Code.Conv_Ovf_I8:
                 {
                     var value = stack.Pop();
 
                     uint intermediateWidth;
                     System.Type intermediateRealType;
-                    bool outputNativeInt = false;
                     bool isSigned;
-                    switch (opcode)
-                    {
-                        case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); outputNativeInt = true; break;
-                        case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); outputNativeInt = true; break;
-                        case Code.Conv_U1: isSigned = false; intermediateWidth = 8; intermediateRealType = typeof(byte); break;
-                        case Code.Conv_I1: isSigned = true; intermediateWidth = 8; intermediateRealType = typeof(sbyte); break;
-                        case Code.Conv_U2: isSigned = false; intermediateWidth = 16; intermediateRealType = typeof(ushort); break;
-                        case Code.Conv_I2: isSigned = true; intermediateWidth = 16; intermediateRealType = typeof(short); break;
-                        case Code.Conv_U4: isSigned = false; intermediateWidth = 32; intermediateRealType = typeof(uint); break;
-                        case Code.Conv_I4: isSigned = true; intermediateWidth = 32; intermediateRealType = typeof(int); break;
-                        case Code.Conv_U8: isSigned = false; intermediateWidth = 64; intermediateRealType = typeof(ulong); break;
-                        case Code.Conv_I8: isSigned = true; intermediateWidth = 64; intermediateRealType = typeof(long); break;
-                        default:
-                            throw new InvalidOperationException();
-                    }
+                    bool isOverflow = false;
 
                     var currentValue = value.Value;
 
@@ -1662,12 +1659,53 @@ namespace SharpLang.CompilerServices
                     }
                     else if (value.StackType == StackValueType.Float)
                     {
+                        if (opcode == Code.Conv_R4 || opcode == Code.Conv_R8)
+                        {
+                            // Special case: float to float, avoid usual case that goes through an intermediary integer.
+                        }
+
                         // TODO: Float conversions
                         throw new NotImplementedException();
                     }
 
                     var inputType = LLVM.TypeOf(currentValue);
                     var inputWidth = LLVM.GetIntTypeWidth(inputType);
+
+                    switch (opcode)
+                    {
+                        case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(UIntPtr); break;
+                        case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize; intermediateRealType = typeof(IntPtr); break;
+                        case Code.Conv_U1: isSigned = false; intermediateWidth = 8; intermediateRealType = typeof(byte); break;
+                        case Code.Conv_I1: isSigned = true; intermediateWidth = 8; intermediateRealType = typeof(sbyte); break;
+                        case Code.Conv_U2: isSigned = false; intermediateWidth = 16; intermediateRealType = typeof(ushort); break;
+                        case Code.Conv_I2: isSigned = true; intermediateWidth = 16; intermediateRealType = typeof(short); break;
+                        case Code.Conv_U4: isSigned = false; intermediateWidth = 32; intermediateRealType = typeof(uint); break;
+                        case Code.Conv_I4: isSigned = true; intermediateWidth = 32; intermediateRealType = typeof(int); break;
+                        case Code.Conv_U8: isSigned = false; intermediateWidth = 64; intermediateRealType = typeof(ulong); break;
+                        case Code.Conv_I8: isSigned = true; intermediateWidth = 64; intermediateRealType = typeof(long); break;
+                        case Code.Conv_Ovf_U:  isOverflow = true; goto case Code.Conv_U;
+                        case Code.Conv_Ovf_I:  isOverflow = true; goto case Code.Conv_I;
+                        case Code.Conv_Ovf_U1: isOverflow = true; goto case Code.Conv_U1;
+                        case Code.Conv_Ovf_I1: isOverflow = true; goto case Code.Conv_I1;
+                        case Code.Conv_Ovf_U2: isOverflow = true; goto case Code.Conv_U2;
+                        case Code.Conv_Ovf_I2: isOverflow = true; goto case Code.Conv_I2;
+                        case Code.Conv_Ovf_U4: isOverflow = true; goto case Code.Conv_U4;
+                        case Code.Conv_Ovf_I4: isOverflow = true; goto case Code.Conv_I4;
+                        case Code.Conv_Ovf_U8: isOverflow = true; goto case Code.Conv_U8;
+                        case Code.Conv_Ovf_I8: isOverflow = true; goto case Code.Conv_I8;
+                        case Code.Conv_R4:
+                        case Code.Conv_R8:
+                            var inputTypeFullName = value.Type.TypeReference.FullName;
+                            isSigned = inputTypeFullName == typeof(int).FullName
+                                || inputTypeFullName == typeof(short).FullName
+                                || inputTypeFullName == typeof(sbyte).FullName
+                                || inputTypeFullName == typeof(IntPtr).FullName;
+                            intermediateWidth = inputWidth;
+                            break;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+
                     var smallestWidth = Math.Min(intermediateWidth, inputWidth);
                     var smallestType = LLVM.IntTypeInContext(context, smallestWidth);
                     var outputWidth = Math.Max(intermediateWidth, 32);
@@ -1675,6 +1713,11 @@ namespace SharpLang.CompilerServices
                     // Truncate (if necessary)
                     if (smallestWidth < inputWidth)
                         currentValue = LLVM.BuildTrunc(builder, currentValue, smallestType, string.Empty);
+
+                    if (isOverflow)
+                    {
+                        // TODO: Compare currentValue with pre-trunc value?
+                    }
 
                     // Reextend to appropriate type (if necessary)
                     if (outputWidth > smallestWidth)
@@ -1686,15 +1729,15 @@ namespace SharpLang.CompilerServices
                             currentValue = LLVM.BuildZExt(builder, currentValue, outputIntType, string.Empty);
                     }
 
-                    // Convert to native int (if necessary)
-                    if (outputNativeInt)
-                        currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
-
                     // Add constant integer value to stack
                     switch (opcode)
                     {
                         case Code.Conv_U:
                         case Code.Conv_I:
+                        case Code.Conv_Ovf_U:
+                        case Code.Conv_Ovf_I:
+                            // Convert to native int (if necessary)
+                            currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
                             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
                             break;
                         case Code.Conv_U1:
@@ -1703,11 +1746,28 @@ namespace SharpLang.CompilerServices
                         case Code.Conv_I2:
                         case Code.Conv_U4:
                         case Code.Conv_I4:
+                        case Code.Conv_Ovf_U1:
+                        case Code.Conv_Ovf_I1:
+                        case Code.Conv_Ovf_U2:
+                        case Code.Conv_Ovf_I2:
+                        case Code.Conv_Ovf_U4:
+                        case Code.Conv_Ovf_I4:
                             stack.Add(new StackValue(StackValueType.Int32, int32, currentValue));
                             break;
                         case Code.Conv_U8:
                         case Code.Conv_I8:
+                        case Code.Conv_Ovf_U8:
+                        case Code.Conv_Ovf_I8:
                             stack.Add(new StackValue(StackValueType.Int64, int64, currentValue));
+                            break;
+                        case Code.Conv_R4:
+                        case Code.Conv_R8:
+                            var outputType = opcode == Code.Conv_R8 ? @double : @float;
+                            if (isSigned)
+                                currentValue = LLVM.BuildSIToFP(builder, currentValue, outputType.DataType, string.Empty);
+                            else
+                                currentValue = LLVM.BuildUIToFP(builder, currentValue, outputType.DataType, string.Empty);
+                            stack.Add(new StackValue(StackValueType.Float, outputType, currentValue));
                             break;
                         default:
                             throw new InvalidOperationException();
