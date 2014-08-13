@@ -328,27 +328,33 @@ namespace SharpLang.CompilerServices
         /// </summary>
         private void EmitBrCommon(StackValue stack, IntPredicate zeroPredicate, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
+            // Compare stack value with zero, and accordingly jump to either target or next block
+            ValueRef cmpInst;
             switch (stack.StackType)
             {
+                case StackValueType.NativeInt:
+                {
+                    var zero = LLVM.ConstPointerNull(LLVM.TypeOf(stack.Value));
+                    cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
+                    break;
+                }
                 case StackValueType.Int32:
                 {
-                    // Compare stack value with zero, and accordingly jump to either target or next block
                     var zero = LLVM.ConstInt(int32Type, 0, false);
-                    var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
-                    LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
+                    cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     break;
                 }
                 case StackValueType.Object:
                 {
-                    // Compare stack value with zero, and accordingly jump to either target or next block
                     var zero = LLVM.ConstPointerNull(LLVM.TypeOf(stack.Value));
-                    var cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
-                    LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
+                    cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     break;
                 }
                 default:
                     throw new NotImplementedException();
             }
+
+            LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
         }
 
         private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
