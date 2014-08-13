@@ -1715,7 +1715,8 @@ namespace SharpLang.CompilerServices
                         // Convert to integer
                         currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
                     }
-                    else if (value.StackType == StackValueType.Reference)
+                    else if (value.StackType == StackValueType.Reference
+                        || value.StackType == StackValueType.Object)
                     {
                         if (opcode != Code.Conv_U8 && opcode != Code.Conv_U
                             && opcode != Code.Conv_I8 && opcode != Code.Conv_I)
