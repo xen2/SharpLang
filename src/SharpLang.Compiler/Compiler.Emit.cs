@@ -634,7 +634,7 @@ namespace SharpLang.CompilerServices
             var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
 
             // Convert
-            arrayElementPointer = ConvertFromLocalToStack(elementType, arrayElementPointer);
+            arrayElementPointer = ConvertFromLocalToStack(refType, arrayElementPointer);
 
             // Push loaded element address onto the stack
             stack.Add(new StackValue(refType.StackType, refType, arrayElementPointer));
