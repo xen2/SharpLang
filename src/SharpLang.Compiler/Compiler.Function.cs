@@ -1488,9 +1488,18 @@ namespace SharpLang.CompilerServices
                         || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
                         throw new NotImplementedException("Comparison between native int and int types.");
 
+                    // Different object types: cast everything to object
+                    if (operand1.StackType == StackValueType.Object
+                        && operand2.StackType == StackValueType.Object
+                        && operand1.Type != operand2.Type)
+                    {
+                        value1 = LLVM.BuildPointerCast(builder, value1, @object.DefaultType, string.Empty);
+                        value2 = LLVM.BuildPointerCast(builder, value2, @object.DefaultType, string.Empty);
+                    }
+
                     if (operand1.StackType != operand2.StackType
                         || LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
-                        throw new InvalidOperationException("Comparison between operands of different types.");
+                        throw new InvalidOperationException(string.Format("Comparison between operands of different types, {0} and {1}.", operand1.Type, operand2.Type));
 
                     ValueRef compareResult;
                     if (operand1.StackType == StackValueType.Float)
