@@ -625,146 +625,14 @@ namespace SharpLang.CompilerServices
                     var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                     var targetMethod = GetFunction(targetMethodReference);
 
-                    // TODO: Interface calls & virtual calls
-                    if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
-                    {
-                        // Build indices for GEP
-                        var indices = new[]
-                        {
-                            LLVM.ConstInt(int32Type, 0, false),                                 // Pointer indirection
-                            LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
-                        };
+                    var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
 
-                        var thisObject = stack[stack.Count - targetMethod.ParameterTypes.Length];
+                    var resolvedMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
 
-                        Class @class;
+                    stack[stack.Count - targetMethod.ParameterTypes.Length] = thisObject;
 
-                        var constrainedClass = functionContext.ConstrainedClass;
-                        if (constrainedClass != null)
-                        {
-                            // Reset state
-                            functionContext.ConstrainedClass = null;
-
-                            if (!constrainedClass.Type.TypeReference.IsValueType)
-                            {
-                                // If thisType is a reference type, dereference
-                                thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
-                                    LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
-                                    constrainedClass.Type.DefaultType, string.Empty));
-                            }
-                            else
-                            {
-                                var matchingMethod = CecilExtensions.TryMatchMethod(constrainedClass, targetMethod.MethodReference, false);
-                                if (matchingMethod != null)
-                                {
-                                    // If thisType is a value type and implements method, then ptr is passed unmodified
-                                    targetMethod = matchingMethod;
-
-                                    // Convert to appropriate type (if necessary)
-                                    var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType());
-                                    if (thisObject.StackType != StackValueType.Reference || thisObject.Type != refType)
-                                    {
-                                        thisObject = new StackValue(refType.StackType, refType,
-                                            LLVM.BuildPointerCast(builder, thisObject.Value, refType.DefaultType, string.Empty));
-                                    }
-                                }
-                                else
-                                {
-                                    // If thisType is a value type and doesn't implement method, dereference, box and pass as this
-                                    thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
-                                        LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
-                                        constrainedClass.Type.DefaultType, string.Empty));
-
-                                    thisObject = new StackValue(StackValueType.Object, constrainedClass.Type, BoxValueType(constrainedClass, thisObject));
-                                }
-                            }
-
-                            stack[stack.Count - targetMethod.ParameterTypes.Length] = thisObject;
-                            @class = constrainedClass;
-                        }
-                        else
-                        {
-                            @class = GetClass(thisObject.Type);
-                        }
-
-                        // TODO: Checking actual type stored in thisObject we might be able to statically resolve method?
-
-                        // If it's a byref value type, emit a normal call
-                        if (thisObject.Type.TypeReference.IsByReference
-                            && thisObject.Type.TypeReference.GetElementType().IsValueType
-                            && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, thisObject.Type.TypeReference.GetElementType()))
-                        {
-                            EmitCall(functionContext, targetMethod.Signature, targetMethod.GeneratedValue);
-                        }
-                        else
-                        {
-                            // Get RTTI pointer
-                            var rttiPointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
-                            rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
-
-                            // Cast to expected RTTI type
-                            rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
-
-                            if (targetMethod.MethodReference.DeclaringType.Resolve().IsInterface)
-                            {
-                                // Interface call
-
-                                // Get method stored in IMT slot
-                                indices = new[]
-                                {
-                                    LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
-                                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.InterfaceMethodTable, false),   // Access IMT
-                                    LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),                   // Access specific IMT slot
-                                };
-
-                                var imtEntry = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
-
-                                var methodPointer = LLVM.BuildLoad(builder, imtEntry, string.Empty);
-
-                                // TODO: Compare method ID and iterate in the linked list until the correct match is found
-                                // If no match is found, it's likely due to covariance/contravariance, so we will need a fallback
-                                var methodId = GetMethodId(targetMethod.MethodReference);
-
-                                // Resolve interface call
-                                var resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunction, new[]
-                                {
-                                    LLVM.ConstInt(int32Type, methodId, false),
-                                    methodPointer,
-                                }, string.Empty);
-                                resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
-
-                                // Emit call
-                                EmitCall(functionContext, targetMethod.Signature, resolvedMethod);
-                            }
-                            else
-                            {
-                                // Virtual table call
-
-                                // Get method stored in vtable slot
-                                indices = new[]
-                                {
-                                    LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
-                                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.VirtualTable, false),   // Access vtable
-                                    LLVM.ConstInt(int32Type, (ulong)targetMethod.VirtualSlot, false),           // Access specific vtable slot
-                                };
-
-                                var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
-                                var resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
-                                resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
-
-                                // Emit call
-                                EmitCall(functionContext, targetMethod.Signature, resolvedMethod);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Normal call
-                        // Callvirt on non-virtual function is only done to force "this" NULL check
-                        // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
-                        // so maybe we should keep this as is?
-                        EmitCall(functionContext, targetMethod.Signature, targetMethod.GeneratedValue);
-                    }
+                    // Emit call
+                    EmitCall(functionContext, targetMethod.Signature, resolvedMethod);
 
                     break;
                 }
@@ -1001,6 +869,19 @@ namespace SharpLang.CompilerServices
                     var targetMethod = GetFunction(targetMethodReference);
 
                     stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrType, string.Empty)));
+
+                    break;
+                }
+                case Code.Ldvirtftn:
+                {
+                    var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
+                    var targetMethod = GetFunction(targetMethodReference);
+
+                    var thisObject = stack.Pop();
+
+                    var resolvedMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
+
+                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, resolvedMethod, intPtrType, string.Empty)));
 
                     break;
                 }
@@ -2273,6 +2154,145 @@ namespace SharpLang.CompilerServices
                 default:
                     throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
             }
+        }
+
+        private ValueRef ResolveVirtualMethod(FunctionCompilerContext functionContext, ref Function targetMethod, ref StackValue thisObject)
+        {
+            ValueRef resolvedMethod;
+            if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
+            {
+                // Build indices for GEP
+                var indices = new[]
+                {
+                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32Type, (int) ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+                };
+
+                Class @class;
+
+                var constrainedClass = functionContext.ConstrainedClass;
+                if (constrainedClass != null)
+                {
+                    // Reset state
+                    functionContext.ConstrainedClass = null;
+
+                    if (!constrainedClass.Type.TypeReference.IsValueType)
+                    {
+                        // If thisType is a reference type, dereference
+                        thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
+                            LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
+                                constrainedClass.Type.DefaultType, string.Empty));
+                    }
+                    else
+                    {
+                        var matchingMethod = CecilExtensions.TryMatchMethod(constrainedClass, targetMethod.MethodReference,
+                            false);
+                        if (matchingMethod != null)
+                        {
+                            // If thisType is a value type and implements method, then ptr is passed unmodified
+                            targetMethod = matchingMethod;
+
+                            // Convert to appropriate type (if necessary)
+                            var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType());
+                            if (thisObject.StackType != StackValueType.Reference || thisObject.Type != refType)
+                            {
+                                thisObject = new StackValue(refType.StackType, refType,
+                                    LLVM.BuildPointerCast(builder, thisObject.Value, refType.DefaultType, string.Empty));
+                            }
+                        }
+                        else
+                        {
+                            // If thisType is a value type and doesn't implement method, dereference, box and pass as this
+                            thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
+                                LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
+                                    constrainedClass.Type.DefaultType, string.Empty));
+
+                            thisObject = new StackValue(StackValueType.Object, constrainedClass.Type,
+                                BoxValueType(constrainedClass, thisObject));
+                        }
+                    }
+
+                    @class = constrainedClass;
+                }
+                else
+                {
+                    @class = GetClass(thisObject.Type);
+                }
+
+                // TODO: Checking actual type stored in thisObject we might be able to statically resolve method?
+
+                // If it's a byref value type, emit a normal call
+                if (thisObject.Type.TypeReference.IsByReference
+                    && thisObject.Type.TypeReference.GetElementType().IsValueType
+                    && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, thisObject.Type.TypeReference.GetElementType()))
+                {
+                    resolvedMethod = targetMethod.GeneratedValue;
+                }
+                else
+                {
+                    // Get RTTI pointer
+                    var rttiPointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
+                    rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
+
+                    // Cast to expected RTTI type
+                    rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
+
+                    if (targetMethod.MethodReference.DeclaringType.Resolve().IsInterface)
+                    {
+                        // Interface call
+
+                        // Get method stored in IMT slot
+                        indices = new[]
+                        {
+                            LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                            LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.InterfaceMethodTable, false), // Access IMT
+                            LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific IMT slot
+                        };
+
+                        var imtEntry = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+
+                        var methodPointer = LLVM.BuildLoad(builder, imtEntry, string.Empty);
+
+                        // TODO: Compare method ID and iterate in the linked list until the correct match is found
+                        // If no match is found, it's likely due to covariance/contravariance, so we will need a fallback
+                        var methodId = GetMethodId(targetMethod.MethodReference);
+
+                        // Resolve interface call
+                        resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunction, new[]
+                        {
+                            LLVM.ConstInt(int32Type, methodId, false),
+                            methodPointer,
+                        }, string.Empty);
+                        resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod,
+                            LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
+                    }
+                    else
+                    {
+                        // Virtual table call
+
+                        // Get method stored in vtable slot
+                        indices = new[]
+                        {
+                            LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                            LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
+                            LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
+                        };
+
+                        var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+                        resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
+                        resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
+                    }
+                }
+            }
+            else
+            {
+                // Normal call
+                // Callvirt on non-virtual function is only done to force "this" NULL check
+                // However, that's probably a part of the .NET spec that we want to skip for performance reasons,
+                // so maybe we should keep this as is?
+                resolvedMethod = targetMethod.GeneratedValue;
+            }
+            return resolvedMethod;
         }
 
         private static ExceptionHandlerInfo GetCurrentExceptionHandler(List<ExceptionHandlerInfo> exceptionHandlers, int offset)
