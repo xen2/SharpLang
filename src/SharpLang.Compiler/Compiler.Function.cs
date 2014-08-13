@@ -817,6 +817,28 @@ namespace SharpLang.CompilerServices
                 }
                 #endregion
 
+                case Code.Localloc:
+                {
+                    var numElements = stack.Pop();
+
+                    ValueRef numElementsCasted;
+                    if (numElements.StackType == StackValueType.NativeInt)
+                    {
+                        numElementsCasted = LLVM.BuildPtrToInt(builder, numElements.Value, int32Type, string.Empty);
+                    }
+                    else
+                    {
+                        numElementsCasted = LLVM.BuildIntCast(builder, numElements.Value, int32Type, string.Empty);
+                    }
+
+
+                    var alloca = LLVM.BuildArrayAlloca(builder, LLVM.Int8TypeInContext(context), numElementsCasted, string.Empty);
+                    alloca = LLVM.BuildPointerCast(builder, alloca, intPtr.DataType, string.Empty);
+
+                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, alloca));
+                    break;
+                }
+
                 case Code.Castclass:
                 case Code.Isinst:
                 {
