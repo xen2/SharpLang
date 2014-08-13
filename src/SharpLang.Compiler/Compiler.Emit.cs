@@ -388,17 +388,25 @@ namespace SharpLang.CompilerServices
         {
             var @object = stack.Pop();
 
-            // Build indices for GEP
-            var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
+            ValueRef value;
+            if (@object.StackType == StackValueType.Value)
+            {
+                value = LLVM.BuildExtractValue(builder, @object.Value, (uint)field.StructIndex, string.Empty);
+            }
+            else
+            {
+                // Build indices for GEP
+                var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
 
-            // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+                // Find field address using GEP
+                var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
 
-            // Load value from field and create "fake" local
-            var value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
+                // Load value from field and create "fake" local
+                value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
 
-            // Set instruction flags
-            SetInstructionFlags(value, instructionFlags);
+                // Set instruction flags
+                SetInstructionFlags(value, instructionFlags);
+            }
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(field.Type, value);
