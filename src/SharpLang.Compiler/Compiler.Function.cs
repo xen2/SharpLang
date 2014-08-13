@@ -2162,6 +2162,7 @@ namespace SharpLang.CompilerServices
                             break;
                         case StackValueType.NativeInt:
                             outputType = intPtr;
+                            result = LLVM.BuildIntToPtr(builder, result, intPtrType, string.Empty);
                             break;
                         case StackValueType.Reference:
                             result = LLVM.BuildIntToPtr(builder, result, intPtrType, string.Empty);
