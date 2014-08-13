@@ -24,6 +24,22 @@ namespace SharpLang.CompilerServices
                 return stackValue;
             }
 
+            // NativeInt to NativeInt
+            // Need pointer conversion
+            if (stack.StackType == StackValueType.NativeInt && localType.StackType == StackValueType.NativeInt)
+            {
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+            }
+
+            // NativeInt to Reference
+            // Used for example when casting+boxing primitive type pointers
+            // TODO: Start GC tracking?
+            if (stack.StackType == StackValueType.NativeInt && localType.StackType == StackValueType.Reference)
+            {
+                // Fallback: allow everything for now...
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+            }
+
             // Object: allow upcast as well
             if (stack.StackType == StackValueType.Reference
                 || stack.StackType == StackValueType.Object)
@@ -80,7 +96,7 @@ namespace SharpLang.CompilerServices
             }
 
             // TODO: Other cases
-            throw new NotImplementedException();
+            throw new NotImplementedException(string.Format("Error converting from {0} to {1}", stack.Type, localType));
         }
 
         /// <summary>
