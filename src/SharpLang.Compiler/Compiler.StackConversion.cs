@@ -31,6 +31,18 @@ namespace SharpLang.CompilerServices
                 return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
             }
 
+            // Int32 to NativeInt
+            if (stack.StackType == StackValueType.Int32 && localType.StackType == StackValueType.NativeInt)
+            {
+                if (intPtrSize == 8)
+                {
+                    // TODO: SExt (IntPTr) or ZExt (everything else)
+                    throw new NotImplementedException();
+                }
+
+                return LLVM.BuildIntToPtr(builder, stackValue, localType.DataType, string.Empty);
+            }
+
             // NativeInt to Reference
             // Used for example when casting+boxing primitive type pointers
             // TODO: Start GC tracking?
