@@ -1369,6 +1369,13 @@ namespace SharpLang.CompilerServices
                         || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
                         throw new NotImplementedException("Comparison between native int and int types.");
 
+                    if (operand1.StackType == StackValueType.NativeInt
+                        && LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
+                    {
+                        // NativeInt types should have same types to be comparable
+                        value2 = LLVM.BuildPointerCast(builder, value2, LLVM.TypeOf(value1), string.Empty);
+                    }
+
                     // Different object types: cast everything to object
                     if (operand1.StackType == StackValueType.Object
                         && operand2.StackType == StackValueType.Object
@@ -1475,6 +1482,22 @@ namespace SharpLang.CompilerServices
                     if ((operand1.StackType == StackValueType.NativeInt && operand2.StackType != StackValueType.NativeInt)
                         || (operand1.StackType != StackValueType.NativeInt && operand2.StackType == StackValueType.NativeInt))
                         throw new NotImplementedException("Comparison between native int and int types.");
+
+                    if (operand1.StackType == StackValueType.NativeInt
+                        && LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
+                    {
+                        // NativeInt types should have same types to be comparable
+                        value2 = LLVM.BuildPointerCast(builder, value2, LLVM.TypeOf(value1), string.Empty);
+                    }
+
+                    // Different object types: cast everything to object
+                    if (operand1.StackType == StackValueType.Object
+                        && operand2.StackType == StackValueType.Object
+                        && operand1.Type != operand2.Type)
+                    {
+                        value1 = LLVM.BuildPointerCast(builder, value1, @object.DefaultType, string.Empty);
+                        value2 = LLVM.BuildPointerCast(builder, value2, @object.DefaultType, string.Empty);
+                    }
 
                     if (operand1.StackType != operand2.StackType
                         || LLVM.TypeOf(value1) != LLVM.TypeOf(value2))
