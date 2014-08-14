@@ -1535,6 +1535,7 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_I8:
                 case Code.Conv_R4:
                 case Code.Conv_R8:
+                case Code.Conv_R_Un:
                 case Code.Conv_Ovf_U:
                 case Code.Conv_Ovf_I:
                 case Code.Conv_Ovf_U1:
@@ -1584,6 +1585,11 @@ namespace SharpLang.CompilerServices
                                 || inputTypeFullName == typeof(IntPtr).FullName;
                             intermediateWidth = 0; // unknown yet, depends on input
                             break;
+                        case Code.Conv_R_Un:
+                            // TODO: Not sure if this is exactly what Conv_R_Un should do...
+                            isSigned = false;
+                            intermediateWidth = 0;
+                            break;
                         default:
                             throw new InvalidOperationException();
                     }
@@ -1627,7 +1633,7 @@ namespace SharpLang.CompilerServices
                     var inputWidth = LLVM.GetIntTypeWidth(inputType);
 
                     // Auto-adapt intermediate width for floats
-                    if (opcode == Code.Conv_R4 || opcode == Code.Conv_R8)
+                    if (opcode == Code.Conv_R4 || opcode == Code.Conv_R8 || opcode == Code.Conv_R_Un)
                     {
                         intermediateWidth = inputWidth;
                     }
@@ -1688,7 +1694,8 @@ namespace SharpLang.CompilerServices
                             break;
                         case Code.Conv_R4:
                         case Code.Conv_R8:
-                            var outputType = opcode == Code.Conv_R8 ? @double : @float;
+                        case Code.Conv_R_Un:
+                            var outputType = opcode == Code.Conv_R8 || opcode == Code.Conv_R_Un ? @double : @float;
                             if (isSigned)
                                 currentValue = LLVM.BuildSIToFP(builder, currentValue, outputType.DataType, string.Empty);
                             else
