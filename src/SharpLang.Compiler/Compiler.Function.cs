@@ -685,6 +685,21 @@ namespace SharpLang.CompilerServices
                 }
                 #endregion
 
+                case Code.Sizeof:
+                {
+                    var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
+                    var type = GetType(typeReference);
+                    var @class = GetClass(type);
+
+                    // Use type because @class might be null (i.e. void*)
+                    var objectSize = LLVM.SizeOf(type.DefaultType);
+                    objectSize = LLVM.BuildIntCast(builder, objectSize, int32Type, string.Empty);
+
+                    stack.Add(new StackValue(StackValueType.Int32, int32.Class.Type, objectSize));
+
+                    break;
+                }
+
                 case Code.Localloc:
                 {
                     var numElements = stack.Pop();
