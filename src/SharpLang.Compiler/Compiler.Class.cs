@@ -211,8 +211,8 @@ namespace SharpLang.CompilerServices
                     // Special cases: Array and String
                     if (typeReference.MetadataType == MetadataType.String)
                     {
-                        // String: length (native int) + char pointer
-                        fieldTypes.Add(intPtrType);
+                        // String: length (int32) + char pointer
+                        fieldTypes.Add(int32Type);
                         fieldTypes.Add(intPtrType);
                     }
                     else if (typeReference.MetadataType == MetadataType.Array)

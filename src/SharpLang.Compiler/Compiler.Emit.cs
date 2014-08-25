@@ -232,7 +232,7 @@ namespace SharpLang.CompilerServices
 
             // Update array with size and 0 data
             var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-            LLVM.BuildStore(builder, LLVM.ConstIntToPtr(LLVM.ConstInt(int64Type, (ulong)operand.Length, false), intPtrType), sizeLocation);
+            LLVM.BuildStore(builder, LLVM.ConstInt(int32Type, (ulong)operand.Length, false), sizeLocation);
 
             indices[2] = LLVM.ConstInt(int32Type, 2, false);                // Access data pointer
             var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
