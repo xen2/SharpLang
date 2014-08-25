@@ -12,14 +12,14 @@ namespace SharpLang.CompilerServices
         internal Class Class;
         internal bool IsLocal;
 
-        public Type(TypeReference typeReference, TypeRef dataType, TypeRef objectType, StackValueType stackType)
+        public Type(TypeReference typeReference, TypeRef dataType, TypeRef valueType, TypeRef objectType, StackValueType stackType)
         {
             TypeReference = typeReference;
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
+            ValueType = valueType;
             DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
-            StackType = stackType;
 
             switch (stackType)
             {
@@ -66,6 +66,14 @@ namespace SharpLang.CompilerServices
         /// The LLVM data type (fields).
         /// </value>
         public TypeRef DataType { get; private set; }
+
+        /// <summary>
+        /// Gets the LLVM value type.
+        /// </summary>
+        /// <value>
+        /// The LLVM value type (fields).
+        /// </value>
+        public TypeRef ValueType { get; private set; }
 
         /// <summary>
         /// Gets the LLVM type when on the stack.

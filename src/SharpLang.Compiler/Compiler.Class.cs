@@ -41,6 +41,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.ByReference:
                 case MetadataType.Void:
                 case MetadataType.Pointer:
+                    // Should return something similar to IntPtr?
                     return null;
                 case MetadataType.Boolean:
                 case MetadataType.Char:
@@ -58,6 +59,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Double:
                 {
                     processClass = true;
+                    processFields = true;
                     break;
                 }
                 case MetadataType.Array:
@@ -80,6 +82,7 @@ namespace SharpLang.CompilerServices
             // Create class version (boxed version with VTable)
             var boxedType = type.ObjectType;
             var dataType = type.DataType;
+            var valueType = type.ValueType;
 
             if (type.Class != null)
             {
@@ -132,7 +135,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Interface: No need for vtable, we can just use object's one
                     var vtableGlobal = GetClass(assembly.MainModule.Import(typeof(object))).GeneratedRuntimeTypeInfoGlobal;
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), dataType }, false);
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), valueType }, false);
                     @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
                 }
                 else
@@ -191,12 +194,12 @@ namespace SharpLang.CompilerServices
                         LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalWeakLinkage);
                     }
 
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), dataType }, false);
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
                 }
 
                 // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
                 // In that case, do not process fields.
-                if (processFields && LLVM.GetTypeKind(dataType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(dataType))
+                if (processFields && LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
                 {
                     // Build actual type data (fields)
                     // Add fields and vtable slots from parent class
@@ -233,7 +236,7 @@ namespace SharpLang.CompilerServices
                         }
                     }
 
-                    LLVM.StructSetBody(dataType, fieldTypes.ToArray(), false);
+                    LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
                 }
             }
 

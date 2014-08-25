@@ -58,6 +58,7 @@ namespace SharpLang.CompilerServices
 
             TypeRef dataType;
             StackValueType stackType;
+            var valueType = TypeRef.Empty;
 
             switch (typeReference.MetadataType)
             {
@@ -152,6 +153,8 @@ namespace SharpLang.CompilerServices
                         stackType = typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
                     }
 
+                    valueType = dataType;
+
                     break;
                 }
                 default:
@@ -160,8 +163,10 @@ namespace SharpLang.CompilerServices
 
             // Create class version (boxed version with VTable)
             var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName);
+            if (valueType == TypeRef.Empty)
+                valueType = LLVM.StructCreateNamed(context, typeReference.FullName);
 
-            var result = new Type(typeReference, dataType, boxedType, stackType);
+            var result = new Type(typeReference, dataType, valueType, boxedType, stackType);
 
             bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
 

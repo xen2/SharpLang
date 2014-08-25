@@ -920,7 +920,12 @@ namespace SharpLang.CompilerServices
 
                         var dataPointer = GetDataPointer(objCast);
 
+                        var expectedPointerType = LLVM.PointerType(@class.Type.DataType, 0);
+                        if (expectedPointerType != LLVM.TypeOf(dataPointer))
+                            dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
                         var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
+
+                        data = ConvertFromLocalToStack(@class.Type, data);
 
                         stack.Add(new StackValue(@class.Type.StackType, @class.Type, data));
                     }
@@ -2353,6 +2358,9 @@ namespace SharpLang.CompilerServices
             var value = ConvertFromStackToLocal(@class.Type, valueType);
 
             // Copy data
+            var expectedPointerType = LLVM.PointerType(LLVM.TypeOf(value), 0);
+            if (expectedPointerType != LLVM.TypeOf(dataPointer))
+                dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
             LLVM.BuildStore(builder, value, dataPointer);
             return allocatedObject;
         }
