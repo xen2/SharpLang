@@ -24,7 +24,7 @@ typedef struct Object
 typedef struct String
 {
 	struct Object base;
-	size_t length;
+	uint32_t length;
 	char* value;
 } String;
 
@@ -78,7 +78,7 @@ void System_Void_System_Console__WriteLine_System_String_(String* str)
 	if (str == NULL)
 		printf("\n");
 	else
-		printf("%.*s\n", (uint32_t)str->length, str->value);
+		printf("%.*s\n", str->length, str->value);
 }
 
 // void System.Console.WriteLine(int)
