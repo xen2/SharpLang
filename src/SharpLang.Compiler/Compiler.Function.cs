@@ -1589,6 +1589,16 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_Ovf_I4:
                 case Code.Conv_Ovf_U8:
                 case Code.Conv_Ovf_I8:
+                case Code.Conv_Ovf_U_Un:
+                case Code.Conv_Ovf_I_Un:
+                case Code.Conv_Ovf_U1_Un:
+                case Code.Conv_Ovf_I1_Un:
+                case Code.Conv_Ovf_U2_Un:
+                case Code.Conv_Ovf_I2_Un:
+                case Code.Conv_Ovf_U4_Un:
+                case Code.Conv_Ovf_I4_Un:
+                case Code.Conv_Ovf_U8_Un:
+                case Code.Conv_Ovf_I8_Un:
                 {
                     var value = stack.Pop();
 
@@ -1619,6 +1629,16 @@ namespace SharpLang.CompilerServices
                         case Code.Conv_Ovf_I4: isOverflow = true; goto case Code.Conv_I4;
                         case Code.Conv_Ovf_U8: isOverflow = true; goto case Code.Conv_U8;
                         case Code.Conv_Ovf_I8: isOverflow = true; goto case Code.Conv_I8;
+                        case Code.Conv_Ovf_U_Un:  isOverflow = true; goto case Code.Conv_U;
+                        case Code.Conv_Ovf_I_Un:  isOverflow = true; goto case Code.Conv_I;
+                        case Code.Conv_Ovf_U1_Un: isOverflow = true; goto case Code.Conv_U1;
+                        case Code.Conv_Ovf_I1_Un: isOverflow = true; goto case Code.Conv_I1;
+                        case Code.Conv_Ovf_U2_Un: isOverflow = true; goto case Code.Conv_U2;
+                        case Code.Conv_Ovf_I2_Un: isOverflow = true; goto case Code.Conv_I2;
+                        case Code.Conv_Ovf_U4_Un: isOverflow = true; goto case Code.Conv_U4;
+                        case Code.Conv_Ovf_I4_Un: isOverflow = true; goto case Code.Conv_I4;
+                        case Code.Conv_Ovf_U8_Un: isOverflow = true; goto case Code.Conv_U8;
+                        case Code.Conv_Ovf_I8_Un: isOverflow = true; goto case Code.Conv_I8;
                         case Code.Conv_R4:
                         case Code.Conv_R8:
                             var inputTypeFullName = value.Type.TypeReference.FullName;
@@ -1711,6 +1731,8 @@ namespace SharpLang.CompilerServices
                         case Code.Conv_I:
                         case Code.Conv_Ovf_U:
                         case Code.Conv_Ovf_I:
+                        case Code.Conv_Ovf_U_Un:
+                        case Code.Conv_Ovf_I_Un:
                             // Convert to native int (if necessary)
                             currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
                             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
@@ -1727,12 +1749,20 @@ namespace SharpLang.CompilerServices
                         case Code.Conv_Ovf_I2:
                         case Code.Conv_Ovf_U4:
                         case Code.Conv_Ovf_I4:
+                        case Code.Conv_Ovf_U1_Un:
+                        case Code.Conv_Ovf_I1_Un:
+                        case Code.Conv_Ovf_U2_Un:
+                        case Code.Conv_Ovf_I2_Un:
+                        case Code.Conv_Ovf_U4_Un:
+                        case Code.Conv_Ovf_I4_Un:
                             stack.Add(new StackValue(StackValueType.Int32, int32, currentValue));
                             break;
                         case Code.Conv_U8:
                         case Code.Conv_I8:
                         case Code.Conv_Ovf_U8:
                         case Code.Conv_Ovf_I8:
+                        case Code.Conv_Ovf_U8_Un:
+                        case Code.Conv_Ovf_I8_Un:
                             stack.Add(new StackValue(StackValueType.Int64, int64, currentValue));
                             break;
                         case Code.Conv_R4:
