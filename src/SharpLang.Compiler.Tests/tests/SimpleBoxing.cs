@@ -16,5 +16,8 @@ public static class Program
 
         System.Console.WriteLine(j.A);
         System.Console.WriteLine(j.B);
+
+        int i2 = 48;
+        System.Console.WriteLine((int)(object)i2);
     }
 }
