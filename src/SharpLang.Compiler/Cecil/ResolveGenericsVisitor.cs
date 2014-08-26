@@ -76,12 +76,16 @@ namespace SharpLang.CompilerServices.Cecil
 
             if (genericInstanceMethodContext != null)
             {
-                // TODO: Only scanning declaring types generic parameters, need to add method's one too
                 var elementMethod = genericInstanceMethodContext.ElementMethod;
+                var resolvedMethod = genericInstanceMethodContext.Resolve();
                 for (int i = 0; i < elementMethod.GenericParameters.Count; ++i)
                 {
                     var genericParameter = elementMethod.GenericParameters[i];
                     genericTypeMapping.Add(genericParameter, genericInstanceMethodContext.GenericArguments[i]);
+
+                    var genericParameter2 = resolvedMethod.GenericParameters[i];
+                    if (genericParameter != genericParameter2)
+                        genericTypeMapping.Add(genericParameter2, genericInstanceMethodContext.GenericArguments[i]);
                 }
             }
 
