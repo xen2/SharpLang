@@ -2238,6 +2238,11 @@ namespace SharpLang.CompilerServices
 
         private ValueRef ResolveVirtualMethod(FunctionCompilerContext functionContext, ref Function targetMethod, ref StackValue thisObject)
         {
+            // Get constrained class
+            var constrainedClass = functionContext.ConstrainedClass;
+            if (constrainedClass != null)
+                functionContext.ConstrainedClass = null;
+
             ValueRef resolvedMethod;
             if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
             {
@@ -2250,12 +2255,9 @@ namespace SharpLang.CompilerServices
 
                 Class @class;
 
-                var constrainedClass = functionContext.ConstrainedClass;
+                // Process constrained class
                 if (constrainedClass != null)
                 {
-                    // Reset state
-                    functionContext.ConstrainedClass = null;
-
                     if (!constrainedClass.Type.TypeReference.IsValueType)
                     {
                         // If thisType is a reference type, dereference
