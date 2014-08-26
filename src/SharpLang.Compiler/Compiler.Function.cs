@@ -1046,6 +1046,14 @@ namespace SharpLang.CompilerServices
                     EmitStarg(stack, args, value);
                     break;
                 }
+                case Code.Arglist:
+                {
+                    // TODO: Implement this opcode
+                    //var value = LLVM.BuildVAArg(builder, , , string.Empty);
+                    var runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeArgumentHandle).FullName));
+                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, LLVM.ConstNull(runtimeHandleClass.Type.DataType)));
+                    break;
+                }
                 #endregion
 
                 #region Load opcodes (Ldc, Ldstr, Ldloc, etc...)
