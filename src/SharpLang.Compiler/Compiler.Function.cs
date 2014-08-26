@@ -643,6 +643,10 @@ namespace SharpLang.CompilerServices
 
                     break;
                 }
+                case Code.Readonly:
+                {
+                    break;
+                }
 
                 #region Obj opcodes (Initobj, Newobj, Stobj, Ldobj, etc...)
                 case Code.Initobj:
