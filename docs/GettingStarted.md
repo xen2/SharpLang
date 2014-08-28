@@ -11,4 +11,6 @@
 7. Run `<SharpLang>\build\GenerateProjects.bat`.
 8. Open `<SharpLang>\build\vs2013\SharpLang.sln`.
 9. Switch Active solution platform to *x86* in Build > Configuration Manager.
-10. Build and play with tests.
+10. Build and play with tests. [NUnit Test Adapter](http://visualstudiogallery.msdn.microsoft.com/6ab922d0-21c0-4f06-ab5f-4ecd1fe7175d) extension has to be installed in order to get test cases listed in *Test Explorer*.
+
+*Note: In default mode (Debug and RelWithDebInfo) the build artefacts require about 14 GB of disk space.*
