@@ -212,7 +212,7 @@ namespace SharpLang.CompilerServices
 
             // Create string data global
             var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
-            var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), string.Empty);
+            var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), ".str");
 
             // Cast from i8-array to i8*
             LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
