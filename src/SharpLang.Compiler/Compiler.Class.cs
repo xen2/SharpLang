@@ -182,7 +182,7 @@ namespace SharpLang.CompilerServices
                         staticFieldsType,
                     }, false);
 
-                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, string.Empty);
+                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, typeReference.FullName + ".rtti");
                     @class.GeneratedRuntimeTypeInfoGlobal = runtimeTypeInfoGlobal;
 
                     if (@class.Type.IsLocal)
@@ -339,7 +339,7 @@ namespace SharpLang.CompilerServices
                         });
                     })
                         .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryType), 1)).ToArray()); // Append { 0, 0 } terminator
-                    var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), "IMTEntry");
+                    var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), @class.Type.TypeReference.FullName + ".imt");
                     LLVM.SetInitializer(imtEntryGlobal, imtEntries);
 
                     // Add 1 to differentiate between single entry and IMT array
@@ -374,12 +374,12 @@ namespace SharpLang.CompilerServices
 
             // Super types global
             var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint) superTypes.Count),
-                string.Empty);
+                @class.Type.TypeReference.FullName + ".supertypes");
             var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] {zero, zero});
 
             // Interface map global
             var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint) @class.Interfaces.Count),
-                string.Empty);
+                @class.Type.TypeReference.FullName + ".interfaces");
             var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
 
             // Build VTable
