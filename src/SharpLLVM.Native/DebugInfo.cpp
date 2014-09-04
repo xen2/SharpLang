@@ -58,7 +58,7 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateSubroutineType(
 	LLVMValueRef ParameterTypes) {
 	return wrap(Builder->createSubroutineType(
 		unwrapDI<DIFile>(File),
-		unwrapDI<DIArray>(ParameterTypes)));
+		unwrapDI<DITypeArray>(ParameterTypes)));
 }
 
 extern "C" LLVMValueRef LLVMDIBuilderCreateFunction(
@@ -165,8 +165,7 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateLexicalBlock(
 	unsigned Discriminator) {
 	return wrap(Builder->createLexicalBlock(
 		unwrapDI<DIDescriptor>(Scope),
-		unwrapDI<DIFile>(File), Line, Col,
-		Discriminator
+		unwrapDI<DIFile>(File), Line, Col
 		));
 }
 
@@ -398,5 +397,5 @@ extern "C" void LLVMDICompositeTypeSetTypeArray(
 	LLVMValueRef CompositeType,
 	LLVMValueRef TypeArray)
 {
-	unwrapDI<DICompositeType>(CompositeType).setTypeArray(unwrapDI<DIArray>(TypeArray));
+	unwrapDI<DICompositeType>(CompositeType).setArrays(unwrapDI<DIArray>(TypeArray));
 }

@@ -72,6 +72,7 @@ function SetupLLVMLibs()
       "LLVMIRReader",
       "LLVMLinker",
       "LLVMMC",
+      "LLVMMCDisassembler",
       "LLVMMCParser",
       "LLVMObjCARCOpts",
       "LLVMObject",

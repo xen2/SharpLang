@@ -91,14 +91,10 @@ namespace SharpLang.CompilerServices
 
         public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
         {
-            GenerateObjects(bitcodeFiles);
-
             var filesToLink = new List<string>();
-            filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
             filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
 
             var arguments = new StringBuilder();
-            arguments.AppendFormat("{0} -o {1}", string.Join(" ", filesToLink), outputFile);
 
             // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
             //var isWindowsOS = Environment.OSVersion.Platform == PlatformID.Win32NT;
@@ -116,16 +112,23 @@ namespace SharpLang.CompilerServices
             {
                 if (useMSVCToolchain)
                 {
+                    GenerateObjects(bitcodeFiles);
+                    filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
+
                     CreateCompilerWrapper();
                 }
                 else
                 {
+                    filesToLink.AddRange(bitcodeFiles);
+
                     // Add mingw32 paths
-                    arguments.AppendFormat(" --target=i686-pc-mingw32");
+                    arguments.AppendFormat("--target=i686-pc-mingw32");
                     processStartInfo.EnvironmentVariables.Add("CPATH", @"..\..\..\..\deps\mingw32\i686-w64-mingw32\include");
                     processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
                 }
             }
+
+            arguments.AppendFormat(" {0} -o {1}", string.Join(" ", filesToLink), outputFile);
 
             processStartInfo.Arguments = arguments.ToString();
 

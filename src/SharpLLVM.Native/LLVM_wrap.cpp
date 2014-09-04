@@ -2386,6 +2386,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_GetOperand(void * jarg1, unsigned int jarg2
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetOperandUse(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  unsigned int arg2 ;
+  LLVMUseRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  result = LLVMGetOperandUse(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_SetOperand(void * jarg1, unsigned int jarg2, void * jarg3) {
   LLVMValueRef arg1 ;
   unsigned int arg2 ;
@@ -2638,6 +2652,32 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstString(char * jarg1, unsigned int jarg
 }
 
 
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IsConstantString(void * jarg1) {
+  unsigned int jresult ;
+  LLVMValueRef arg1 ;
+  LLVMBool result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = (LLVMBool)LLVMIsConstantString(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_GetAsString(void * jarg1, void * jarg2) {
+  char * jresult ;
+  LLVMValueRef arg1 ;
+  size_t *arg2 = (size_t *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (size_t *)jarg2; 
+  result = (char *)LLVMGetAsString(arg1,arg2);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_ConstStructInContext(void * jarg1, void* arg2_data, unsigned int jarg2, unsigned int jarg4) {
   void * jresult ;
   LLVMContextRef arg1 ;
@@ -2695,6 +2735,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstNamedStruct(void * jarg1, void* arg2_d
   arg1 = (LLVMTypeRef)jarg1; 
   arg2 = (LLVMValueRef*)arg2_data; arg3 = jarg2;
   result = LLVMConstNamedStruct(arg1,arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetElementAsConstant(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  unsigned int arg2 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  result = LLVMGetElementAsConstant(arg1,arg2);
   jresult = result; 
   return jresult;
 }
@@ -7300,6 +7354,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddScalarizerPass(void * jarg1) {
 }
 
 
+SWIGEXPORT void SWIGSTDCALL CSharp_AddMergedLoadStoreMotionPass(void * jarg1) {
+  LLVMPassManagerRef arg1 ;
+  
+  arg1 = (LLVMPassManagerRef)jarg1; 
+  LLVMAddMergedLoadStoreMotionPass(arg1);
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_AddGVNPass(void * jarg1) {
   LLVMPassManagerRef arg1 ;
   
@@ -7523,6 +7585,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddTypeBasedAliasAnalysisPass(void * jarg1) {
   
   arg1 = (LLVMPassManagerRef)jarg1; 
   LLVMAddTypeBasedAliasAnalysisPass(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_AddScopedNoAliasAAPass(void * jarg1) {
+  LLVMPassManagerRef arg1 ;
+  
+  arg1 = (LLVMPassManagerRef)jarg1; 
+  LLVMAddScopedNoAliasAAPass(arg1);
 }
 
 
