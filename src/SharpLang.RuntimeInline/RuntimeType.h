@@ -27,7 +27,7 @@ typedef struct Exception
 typedef struct String
 {
 	Object base;
-	size_t length;
+	uint32_t length;
 	char* value;
 } String;
 
