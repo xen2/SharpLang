@@ -70,3 +70,7 @@
 %typemap(cstype) char** "out string"
 %typemap(csin) char** "out $csinput"
 %typemap(imtype) char** "out string"
+
+%typemap(cstype) size_t* "out System.IntPtr"
+%typemap(csin) size_t* "out $csinput"
+%typemap(imtype) size_t* "out System.IntPtr"

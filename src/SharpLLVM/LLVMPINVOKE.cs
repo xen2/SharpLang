@@ -726,6 +726,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetOperand")]
   public static extern System.IntPtr GetOperand(System.IntPtr jarg1, uint jarg2);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetOperandUse")]
+  public static extern System.IntPtr GetOperandUse(System.IntPtr jarg1, uint jarg2);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_SetOperand")]
   public static extern void SetOperand(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3);
 
@@ -780,6 +783,12 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstString")]
   public static extern System.IntPtr ConstString(string jarg1, uint jarg2, bool jarg3);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsConstantString")]
+  public static extern bool IsConstantString(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetAsString")]
+  public static extern string GetAsString(System.IntPtr jarg1, out System.IntPtr jarg2);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstStructInContext")]
   public static extern System.IntPtr ConstStructInContext(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2, bool jarg4);
 
@@ -791,6 +800,9 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstNamedStruct")]
   public static extern System.IntPtr ConstNamedStruct(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetElementAsConstant")]
+  public static extern System.IntPtr GetElementAsConstant(System.IntPtr jarg1, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstVector")]
   public static extern System.IntPtr ConstVector(System.IntPtr arg1_data, uint jarg1);
@@ -1806,6 +1818,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddScalarizerPass")]
   public static extern void AddScalarizerPass(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddMergedLoadStoreMotionPass")]
+  public static extern void AddMergedLoadStoreMotionPass(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddGVNPass")]
   public static extern void AddGVNPass(System.IntPtr jarg1);
 
@@ -1889,6 +1904,9 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddTypeBasedAliasAnalysisPass")]
   public static extern void AddTypeBasedAliasAnalysisPass(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddScopedNoAliasAAPass")]
+  public static extern void AddScopedNoAliasAAPass(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddBasicAliasAnalysisPass")]
   public static extern void AddBasicAliasAnalysisPass(System.IntPtr jarg1);

@@ -906,6 +906,11 @@ public class LLVM {
     return ret;
   }
 
+  public unsafe static UseRef GetOperandUse(ValueRef Val, uint Index) {
+    UseRef ret = new UseRef(LLVMPINVOKE.GetOperandUse(Val.Value, Index));
+    return ret;
+  }
+
   public unsafe static void SetOperand(ValueRef User, uint Index, ValueRef Val) {
     LLVMPINVOKE.SetOperand(User.Value, Index, Val.Value);
   }
@@ -995,6 +1000,16 @@ public class LLVM {
     return ret;
   }
 
+  public unsafe static bool IsConstantString(ValueRef c) {
+    bool ret = LLVMPINVOKE.IsConstantString(c.Value);
+    return ret;
+  }
+
+  public unsafe static string GetAsString(ValueRef c, out System.IntPtr arg1) {
+    string ret = LLVMPINVOKE.GetAsString(c.Value, out arg1);
+    return ret;
+  }
+
   public unsafe static ValueRef ConstStructInContext(ContextRef C, ValueRef[] ConstantVals, bool Packed) {
     fixed (ValueRef* swig_ptrTo_ConstantVals = ConstantVals)
     {
@@ -1025,6 +1040,11 @@ public class LLVM {
       ValueRef ret = new ValueRef(LLVMPINVOKE.ConstNamedStruct(StructTy.Value, (System.IntPtr)swig_ptrTo_ConstantVals, (uint)ConstantVals.Length));
       return ret;
     }
+  }
+
+  public unsafe static ValueRef GetElementAsConstant(ValueRef c, uint idx) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.GetElementAsConstant(c.Value, idx));
+    return ret;
   }
 
   public unsafe static ValueRef ConstVector(ValueRef[] ScalarConstantVals) {
@@ -2669,6 +2689,10 @@ public class LLVM {
     LLVMPINVOKE.AddScalarizerPass(PM.Value);
   }
 
+  public unsafe static void AddMergedLoadStoreMotionPass(PassManagerRef PM) {
+    LLVMPINVOKE.AddMergedLoadStoreMotionPass(PM.Value);
+  }
+
   public unsafe static void AddGVNPass(PassManagerRef PM) {
     LLVMPINVOKE.AddGVNPass(PM.Value);
   }
@@ -2779,6 +2803,10 @@ public class LLVM {
 
   public unsafe static void AddTypeBasedAliasAnalysisPass(PassManagerRef PM) {
     LLVMPINVOKE.AddTypeBasedAliasAnalysisPass(PM.Value);
+  }
+
+  public unsafe static void AddScopedNoAliasAAPass(PassManagerRef PM) {
+    LLVMPINVOKE.AddScopedNoAliasAAPass(PM.Value);
   }
 
   public unsafe static void AddBasicAliasAnalysisPass(PassManagerRef PM) {
