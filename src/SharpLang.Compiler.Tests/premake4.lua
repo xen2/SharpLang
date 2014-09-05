@@ -13,7 +13,7 @@ project "SharpLang.Compiler.Tests"
     depsdir .. "/NUnit",
   }
 
-  dependson { "SharpLang.RuntimeInline", "corlib-net_4_5" }
+  dependson { "corlib-net_4_5" }
   
   links
   {

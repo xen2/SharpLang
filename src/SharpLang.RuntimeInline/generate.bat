@@ -1,1 +1,0 @@
-..\..\tools\swig\swig -csharp -I../../deps/llvm/include -namespace SharpLang.RuntimeInline -dllimport SharpLang.RuntimeInline.dll -outdir ../SharpLang.Compiler/RuntimeInline -o Runtime_wrap.cpp Runtime.i

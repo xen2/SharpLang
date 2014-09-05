@@ -29,7 +29,6 @@ solution "SharpLang"
   group "Libraries"
     include (srcdir .. "/SharpLang.Compiler")
     include (srcdir .. "/SharpLang.Compiler.Tests")
-    include (srcdir .. "/SharpLang.RuntimeInline")
 
     include (srcdir .. "/SharpLLVM")
     include (srcdir .. "/SharpLLVM.Native")
