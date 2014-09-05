@@ -93,6 +93,7 @@ namespace SharpLang.CompilerServices
         {
             var filesToLink = new List<string>();
             filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
+            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), @"..\..\SharpLang.RuntimeInline\Runtime.bc"));
 
             var arguments = new StringBuilder();
 

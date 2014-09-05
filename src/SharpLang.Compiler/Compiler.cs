@@ -15,6 +15,7 @@ namespace SharpLang.CompilerServices
     public sealed partial class Compiler
     {
         private ModuleRef module;
+        private ModuleRef runtimeModule;
         private ContextRef context;
 
         // RuntimeInline
@@ -63,19 +64,29 @@ namespace SharpLang.CompilerServices
         {
             this.assembly = assembly;
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
+
+            context = LLVM.GetGlobalContext();
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
+            
+            MemoryBufferRef memoryBuffer;
+            string message;
+            if (LLVM.CreateMemoryBufferWithContentsOfFile(@"..\..\..\..\src\SharpLang.RuntimeInline\Runtime.bc", out memoryBuffer, out message))
+                throw new InvalidOperationException(message);
+
+            if (LLVM.GetBitcodeModuleInContext(context, memoryBuffer, out runtimeModule, out message))
+                throw new InvalidOperationException(message);
+
+            LLVM.DisposeMemoryBuffer(memoryBuffer);
 
             // TODO: Choose appropriate triple depending on target
             LLVM.SetTarget(module, "i686-pc-mingw32");
 
-            RuntimeInline.Runtime.makeLLVMModuleContents(module);
-            allocObjectFunction = LLVM.GetNamedFunction(module, "allocObject");
-            resolveInterfaceCallFunction = LLVM.GetNamedFunction(module, "resolveInterfaceCall");
-            isInstInterfaceFunction = LLVM.GetNamedFunction(module, "isInstInterface");
-            throwExceptionFunction = LLVM.GetNamedFunction(module, "throwException");
-            sharpPersonalityFunction = LLVM.GetNamedFunction(module, "sharpPersonality");
+            allocObjectFunction = ImportRuntimeFunction(module, "allocObject");
+            resolveInterfaceCallFunction = ImportRuntimeFunction(module, "resolveInterfaceCall");
+            isInstInterfaceFunction = ImportRuntimeFunction(module, "isInstInterface");
+            throwExceptionFunction = ImportRuntimeFunction(module, "throwException");
+            sharpPersonalityFunction = ImportRuntimeFunction(module, "sharpPersonality");
 
-            context = LLVM.GetModuleContext(module);
             builder = LLVM.CreateBuilderInContext(context);
             intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
             int32Type = LLVM.Int32TypeInContext(context);
@@ -107,6 +118,14 @@ namespace SharpLang.CompilerServices
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
 
             RegisterAssembly(assembly);
+        }
+
+        private ValueRef ImportRuntimeFunction(ModuleRef module, string name)
+        {
+            var function = LLVM.GetNamedFunction(runtimeModule, name);
+            var functionType = LLVM.GetElementType(LLVM.TypeOf(function));
+
+            return LLVM.AddFunction(module, name, functionType);
         }
 
         public void RegisterType(TypeReference typeReference)
