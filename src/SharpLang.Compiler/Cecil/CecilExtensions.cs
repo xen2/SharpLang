@@ -17,6 +17,49 @@ namespace SharpLang.CompilerServices.Cecil
         // Not sure why Cecil made ContainsGenericParameter internal, but let's work around it by reflection.
         private static readonly MethodInfo containsGenericParameterGetMethod = typeof(MemberReference).GetProperty("ContainsGenericParameter", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).GetMethod;
 
+        public static string MangledName(this TypeReference typeReference)
+        {
+            var assembly = (typeReference.Resolve() ?? typeReference).Module.Assembly;
+            if (assembly.Name.Name == "mscorlib")
+                return typeReference.FullName;
+
+            return assembly.Name.Name + "_" + typeReference.FullName;
+        }
+
+        public static string MangledName(this MethodReference self)
+        {
+            var builder = new StringBuilder();
+            builder.Append(self.ReturnType.MangledName()).Append(" ");
+            if (self.DeclaringType != null)
+                builder.Append(self.DeclaringType.MangledName()).Append("::");
+            builder.Append(self.Name);
+            MethodSignatureMangledName(self, builder);
+            return builder.ToString();
+        }
+
+        public static void MethodSignatureMangledName(this IMethodSignature self, StringBuilder builder)
+        {
+            builder.Append("(");
+            if (self.HasParameters)
+            {
+                var parameters = self.Parameters;
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    ParameterDefinition definition = parameters[i];
+                    if (i > 0)
+                    {
+                        builder.Append(",");
+                    }
+                    if (definition.ParameterType.IsSentinel)
+                    {
+                        builder.Append("...,");
+                    }
+                    builder.Append(definition.ParameterType.MangledName());
+                }
+            }
+            builder.Append(")");
+        }
+
         public static TypeReference MakeGenericType(this TypeReference self, params TypeReference[] arguments)
         {
             if (self.GenericParameters.Count != arguments.Length)
