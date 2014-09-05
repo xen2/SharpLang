@@ -149,7 +149,7 @@ namespace SharpLang.CompilerServices
                     }
                     else
                     {
-                        dataType = LLVM.StructCreateNamed(context, typeReference.FullName + ".data");
+                        dataType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".data");
                         stackType = typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
                     }
 
@@ -162,9 +162,9 @@ namespace SharpLang.CompilerServices
             }
 
             // Create class version (boxed version with VTable)
-            var boxedType = LLVM.StructCreateNamed(context, typeReference.FullName + ".class");
+            var boxedType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".class");
             if (valueType == TypeRef.Empty)
-                valueType = LLVM.StructCreateNamed(context, typeReference.FullName + ".value");
+                valueType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".value");
 
             var result = new Type(typeReference, dataType, valueType, boxedType, stackType);
 

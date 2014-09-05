@@ -102,7 +102,7 @@ namespace SharpLang.CompilerServices
 
             // Generate function global
             bool isExternal = method.DeclaringType.Resolve().Module.Assembly != assembly;
-            var methodMangledName = Regex.Replace(method.FullName, @"(\W)", "_");
+            var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             var resolvedMethod = method.Resolve();
