@@ -210,8 +210,18 @@ namespace SharpLang.CompilerServices
         {
             var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
+            ValueRef stringConstantData;
+
             // Create string data global
-            var stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
+            if (CharUsesUTF8)
+            {
+                stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
+            }
+            else
+            {
+                stringConstantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), operand.Select(x => LLVM.ConstInt(LLVM.Int16TypeInContext(context), x, false)).ToArray());
+            }
+
             var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), ".str");
 
             // Cast from i8-array to i8*
