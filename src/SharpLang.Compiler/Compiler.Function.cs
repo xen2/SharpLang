@@ -1217,6 +1217,14 @@ namespace SharpLang.CompilerServices
                             throw new ArgumentException("opcode");
                     }
 
+                    if (CharUsesUTF8)
+                    {
+                        if (opcode == Code.Stind_I2 && address.Type.TypeReference.FullName == typeof(char*).FullName)
+                        {
+                            type = int8;
+                        }
+                    }
+
                     // Convert to local type
                     var sourceValue = ConvertFromStackToLocal(type, value);
 
@@ -1262,6 +1270,14 @@ namespace SharpLang.CompilerServices
                             break;
                         default:
                             throw new ArgumentException("opcode");
+                    }
+
+                    if (CharUsesUTF8)
+                    {
+                        if (opcode == Code.Ldind_I2 && address.Type.TypeReference.FullName == typeof(char*).FullName)
+                        {
+                            type = int8;
+                        }
                     }
 
                     // Load value at address
@@ -1613,6 +1629,27 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_Ovf_I8_Un:
                 {
                     var value = stack.Pop();
+
+                    // Special case: string contains an extra indirection to access its first character.
+                    // We resolve it on conv.i.
+                    if (stringSliceable
+                        && value.Type.TypeReference.FullName == typeof(string).FullName
+                        && (opcode == Code.Conv_I || opcode == Code.Conv_U))
+                    {
+                        // Prepare indices
+                        var indices = new[]
+                        {
+                            LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
+                            LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
+                            LLVM.ConstInt(int32Type, 2, false),                         // Access string pointer
+                        };
+
+                        var charPointerLocation = LLVM.BuildInBoundsGEP(builder, value.Value, indices, string.Empty);
+                        var firstCharacterPointer = LLVM.BuildLoad(builder, charPointerLocation, string.Empty);
+
+                        stack.Add(new StackValue(StackValueType.NativeInt, intPtr, firstCharacterPointer));
+                        break;
+                    }
 
                     uint intermediateWidth;
                     System.Type intermediateRealType;
@@ -2049,6 +2086,19 @@ namespace SharpLang.CompilerServices
                     }
                     else
                     {
+                        // Special case: char is size 1, not 2!
+                        if (CharUsesUTF8)
+                        {
+                            if (opcode == Code.Add && operand1.Type.TypeReference.FullName == typeof(char*).FullName)
+                            {
+                                value2 = LLVM.BuildLShr(builder, value2, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                            }
+                            else if (opcode == Code.Add && operand2.Type.TypeReference.FullName == typeof (char*).FullName)
+                            {
+                                value1 = LLVM.BuildLShr(builder, value1, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                            }
+                        }
+
                         switch (opcode)
                         {
                             case Code.Add:          result = LLVM.BuildAdd(builder, value1, value2, string.Empty); break;
@@ -2121,6 +2171,16 @@ namespace SharpLang.CompilerServices
                             }
                             default:
                                 goto InvalidBinaryOperation;
+                        }
+
+                        if (CharUsesUTF8)
+                        {
+                            if (opcode == Code.Sub
+                                && operand1.Type.TypeReference.FullName == typeof(char*).FullName
+                                && operand2.Type.TypeReference.FullName == typeof(char*).FullName)
+                            {
+                                result = LLVM.BuildLShr(builder, result, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                            }
                         }
                     }
 
