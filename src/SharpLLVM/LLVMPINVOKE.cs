@@ -253,7 +253,7 @@ class LLVMPINVOKE {
   public static extern void DumpModule(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_PrintModuleToFile")]
-  public static extern bool PrintModuleToFile(System.IntPtr jarg1, string jarg2, out string jarg3);
+  public static extern bool PrintModuleToFile(System.IntPtr jarg1, string jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_PrintModuleToString")]
   public static extern string PrintModuleToString(System.IntPtr jarg1);
@@ -1648,10 +1648,10 @@ class LLVMPINVOKE {
   public static extern void DisposeModuleProvider(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_CreateMemoryBufferWithContentsOfFile")]
-  public static extern bool CreateMemoryBufferWithContentsOfFile(string jarg1, out System.IntPtr jarg2, out string jarg3);
+  public static extern bool CreateMemoryBufferWithContentsOfFile(string jarg1, out System.IntPtr jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_CreateMemoryBufferWithSTDIN")]
-  public static extern bool CreateMemoryBufferWithSTDIN(out System.IntPtr jarg1, out string jarg2);
+  public static extern bool CreateMemoryBufferWithSTDIN(out System.IntPtr jarg1, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_CreateMemoryBufferWithMemoryRange")]
   public static extern System.IntPtr CreateMemoryBufferWithMemoryRange(string jarg1, uint jarg2, string jarg3, bool jarg4);
@@ -1705,22 +1705,22 @@ class LLVMPINVOKE {
   public static extern bool IsMultithreaded();
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ParseBitcode")]
-  public static extern bool ParseBitcode(System.IntPtr jarg1, out System.IntPtr jarg2, out string jarg3);
+  public static extern bool ParseBitcode(System.IntPtr jarg1, out System.IntPtr jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ParseBitcodeInContext")]
-  public static extern bool ParseBitcodeInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, out string jarg4);
+  public static extern bool ParseBitcodeInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg4);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetBitcodeModuleInContext")]
-  public static extern bool GetBitcodeModuleInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, out string jarg4);
+  public static extern bool GetBitcodeModuleInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg4);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetBitcodeModule")]
-  public static extern bool GetBitcodeModule(System.IntPtr jarg1, out System.IntPtr jarg2, out string jarg3);
+  public static extern bool GetBitcodeModule(System.IntPtr jarg1, out System.IntPtr jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetBitcodeModuleProviderInContext")]
-  public static extern bool GetBitcodeModuleProviderInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, out string jarg4);
+  public static extern bool GetBitcodeModuleProviderInContext(System.IntPtr jarg1, System.IntPtr jarg2, out System.IntPtr jarg3, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg4);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetBitcodeModuleProvider")]
-  public static extern bool GetBitcodeModuleProvider(System.IntPtr jarg1, out System.IntPtr jarg2, out string jarg3);
+  public static extern bool GetBitcodeModuleProvider(System.IntPtr jarg1, out System.IntPtr jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_WriteBitcodeToFile")]
   public static extern int WriteBitcodeToFile(System.IntPtr jarg1, string jarg2);
@@ -2023,7 +2023,7 @@ class LLVMPINVOKE {
   public static extern System.IntPtr GetTargetFromName(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetTargetFromTriple")]
-  public static extern bool GetTargetFromTriple(string jarg1, out System.IntPtr jarg2, out string jarg3);
+  public static extern bool GetTargetFromTriple(string jarg1, out System.IntPtr jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetTargetName")]
   public static extern string GetTargetName(System.IntPtr jarg1);
@@ -2065,10 +2065,10 @@ class LLVMPINVOKE {
   public static extern void SetTargetMachineAsmVerbosity(System.IntPtr jarg1, bool jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_TargetMachineEmitToFile")]
-  public static extern bool TargetMachineEmitToFile(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, int jarg4, out string jarg5);
+  public static extern bool TargetMachineEmitToFile(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, int jarg4, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_TargetMachineEmitToMemoryBuffer")]
-  public static extern bool TargetMachineEmitToMemoryBuffer(System.IntPtr jarg1, System.IntPtr jarg2, int jarg3, out string jarg4, out System.IntPtr jarg5);
+  public static extern bool TargetMachineEmitToMemoryBuffer(System.IntPtr jarg1, System.IntPtr jarg2, int jarg3, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg4, out System.IntPtr jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetDefaultTargetTriple")]
   public static extern string GetDefaultTargetTriple();
@@ -2077,7 +2077,7 @@ class LLVMPINVOKE {
   public static extern void AddAnalysisPasses(System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_VerifyModule")]
-  public static extern bool VerifyModule(System.IntPtr jarg1, int jarg2, out string jarg3);
+  public static extern bool VerifyModule(System.IntPtr jarg1, int jarg2, [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]out string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_VerifyFunction")]
   public static extern bool VerifyFunction(System.IntPtr jarg1, int jarg2);
