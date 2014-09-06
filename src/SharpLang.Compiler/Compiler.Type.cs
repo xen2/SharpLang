@@ -100,6 +100,11 @@ namespace SharpLang.CompilerServices
                     stackType = StackValueType.Float;
                     break;
                 case MetadataType.Char:
+                    dataType = CharUsesUTF8
+                        ? LLVM.Int8TypeInContext(context)
+                        : LLVM.Int16TypeInContext(context);
+                    stackType = StackValueType.Int32;
+                    break;
                 case MetadataType.Byte:
                 case MetadataType.SByte:
                     dataType = LLVM.Int8TypeInContext(context);
