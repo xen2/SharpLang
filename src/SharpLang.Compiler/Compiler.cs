@@ -214,13 +214,11 @@ namespace SharpLang.CompilerServices
             LLVM.DisposeBuilder(builder);
 
             // Verify module
-#if VERIFY_LLVM
             string message;
             if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
             {
                 throw new InvalidOperationException(message);
             }
-#endif
             
             return module;
         }

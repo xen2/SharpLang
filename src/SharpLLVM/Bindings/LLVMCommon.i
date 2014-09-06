@@ -69,7 +69,11 @@
 
 %typemap(cstype) char** "out string"
 %typemap(csin) char** "out $csinput"
-%typemap(imtype) char** "out string"
+%typemap(imtype, inattributes="[System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)]") char** "out string"
+%typemap(argout) char**
+%{ 
+	if (*$1 != NULL) *$1 = SWIG_csharp_string_callback(*$1);
+%}
 
 %typemap(cstype) size_t* "out System.IntPtr"
 %typemap(csin) size_t* "out $csinput"

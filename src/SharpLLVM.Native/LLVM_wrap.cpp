@@ -508,6 +508,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PrintModuleToFile(void * jarg1, char 
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMPrintModuleToFile(arg1,(char const *)arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -6735,6 +6738,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_CreateMemoryBufferWithContentsOfFile(
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMCreateMemoryBufferWithContentsOfFile((char const *)arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -6749,6 +6755,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_CreateMemoryBufferWithSTDIN(void * ja
   arg2 = (char **)jarg2; 
   result = (LLVMBool)LLVMCreateMemoryBufferWithSTDIN(arg1,arg2);
   jresult = result; 
+  
+  if (*arg2 != NULL) *arg2 = SWIG_csharp_string_callback(*arg2);
+  
   return jresult;
 }
 
@@ -6960,6 +6969,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ParseBitcode(void * jarg1, void * jar
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMParseBitcode(arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -6978,6 +6990,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ParseBitcodeInContext(void * jarg1, v
   arg4 = (char **)jarg4; 
   result = (LLVMBool)LLVMParseBitcodeInContext(arg1,arg2,arg3,arg4);
   jresult = result; 
+  
+  if (*arg4 != NULL) *arg4 = SWIG_csharp_string_callback(*arg4);
+  
   return jresult;
 }
 
@@ -6996,6 +7011,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetBitcodeModuleInContext(void * jarg
   arg4 = (char **)jarg4; 
   result = (LLVMBool)LLVMGetBitcodeModuleInContext(arg1,arg2,arg3,arg4);
   jresult = result; 
+  
+  if (*arg4 != NULL) *arg4 = SWIG_csharp_string_callback(*arg4);
+  
   return jresult;
 }
 
@@ -7012,6 +7030,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetBitcodeModule(void * jarg1, void *
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMGetBitcodeModule(arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -7030,6 +7051,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetBitcodeModuleProviderInContext(voi
   arg4 = (char **)jarg4; 
   result = (LLVMBool)LLVMGetBitcodeModuleProviderInContext(arg1,arg2,arg3,arg4);
   jresult = result; 
+  
+  if (*arg4 != NULL) *arg4 = SWIG_csharp_string_callback(*arg4);
+  
   return jresult;
 }
 
@@ -7046,6 +7070,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetBitcodeModuleProvider(void * jarg1
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMGetBitcodeModuleProvider(arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -8020,6 +8047,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetTargetFromTriple(char * jarg1, voi
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMGetTargetFromTriple((char const *)arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
@@ -8202,6 +8232,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_TargetMachineEmitToFile(void * jarg1,
   arg5 = (char **)jarg5; 
   result = (LLVMBool)LLVMTargetMachineEmitToFile(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
+  
+  if (*arg5 != NULL) *arg5 = SWIG_csharp_string_callback(*arg5);
+  
   return jresult;
 }
 
@@ -8222,6 +8255,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_TargetMachineEmitToMemoryBuffer(void 
   arg5 = (LLVMMemoryBufferRef *)jarg5; 
   result = (LLVMBool)LLVMTargetMachineEmitToMemoryBuffer(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
+  
+  if (*arg4 != NULL) *arg4 = SWIG_csharp_string_callback(*arg4);
+  
   return jresult;
 }
 
@@ -8258,6 +8294,9 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_VerifyModule(void * jarg1, int jarg2,
   arg3 = (char **)jarg3; 
   result = (LLVMBool)LLVMVerifyModule(arg1,arg2,arg3);
   jresult = result; 
+  
+  if (*arg3 != NULL) *arg3 = SWIG_csharp_string_callback(*arg3);
+  
   return jresult;
 }
 
