@@ -1871,7 +1871,7 @@ namespace SharpLang.CompilerServices
                     var value1 = operand1.Value;
                     var value2 = operand2.Value;
 
-                    StackValueType outputStackType;
+                    StackValue outputOperandType;
 
                     bool isShiftOperation = false;
                     bool isIntegerOperation = false;
@@ -1923,7 +1923,7 @@ namespace SharpLang.CompilerServices
                         }
 
                         // Output type is determined by first operand
-                        outputStackType = operand1.StackType;
+                        outputOperandType = operand1;
                     }
                     else if (operand1.StackType == operand2.StackType) // Diagonal
                     {
@@ -1933,19 +1933,19 @@ namespace SharpLang.CompilerServices
                             case StackValueType.Int32:
                             case StackValueType.Int64:
                             case StackValueType.Float:
-                                outputStackType = operand1.StackType;
+                                outputOperandType = operand1;
                                 break;
                             case StackValueType.NativeInt:
                                 value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
                                 value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
-                                outputStackType = operand1.StackType;
+                                outputOperandType = operand1;
                                 break;
                             case StackValueType.Reference:
                                 if (opcode != Code.Sub && opcode != Code.Sub_Ovf_Un)
                                     goto InvalidBinaryOperation;
                                 value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
                                 value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
-                                outputStackType = StackValueType.NativeInt;
+                                outputOperandType = new StackValue(StackValueType.NativeInt, intPtr, ValueRef.Empty);
                                 break;
                             default:
                                 throw new InvalidOperationException(string.Format("Binary operations are not allowed on {0}.", operand1.StackType));
@@ -1954,12 +1954,12 @@ namespace SharpLang.CompilerServices
                     else if (operand1.StackType == StackValueType.NativeInt && operand2.StackType == StackValueType.Int32)
                     {
                         value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
-                        outputStackType = StackValueType.NativeInt;
+                        outputOperandType = operand1;
                     }
                     else if (operand1.StackType == StackValueType.Int32 && operand2.StackType == StackValueType.NativeInt)
                     {
                         value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
-                        outputStackType = StackValueType.NativeInt;
+                        outputOperandType = operand2;
                     }
                     else if (!isIntegerOperation
                         && (operand1.StackType == StackValueType.Reference || operand2.StackType == StackValueType.Reference)) // ref + [i32, nativeint] or [i32, nativeint] + ref
@@ -2126,7 +2126,7 @@ namespace SharpLang.CompilerServices
 
                     Type outputType;
 
-                    switch (outputStackType)
+                    switch (outputOperandType.StackType)
                     {
                         case StackValueType.Int32:
                         case StackValueType.Int64:
@@ -2153,7 +2153,7 @@ namespace SharpLang.CompilerServices
                             goto InvalidBinaryOperation;
                     }
 
-                    stack.Add(new StackValue(outputStackType, outputType, result));
+                    stack.Add(new StackValue(outputOperandType.StackType, outputOperandType.Type, result));
 
                     break;
 
