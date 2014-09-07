@@ -2318,20 +2318,27 @@ namespace SharpLang.CompilerServices
 
         private void EnsureClassInitialized(FunctionCompilerContext functionContext, Class @class)
         {
-            // TODO: Handle PInvoke initialization as well
             // TODO: Add thread protection (with lock and actual class initialization in a separate method to improve code reuse)
+            // If there was a type initializer, let's call it.
+            // Even through the type initializer itself will check if type initialization is necessary inside a lock,
+            // we do a quick check before here already (early exit).
             //  if (!classInitialized)
+            //  {
+            //      EnsureClassInitialized();
+            //  }
+            // with:
+            //  void EnsureClassInitialized()
             //  {
             //      lock (initMutex)
             //      {
             //          if (!classInitialized)
             //          {
-            //              Initialized();
+            //              InitializeClass();
             //              classInitialized = true;
             //          }
             //      }
             //  }
-            if (@class.StaticCtor != null)
+            if (@class.InitializeType != ValueRef.Empty)
             {
                 var functionGlobal = functionContext.Function.GeneratedValue;
 
@@ -2357,10 +2364,12 @@ namespace SharpLang.CompilerServices
 
                 // Initialize class (first time)
                 LLVM.PositionBuilderAtEnd(builder, typeNeedInitBlock);
-                LLVM.BuildCall(builder, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
+                LLVM.BuildCall(builder, @class.InitializeType, new ValueRef[0], string.Empty);
 
                 // Set flag so that it won't be initialized again
-                LLVM.BuildStore(builder, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
+                // Note: Inner function already does this, so commented out for now.
+                // However, enabling it here might help LLVM performs additional optimization if happens multiple time in same function? (vs heavier code? need to test in practice)
+                //LLVM.BuildStore(builder, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
                 LLVM.BuildBr(builder, nextBlock);
 
                 // Normal path

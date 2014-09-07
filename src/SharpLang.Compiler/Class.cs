@@ -34,6 +34,8 @@ namespace SharpLang.CompilerServices
 
         public List<Function> VirtualTable { get; private set; }
 
+        public ValueRef InitializeType { get; set; }
+
         public Function StaticCtor { get; set; }
 
         public List<Function> Functions { get; private set; }
