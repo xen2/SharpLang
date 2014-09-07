@@ -595,6 +595,10 @@ namespace SharpLang.CompilerServices
                     var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                     var targetMethod = GetFunction(targetMethodReference);
 
+                    // If calling a static method, make sure .cctor has been called
+                    if (!targetMethodReference.HasThis)
+                        EnsureClassInitialized(functionContext, GetClass(targetMethod.DeclaringType));
+
                     EmitCall(functionContext, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
 
                     break;
@@ -1172,6 +1176,8 @@ namespace SharpLang.CompilerServices
                     var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                     var field = @class.Fields[fieldReference.Resolve()];
 
+                    EnsureClassInitialized(functionContext, @class);
+
                     if (opcode == Code.Ldsflda)
                     {
                         EmitLdsflda(stack, field);
@@ -1335,6 +1341,8 @@ namespace SharpLang.CompilerServices
                     // Resolve class and field
                     var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
                     var field = @class.Fields[fieldReference.Resolve()];
+
+                    EnsureClassInitialized(functionContext, @class);
 
                     EmitStsfld(stack, field, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
@@ -2305,6 +2313,59 @@ namespace SharpLang.CompilerServices
 
                 default:
                     throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
+            }
+        }
+
+        private void EnsureClassInitialized(FunctionCompilerContext functionContext, Class @class)
+        {
+            // TODO: Handle PInvoke initialization as well
+            // TODO: Add thread protection (with lock and actual class initialization in a separate method to improve code reuse)
+            //  if (!classInitialized)
+            //  {
+            //      lock (initMutex)
+            //      {
+            //          if (!classInitialized)
+            //          {
+            //              Initialized();
+            //              classInitialized = true;
+            //          }
+            //      }
+            //  }
+            if (@class.StaticCtor != null)
+            {
+                var functionGlobal = functionContext.Function.GeneratedValue;
+
+                // Note: we temporarily ignore extern class
+                // TODO: This will be reactivated as soon as we start linking multiple modules
+                if (!@class.Type.IsLocal)
+                    return;
+
+                // Check if class is initialized
+                var indices = new[]
+                {
+                    LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
+                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
+                };
+
+                var classInitializedAddress = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                var classInitialized = LLVM.BuildLoad(builder, classInitializedAddress, string.Empty);
+
+                var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+
+                LLVM.BuildCondBr(builder, classInitialized, nextBlock, typeNeedInitBlock);
+
+                // Initialize class (first time)
+                LLVM.PositionBuilderAtEnd(builder, typeNeedInitBlock);
+                LLVM.BuildCall(builder, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
+
+                // Set flag so that it won't be initialized again
+                LLVM.BuildStore(builder, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
+                LLVM.BuildBr(builder, nextBlock);
+
+                // Normal path
+                LLVM.PositionBuilderAtEnd(builder, nextBlock);
+                functionContext.BasicBlock = nextBlock;
             }
         }
 

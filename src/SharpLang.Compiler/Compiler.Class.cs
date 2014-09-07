@@ -177,6 +177,7 @@ namespace SharpLang.CompilerServices
                         int32Type,
                         LLVM.PointerType(intPtrType, 0),
                         LLVM.PointerType(intPtrType, 0),
+                        LLVM.Int1TypeInContext(context),
                         LLVM.ArrayType(intPtrType, InterfaceMethodTableSize),
                         vtableType,
                         staticFieldsType,
@@ -397,6 +398,7 @@ namespace SharpLang.CompilerServices
                 interfacesCount,
                 superTypesGlobal,
                 interfacesGlobal,
+                LLVM.ConstInt(LLVM.Int1TypeInContext(context), 0, false), // Class initialized?
                 interfaceMethodTableConstant,
                 vtableConstant,
                 LLVM.ConstNull(runtimeTypeInfoTypeElements[(int)RuntimeTypeInfoFields.StaticFields]),
