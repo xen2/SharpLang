@@ -261,8 +261,14 @@ namespace SharpLang.CompilerServices
                         fieldTypes.Add(parentClass.Type.DataType);
                     }
 
-                    // Special cases: Array
-                    if (typeReference.MetadataType == MetadataType.Array)
+                    // Special cases: Array and String
+                    if (typeReference.MetadataType == MetadataType.String)
+                    {
+                        // String: length (int32) + char pointer
+                        fieldTypes.Add(int32Type);
+                        fieldTypes.Add(intPtrType);
+                    }
+                    else if (typeReference.MetadataType == MetadataType.Array)
                     {
                         // String: length (native int) + first element pointer
                         var arrayType = (ArrayType)typeReference;
@@ -294,8 +300,6 @@ namespace SharpLang.CompilerServices
         {
             if (@class.IsEmitted)
                 return;
-
-            Console.WriteLine("Build type {0}", @class);
 
             @class.IsEmitted = true;
 
