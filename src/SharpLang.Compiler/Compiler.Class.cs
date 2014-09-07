@@ -198,6 +198,58 @@ namespace SharpLang.CompilerServices
                     LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
                 }
 
+                // Prepare class initializer
+                if (@class.StaticCtor != null)
+                {
+                    //  void EnsureClassInitialized()
+                    //  {
+                    //      //lock (initMutex) < TODO: not implemented yet
+                    //      {
+                    //          if (!classInitialized)
+                    //          {
+                    //              InitializeClass();
+                    //              classInitialized = true;
+                    //          }
+                    //      }
+                    //  }
+                    var initTypeFunction = LLVM.AddFunction(module, typeReference.MangledName() + "_inittype", LLVM.FunctionType(LLVM.VoidTypeInContext(context), new TypeRef[0], false));
+                    var block = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
+                    LLVM.PositionBuilderAtEnd(builder2, block);
+
+                    // Check if class is initialized
+                    var indices = new[]
+                    {
+                        LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
+                        LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
+                    };
+
+                    var classInitializedAddress = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                    var classInitialized = LLVM.BuildLoad(builder2, classInitializedAddress, string.Empty);
+
+                    var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
+                    var nextBlock = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
+
+                    LLVM.BuildCondBr(builder2, classInitialized, nextBlock, typeNeedInitBlock);
+
+                    // Initialize class (first time)
+                    LLVM.PositionBuilderAtEnd(builder2, typeNeedInitBlock);
+
+                    // Static ctor
+                    if (@class.StaticCtor != null)
+                        LLVM.BuildCall(builder2, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
+
+                    // TODO: PInvoke initialization
+
+                    // Set flag so that it won't be initialized again
+                    LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
+                    LLVM.BuildBr(builder2, nextBlock);
+
+                    LLVM.PositionBuilderAtEnd(builder2, nextBlock);
+                    LLVM.BuildRetVoid(builder2);
+
+                    @class.InitializeType = initTypeFunction;
+                }
+
                 // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
                 // In that case, do not process fields.
                 if (processFields && LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
@@ -209,14 +261,8 @@ namespace SharpLang.CompilerServices
                         fieldTypes.Add(parentClass.Type.DataType);
                     }
 
-                    // Special cases: Array and String
-                    if (typeReference.MetadataType == MetadataType.String)
-                    {
-                        // String: length (int32) + char pointer
-                        fieldTypes.Add(int32Type);
-                        fieldTypes.Add(intPtrType);
-                    }
-                    else if (typeReference.MetadataType == MetadataType.Array)
+                    // Special cases: Array
+                    if (typeReference.MetadataType == MetadataType.Array)
                     {
                         // String: length (native int) + first element pointer
                         var arrayType = (ArrayType)typeReference;
@@ -248,6 +294,8 @@ namespace SharpLang.CompilerServices
         {
             if (@class.IsEmitted)
                 return;
+
+            Console.WriteLine("Build type {0}", @class);
 
             @class.IsEmitted = true;
 
