@@ -286,6 +286,11 @@ namespace SharpLang.CompilerServices
 
                 @class.Functions.Add(function);
 
+                if (method.IsSpecialName && method.Name == ".cctor")
+                {
+                    @class.StaticCtor = function;
+                }
+
                 if (method.IsVirtual)
                 {
                     if (isInterface)

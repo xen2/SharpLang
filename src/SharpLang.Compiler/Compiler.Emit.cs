@@ -139,6 +139,9 @@ namespace SharpLang.CompilerServices
         {
             var stack = functionContext.Stack;
 
+            // Make sure .cctor has been called
+            EnsureClassInitialized(functionContext, GetClass(type));
+
             var allocatedObject = AllocateObject(type);
 
             // Add it to stack, right before arguments
