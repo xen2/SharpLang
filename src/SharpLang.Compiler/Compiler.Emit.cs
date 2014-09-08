@@ -214,24 +214,7 @@ namespace SharpLang.CompilerServices
         {
             var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
-            ValueRef stringConstantData;
-
-            // Create string data global
-            if (CharUsesUTF8)
-            {
-                stringConstantData = LLVM.ConstStringInContext(context, operand, (uint)operand.Length, true);
-            }
-            else
-            {
-                stringConstantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), operand.Select(x => LLVM.ConstInt(LLVM.Int16TypeInContext(context), x, false)).ToArray());
-            }
-
-            var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), ".str");
-
-            // Cast from i8-array to i8*
-            LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
-            var zero = LLVM.ConstInt(int32Type, 0, false);
-            stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] { zero, zero });
+            var stringConstantDataGlobal = CreateStringConstant(operand, !CharUsesUTF8, false);
 
             // Allocate object
             var allocatedObject = AllocateObject(stringClass.Type);
@@ -254,6 +237,34 @@ namespace SharpLang.CompilerServices
 
             // Push on stack
             stack.Add(new StackValue(StackValueType.Object, stringClass.Type, allocatedObject));
+        }
+
+        private ValueRef CreateStringConstant(string str, bool utf16, bool nullTerminate)
+        {
+            ValueRef stringConstantData;
+
+            // Create string data global
+            if (utf16)
+            {
+                var utf16String = str.Select(x => LLVM.ConstInt(LLVM.Int16TypeInContext(context), x, false));
+                if (nullTerminate)
+                    utf16String = utf16String.Concat(new[] { LLVM.ConstNull(LLVM.Int16TypeInContext(context)) });
+
+                stringConstantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), utf16String.ToArray());
+            }
+            else // utf8
+            {
+                stringConstantData = LLVM.ConstStringInContext(context, str, (uint)str.Length, !nullTerminate);
+            }
+
+            var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), ".str");
+
+            // Cast from i8-array to i8*
+            LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
+            var zero = LLVM.ConstInt(int32Type, 0, false);
+            stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] {zero, zero});
+
+            return stringConstantDataGlobal;
         }
 
         private void EmitI4(List<StackValue> stack, int operandIndex)
