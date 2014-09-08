@@ -599,7 +599,16 @@ namespace SharpLang.CompilerServices
                     if (!targetMethodReference.HasThis)
                         EnsureClassInitialized(functionContext, GetClass(targetMethod.DeclaringType));
 
-                    EmitCall(functionContext, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), targetMethod.GeneratedValue);
+                    var overrideMethod = targetMethod.GeneratedValue;
+
+                    // PInvoke: go through ResolveVirtualMethod
+                    if (targetMethodReference.Resolve().HasPInvokeInfo)
+                    {
+                        StackValue thisObject = null;
+                        overrideMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
+                    }
+
+                    EmitCall(functionContext, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), overrideMethod);
 
                     break;
                 }
@@ -2385,8 +2394,10 @@ namespace SharpLang.CompilerServices
             if (constrainedClass != null)
                 functionContext.ConstrainedClass = null;
 
+            var method = targetMethod.MethodReference.Resolve();
+
             ValueRef resolvedMethod;
-            if ((targetMethod.MethodReference.Resolve().Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
+            if ((method.Attributes & MethodAttributes.Virtual) == MethodAttributes.Virtual)
             {
                 // Build indices for GEP
                 var indices = new[]
@@ -2507,6 +2518,23 @@ namespace SharpLang.CompilerServices
                         resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
                     }
                 }
+            }
+            else if (method.HasPInvokeInfo)
+            {
+                // PInvoke behaves almost like a virtual call, but directly use given class vtable
+                var @class = GetClass(targetMethod.DeclaringType);
+
+                // Get method stored in vtable slot
+                var indices = new[]
+                {
+                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
+                    LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
+                };
+
+                var vtable = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
+                resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
             }
             else
             {

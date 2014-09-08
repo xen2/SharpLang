@@ -24,6 +24,8 @@ namespace SharpLang.CompilerServices
         private ValueRef isInstInterfaceFunction;
         private ValueRef throwExceptionFunction;
         private ValueRef sharpPersonalityFunction;
+        private ValueRef pinvokeLoadLibraryFunction;
+        private ValueRef pinvokeGetProcAddressFunction;
 
         // Builder for normal instructions
         private BuilderRef builder;
@@ -86,6 +88,8 @@ namespace SharpLang.CompilerServices
             isInstInterfaceFunction = ImportRuntimeFunction(module, "isInstInterface");
             throwExceptionFunction = ImportRuntimeFunction(module, "throwException");
             sharpPersonalityFunction = ImportRuntimeFunction(module, "sharpPersonality");
+            pinvokeLoadLibraryFunction = ImportRuntimeFunction(module, "PInvokeOpenLibrary");
+            pinvokeGetProcAddressFunction = ImportRuntimeFunction(module, "PInvokeGetProcAddress");
 
             builder = LLVM.CreateBuilderInContext(context);
             intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
@@ -269,8 +273,8 @@ namespace SharpLang.CompilerServices
 
             bool isInterface = typeDefinition.IsInterface;
 
-            // Process methods
-            foreach (var method in typeDefinition.Methods)
+            // Process methods, Virtual first, then non virtual, then static
+            foreach (var method in typeDefinition.Methods.OrderBy(x => x.IsVirtual ? 0 : (!x.IsStatic ? 1 : 2)))
             {
                 var methodReference = ResolveGenericMethod(@class.Type.TypeReference, method);
 
@@ -323,6 +327,12 @@ namespace SharpLang.CompilerServices
                         function.VirtualSlot = matchedMethod.VirtualSlot;
                         @class.VirtualTable[function.VirtualSlot] = function;
                     }
+                }
+                else
+                {
+                    // New slot
+                    function.VirtualSlot = @class.VirtualTable.Count;
+                    @class.VirtualTable.Add(function);
                 }
             }
         }

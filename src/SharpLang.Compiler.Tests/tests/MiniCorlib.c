@@ -72,6 +72,24 @@ void System_Void_System_NotSupportedException___ctor_System_String_(void* except
 {
 }
 
+// System.IntPtr::op_Explicit(void*)
+void* System_IntPtr_System_IntPtr__op_Explicit_System_Void__(void* p)
+{
+	return p;
+}
+
+// System.UIntPtr::op_Explicit(ulong)
+void* System_UIntPtr_System_UIntPtr__op_Explicit_System_UInt64_(uint64_t p)
+{
+	return (void*)p;
+}
+
+// int System.String.get_Length()
+int32_t System_Int32_System_String__get_Length__(String* str)
+{
+	return str->length;
+}
+
 // void System.Console.WriteLine(string)
 void System_Void_System_Console__WriteLine_System_String_(String* str)
 {
@@ -175,4 +193,10 @@ uint8_t System_Boolean_System_ValueType__Equals_System_Object_(struct Object* bo
 uint8_t System_Boolean_System_Int32__Equals_System_Object_(int32_t* i, void* obj)
 {
 	return *i == ((Int32*)obj)->value ? 1 : 0;
+}
+
+// int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
+int32_t System_Int32_System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
+{
+	return 0;
 }

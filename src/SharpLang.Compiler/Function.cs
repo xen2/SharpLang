@@ -39,7 +39,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The LLVM generated value.
         /// </value>
-        public ValueRef GeneratedValue { get; private set; }
+        public ValueRef GeneratedValue { get; internal set; }
 
         /// <summary>
         /// Gets the return type.

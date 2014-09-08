@@ -105,8 +105,8 @@ namespace SharpLang.CompilerServices
                 {
                     @class.BaseType = parentClass;
 
-                    // Add parent classes
-                    @class.VirtualTable.AddRange(parentClass.VirtualTable);
+                    // Add parent virtual methods
+                    @class.VirtualTable.AddRange(parentClass.VirtualTable.TakeWhile(x => x.MethodReference.Resolve().IsVirtual));
                     foreach (var @interface in parentClass.Interfaces)
                         @class.Interfaces.Add(@interface);
 
@@ -199,7 +199,7 @@ namespace SharpLang.CompilerServices
                 }
 
                 // Prepare class initializer
-                if (@class.StaticCtor != null)
+                if (@class.StaticCtor != null || typeDefinition.Methods.Any(x => x.HasPInvokeInfo))
                 {
                     //  void EnsureClassInitialized()
                     //  {
@@ -239,6 +239,37 @@ namespace SharpLang.CompilerServices
                         LLVM.BuildCall(builder2, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
 
                     // TODO: PInvoke initialization
+                    foreach (var pinvokeModule in typeDefinition.Methods.Where(x => x.HasPInvokeInfo).GroupBy(x => x.PInvokeInfo.Module))
+                    {
+                        var libraryName = CreateStringConstant(pinvokeModule.Key.Name, false, true);
+                        var pinvokeLoadLibraryResult = LLVM.BuildCall(builder2, pinvokeLoadLibraryFunction, new[] { libraryName }, string.Empty);
+
+                        foreach (var method in pinvokeModule)
+                        {
+                            var entryPoint = CreateStringConstant(method.PInvokeInfo.EntryPoint, false, true);
+                            var pinvokeGetProcAddressResult = LLVM.BuildCall(builder2, pinvokeGetProcAddressFunction,
+                                new[]
+                                {
+                                    pinvokeLoadLibraryResult,
+                                    entryPoint,
+                                }, string.Empty);
+
+                            // TODO: Resolve method using generic context.
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
+                                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.VirtualTable, false),   // Access vtable
+                                LLVM.ConstInt(int32Type, (ulong)GetFunction(method).VirtualSlot, false),    // Access specific vtable slot
+                            };
+
+                            // Get vtable slot and cast to proper type
+                            var vtableSlot = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                            pinvokeGetProcAddressResult = LLVM.BuildPointerCast(builder2, pinvokeGetProcAddressResult, LLVM.GetElementType(LLVM.TypeOf(vtableSlot)), string.Empty);
+
+                            // Store value
+                            LLVM.BuildStore(builder2, pinvokeGetProcAddressResult, vtableSlot);
+                        }
+                    } 
 
                     // Set flag so that it won't be initialized again
                     LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
@@ -333,7 +364,7 @@ namespace SharpLang.CompilerServices
                         throw new InvalidOperationException(string.Format("Could not find matching method for {0} in {1}", resolvedInterfaceMethod, @class));
 
                     var isInterface = resolvedFunction.DeclaringType.TypeReference.Resolve().IsInterface;
-                    if (!isInterface && resolvedFunction.VirtualSlot != -1)
+                    if (!isInterface && resolvedFunction.MethodReference.Resolve().IsVirtual && resolvedFunction.VirtualSlot != -1)
                     {
                         // We might have found a base virtual method matching this interface method.
                         // Let's get the actual method override for this virtual slot.
