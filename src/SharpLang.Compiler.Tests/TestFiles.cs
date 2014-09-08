@@ -30,6 +30,7 @@ namespace SharpLang.CompilerServices.Tests
                 GenerateInMemory = false,
                 GenerateExecutable = true,
                 TreatWarningsAsErrors = false,
+                CompilerOptions = "/unsafe",
                 OutputAssembly = outputAssembly,
             };
 
