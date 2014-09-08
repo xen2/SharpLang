@@ -2,7 +2,7 @@
 {
     public sealed partial class Compiler
     {
-        private bool charUsesUtf8 = true;
+        private bool charUsesUtf8 = false;
         private bool stringSliceable = true;
 
         /// <summary>

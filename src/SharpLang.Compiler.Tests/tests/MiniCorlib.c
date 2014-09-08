@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "../../SharpLang.Runtime/ConvertUTF.h"
+
 // Match runtime String struct layout
 typedef struct RuntimeTypeInfo
 {
@@ -25,7 +27,7 @@ typedef struct String
 {
 	struct Object base;
 	uint32_t length;
-	char* value;
+	uint16_t* value;
 } String;
 
 typedef struct Int32
@@ -96,7 +98,16 @@ void System_Void_System_Console__WriteLine_System_String_(String* str)
 	if (str == NULL)
 		printf("\n");
 	else
-		printf("%.*s\n", str->length, str->value);
+	{
+		//printf("%.*s\n", str->length, str->value);
+		uint32_t bufferLength = str->length * UNI_MAX_UTF8_BYTES_PER_CODE_POINT;
+		uint8_t* buffer = malloc(bufferLength);
+		uint16_t* src = str->value;
+		uint8_t* dest = buffer;
+		ConvertUTF16toUTF8(&src, src + str->length, &dest, dest + bufferLength, strictConversion);
+		printf("%.*s\n", dest - buffer, buffer);
+		free(buffer);
+	}
 }
 
 // void System.Console.WriteLine(int)
