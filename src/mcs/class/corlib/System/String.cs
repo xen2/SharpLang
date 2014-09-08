@@ -57,10 +57,10 @@ namespace System
 	[Serializable]
 	[ComVisible (true)]
 	[StructLayout (LayoutKind.Sequential)]
-	public sealed class String : IConvertible, ICloneable, IEnumerable, IComparable, IComparable<String>, IEquatable <String>, IEnumerable<char>
+	public unsafe sealed class String : IConvertible, ICloneable, IEnumerable, IComparable, IComparable<String>, IEquatable <String>, IEnumerable<char>
 	{
 		[NonSerialized] private int length;
-		[NonSerialized] private char start_char;
+		[NonSerialized] private char* start;
 
 		public static readonly String Empty = "";
 
@@ -79,43 +79,41 @@ namespace System
 			if (len != b.length)
 				return false;
 
-			fixed (char* s1 = &a.start_char, s2 = &b.start_char) {
-				char* s1_ptr = s1;
-				char* s2_ptr = s2;
+			char* s1_ptr = a.start;
+			char* s2_ptr = b.start;
 
-				while (len >= 8) {
-					if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0] ||
-						((int*)s1_ptr)[1] != ((int*)s2_ptr)[1] ||
-						((int*)s1_ptr)[2] != ((int*)s2_ptr)[2] ||
-						((int*)s1_ptr)[3] != ((int*)s2_ptr)[3])
-						return false;
+			while (len >= 8) {
+				if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0] ||
+					((int*)s1_ptr)[1] != ((int*)s2_ptr)[1] ||
+					((int*)s1_ptr)[2] != ((int*)s2_ptr)[2] ||
+					((int*)s1_ptr)[3] != ((int*)s2_ptr)[3])
+					return false;
 
-					s1_ptr += 8;
-					s2_ptr += 8;
-					len -= 8;
-				}
-
-				if (len >= 4) {
-					if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0] ||
-						((int*)s1_ptr)[1] != ((int*)s2_ptr)[1])
-						return false;
-
-					s1_ptr += 4;
-					s2_ptr += 4;
-					len -= 4;
-				}
-
-				if (len > 1) {
-					if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0])
-						return false;
-
-					s1_ptr += 2;
-					s2_ptr += 2;
-					len -= 2;
-				}
-
-				return len == 0 || *s1_ptr == *s2_ptr;
+				s1_ptr += 8;
+				s2_ptr += 8;
+				len -= 8;
 			}
+
+			if (len >= 4) {
+				if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0] ||
+					((int*)s1_ptr)[1] != ((int*)s2_ptr)[1])
+					return false;
+
+				s1_ptr += 4;
+				s2_ptr += 4;
+				len -= 4;
+			}
+
+			if (len > 1) {
+				if (((int*)s1_ptr)[0] != ((int*)s2_ptr)[0])
+					return false;
+
+				s1_ptr += 2;
+				s2_ptr += 2;
+				len -= 2;
+			}
+
+			return len == 0 || *s1_ptr == *s2_ptr;
 		}
 
 		public static bool operator == (String a, String b)
@@ -145,8 +143,7 @@ namespace System
 			get {
 				if (index < 0 || index >= length)
 					throw new IndexOutOfRangeException ();
-				fixed (char* c = &start_char)
-					return c[index];
+				return start[index];
 			}
 		}
 
@@ -942,27 +939,25 @@ namespace System
 						lowest = *any_ptr;
 				}
 
-				fixed (char* start = &start_char) {
-					char* ptr = start + startIndex;
-					char* end_ptr = ptr + count;
+				char* ptr = start + startIndex;
+				char* end_ptr = ptr + count;
 
-					while (ptr != end_ptr) {
-						if (*ptr > highest || *ptr < lowest) {
-							ptr++;
-							continue;
-						}
-
-						if (*ptr == *any)
-							return (int)(ptr - start);
-
-						any_ptr = any;
-						while (++any_ptr != end_any_ptr) {
-							if (*ptr == *any_ptr)
-								return (int)(ptr - start);
-						}
-
+				while (ptr != end_ptr) {
+					if (*ptr > highest || *ptr < lowest) {
 						ptr++;
+						continue;
 					}
+
+					if (*ptr == *any)
+						return (int)(ptr - start);
+
+					any_ptr = any;
+					while (++any_ptr != end_any_ptr) {
+						if (*ptr == *any_ptr)
+							return (int)(ptr - start);
+					}
+
+					ptr++;
 				}
 			}
 			return -1;
@@ -1223,40 +1218,38 @@ namespace System
 			// It helps JIT compiler to optimize comparison
 			int value_32 = (int)value;
 
-			fixed (char* start = &start_char) {
-				char* ptr = start + startIndex;
-				char* end_ptr = ptr + (count >> 3 << 3);
+			char* ptr = start + startIndex;
+			char* end_ptr = ptr + (count >> 3 << 3);
 
-				while (ptr != end_ptr) {
-					if (*ptr == value_32)
-						return (int)(ptr - start);
-					if (ptr[1] == value_32)
-						return (int)(ptr - start + 1);
-					if (ptr[2] == value_32)
-						return (int)(ptr - start + 2);
-					if (ptr[3] == value_32)
-						return (int)(ptr - start + 3);
-					if (ptr[4] == value_32)
-						return (int)(ptr - start + 4);
-					if (ptr[5] == value_32)
-						return (int)(ptr - start + 5);
-					if (ptr[6] == value_32)
-						return (int)(ptr - start + 6);
-					if (ptr[7] == value_32)
-						return (int)(ptr - start + 7);
+			while (ptr != end_ptr) {
+				if (*ptr == value_32)
+					return (int)(ptr - start);
+				if (ptr[1] == value_32)
+					return (int)(ptr - start + 1);
+				if (ptr[2] == value_32)
+					return (int)(ptr - start + 2);
+				if (ptr[3] == value_32)
+					return (int)(ptr - start + 3);
+				if (ptr[4] == value_32)
+					return (int)(ptr - start + 4);
+				if (ptr[5] == value_32)
+					return (int)(ptr - start + 5);
+				if (ptr[6] == value_32)
+					return (int)(ptr - start + 6);
+				if (ptr[7] == value_32)
+					return (int)(ptr - start + 7);
 
-					ptr += 8;
-				}
-
-				end_ptr += count & 0x07;
-				while (ptr != end_ptr) {
-					if (*ptr == value_32)
-						return (int)(ptr - start);
-
-					ptr++;
-				}
-				return -1;
+				ptr += 8;
 			}
+
+			end_ptr += count & 0x07;
+			while (ptr != end_ptr) {
+				if (*ptr == value_32)
+					return (int)(ptr - start);
+
+				ptr++;
+			}
+			return -1;
 		}
 
 		internal unsafe int IndexOfOrdinalIgnoreCase (char value, int startIndex, int count)
@@ -1265,11 +1258,9 @@ namespace System
 				return -1;
 			int end = startIndex + count;
 			char c = Char.ToUpperInvariant (value);
-			fixed (char* s = &start_char) {
-				for (int i = startIndex; i < end; i++)
-					if (Char.ToUpperInvariant (s [i]) == c)
-						return i;
-			}
+			for (int i = startIndex; i < end; i++)
+				if (Char.ToUpperInvariant (start [i]) == c)
+					return i;
 			return -1;
 		}
 
@@ -1417,40 +1408,38 @@ namespace System
 			// It helps JIT compiler to optimize comparison
 			int value_32 = (int)value;
 
-			fixed (char* start = &start_char) {
-				char* ptr = start + startIndex;
-				char* end_ptr = ptr - (count >> 3 << 3);
+			char* ptr = start + startIndex;
+			char* end_ptr = ptr - (count >> 3 << 3);
 
-				while (ptr != end_ptr) {
-					if (*ptr == value_32)
-						return (int)(ptr - start);
-					if (ptr[-1] == value_32)
-						return (int)(ptr - start) - 1;
-					if (ptr[-2] == value_32)
-						return (int)(ptr - start) - 2;
-					if (ptr[-3] == value_32)
-						return (int)(ptr - start) - 3;
-					if (ptr[-4] == value_32)
-						return (int)(ptr - start) - 4;
-					if (ptr[-5] == value_32)
-						return (int)(ptr - start) - 5;
-					if (ptr[-6] == value_32)
-						return (int)(ptr - start) - 6;
-					if (ptr[-7] == value_32)
-						return (int)(ptr - start) - 7;
+			while (ptr != end_ptr) {
+				if (*ptr == value_32)
+					return (int)(ptr - start);
+				if (ptr[-1] == value_32)
+					return (int)(ptr - start) - 1;
+				if (ptr[-2] == value_32)
+					return (int)(ptr - start) - 2;
+				if (ptr[-3] == value_32)
+					return (int)(ptr - start) - 3;
+				if (ptr[-4] == value_32)
+					return (int)(ptr - start) - 4;
+				if (ptr[-5] == value_32)
+					return (int)(ptr - start) - 5;
+				if (ptr[-6] == value_32)
+					return (int)(ptr - start) - 6;
+				if (ptr[-7] == value_32)
+					return (int)(ptr - start) - 7;
 
-					ptr -= 8;
-				}
-
-				end_ptr -= count & 0x07;
-				while (ptr != end_ptr) {
-					if (*ptr == value_32)
-						return (int)(ptr - start);
-
-					ptr--;
-				}
-				return -1;
+				ptr -= 8;
 			}
+
+			end_ptr -= count & 0x07;
+			while (ptr != end_ptr) {
+				if (*ptr == value_32)
+					return (int)(ptr - start);
+
+				ptr--;
+			}
+			return -1;
 		}
 
 		internal unsafe int LastIndexOfOrdinalIgnoreCase (char value, int startIndex, int count)
@@ -1459,11 +1448,9 @@ namespace System
 				return -1;
 			int end = startIndex - count;
 			char c = Char.ToUpperInvariant (value);
-			fixed (char* s = &start_char) {
-				for (int i = startIndex; i > end; i--)
-					if (Char.ToUpperInvariant (s [i]) == c)
-						return i;
-			}
+			for (int i = startIndex; i > end; i--)
+				if (Char.ToUpperInvariant (start [i]) == c)
+					return i;
 			return -1;
 		}
 
@@ -1735,7 +1722,8 @@ namespace System
 				start_pos = 0;
 
 			string tmp = InternalAllocateStr (length);
-			fixed (char* dest = tmp, src = &start_char) {
+			var src = start;
+            fixed (char* dest = tmp) {
 				if (start_pos != 0)
 					CharCopy (dest, src, start_pos);
 
@@ -1892,10 +1880,10 @@ namespace System
 				return Empty;
 
 			string tmp = InternalAllocateStr (length);
-			fixed (char* source = &start_char, dest = tmp) {
+			fixed (char* dest = tmp) {
 
 				char* destPtr = (char*)dest;
-				char* sourcePtr = (char*)source;
+				char* sourcePtr = (char*)start;
 
 				for (int n = 0; n < length; n++) {
 					*destPtr = Char.ToLowerInvariant (*sourcePtr);
@@ -1928,10 +1916,10 @@ namespace System
 				return Empty;
 
 			string tmp = InternalAllocateStr (length);
-			fixed (char* source = &start_char, dest = tmp) {
+			fixed (char* dest = tmp) {
 
 				char* destPtr = (char*)dest;
-				char* sourcePtr = (char*)source;
+				char* sourcePtr = (char*)start;
 
 				for (int n = 0; n < length; n++) {
 					*destPtr = Char.ToUpperInvariant (*sourcePtr);
@@ -2669,10 +2657,7 @@ namespace System
 			if ((uint) idx >= (uint) Length)
 				throw new ArgumentOutOfRangeException ("idx");
 
-			fixed (char * pStr = &start_char) 
-			{
-				pStr [idx] = val;
-			}
+			start [idx] = val;
 		}
 
 		internal unsafe void InternalSetLength (int newLength)
@@ -2683,13 +2668,11 @@ namespace System
 			// zero terminate, we can pass string objects directly via pinvoke
 			// we also zero the rest of the string, since the new GC needs to be
 			// able to handle the changing size (it will skip the 0 bytes).
-			fixed (char * pStr = &start_char) {
-				char *p = pStr + newLength;
-				char *end = pStr + length;
-				while (p < end) {
-					p [0] = '\0';
-					p++;
-				}
+			char *p = start + newLength;
+			char *end = start + length;
+			while (p < end) {
+				p [0] = '\0';
+				p++;
 			}
 			length = newLength;
 		}
