@@ -19,7 +19,7 @@ namespace SharpLang.CompilerServices
         static Driver()
         {
             LLC = "llc";
-            Clang = "clang";
+            Clang = "clang++";
         }
 
         /// <summary>
@@ -89,12 +89,10 @@ namespace SharpLang.CompilerServices
 
         const string ClangWrapper = "vs_clang.bat";
 
-        public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
-        {
-            var filesToLink = new List<string>();
-            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"));
-            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), @"..\..\SharpLang.Runtime\Runtime.bc"));
+        private static readonly bool UseMSVCToolChain = Environment.OSVersion.Platform == PlatformID.Win32NT && false;
 
+        public static void ExecuteClang(string args)
+        {
             var arguments = new StringBuilder();
 
             // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
@@ -108,28 +106,22 @@ namespace SharpLang.CompilerServices
                 UseShellExecute = false,
                 FileName = useMSVCToolchain ? ClangWrapper : Clang,
             };
-            
-            if (isWindowsOS)
+
+            if (UseMSVCToolChain)
             {
-                if (useMSVCToolchain)
-                {
-                    GenerateObjects(bitcodeFiles);
-                    filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
-
-                    CreateCompilerWrapper();
-                }
-                else
-                {
-                    filesToLink.AddRange(bitcodeFiles);
-
-                    // Add mingw32 paths
-                    arguments.AppendFormat("--target=i686-pc-mingw32");
-                    processStartInfo.EnvironmentVariables.Add("CPATH", @"..\..\..\..\deps\mingw32\i686-w64-mingw32\include");
-                    processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
-                }
+                // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
+                CreateCompilerWrapper();
+            }
+            else
+            {
+                // Add mingw32 paths
+                arguments.AppendFormat("--target=i686-w64-mingw32");
+                arguments.AppendFormat(" -I../../../../deps/llvm/build/include -I../../../../deps/llvm/include");
+                arguments.AppendFormat(" -I../../../../deps/mingw32/i686-w64-mingw32/include -I../../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS");
+                processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
             }
 
-            arguments.AppendFormat(" {0} -o {1}", string.Join(" ", filesToLink), outputFile);
+            arguments.Append(' ').Append(args);
 
             processStartInfo.Arguments = arguments.ToString();
 
@@ -140,6 +132,31 @@ namespace SharpLang.CompilerServices
             if (processLinker.ExitCode != 0)
                 throw new InvalidOperationException(string.Format("Error executing clang: {0}",
                     processLinkerOutput));
+        }
+
+        public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
+        {
+            var filesToLink = new List<string>();
+            ExecuteClang(string.Format("{0} -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"), Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc")));
+            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc"));
+            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), @"..\..\SharpLang.Runtime\Runtime.bc"));
+
+            var arguments = new StringBuilder();
+            
+            if (UseMSVCToolChain)
+            {
+                GenerateObjects(bitcodeFiles);
+                filesToLink.AddRange(bitcodeFiles.Select(x => Path.ChangeExtension(x, "obj")));
+            }
+            else
+            {
+                filesToLink.AddRange(bitcodeFiles);
+            }
+
+            //arguments.Append(" --driver-mode=g++ -std=c++11");
+            arguments.AppendFormat(" {0} -o {1}", string.Join(" ", filesToLink), outputFile);
+
+            ExecuteClang(arguments.ToString());
         }
 
         private static void CreateCompilerWrapper()
