@@ -1,8 +1,8 @@
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 #include <unwind.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "llvm/Support/Dwarf.h"
 
@@ -12,7 +12,7 @@ struct ExceptionType
 {
 	RuntimeTypeInfo* runtimeTypeInfo;
 	struct _Unwind_Exception unwindException;
-};
+} __attribute__((__aligned__));
 
 int64_t exceptionBaseFromUnwindOffset = ((uintptr_t) (((ExceptionType*) (NULL)))) - ((uintptr_t) &(((ExceptionType*) (NULL))->unwindException));
 
@@ -371,7 +371,7 @@ void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
 
 extern "C" void throwException(Object* obj)
 {
-	struct ExceptionType* ex = (struct ExceptionType*)malloc(sizeof(struct ExceptionType));
+	struct ExceptionType* ex = (struct ExceptionType*)_aligned_malloc(sizeof(struct ExceptionType), 16);
 	memset(ex, 0, sizeof(*ex));
 	ex->runtimeTypeInfo = obj->runtimeTypeInfo;
 	ex->unwindException.exception_class = 0; // TODO
