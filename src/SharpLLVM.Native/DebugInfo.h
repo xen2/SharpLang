@@ -194,5 +194,8 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateNameSpace(
 extern "C" void LLVMDICompositeTypeSetTypeArray(
 	LLVMValueRef CompositeType,
 	LLVMValueRef TypeArray);
+extern "C" void LLVMAddModuleFlag(LLVMModuleRef M,
+	const char *name,
+	uint32_t value);
 
 #endif

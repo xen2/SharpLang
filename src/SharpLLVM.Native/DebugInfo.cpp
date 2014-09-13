@@ -399,3 +399,9 @@ extern "C" void LLVMDICompositeTypeSetTypeArray(
 {
 	unwrapDI<DICompositeType>(CompositeType).setArrays(unwrapDI<DIArray>(TypeArray));
 }
+
+extern "C" void LLVMAddModuleFlag(LLVMModuleRef M,
+	const char *name,
+	uint32_t value) {
+	unwrap(M)->addModuleFlag(Module::Warning, name, value);
+}
