@@ -8950,6 +8950,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DICompositeTypeSetTypeArray(void * jarg1, voi
 }
 
 
+SWIGEXPORT void SWIGSTDCALL CSharp_AddModuleFlag(void * jarg1, char * jarg2, unsigned int jarg3) {
+  LLVMModuleRef arg1 ;
+  char *arg2 = (char *) 0 ;
+  uint32_t arg3 ;
+  
+  arg1 = (LLVMModuleRef)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  LLVMAddModuleFlag(arg1,(char const *)arg2,arg3);
+}
+
+
 #ifdef __cplusplus
 }
 #endif

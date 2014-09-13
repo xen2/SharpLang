@@ -3246,6 +3246,10 @@ public class LLVM {
     LLVMPINVOKE.DICompositeTypeSetTypeArray(CompositeType.Value, TypeArray.Value);
   }
 
+  public unsafe static void AddModuleFlag(ModuleRef M, string name, uint value) {
+    LLVMPINVOKE.AddModuleFlag(M.Value, name, value);
+  }
+
 }
 
 }
