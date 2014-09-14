@@ -233,8 +233,11 @@ namespace SharpLang.CompilerServices
                 var argType = function.ParameterTypes[index];
                 var arg = LLVM.GetParam(functionGlobal, (uint)index);
 
+                var parameterIndex = index - (functionContext.Method.HasThis ? 1 : 0);
+                var parameterName = parameterIndex == -1 ? "this" : method.Parameters[parameterIndex].Name;
+
                 // Copy argument on stack
-                var storage = LLVM.BuildAlloca(builder, argType.DefaultType, "arg" + index.ToString());
+                var storage = LLVM.BuildAlloca(builder, argType.DefaultType, parameterName);
                 LLVM.BuildStore(builder, arg, storage);
 
                 args.Add(new StackValue(argType.StackType, argType, storage));
