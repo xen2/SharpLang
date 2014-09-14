@@ -115,7 +115,7 @@ namespace SharpLang.CompilerServices
             else
             {
                 // Add mingw32 paths
-                arguments.AppendFormat("--target=i686-w64-mingw32");
+                arguments.AppendFormat("--target=i686-w64-mingw32 -g");
                 arguments.AppendFormat(" -I../../../../deps/llvm/build/include -I../../../../deps/llvm/include");
                 arguments.AppendFormat(" -I../../../../deps/mingw32/i686-w64-mingw32/include -I../../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS");
                 processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
