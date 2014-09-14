@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -17,11 +18,14 @@ namespace SharpLang.CompilerServices
 
         public MethodReference MethodReference { get; set; }
         public MethodDefinition Method { get; set; }
+        public MethodBody Body { get; set; }
         public Function Function { get; set; }
         public BasicBlockRef BasicBlock { get; set; }
         public List<StackValue> Stack { get; set; }
         public List<StackValue> Locals { get; set; }
         public List<StackValue> Arguments { get; set; }
+
+        public List<Scope> Scopes { get; set; } 
 
         public BasicBlockRef[] BasicBlocks { get; set; }
         public StackValue[][] ForwardStacks { get; set; }
@@ -43,5 +47,8 @@ namespace SharpLang.CompilerServices
         public ValueRef ExceptionHandlerSelectorSlot { get; set; }
         public BasicBlockRef ResumeExceptionBlock { get; set; }
         public BasicBlockRef LandingPadBlock { get; set; }
+
+        // Debug info
+        public ValueRef DebugFile { get; set; }
     }
 }

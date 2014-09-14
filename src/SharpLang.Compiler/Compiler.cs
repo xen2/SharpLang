@@ -53,6 +53,9 @@ namespace SharpLang.CompilerServices
         // Builder that is used for PHI nodes
         private BuilderRef builder2;
 
+        private DIBuilderRef debugBuilder;
+        private TargetDataRef targetData;
+
         private AssemblyDefinition assembly;
         private AssemblyDefinition corlib;
 
@@ -83,6 +86,9 @@ namespace SharpLang.CompilerServices
             // TODO: Choose appropriate triple depending on target
             LLVM.SetTarget(module, "i686-pc-mingw32");
 
+            var dataLayout = LLVM.GetDataLayout(runtimeModule);
+            targetData = LLVM.CreateTargetData(dataLayout);
+
             allocObjectFunction = ImportRuntimeFunction(module, "allocObject");
             resolveInterfaceCallFunction = ImportRuntimeFunction(module, "resolveInterfaceCall");
             isInstInterfaceFunction = ImportRuntimeFunction(module, "isInstInterface");
@@ -98,6 +104,8 @@ namespace SharpLang.CompilerServices
             intPtrSize = 4;            // Or 8?
             nativeIntType = int32Type; // Or int64Type?
             builder2 = LLVM.CreateBuilderInContext(context);
+
+            debugBuilder = LLVM.DIBuilderCreate(module);
 
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
             int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName));
@@ -180,6 +188,13 @@ namespace SharpLang.CompilerServices
 
         public ModuleRef GenerateModule()
         {
+            LLVM.DIBuilderCreateCompileUnit(debugBuilder,
+                0x4, // DW_LANG_C_plus_plus
+                "file", "directory", "SharpLang", false, string.Empty, 1, string.Empty);
+
+            LLVM.AddModuleFlag(module, "Dwarf Version", 4);
+            LLVM.AddModuleFlag(module, "Debug Info Version", 1);
+
             // Process methods
             while (classesToGenerate.Count > 0)
             {
@@ -215,6 +230,8 @@ namespace SharpLang.CompilerServices
                 LLVM.BuildRet(builder, LLVM.ConstInt(int32Type, 0, false));
 	        }
 
+            LLVM.DIBuilderFinalize(debugBuilder);
+            LLVM.DIBuilderDispose(debugBuilder);
             LLVM.DisposeBuilder(builder);
 
             // Verify module

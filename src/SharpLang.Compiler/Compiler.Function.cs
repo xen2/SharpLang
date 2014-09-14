@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -197,6 +198,8 @@ namespace SharpLang.CompilerServices
             if (body == null)
                 return;
 
+            functionContext.Body = body;
+
             var numParams = method.Parameters.Count;
 
             // Create stack, locals and args
@@ -209,6 +212,7 @@ namespace SharpLang.CompilerServices
             functionContext.Stack = stack;
             functionContext.Locals = locals;
             functionContext.Arguments = args;
+            functionContext.Scopes = new List<Scope>();
             functionContext.ExceptionHandlers = exceptionHandlers;
             functionContext.ActiveTryHandlers = activeTryHandlers;
 
@@ -344,6 +348,8 @@ namespace SharpLang.CompilerServices
                 }
             }
 
+            PrepareScopes(functionContext);
+
             foreach (var instruction in body.Instructions)
             {
                 try
@@ -354,6 +360,8 @@ namespace SharpLang.CompilerServices
 
                     if (branchTargets[instruction.Offset])
                         UpdateBranching(functionContext, instruction);
+
+                    ProcessScopes(functionContext, instruction);
 
                     // Reset states
                     functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
