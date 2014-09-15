@@ -74,6 +74,8 @@ namespace SharpLang.CompilerServices.Tests
                 typeof(Exception),
                 typeof(OverflowException),
                 typeof(InvalidCastException),
+                typeof(NotSupportedException),
+                typeof(Array),
             });
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
