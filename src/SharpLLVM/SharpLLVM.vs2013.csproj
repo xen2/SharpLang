@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SharpLLVM</RootNamespace>
+    <AssemblyName>SharpLLVM</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Debug_x32\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Debug\SharpLLVM\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Debug_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Debug\SharpLLVM\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Release_x32\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Release\SharpLLVM\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Release_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Release\SharpLLVM\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Additional\Intrinsics.cs" />
+    <None Include="Additional\Intrinsics.tt" />
+    <Compile Include="Additional\TypeRef.cs" />
+    <Compile Include="Additional\ValueRef.cs" />
+    <Compile Include="AtomicOrdering.cs" />
+    <Compile Include="AtomicRMWBinOp.cs" />
+    <Compile Include="Attribute.cs" />
+    <Compile Include="BasicBlockRef.cs" />
+    <None Include="Bindings\LLVM.i" />
+    <None Include="Bindings\LLVMCommon.i" />
+    <Compile Include="BuilderRef.cs" />
+    <Compile Include="ByteOrdering.cs" />
+    <Compile Include="CallConv.cs" />
+    <Compile Include="CodeGenFileType.cs" />
+    <Compile Include="CodeGenOptLevel.cs" />
+    <Compile Include="CodeModel.cs" />
+    <Compile Include="ContextRef.cs" />
+    <Compile Include="DIBuilderRef.cs" />
+    <Compile Include="DLLStorageClass.cs" />
+    <Compile Include="DiagnosticInfoRef.cs" />
+    <Compile Include="DiagnosticSeverity.cs" />
+    <Compile Include="IntPredicate.cs" />
+    <Compile Include="LLVM.cs" />
+    <Compile Include="LLVMPINVOKE.cs" />
+    <Compile Include="LandingPadClauseTy.cs" />
+    <Compile Include="Linkage.cs" />
+    <Compile Include="MemoryBufferRef.cs" />
+    <Compile Include="MemoryTargetRef.cs" />
+    <Compile Include="ModuleProviderRef.cs" />
+    <Compile Include="ModuleRef.cs" />
+    <Compile Include="Opcode.cs" />
+    <Compile Include="PassManagerBuilderRef.cs" />
+    <Compile Include="PassManagerRef.cs" />
+    <Compile Include="PassRegistryRef.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RealPredicate.cs" />
+    <Compile Include="RelocMode.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_q_const__char__void.cs" />
+    <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
+    <Compile Include="SWIGTYPE_p_unsigned_long_long.cs" />
+    <Compile Include="TargetDataRef.cs" />
+    <Compile Include="TargetLibraryInfoRef.cs" />
+    <Compile Include="TargetMachineRef.cs" />
+    <Compile Include="TargetRef.cs" />
+    <Compile Include="ThreadLocalMode.cs" />
+    <Compile Include="TypeKind.cs" />
+    <Compile Include="TypeRef.cs" />
+    <Compile Include="UseRef.cs" />
+    <Compile Include="ValueRef.cs" />
+    <Compile Include="VerifierFailureAction.cs" />
+    <Compile Include="Visibility.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+    <Compile Include="obj\x64\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\x64\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\x64\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+    <Compile Include="obj\x86\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\x86\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\x86\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
