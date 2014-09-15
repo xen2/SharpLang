@@ -28,10 +28,9 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-/build/vs2012
-/build/vs2013
+/build/vs2012/gen
+/build/vs2013/gen
 /build/gmake
 /deps/mingw32
 /tools/swig
 /src/SharpLang.Compiler.Tests/tests/output/
-/src/**/*.csproj

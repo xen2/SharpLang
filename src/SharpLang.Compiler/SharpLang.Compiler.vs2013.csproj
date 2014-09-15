@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AEEE66AF-9AD2-2705-0333-2258EF351287}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SharpLang.Compiler</RootNamespace>
+    <AssemblyName>SharpLang.Compiler</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Debug_x32\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Debug\SharpLang.Compiler\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Debug_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Debug\SharpLang.Compiler\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Release_x32\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Release\SharpLang.Compiler\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Release_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Release\SharpLang.Compiler\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Mono.Cecil" />
+    <Reference Include="Mono.Cecil.Pdb" />
+    <Reference Include="Mono.Cecil.Rocks" />
+    <Reference Include="Mono.Options" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cecil\CecilExtensions.TypeMap.cs" />
+    <Compile Include="Cecil\CecilExtensions.cs" />
+    <Compile Include="Cecil\CustomAssemblyResolver.cs" />
+    <Compile Include="Cecil\ResolveGenericsVisitor.cs" />
+    <Compile Include="Cecil\TypeReferenceVisitor.cs" />
+    <Compile Include="Class.cs" />
+    <Compile Include="Compiler.Class.cs" />
+    <Compile Include="Compiler.Delegate.cs" />
+    <Compile Include="Compiler.Emit.cs" />
+    <Compile Include="Compiler.Function.cs" />
+    <Compile Include="Compiler.Options.cs" />
+    <Compile Include="Compiler.Scope.cs" />
+    <Compile Include="Compiler.StackConversion.cs" />
+    <Compile Include="Compiler.Type.cs" />
+    <Compile Include="Compiler.cs" />
+    <Compile Include="Driver.cs" />
+    <Compile Include="ExceptionHandlerInfo.cs" />
+    <Compile Include="Field.cs" />
+    <Compile Include="FlowingNextInstructionMode.cs" />
+    <Compile Include="Function.cs" />
+    <Compile Include="FunctionCompilerContext.cs" />
+    <Compile Include="FunctionSignature.cs" />
+    <Compile Include="InstructionFlags.cs" />
+    <Compile Include="ObjectFields.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeInline\Runtime.cs" />
+    <Compile Include="RuntimeInline\RuntimePINVOKE.cs" />
+    <Compile Include="RuntimeTypeInfoFields.cs" />
+    <Compile Include="Scope.cs" />
+    <Compile Include="StackExtensions.cs" />
+    <Compile Include="StackValue.cs" />
+    <Compile Include="StackValueType.cs" />
+    <Compile Include="Toolchains\MSVCToolchain.cs" />
+    <Compile Include="Type.cs" />
+    <Compile Include="TypeLoadState.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\Release\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharpLLVM\SharpLLVM.vs2013.csproj">
+      <Project>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</Project>
+      <Name>SharpLLVM</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
