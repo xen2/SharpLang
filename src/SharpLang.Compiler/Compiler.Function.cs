@@ -107,9 +107,8 @@ namespace SharpLang.CompilerServices
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             var resolvedMethod = method.Resolve();
-            var hasDefinition = resolvedMethod != null
-                && (resolvedMethod.HasBody
-                    || ((resolvedMethod.ImplAttributes & (MethodImplAttributes.InternalCall | MethodImplAttributes.Runtime)) != 0));
+            bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & (MethodImplAttributes.InternalCall | MethodImplAttributes.Runtime)) != 0);
+            var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal);
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
@@ -119,7 +118,7 @@ namespace SharpLang.CompilerServices
 
             if (hasDefinition)
             {
-                if (isExternal)
+                if (isExternal || isInternal)
                 {
                     // External weak linkage
                     LLVM.SetLinkage(functionGlobal, Linkage.ExternalWeakLinkage);
