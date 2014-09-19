@@ -772,8 +772,12 @@ namespace SharpLang.CompilerServices
                     ValueRef castedPointerObject;
 
                     // Prepare basic blocks (for PHI instruction)
-                    var typeNotMatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
-                    var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                    var typeNotMatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_not_match", instruction.Offset));
+                    var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check_done", instruction.Offset));
+
+                    LLVM.MoveBasicBlockAfter(typeNotMatchBlock, LLVM.GetInsertBlock(builder));
+                    LLVM.MoveBasicBlockAfter(typeCheckDoneBlock, typeNotMatchBlock);
+
                     BasicBlockRef typeCheckBlock;
 
                     if (@class.Type.TypeReference.Resolve().IsInterface)
@@ -803,7 +807,8 @@ namespace SharpLang.CompilerServices
                             LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypeCount, false),         // Super type count
                         };
 
-                        typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+                        typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check", instruction.Offset));
+                        LLVM.MoveBasicBlockAfter(typeCheckBlock, typeNotMatchBlock);
 
                         var superTypeCount = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
                         superTypeCount = LLVM.BuildLoad(builder, superTypeCount, string.Empty);
@@ -858,6 +863,7 @@ namespace SharpLang.CompilerServices
 
                     // Start new typeCheckDoneBlock
                     LLVM.PositionBuilderAtEnd(builder, typeCheckDoneBlock);
+                    functionContext.BasicBlock = typeCheckDoneBlock;
 
                     // Put back with appropriate type at end of stack
                     ValueRef mergedVariable;
