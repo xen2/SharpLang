@@ -759,6 +759,23 @@ namespace SharpLang.CompilerServices
 
                     var obj = stack.Pop();
 
+                    var currentBlock = LLVM.GetInsertBlock(builder);
+
+                    // Prepare basic blocks (for PHI instruction)
+                    var typeIsNotNullBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_not_null", instruction.Offset));
+                    var typeNotMatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_not_match", instruction.Offset));
+                    var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check_done", instruction.Offset));
+
+                    LLVM.MoveBasicBlockAfter(typeIsNotNullBlock, currentBlock);
+                    LLVM.MoveBasicBlockAfter(typeNotMatchBlock, typeIsNotNullBlock);
+                    LLVM.MoveBasicBlockAfter(typeCheckDoneBlock, typeNotMatchBlock);
+
+
+                    var isObjNonNull = LLVM.BuildICmp(builder, IntPredicate.IntNE, obj.Value, LLVM.ConstPointerNull(LLVM.TypeOf(obj.Value)), string.Empty);
+                    LLVM.BuildCondBr(builder, isObjNonNull, typeIsNotNullBlock, typeNotMatchBlock);
+
+                    LLVM.PositionBuilderAtEnd(builder, typeIsNotNullBlock);
+
                     // Get RTTI pointer
                     var indices = new[]
                     {
@@ -772,13 +789,6 @@ namespace SharpLang.CompilerServices
                     // castedPointerObject is valid only from typeCheckBlock
                     var castedPointerType = LLVM.PointerType(@class.Type.ObjectType, 0);
                     ValueRef castedPointerObject;
-
-                    // Prepare basic blocks (for PHI instruction)
-                    var typeNotMatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_not_match", instruction.Offset));
-                    var typeCheckDoneBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check_done", instruction.Offset));
-
-                    LLVM.MoveBasicBlockAfter(typeNotMatchBlock, LLVM.GetInsertBlock(builder));
-                    LLVM.MoveBasicBlockAfter(typeCheckDoneBlock, typeNotMatchBlock);
 
                     BasicBlockRef typeCheckBlock;
 
@@ -810,7 +820,7 @@ namespace SharpLang.CompilerServices
                         };
 
                         typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check", instruction.Offset));
-                        LLVM.MoveBasicBlockAfter(typeCheckBlock, typeNotMatchBlock);
+                        LLVM.MoveBasicBlockBefore(typeCheckBlock, typeNotMatchBlock);
 
                         var superTypeCount = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
                         superTypeCount = LLVM.BuildLoad(builder, superTypeCount, string.Empty);
@@ -877,8 +887,8 @@ namespace SharpLang.CompilerServices
                     {
                         mergedVariable = LLVM.BuildPhi(builder, castedPointerType, string.Empty);
                         LLVM.AddIncoming(mergedVariable,
-                            new[] {castedPointerObject, LLVM.ConstPointerNull(castedPointerType)},
-                            new[] {typeCheckBlock, typeNotMatchBlock});
+                            new[] { castedPointerObject, LLVM.ConstPointerNull(castedPointerType) },
+                            new[] { typeCheckBlock, typeNotMatchBlock });
                     }
                     stack.Add(new StackValue(obj.StackType, @class.Type, mergedVariable));
 
