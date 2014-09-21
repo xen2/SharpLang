@@ -137,8 +137,6 @@ namespace SharpLang.CompilerServices
         public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
         {
             var filesToLink = new List<string>();
-            ExecuteClang(string.Format("{0} -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"), Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc")));
-            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc"));
             filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), @"..\..\SharpLang.Runtime\Runtime.bc"));
 
             var arguments = new StringBuilder();
