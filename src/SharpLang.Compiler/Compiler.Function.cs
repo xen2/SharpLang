@@ -2196,6 +2196,8 @@ namespace SharpLang.CompilerServices
 
                                 var nextBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
                                 var overflowBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "overflow");
+                                LLVM.MoveBasicBlockAfter(overflowBlock, LLVM.GetInsertBlock(builder));
+                                LLVM.MoveBasicBlockAfter(nextBlock, overflowBlock);
 
                                 LLVM.BuildCondBr(builder, hasOverflow, overflowBlock, nextBlock);
 
@@ -2396,6 +2398,9 @@ namespace SharpLang.CompilerServices
 
                 var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
                 var nextBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+
+                LLVM.MoveBasicBlockAfter(typeNeedInitBlock, LLVM.GetInsertBlock(builder));
+                LLVM.MoveBasicBlockAfter(nextBlock, typeNeedInitBlock);
 
                 LLVM.BuildCondBr(builder, classInitialized, nextBlock, typeNeedInitBlock);
 

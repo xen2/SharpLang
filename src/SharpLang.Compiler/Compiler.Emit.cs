@@ -771,6 +771,7 @@ namespace SharpLang.CompilerServices
             if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
             {
                 var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
+                LLVM.MoveBasicBlockAfter(nextBlock, LLVM.GetInsertBlock(builder));
                 callResult = LLVM.BuildInvoke(builder, function, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
                 LLVM.PositionBuilderAtEnd(builder, nextBlock);
                 functionContext.BasicBlock = nextBlock;
