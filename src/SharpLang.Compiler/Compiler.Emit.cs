@@ -616,16 +616,7 @@ namespace SharpLang.CompilerServices
             var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
 
             // Compute array size (object size * num elements)
-            // TODO: 64bit support
-            ValueRef numElementsCasted;
-            if (numElements.StackType == StackValueType.NativeInt)
-            {
-                numElementsCasted = LLVM.BuildPtrToInt(builder, numElements.Value, int32Type, string.Empty);
-            }
-            else
-            {
-                numElementsCasted = LLVM.BuildIntCast(builder, numElements.Value, int32Type, string.Empty);
-            }
+            var numElementsCasted = ConvertToNativeInt(numElements);
             var arraySize = LLVM.BuildMul(builder, typeSize, numElementsCasted, string.Empty);
 
             // Invoke malloc
@@ -682,13 +673,15 @@ namespace SharpLang.CompilerServices
             var index = stack.Pop();
             var array = stack.Pop();
 
+            var indexValue = ConvertToNativeInt(index);
+
             var refType = GetType(elementType.TypeReference.MakeByReferenceType());
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
 
             // Find pointer of element at requested index
-            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { indexValue }, string.Empty);
 
             // Convert
             arrayElementPointer = ConvertFromLocalToStack(refType, arrayElementPointer);
@@ -702,6 +695,8 @@ namespace SharpLang.CompilerServices
             var index = stack.Pop();
             var array = stack.Pop();
 
+            var indexValue = ConvertToNativeInt(index);
+
             // Get element type
             var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
 
@@ -709,7 +704,7 @@ namespace SharpLang.CompilerServices
             var arrayFirstElement = LoadArrayDataPointer(array);
 
             // Find pointer of element at requested index
-            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { indexValue }, string.Empty);
 
             // Load element
             var element = LLVM.BuildLoad(builder, arrayElementPointer, string.Empty);
@@ -727,6 +722,8 @@ namespace SharpLang.CompilerServices
             var index = stack.Pop();
             var array = stack.Pop();
 
+            var indexValue = ConvertToNativeInt(index);
+
             // Get element type
             var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
 
@@ -734,7 +731,7 @@ namespace SharpLang.CompilerServices
             var arrayFirstElement = LoadArrayDataPointer(array);
 
             // Find pointer of element at requested index
-            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { index.Value }, string.Empty);
+            var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { indexValue }, string.Empty);
 
             // Convert
             var convertedElement = ConvertFromStackToLocal(elementType, value);
@@ -784,6 +781,20 @@ namespace SharpLang.CompilerServices
             }
 
             return callResult;
+        }
+
+        private ValueRef ConvertToNativeInt(StackValue index)
+        {
+            // NatveInt: cast to integer
+            if (index.StackType == StackValueType.NativeInt)
+                return LLVM.BuildPtrToInt(builder, index.Value, nativeIntType, string.Empty);
+
+            // Integer of different size: cast
+            if (LLVM.GetIntTypeWidth(LLVM.TypeOf(index.Value)) != intPtrSize * 8)
+                return LLVM.BuildIntCast(builder, index.Value, nativeIntType, string.Empty);
+
+            // Otherwise, return as is
+            return index.Value;
         }
     }
 }
