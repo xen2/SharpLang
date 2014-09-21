@@ -29,7 +29,6 @@ namespace SharpLang.CompilerServices.Cecil
         public static string MangledName(this MethodReference self)
         {
             var builder = new StringBuilder();
-            builder.Append(self.ReturnType.MangledName()).Append(" ");
             if (self.DeclaringType != null)
                 builder.Append(self.DeclaringType.MangledName()).Append("::");
             builder.Append(self.Name);
