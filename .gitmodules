@@ -4,3 +4,6 @@
 [submodule "deps/clang"]
 	path = deps/clang
 	url = http://llvm.org/git/clang.git
+[submodule "deps/compiler-rt"]
+	path = deps/compiler-rt
+	url = http://llvm.org/git/compiler-rt.git
