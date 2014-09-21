@@ -19,7 +19,7 @@ namespace SharpLang.CompilerServices
             // Same type, return as is
             if ((stack.StackType == StackValueType.Value
                     || stack.StackType == StackValueType.NativeInt)
-                && localType.DefaultType == stack.Type.DefaultType)
+                && localType.DefaultType == LLVM.TypeOf(stack.Value))
             {
                 return stackValue;
             }
