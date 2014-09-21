@@ -257,7 +257,9 @@ namespace SharpLang.CompilerServices
                 stringConstantData = LLVM.ConstStringInContext(context, str, (uint)str.Length, !nullTerminate);
             }
 
+            // Create string constant with private linkage
             var stringConstantDataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstantData), ".str");
+            LLVM.SetLinkage(stringConstantDataGlobal, Linkage.PrivateLinkage);
 
             // Cast from i8-array to i8*
             LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
