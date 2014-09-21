@@ -39,62 +39,62 @@ typedef struct Int32
 
 // Empty functions that pretend to set culture on thread UI so that real .NET execute them.
 // No need to worry anymore about culture when using Console.WriteLine.
-void System_Void_System_Globalization_CultureInfo___ctor_System_String_(void* a, void* b)
+void System_Globalization_CultureInfo___ctor_System_String_(void* a, void* b)
 {
 	// Ignored
 }
 
-void System_Void_System_Threading_Thread__set_CurrentCulture_System_Globalization_CultureInfo_(void* a, void* b)
+void System_Threading_Thread__set_CurrentCulture_System_Globalization_CultureInfo_(void* a, void* b)
 {
 	// Ignored
 }
 
-void* System_Threading_Thread_System_Threading_Thread__get_CurrentThread__()
+void* System_Threading_Thread__get_CurrentThread__()
 {
 	// Ignored
 	return NULL;
 }
 
 // System.Exception..ctor()
-void System_Void_System_Exception___ctor__(void* exception)
+void System_Exception___ctor__(void* exception)
 {
 }
 
 // System.InvalidCastException..ctor()
-void System_Void_System_InvalidCastException___ctor__(void* exception)
+void System_InvalidCastException___ctor__(void* exception)
 {
 }
 
 // System.OverflowException..ctor()
-void System_Void_System_OverflowException___ctor__(void* exception)
+void System_OverflowException___ctor__(void* exception)
 {
 }
 
 // System.NotSupportedException..ctor(string)
-void System_Void_System_NotSupportedException___ctor_System_String_(void* exception, String* str)
+void System_NotSupportedException___ctor_System_String_(void* exception, String* str)
 {
 }
 
 // System.IntPtr::op_Explicit(void*)
-void* System_IntPtr_System_IntPtr__op_Explicit_System_Void__(void* p)
+void* System_IntPtr__op_Explicit_System_Void__(void* p)
 {
 	return p;
 }
 
 // System.UIntPtr::op_Explicit(ulong)
-void* System_UIntPtr_System_UIntPtr__op_Explicit_System_UInt64_(uint64_t p)
+void* System_UIntPtr__op_Explicit_System_UInt64_(uint64_t p)
 {
 	return (void*)p;
 }
 
 // int System.String.get_Length()
-int32_t System_Int32_System_String__get_Length__(String* str)
+int32_t System_String__get_Length__(String* str)
 {
 	return str->length;
 }
 
 // void System.Console.WriteLine(string)
-void System_Void_System_Console__WriteLine_System_String_(String* str)
+void System_Console__WriteLine_System_String_(String* str)
 {
 	if (str == NULL)
 		printf("\n");
@@ -112,37 +112,37 @@ void System_Void_System_Console__WriteLine_System_String_(String* str)
 }
 
 // void System.Console.WriteLine(int)
-void System_Void_System_Console__WriteLine_System_Int32_(int32_t i)
+void System_Console__WriteLine_System_Int32_(int32_t i)
 {
 	printf("%i\n", i);
 }
 
 // void System.Console.WriteLine(uint)
-void System_Void_System_Console__WriteLine_System_UInt32_(uint32_t i)
+void System_Console__WriteLine_System_UInt32_(uint32_t i)
 {
 	printf("%u\n", i);
 }
 
 // void System.Console.WriteLine(int)
-void System_Void_System_Console__WriteLine_System_Int64_(int64_t i)
+void System_Console__WriteLine_System_Int64_(int64_t i)
 {
 	printf("%lli\n", i);
 }
 
 // void System.Console.WriteLine(uint)
-void System_Void_System_Console__WriteLine_System_UInt64_(uint64_t i)
+void System_Console__WriteLine_System_UInt64_(uint64_t i)
 {
 	printf("%llu\n", i);
 }
 
 // void System.Console.WriteLine(uint)
-void System_Void_System_Console__WriteLine_System_Boolean_(uint8_t b)
+void System_Console__WriteLine_System_Boolean_(uint8_t b)
 {
 	printf("%s\n", b != 0 ? "True" : "False");
 }
 
 // void System.Console.WriteLine(float)
-void System_Void_System_Console__WriteLine_System_Single_(float f)
+void System_Console__WriteLine_System_Single_(float f)
 {
 	// Not exact, but works for current test
 	char buffer[64];
@@ -162,7 +162,7 @@ void System_Void_System_Console__WriteLine_System_Single_(float f)
 }
 
 // void System.Console.WriteLine(double)
-void System_Void_System_Console__WriteLine_System_Double_(double f)
+void System_Console__WriteLine_System_Double_(double f)
 {
 	// Not exact, but works for current test
 	char buffer[64];
@@ -182,12 +182,12 @@ void System_Void_System_Console__WriteLine_System_Double_(double f)
 }
 
 // void System.Object..ctor()
-void System_Void_System_Object___ctor__(void* obj)
+void System_Object___ctor__(void* obj)
 {
 }
 
 // void System.ValueType.Equals(object)
-uint8_t System_Boolean_System_ValueType__Equals_System_Object_(struct Object* boxedValue, struct Object* obj)
+uint8_t System_ValueType__Equals_System_Object_(struct Object* boxedValue, struct Object* obj)
 {
 	if (obj == 0)
 		return 0;
@@ -202,13 +202,13 @@ uint8_t System_Boolean_System_ValueType__Equals_System_Object_(struct Object* bo
 }
 
 // bool System.Int32.Equals(object)
-uint8_t System_Boolean_System_Int32__Equals_System_Object_(int32_t* i, void* obj)
+uint8_t System_Int32__Equals_System_Object_(int32_t* i, void* obj)
 {
 	return *i == ((Int32*)obj)->value ? 1 : 0;
 }
 
 // int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
-int32_t System_Int32_System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
+int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
 {
 	return 0;
 }
