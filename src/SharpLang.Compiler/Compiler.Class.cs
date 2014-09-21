@@ -187,7 +187,8 @@ namespace SharpLang.CompilerServices
                         : intPtrType;
     
                     // Build vtable
-                    var vtableType = LLVM.StructTypeInContext(context, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
+                    var vtableType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
+                    LLVM.StructSetBody(vtableType, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
         
                     foreach (var @interface in typeDefinition.Interfaces)
                     {
@@ -207,11 +208,13 @@ namespace SharpLang.CompilerServices
                         @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
                         fieldTypes.Add(fieldType.DefaultType);
                     }
-    
-                    var staticFieldsType = LLVM.StructTypeInContext(context, fieldTypes.ToArray(), false);
+
+                    var staticFieldsType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".static");
+                    LLVM.StructSetBody(staticFieldsType, fieldTypes.ToArray(), false);
                     fieldTypes.Clear(); // Reused for non-static fields after
 
-                    var runtimeTypeInfoType = LLVM.StructTypeInContext(context, new []
+                    var runtimeTypeInfoType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".rtti_type");
+                    LLVM.StructSetBody(runtimeTypeInfoType, new[]
                     {
                         parentRuntimeTypeInfoType,
                         int32Type,
