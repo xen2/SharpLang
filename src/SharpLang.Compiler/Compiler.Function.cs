@@ -1703,8 +1703,8 @@ namespace SharpLang.CompilerServices
 
                     switch (opcode)
                     {
-                        case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize; break;
-                        case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize; break;
+                        case Code.Conv_U: isSigned = false; intermediateWidth = (uint)intPtrSize * 8; break;
+                        case Code.Conv_I: isSigned = true; intermediateWidth = (uint)intPtrSize * 8; break;
                         case Code.Conv_U1: isSigned = false; intermediateWidth = 8; break;
                         case Code.Conv_I1: isSigned = true; intermediateWidth = 8; break;
                         case Code.Conv_U2: isSigned = false; intermediateWidth = 16; break;
