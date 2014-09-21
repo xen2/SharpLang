@@ -113,6 +113,47 @@ namespace SharpLang.CompilerServices
                     @class.Depth = parentClass.Depth + 1;
                 }
 
+                // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
+                // In that case, do not process fields.
+                if (processFields && LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
+                {
+                    // Build actual type data (fields)
+                    // Add fields and vtable slots from parent class
+                    if (parentClass != null && type.StackType == StackValueType.Object)
+                    {
+                        fieldTypes.Add(parentClass.Type.DataType);
+                    }
+
+                    // Special cases: Array
+                    if (typeReference.MetadataType == MetadataType.Array)
+                    {
+                        // String: length (native int) + first element pointer
+                        var arrayType = (ArrayType)typeReference;
+                        var elementType = CreateType(arrayType.ElementType);
+                        fieldTypes.Add(intPtrType);
+                        fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
+                    }
+                    else
+                    {
+                        foreach (var field in typeDefinition.Fields)
+                        {
+                            if (field.IsStatic)
+                                continue;
+
+                            var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+
+                            // Value type: Generate class to be able to compute size
+                            if (fieldType.StackType == StackValueType.Value)
+                                GetClass(fieldType);
+
+                            @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                            fieldTypes.Add(fieldType.DefaultType);
+                        }
+                    }
+
+                    LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
+                }
+
                 if (typeReference is ArrayType)
                 {
                     var elementType = ResolveGenericsVisitor.Process(typeReference, ((ArrayType)typeReference).ElementType);
@@ -269,7 +310,7 @@ namespace SharpLang.CompilerServices
                             // Store value
                             LLVM.BuildStore(builder2, pinvokeGetProcAddressResult, vtableSlot);
                         }
-                    } 
+                    }
 
                     // Set flag so that it won't be initialized again
                     LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
@@ -279,42 +320,6 @@ namespace SharpLang.CompilerServices
                     LLVM.BuildRetVoid(builder2);
 
                     @class.InitializeType = initTypeFunction;
-                }
-
-                // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
-                // In that case, do not process fields.
-                if (processFields && LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
-                {
-                    // Build actual type data (fields)
-                    // Add fields and vtable slots from parent class
-                    if (parentClass != null && type.StackType == StackValueType.Object)
-                    {
-                        fieldTypes.Add(parentClass.Type.DataType);
-                    }
-
-                    // Special cases: Array
-                    if (typeReference.MetadataType == MetadataType.Array)
-                    {
-                        // String: length (native int) + first element pointer
-                        var arrayType = (ArrayType)typeReference;
-                        var elementType = CreateType(arrayType.ElementType);
-                        fieldTypes.Add(intPtrType);
-                        fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
-                    }
-                    else
-                    {
-                        foreach (var field in typeDefinition.Fields)
-                        {
-                            if (field.IsStatic)
-                                continue;
-
-                            var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
-                            @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
-                            fieldTypes.Add(fieldType.DefaultType);
-                        }
-                    }
-
-                    LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
                 }
             }
 
