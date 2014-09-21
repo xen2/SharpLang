@@ -248,8 +248,8 @@ namespace SharpLang.CompilerServices
                     //      {
                     //          if (!classInitialized)
                     //          {
-                    //              InitializeClass();
                     //              classInitialized = true;
+                    //              InitializeClass();
                     //          }
                     //      }
                     //  }
@@ -274,6 +274,9 @@ namespace SharpLang.CompilerServices
 
                     // Initialize class (first time)
                     LLVM.PositionBuilderAtEnd(builder2, typeNeedInitBlock);
+
+                    // Set flag so that it won't be initialized again
+                    LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
 
                     // Static ctor
                     if (@class.StaticCtor != null)
@@ -312,8 +315,6 @@ namespace SharpLang.CompilerServices
                         }
                     }
 
-                    // Set flag so that it won't be initialized again
-                    LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
                     LLVM.BuildBr(builder2, nextBlock);
 
                     LLVM.PositionBuilderAtEnd(builder2, nextBlock);
