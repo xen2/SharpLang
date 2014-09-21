@@ -612,7 +612,8 @@ namespace SharpLang.CompilerServices
                     var overrideMethod = targetMethod.GeneratedValue;
 
                     // PInvoke: go through ResolveVirtualMethod
-                    if (targetMethodReference.Resolve().HasPInvokeInfo)
+                    var resolvedMethod = targetMethodReference.Resolve();
+                    if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
                     {
                         StackValue thisObject = null;
                         overrideMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
