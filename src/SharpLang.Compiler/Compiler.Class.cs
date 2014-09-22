@@ -187,8 +187,8 @@ namespace SharpLang.CompilerServices
                         : intPtrType;
     
                     // Build vtable
-                    var vtableType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
-                    LLVM.StructSetBody(vtableType, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
+                    @class.VTableType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
+                    LLVM.StructSetBody(@class.VTableType, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
         
                     foreach (var @interface in typeDefinition.Interfaces)
                     {
@@ -223,7 +223,7 @@ namespace SharpLang.CompilerServices
                         LLVM.PointerType(intPtrType, 0),
                         LLVM.Int1TypeInContext(context),
                         LLVM.ArrayType(intPtrType, InterfaceMethodTableSize),
-                        vtableType,
+                        @class.VTableType,
                         staticFieldsType,
                     }, false);
 
@@ -470,7 +470,7 @@ namespace SharpLang.CompilerServices
             var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
 
             // Build VTable
-            var vtableConstant = LLVM.ConstStructInContext(context, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray(), false);
+            var vtableConstant = LLVM.ConstNamedStruct(@class.VTableType, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray());
 
             // Build RTTI
             var runtimeTypeInfoGlobal = @class.GeneratedRuntimeTypeInfoGlobal;
