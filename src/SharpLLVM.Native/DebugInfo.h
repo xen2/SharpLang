@@ -68,6 +68,21 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateStructType(
 	unsigned RunTimeLang,
 	LLVMValueRef VTableHolder,
 	const char *UniqueId);
+extern "C" LLVMValueRef LLVMDIBuilderCreateClassType(
+	LLVMDIBuilderRef Builder,
+	LLVMValueRef Scope,
+	const char* Name,
+	LLVMValueRef File,
+	unsigned LineNumber,
+	uint64_t SizeInBits,
+	uint64_t AlignInBits,
+	uint64_t OffsetInBits,
+	unsigned Flags,
+	LLVMValueRef DerivedFrom,
+	LLVMValueRef Elements,
+	LLVMValueRef VTableHolder,
+	LLVMValueRef TemplateParms,
+	const char *UniqueId);
 extern "C" LLVMValueRef LLVMDIBuilderCreateMemberType(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Scope,

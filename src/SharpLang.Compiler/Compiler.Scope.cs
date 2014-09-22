@@ -14,6 +14,39 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
+        private Dictionary<string, ValueRef> debugNamespaces = new Dictionary<string, ValueRef>();
+        private Dictionary<Class, ValueRef> debugClasses = new Dictionary<Class, ValueRef>();
+
+        private ValueRef GetOrCreateDebugNamespace(string @namespace)
+        {
+            if (@namespace == string.Empty)
+                return ValueRef.Empty;
+
+            // Already done before?
+            ValueRef debugNamespace;
+            if (debugNamespaces.TryGetValue(@namespace, out debugNamespace))
+                return debugNamespace;
+
+            var debugParentNamespace = ValueRef.Empty;
+
+            // Split between parent and current node (last element of the path)
+            var splitIndex = @namespace.LastIndexOf('.');
+            if (splitIndex != -1)
+            {
+                // Resolve parent namespace (recursively)
+                var parentNamespace = @namespace.Substring(0, splitIndex);
+                debugParentNamespace = GetOrCreateDebugNamespace(parentNamespace);
+            }
+
+            // Create debug namespace for this node
+            debugNamespace = LLVM.DIBuilderCreateNameSpace(debugBuilder, debugParentNamespace, @namespace.Substring(splitIndex + 1), ValueRef.Empty, 0);
+
+            // Register
+            debugNamespaces.Add(@namespace, debugNamespace);
+
+            return debugNamespace;
+        }
+
         private void PrepareScopes(FunctionCompilerContext functionContext)
         {
             var function = functionContext.Function;
@@ -24,22 +57,37 @@ namespace SharpLang.CompilerServices
             // Note: could be null
             var newScope = new Scope(body.Scope);
             functionContext.Scopes.Add(newScope);
-            
+
+            // Find class scope
+            var debugClass = GetOrCreateDebugClass(GetClass(function.DeclaringType));
+
             // Update debug information
+            int line = 0;
+
             var startSequencePoint = body.Instructions[0].SequencePoint;
+            string url;
             if (startSequencePoint != null)
             {
-                var url = startSequencePoint.Document.Url;
-                var line = startSequencePoint.StartLine;
-                functionContext.DebugFile = LLVM.DIBuilderCreateFile(debugBuilder, Path.GetFileName(url), Path.GetDirectoryName(url));
-                var functionParameterTypes = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
-                var functionType = LLVM.DIBuilderCreateSubroutineType(debugBuilder, functionContext.DebugFile, functionParameterTypes);
-                newScope.GeneratedScope = LLVM.DIBuilderCreateFunction(debugBuilder, functionContext.DebugFile, methodReference.FullName, LLVM.GetValueName(function.GeneratedValue),
-                    functionContext.DebugFile, (uint)line, functionType,
-                    false, true, (uint)line, 0, false, function.GeneratedValue, ValueRef.Empty, ValueRef.Empty);
+                url = startSequencePoint.Document.Url;
+                line = startSequencePoint.StartLine;
+            }
+            else
+            {
+                url = assembly.MainModule.FullyQualifiedName;
             }
 
-            SetupDebugLocation(body.Instructions[0], newScope);
+            functionContext.DebugFile = LLVM.DIBuilderCreateFile(debugBuilder, Path.GetFileName(url), Path.GetDirectoryName(url));
+            var functionParameterTypes = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
+            var functionType = LLVM.DIBuilderCreateSubroutineType(debugBuilder, functionContext.DebugFile, functionParameterTypes);
+
+            // Replace . with :: so that gdb properly understands it is namespaces.
+            var methodDebugName = string.Format("{0}::{1}", methodReference.DeclaringType.FullName.Replace(".", "::"), methodReference.Name);
+
+            newScope.GeneratedScope = LLVM.DIBuilderCreateFunction(debugBuilder, debugClass, methodReference.Name, methodDebugName,
+                functionContext.DebugFile, (uint)line, functionType,
+                false, true, (uint)line, 0, false, function.GeneratedValue, ValueRef.Empty, ValueRef.Empty);
+
+            SetupDebugLocation(body.Instructions[0].SequencePoint, newScope);
             if (body.Scope != null)
             {
                 EnterScope(functionContext, newScope);
@@ -51,8 +99,10 @@ namespace SharpLang.CompilerServices
                 {
                     var variable = functionContext.Locals[index];
                     var variableName = body.Variables[index].Name;
+                    if (string.IsNullOrEmpty(variableName))
+                        variableName = "var" + index;
 
-                    EmitDebugVariable(functionContext, body.Instructions[0], newScope.GeneratedScope, variable, DW_TAG.auto_variable, variableName);
+                    EmitDebugVariable(functionContext, body.Instructions[0].SequencePoint, newScope.GeneratedScope, variable, DW_TAG.auto_variable, variableName);
                 }
             }
 
@@ -63,8 +113,31 @@ namespace SharpLang.CompilerServices
 
                 var argName = LLVM.GetValueName(arg.Value);
 
-                EmitDebugVariable(functionContext, body.Instructions[0], newScope.GeneratedScope, arg, DW_TAG.arg_variable, argName, index + 1);
+                EmitDebugVariable(functionContext, body.Instructions[0].SequencePoint, newScope.GeneratedScope, arg, DW_TAG.arg_variable, argName, index + 1);
             }
+        }
+
+        private ValueRef GetOrCreateDebugClass(Class @class)
+        {
+            ValueRef debugClass;
+            if (debugClasses.TryGetValue(@class, out debugClass))
+                return debugClass;
+
+            // Find namespace scope
+            var debugNamespace = GetOrCreateDebugNamespace(@class.Type.TypeReference.Namespace);
+
+            var parentClass = @class.BaseType;
+            var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : ValueRef.Empty;
+
+            // Create debug version of the class
+            var size = LLVM.ABISizeOfType(targetData, @class.Type.DefaultType) * 8;
+            var align = LLVM.ABIAlignmentOfType(targetData, @class.Type.DefaultType) * 8;
+            var emptyArray = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
+
+            debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, @class.Type.TypeReference.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, @class.Type.TypeReference.FullName);
+            
+            debugClasses.Add(@class, debugClass);
+            return debugClass;
         }
 
         private void ProcessScopes(FunctionCompilerContext functionContext, Instruction instruction)
@@ -104,24 +177,21 @@ namespace SharpLang.CompilerServices
                 }
             }
 
-            SetupDebugLocation(instruction, lastScope);
+            if (instruction.SequencePoint != null)
+                SetupDebugLocation(instruction.SequencePoint, lastScope);
         }
 
-        private void SetupDebugLocation(Instruction instruction, Scope lastScope)
+        private void SetupDebugLocation(SequencePoint sequencePoint, Scope lastScope)
         {
-            var sequencePoint = instruction.SequencePoint;
-            if (sequencePoint != null)
-            {
-                var line = sequencePoint.StartLine;
-                var column = sequencePoint.StartColumn;
-                var debugLoc = LLVM.MDNodeInContext(context,
-                    new[]
-                    {
-                        LLVM.ConstInt(int32Type, (ulong) line, true), LLVM.ConstInt(int32Type, (ulong) column, true),
-                        lastScope.GeneratedScope, ValueRef.Empty
-                    });
-                LLVM.SetCurrentDebugLocation(builder, debugLoc);
-            }
+            var line = sequencePoint != null ? sequencePoint.StartLine : 0;
+            var column = sequencePoint != null ? sequencePoint.StartColumn : 0;
+            var debugLoc = LLVM.MDNodeInContext(context,
+                new[]
+                {
+                    LLVM.ConstInt(int32Type, (ulong) line, true), LLVM.ConstInt(int32Type, (ulong) column, true),
+                    lastScope.GeneratedScope, ValueRef.Empty
+                });
+            LLVM.SetCurrentDebugLocation(builder, debugLoc);
         }
 
         private Scope CreateScope(FunctionCompilerContext functionContext, Scope parentScope, Mono.Cecil.Cil.Scope cecilScope)
@@ -142,7 +212,7 @@ namespace SharpLang.CompilerServices
         {
             if (newScope.Source != null)
             {
-                SetupDebugLocation(newScope.Source.Start, newScope);
+                SetupDebugLocation(newScope.Source.Start.SequencePoint, newScope);
                 if (newScope.Source.HasVariables)
                 {
                     foreach (var local in newScope.Source.Variables)
@@ -150,15 +220,14 @@ namespace SharpLang.CompilerServices
                         var variable = functionContext.Locals[local.Index];
                         var variableName = local.Name;
 
-                        EmitDebugVariable(functionContext, newScope.Source.Start, newScope.GeneratedScope, variable, DW_TAG.auto_variable, variableName);
+                        EmitDebugVariable(functionContext, newScope.Source.Start.SequencePoint, newScope.GeneratedScope, variable, DW_TAG.auto_variable, variableName);
                     }
                 }
             }
         }
 
-        private void EmitDebugVariable(FunctionCompilerContext functionContext, Instruction start, ValueRef generatedScope, StackValue variable, DW_TAG dwarfType, string variableName, int argIndex = 0)
+        private void EmitDebugVariable(FunctionCompilerContext functionContext, SequencePoint sequencePoint, ValueRef generatedScope, StackValue variable, DW_TAG dwarfType, string variableName, int argIndex = 0)
         {
-            var sequencePoint = start.SequencePoint;
             var debugType = CreateDebugType(functionContext, variable.Type);
 
             // TODO: Detect where variable is actually declared (first use of local?)
@@ -188,8 +257,32 @@ namespace SharpLang.CompilerServices
 
         private ValueRef CreateDebugType(FunctionCompilerContext functionContext, Type type)
         {
-            var size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
-            var align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
+            ulong size = 0;
+            ulong align = 0;
+
+            switch (type.TypeReference.MetadataType)
+            {
+                case MetadataType.Boolean:
+                case MetadataType.SByte:
+                case MetadataType.Byte:
+                case MetadataType.Int16:
+                case MetadataType.UInt16:
+                case MetadataType.Int32:
+                case MetadataType.UInt32:
+                case MetadataType.Int64:
+                case MetadataType.UInt64:
+                case MetadataType.Single:
+                case MetadataType.Double:
+                case MetadataType.Char:
+                case MetadataType.IntPtr:
+                case MetadataType.UIntPtr:
+                case MetadataType.Pointer:
+                    size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
+                    align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
+                    break;
+                default:
+                    break;
+            }
 
             switch (type.TypeReference.MetadataType)
             {

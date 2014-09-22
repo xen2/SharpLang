@@ -138,6 +138,38 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateStructType(
 		));
 }
 
+extern "C" LLVMValueRef LLVMDIBuilderCreateClassType(
+	LLVMDIBuilderRef Builder,
+	LLVMValueRef Scope,
+	const char* Name,
+	LLVMValueRef File,
+	unsigned LineNumber,
+	uint64_t SizeInBits,
+	uint64_t AlignInBits,
+	uint64_t OffsetInBits,
+	unsigned Flags,
+	LLVMValueRef DerivedFrom,
+	LLVMValueRef Elements,
+	LLVMValueRef VTableHolder,
+	LLVMValueRef TemplateParms,
+	const char *UniqueId) {
+	return wrap(Builder->createClassType(
+		unwrapDI<DIDescriptor>(Scope),
+		Name,
+		unwrapDI<DIFile>(File),
+		LineNumber,
+		SizeInBits,
+		AlignInBits,
+		OffsetInBits,
+		Flags,
+		unwrapDI<DIType>(DerivedFrom),
+		unwrapDI<DIArray>(Elements),
+		unwrapDI<DIType>(VTableHolder),
+		unwrapDI<MDNode*>(TemplateParms),
+		UniqueId
+		));
+}
+
 extern "C" LLVMValueRef LLVMDIBuilderCreateMemberType(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Scope,
