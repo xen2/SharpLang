@@ -2121,6 +2121,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateStructType")]
   public static extern System.IntPtr DIBuilderCreateStructType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, uint jarg8, System.IntPtr jarg9, System.IntPtr jarg10, uint jarg11, System.IntPtr jarg12, string jarg13);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateClassType")]
+  public static extern System.IntPtr DIBuilderCreateClassType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, ulong jarg8, uint jarg9, System.IntPtr jarg10, System.IntPtr jarg11, System.IntPtr jarg12, System.IntPtr jarg13, string jarg14);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateMemberType")]
   public static extern System.IntPtr DIBuilderCreateMemberType(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5, ulong jarg6, ulong jarg7, ulong jarg8, uint jarg9, System.IntPtr jarg10);
 
