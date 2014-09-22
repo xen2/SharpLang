@@ -108,6 +108,30 @@ extern "C" LLVMValueRef LLVMDIBuilderCreatePointerType(
 		unwrapDI<DIType>(PointeeTy), SizeInBits, AlignInBits, Name));
 }
 
+extern "C" LLVMValueRef LLVMDIBuilderCreateForwardDecl(
+	LLVMDIBuilderRef Builder,
+	unsigned Tag,
+	const char* Name,
+	LLVMValueRef Scope,
+	LLVMValueRef File,
+	unsigned Line,
+	unsigned RuntimeLang,
+	uint64_t SizeInBits,
+	uint64_t AlignInBits,
+	const char* UniqueId) {
+	return wrap(Builder->createForwardDecl(
+		Tag,
+		Name,
+		unwrapDI<DIDescriptor>(Scope),
+		unwrapDI<DIFile>(File),
+		Line,
+		RuntimeLang,
+		SizeInBits,
+		AlignInBits,
+		UniqueId
+		));
+}
+
 extern "C" LLVMValueRef LLVMDIBuilderCreateStructType(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Scope,

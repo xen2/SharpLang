@@ -54,6 +54,17 @@ extern "C" LLVMValueRef LLVMDIBuilderCreatePointerType(
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	const char* Name);
+extern "C" LLVMValueRef LLVMDIBuilderCreateForwardDecl(
+	LLVMDIBuilderRef Builder,
+	unsigned Tag,
+	const char* Name,
+	LLVMValueRef Scope,
+	LLVMValueRef File,
+	unsigned Line,
+	unsigned RuntimeLang,
+	uint64_t SizeInBits,
+	uint64_t AlignInBits,
+	const char* UniqueId);
 extern "C" LLVMValueRef LLVMDIBuilderCreateStructType(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Scope,
