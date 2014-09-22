@@ -3141,6 +3141,11 @@ public class LLVM {
     return ret;
   }
 
+  public unsafe static ValueRef DIBuilderCreateForwardDecl(DIBuilderRef Builder, uint Tag, string Name, ValueRef Scope, ValueRef File, uint Line, uint RuntimeLang, ulong SizeInBits, ulong AlignInBits, string UniqueId) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateForwardDecl(Builder.Value, Tag, Name, Scope.Value, File.Value, Line, RuntimeLang, SizeInBits, AlignInBits, UniqueId));
+    return ret;
+  }
+
   public unsafe static ValueRef DIBuilderCreateStructType(DIBuilderRef Builder, ValueRef Scope, string Name, ValueRef File, uint LineNumber, ulong SizeInBits, ulong AlignInBits, uint Flags, ValueRef DerivedFrom, ValueRef Elements, uint RunTimeLang, ValueRef VTableHolder, string UniqueId) {
     ValueRef ret = new ValueRef(LLVMPINVOKE.DIBuilderCreateStructType(Builder.Value, Scope.Value, Name, File.Value, LineNumber, SizeInBits, AlignInBits, Flags, DerivedFrom.Value, Elements.Value, RunTimeLang, VTableHolder.Value, UniqueId));
     return ret;

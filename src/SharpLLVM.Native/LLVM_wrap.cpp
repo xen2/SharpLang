@@ -8512,6 +8512,36 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreatePointerType(void * jarg1, vo
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateForwardDecl(void * jarg1, unsigned int jarg2, char * jarg3, void * jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned long long jarg8, unsigned long long jarg9, char * jarg10) {
+  void * jresult ;
+  LLVMDIBuilderRef arg1 ;
+  unsigned int arg2 ;
+  char *arg3 = (char *) 0 ;
+  LLVMValueRef arg4 ;
+  LLVMValueRef arg5 ;
+  unsigned int arg6 ;
+  unsigned int arg7 ;
+  uint64_t arg8 ;
+  uint64_t arg9 ;
+  char *arg10 = (char *) 0 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMDIBuilderRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (LLVMValueRef)jarg4; 
+  arg5 = (LLVMValueRef)jarg5; 
+  arg6 = (unsigned int)jarg6; 
+  arg7 = (unsigned int)jarg7; 
+  arg8 = (uint64_t)jarg8; 
+  arg9 = (uint64_t)jarg9; 
+  arg10 = (char *)jarg10; 
+  result = LLVMDIBuilderCreateForwardDecl(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9,(char const *)arg10);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateStructType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, unsigned int jarg8, void * jarg9, void * jarg10, unsigned int jarg11, void * jarg12, char * jarg13) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
