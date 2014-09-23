@@ -16,7 +16,8 @@ namespace SharpLang.CompilerServices
     {
         private Dictionary<string, ValueRef> debugNamespaces = new Dictionary<string, ValueRef>();
         private Dictionary<Class, ValueRef> debugClasses = new Dictionary<Class, ValueRef>();
-
+        private Dictionary<Type, ValueRef> debugTypeCache = new Dictionary<Type, ValueRef>();
+        
         private ValueRef GetOrCreateDebugNamespace(string @namespace)
         {
             if (@namespace == string.Empty)
@@ -123,20 +124,61 @@ namespace SharpLang.CompilerServices
             if (debugClasses.TryGetValue(@class, out debugClass))
                 return debugClass;
 
-            // Find namespace scope
-            var debugNamespace = GetOrCreateDebugNamespace(@class.Type.TypeReference.Namespace);
+            var type = @class.Type;
 
-            var parentClass = @class.BaseType;
-            var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : ValueRef.Empty;
+            // Find namespace scope
+            var debugNamespace = GetOrCreateDebugNamespace(type.TypeReference.Namespace);
 
             // Create debug version of the class
-            var size = LLVM.ABISizeOfType(targetData, @class.Type.DefaultType) * 8;
-            var align = LLVM.ABIAlignmentOfType(targetData, @class.Type.DefaultType) * 8;
+            var structType = type.StackType == StackValueType.Object ? type.ObjectType : type.ValueType;
+            var size = LLVM.ABISizeOfType(targetData, structType) * 8;
+            var align = LLVM.ABIAlignmentOfType(targetData, structType) * 8;
             var emptyArray = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
 
-            debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, @class.Type.TypeReference.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, @class.Type.TypeReference.FullName);
-            
+            bool isLocal = type.IsLocal;
+            if (isLocal)
+            {
+                var parentClass = @class.BaseType;
+                var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : ValueRef.Empty;
+                debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, type.TypeReference.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, type.TypeReference.FullName);
+            }
+            else
+            {
+                debugClass = LLVM.DIBuilderCreateForwardDecl(debugBuilder, (int)DW_TAG.class_type, type.TypeReference.Name, debugNamespace, ValueRef.Empty, 0, 0, size, align, type.TypeReference.FullName);
+            }
+
             debugClasses.Add(@class, debugClass);
+
+            if (isLocal)
+            {
+                // Complete members
+                var memberTypes = new List<ValueRef>(@class.Fields.Count);
+
+                foreach (var field in type.Class.Fields)
+                {
+                    if (field.Key.IsStatic)
+                        continue;
+
+                    var fieldType = CreateDebugType(field.Value.Type);
+                    var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
+                    var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
+                    var fieldOffset = LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex)*8;
+
+                    // Add object header (VTable ptr, etc...)
+                    if (type.StackType == StackValueType.Object)
+                        fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectType, (int)ObjectFields.Data) * 8;
+
+                    memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, ValueRef.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
+                }
+
+                // Update members (mutation)
+                // TODO: LLVM.DICompositeTypeSetTypeArray should take a ref, not out.
+                LLVM.DICompositeTypeSetTypeArray(out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
+
+                // debugClass being changed, set it again (old value is not valid anymore)
+                debugClasses[@class] = debugClass;
+            }
+
             return debugClass;
         }
 
@@ -228,7 +270,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitDebugVariable(FunctionCompilerContext functionContext, SequencePoint sequencePoint, ValueRef generatedScope, StackValue variable, DW_TAG dwarfType, string variableName, int argIndex = 0)
         {
-            var debugType = CreateDebugType(functionContext, variable.Type);
+            var debugType = CreateDebugType(variable.Type);
 
             // TODO: Detect where variable is actually declared (first use of local?)
             var debugLocalVariable = LLVM.DIBuilderCreateLocalVariable(debugBuilder,
@@ -243,6 +285,9 @@ namespace SharpLang.CompilerServices
 
         public enum DW_TAG
         {
+            class_type = 0x02,
+            structure_type = 0x13,
+
             auto_variable = 0x100,
             arg_variable = 0x101,
         }
@@ -255,8 +300,12 @@ namespace SharpLang.CompilerServices
             Unsigned = 0x07,
         }
 
-        private ValueRef CreateDebugType(FunctionCompilerContext functionContext, Type type)
+        private ValueRef CreateDebugType(Type type)
         {
+            ValueRef result;
+            if (debugTypeCache.TryGetValue(type, out result))
+                return result;
+
             ulong size = 0;
             ulong align = 0;
 
@@ -316,10 +365,38 @@ namespace SharpLang.CompilerServices
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "UIntPtr", size, align, (uint)DW_ATE.Unsigned);
                 case MetadataType.Pointer:
                     var elementType = GetType(((PointerType)type.TypeReference).ElementType);
-                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(functionContext, elementType), size, align, type.TypeReference.Name);
+                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
+                case MetadataType.Array:
+                case MetadataType.String:
+                case MetadataType.TypedByReference:
+                case MetadataType.GenericInstance:
+                case MetadataType.ValueType:
+                case MetadataType.Class:
+                case MetadataType.Object:
+                {
+                    var debugClass = GetOrCreateDebugClass(GetClass(type));
+
+                    var typeDefinition = GetMethodTypeDefinition(type.TypeReference);
+
+                    // Try again from cache, it might have been done through recursion already
+                    if (debugTypeCache.TryGetValue(type, out result))
+                        return result;
+
+                    if (!typeDefinition.IsValueType)
+                    {
+                        size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
+                        align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
+
+                        debugClass = LLVM.DIBuilderCreatePointerType(debugBuilder, debugClass, size, align, string.Empty);
+                    }
+
+                    debugTypeCache.Add(type, debugClass);
+
+                    return debugClass;
+                }
                 default:
                     // For now, let's have a fallback since lot of types are not supported yet.
-                    return CreateDebugType(functionContext, intPtr);
+                    return CreateDebugType(intPtr);
             }
         }
     }

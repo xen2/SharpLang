@@ -9009,10 +9009,10 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateNameSpace(void * jarg1, void
 
 
 SWIGEXPORT void SWIGSTDCALL CSharp_DICompositeTypeSetTypeArray(void * jarg1, void * jarg2) {
-  LLVMValueRef arg1 ;
+  LLVMValueRef *arg1 = (LLVMValueRef *) 0 ;
   LLVMValueRef arg2 ;
   
-  arg1 = (LLVMValueRef)jarg1; 
+  arg1 = (LLVMValueRef *)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
   LLVMDICompositeTypeSetTypeArray(arg1,arg2);
 }

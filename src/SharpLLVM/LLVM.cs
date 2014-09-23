@@ -3252,8 +3252,8 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static void DICompositeTypeSetTypeArray(ValueRef CompositeType, ValueRef TypeArray) {
-    LLVMPINVOKE.DICompositeTypeSetTypeArray(CompositeType.Value, TypeArray.Value);
+  public unsafe static void DICompositeTypeSetTypeArray(out ValueRef CompositeType, ValueRef TypeArray) {
+    LLVMPINVOKE.DICompositeTypeSetTypeArray(out CompositeType.Value, TypeArray.Value);
   }
 
   public unsafe static void AddModuleFlag(ModuleRef M, string name, uint value) {
