@@ -450,10 +450,12 @@ extern "C" LLVMValueRef LLVMDIBuilderCreateNameSpace(
 }
 
 extern "C" void LLVMDICompositeTypeSetTypeArray(
-	LLVMValueRef CompositeType,
+	LLVMValueRef* CompositeType,
 	LLVMValueRef TypeArray)
 {
-	unwrapDI<DICompositeType>(CompositeType).setArrays(unwrapDI<DIArray>(TypeArray));
+	auto compositeType = unwrapDI<DICompositeType>(*CompositeType);
+	compositeType.setArrays(unwrapDI<DIArray>(TypeArray));
+	*CompositeType = wrap(compositeType);
 }
 
 extern "C" void LLVMAddModuleFlag(LLVMModuleRef M,

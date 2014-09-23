@@ -2182,7 +2182,7 @@ class LLVMPINVOKE {
   public static extern System.IntPtr DIBuilderCreateNameSpace(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DICompositeTypeSetTypeArray")]
-  public static extern void DICompositeTypeSetTypeArray(System.IntPtr jarg1, System.IntPtr jarg2);
+  public static extern void DICompositeTypeSetTypeArray(out System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddModuleFlag")]
   public static extern void AddModuleFlag(System.IntPtr jarg1, string jarg2, uint jarg3);
