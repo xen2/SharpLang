@@ -28,7 +28,15 @@ typedef struct String
 {
 	Object base;
 	uint32_t length;
-	char* value;
+	const char16_t* value;
 } String;
+
+template <class T>
+struct Array
+{
+	Object base;
+	size_t length;
+	const T* value;
+};
 
 #endif

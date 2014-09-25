@@ -257,6 +257,10 @@ namespace SharpLang.CompilerServices
                     //      }
                     //  }
                     var initTypeFunction = LLVM.AddFunction(module, typeReference.MangledName() + "_inittype", LLVM.FunctionType(LLVM.VoidTypeInContext(context), new TypeRef[0], false));
+
+                    // TODO: Temporarily emit it multiple time (once per assembly), that should be fixed!
+                    LLVM.SetLinkage(initTypeFunction, Linkage.LinkOnceAnyLinkage);
+
                     var block = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
                     LLVM.PositionBuilderAtEnd(builder2, block);
 

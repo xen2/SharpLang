@@ -206,9 +206,3 @@ uint8_t System_Int32__Equals_System_Object_(int32_t* i, void* obj)
 {
 	return *i == ((Int32*)obj)->value ? 1 : 0;
 }
-
-// int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
-int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
-{
-	return 0;
-}
