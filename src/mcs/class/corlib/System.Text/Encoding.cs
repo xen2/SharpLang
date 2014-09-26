@@ -331,9 +331,6 @@ public abstract class Encoding : ICloneable
 	// Returns NULL if the method failed.
 	private static Object InvokeI18N (String name, params Object[] args)
 	{
-        // TODO: Temporary hack, until AppDomain.Current and Assembly.Load properly behaves.
-	    return null;
-
 		lock (lockobj) {
 			// Bail out if we previously detected that there
 			// is insufficent engine support for I18N handling.
