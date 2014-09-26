@@ -11,6 +11,7 @@ namespace SharpLang.CompilerServices
         SuperTypes,
         InterfaceMap,
         TypeInitialized,
+        ObjectSize,
         InterfaceMethodTable,
         VirtualTable,
         StaticFields,

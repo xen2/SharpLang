@@ -10,6 +10,8 @@ typedef struct RuntimeTypeInfo
 	uint32_t interfacesCount;
 	RuntimeTypeInfo** superTypes;
 	RuntimeTypeInfo** interfaceMap;
+	uint8_t initialized;
+	uint32_t objectSize;
 	void* interfaceMethodTable[19];
 	void* virtualTable[0];
 } RuntimeTypeInfo;
