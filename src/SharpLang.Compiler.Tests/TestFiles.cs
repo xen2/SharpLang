@@ -33,6 +33,7 @@ namespace SharpLang.CompilerServices.Tests
                 typeof(NotSupportedException),
                 typeof(Array),
                 typeof(String),
+                typeof(AppDomain),
             });
 
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),

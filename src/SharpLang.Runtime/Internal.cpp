@@ -113,6 +113,32 @@ extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToS
 	return 0;
 }
 
+static Object* AllocateObject(RuntimeTypeInfo* rtti)
+{
+	Object* object = (Object*) malloc(rtti->objectSize);
+	object->runtimeTypeInfo = rtti;
+	return object;
+}
+
+extern RuntimeTypeInfo System_AppDomain_rtti;
+
+static Object* InitializeAppDomain()
+{
+	Object* appDomain = AllocateObject(&System_AppDomain_rtti);
+	return appDomain;
+}
+
+extern "C" Object* System_AppDomain__getCurDomain__()
+{
+	static Object* appDomain = InitializeAppDomain();
+	return appDomain;
+}
+
+extern "C" Object* System_AppDomain__LoadAssembly_System_String_System_Security_Policy_Evidence_System_Boolean_(Object* appDomain, String* assemblyRef, Object* securityEvidence, bool refOnly)
+{
+	return NULL;
+}
+
 extern "C" void System_GC__SuppressFinalize_System_Object_(Object* obj)
 {
 }
