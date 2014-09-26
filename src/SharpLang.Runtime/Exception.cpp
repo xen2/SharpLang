@@ -8,13 +8,13 @@
 
 #include "RuntimeType.h"
 
-struct ExceptionType
+struct ExceptionInfo
 {
-	RuntimeTypeInfo* runtimeTypeInfo;
+	Object* exceptionObject;
 	struct _Unwind_Exception unwindException;
 } __attribute__((__aligned__));
 
-int64_t exceptionBaseFromUnwindOffset = ((uintptr_t) (((ExceptionType*) (NULL)))) - ((uintptr_t) &(((ExceptionType*) (NULL))->unwindException));
+int64_t exceptionBaseFromUnwindOffset = ((uintptr_t) (((ExceptionInfo*) (NULL)))) - ((uintptr_t) &(((ExceptionInfo*) (NULL))->unwindException));
 
 /// Read a uleb128 encoded value and advance pointer
 /// See Variable Length Data in:
@@ -179,7 +179,7 @@ static bool handleActionValue(int64_t *resultAction,
 	const uint8_t *classInfo,
 	uintptr_t actionEntry,
 	uint64_t exceptionClass,
-struct _Unwind_Exception *exceptionObject)
+    struct ExceptionInfo* exceptionInfo)
 {
 	const uint8_t *actionPos = (uint8_t*)actionEntry;
 
@@ -203,9 +203,8 @@ struct _Unwind_Exception *exceptionObject)
 			// Expected exception type
 			struct RuntimeTypeInfo* expectedExceptionType = reinterpret_cast<struct RuntimeTypeInfo*>(P);
 
-			// Actual exception
-			struct ExceptionType* exception = (struct ExceptionType*)((char*)exceptionObject + exceptionBaseFromUnwindOffset);
-			struct RuntimeTypeInfo* exceptionType = exception->runtimeTypeInfo;
+			// Actual exception type
+			struct RuntimeTypeInfo* exceptionType = exceptionInfo->exceptionObject->runtimeTypeInfo;
 
 			// Check if they match (by testing each class in hierarchy)
 			while (exceptionType != NULL)
@@ -304,6 +303,8 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 
 		if ((start <= pcOffset) && (pcOffset < (start + length))) {
 			int64_t actionValue = 0;
+            
+            struct ExceptionInfo* exceptionInfo = (struct ExceptionInfo*)((char*)exceptionObject + exceptionBaseFromUnwindOffset);
 
 			if (actionEntry) {
 				exceptionMatched = handleActionValue(&actionValue,
@@ -311,7 +312,7 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 					classInfo,
 					actionEntry,
 					exceptionClass,
-					exceptionObject);
+					exceptionInfo);
 			}
 
 			if (!(actions & _UA_SEARCH_PHASE)) {
@@ -321,7 +322,7 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 				// compiler to take two parameters in registers.
 				_Unwind_SetGR(context,
 					__builtin_eh_return_data_regno(0),
-					(uintptr_t) exceptionObject);
+					(uintptr_t)exceptionInfo);
 
 				// Note: this virtual register directly corresponds
 				//       to the return of the llvm.eh.selector intrinsic
@@ -371,9 +372,9 @@ void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
 
 extern "C" void throwException(Object* obj)
 {
-	struct ExceptionType* ex = (struct ExceptionType*)_aligned_malloc(sizeof(struct ExceptionType), 16);
+	struct ExceptionInfo* ex = (struct ExceptionInfo*)_aligned_malloc(sizeof(struct ExceptionInfo), 16);
 	memset(ex, 0, sizeof(*ex));
-	ex->runtimeTypeInfo = obj->runtimeTypeInfo;
+	ex->exceptionObject = obj;
 	ex->unwindException.exception_class = 0; // TODO
 	ex->unwindException.exception_cleanup = cleanupException;
 	_Unwind_RaiseException(&ex->unwindException);
