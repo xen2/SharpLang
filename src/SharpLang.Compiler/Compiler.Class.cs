@@ -223,6 +223,7 @@ namespace SharpLang.CompilerServices
                         LLVM.PointerType(intPtrType, 0),
                         LLVM.PointerType(intPtrType, 0),
                         LLVM.Int1TypeInContext(context),
+                        LLVM.Int32TypeInContext(context),
                         LLVM.ArrayType(intPtrType, InterfaceMethodTableSize),
                         @class.VTableType,
                         staticFieldsType,
@@ -233,6 +234,8 @@ namespace SharpLang.CompilerServices
                     var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
                     @class.GeneratedRuntimeTypeInfoGlobal = runtimeTypeInfoGlobal;
 
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
+
                     if (@class.Type.IsLocal)
                     {
                         BuildRuntimeType(@class);
@@ -241,8 +244,6 @@ namespace SharpLang.CompilerServices
                     {
                         LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalWeakLinkage);
                     }
-
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
                 }
 
                 // Prepare class initializer
@@ -494,6 +495,7 @@ namespace SharpLang.CompilerServices
                 superTypesGlobal,
                 interfacesGlobal,
                 LLVM.ConstInt(LLVM.Int1TypeInContext(context), 0, false), // Class initialized?
+                LLVM.ConstIntCast(LLVM.SizeOf(@class.Type.ObjectType), int32Type, false),
                 interfaceMethodTableConstant,
                 vtableConstant,
                 LLVM.ConstNull(runtimeTypeInfoTypeElements[(int)RuntimeTypeInfoFields.StaticFields]),
