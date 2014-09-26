@@ -25,7 +25,7 @@ namespace SharpLang.CompilerServices.Tests
             SetupLocalToolchain();
 
             // Compile with a few additional corlib types useful for normal execution
-            Driver.CompileAssembly(outputAssembly, bitcodeFile, additionalTypes: new[]
+            Driver.CompileAssembly(outputAssembly, bitcodeFile, verifyModule: true, additionalTypes: new[]
             {
                 typeof(Exception),
                 typeof(OverflowException),
