@@ -15,6 +15,29 @@ namespace SharpLang.CompilerServices.Tests
         [ThreadStatic]
         public static CodeDomProvider codeDomProvider;
 
+        [Test]
+        public static void TestCorlib()
+        {
+            var testName = "WriteLine";
+            var sourceFile = Path.Combine(Utils.GetTestsDirectory(), testName + ".cs");
+
+            var outputAssembly = CompileAssembly(sourceFile);
+
+            Driver.CompileAssembly(@"..\..\..\..\src\mcs\class\lib\net_4_5\mscorlib.dll", "mscorlib.bc", true);
+            Driver.CompileAssembly(outputAssembly, testName + ".bc", true);
+
+            // Link bitcode and runtime
+            SetupLocalToolchain();
+            Driver.LinkBitcodes(testName + ".exe", testName + ".bc", "mscorlib.bc");
+
+            // Execute original and ours
+            var output1 = ExecuteAndCaptureOutput(outputAssembly);
+            var output2 = ExecuteAndCaptureOutput(testName + ".exe");
+
+            // Compare output
+            Assert.That(output2, Is.EqualTo(output1));
+        }
+
         [Test, TestCaseSource("TestCases")]
         public static void Test(string sourceFile)
         {
