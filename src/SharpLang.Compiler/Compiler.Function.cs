@@ -382,6 +382,12 @@ namespace SharpLang.CompilerServices
                     throw new InvalidOperationException(string.Format("Error while processing instruction {0} of method {1}", instruction, methodReference), e);
                 }
             }
+
+            if (body.HasExceptionHandlers)
+            {
+                // Place eh.resume block at the very end
+                LLVM.MoveBasicBlockAfter(functionContext.ResumeExceptionBlock, LLVM.GetLastBasicBlock(functionGlobal));
+            }
         }
 
         /// <summary>
@@ -480,6 +486,9 @@ namespace SharpLang.CompilerServices
                         // Jump to catch clause if type matches.
                         // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
                         var ehtypeComparisonResult = LLVM.BuildICmp(builder2, IntPredicate.IntEQ, ehselectorValue, ehtypeid, string.Empty);
+
+                        // Move this catch dispatch block just before its actual catch block
+                        LLVM.MoveBasicBlockBefore(catchDispatchBlock, catchBlock);
                         LLVM.BuildCondBr(builder2, ehtypeComparisonResult, catchBlock, activeTryHandlers.Count > 0 ? activeTryHandlers.Last().CatchDispatch : functionContext.ResumeExceptionBlock);
                     }
                     else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally)
@@ -532,6 +541,9 @@ namespace SharpLang.CompilerServices
                     // Add jump to catch dispatch block or finally block
                     var lastActiveTryHandler = activeTryHandlers.Last();
                     LLVM.BuildBr(builder2, lastActiveTryHandler.CatchDispatch);
+
+                    // Move landingpad block just before its catch.dispatch block
+                    LLVM.MoveBasicBlockBefore(functionContext.LandingPadBlock, lastActiveTryHandler.CatchDispatch);
 
                     // Filter exceptions type by type
                     for (int index = activeTryHandlers.Count - 1; index >= 0; index--)
