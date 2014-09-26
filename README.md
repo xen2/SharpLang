@@ -27,16 +27,40 @@ BSD 2-clause license.
 
 It's still a early work in progress. Any help/feedback is welcome!
 
-### Short term
+### What's working
 
-* Supports for all .NET opcodes
-* Passes many unit tests (branching, struct/class, interfaces, generics, etc...)
-* Subset of .NET framework (maybe .NETCore 4.5 to start with?)
+* Codegen (unit tested)
+ * Supports most .NET opcodes
+ * Branching
+ * Classes and interfaces
+ * Generics (expanded like C++ template)
+ * PInvoke (simple, no marshalling)
+ * Delegate (no multicast delegate yet)
+ * Boxing
+ * Exceptions
+ * Converts Mono mscorlib
+* Simple code linked against SharpLang-compiled Mono mscorlib is starting to work
 
-### Future additions
+### What's next
 
-* Immix GC (TBD)
-* Performance
+* Driver/Linker
+* Runtime
+ * Reflection
+ * Threads, Locks, etc...
+ * I/O
+ * Marshalling
+ * Vararg
+* Immix GC integration
+* Cross-platform
+ * Enscripten HTML5 (javascript) support
+ * Linux/MacOSX support
+* Code quality
+* Documentation
+
+### Future
+
+* Dynamic loading
+* Performance extensions
  * Non-nullable types
  * SIMD support
  * More control over class/struct layouting (allocate class on stack, etc...)
@@ -45,11 +69,12 @@ It's still a early work in progress. Any help/feedback is welcome!
  * Lifetime control (unique/owned pointers, stack alloc as much as possible with pure functions, etc...)
  * RAII (struct destructors)
  * Use and extend Roslyn for new language extensions
-* Direct (or at least easy) access to C++, probably with help of libclang
+* Direct (or at least easy) access to C++ (probably with help of libclang)
+* Other platforms
 
 ## Various technical details
 
 Here for now, until later moved to a more specific documentation.
 
-* UTF8 string (UTF16 was choosed mainly because of Windows API, but UTF8 is more space efficient, API compatible with char* and avoid many conversions)
+* ~~UTF8 string (UTF16 was choosed mainly because of Windows API, but UTF8 is more space efficient, API compatible with char* and avoid many conversions)~~
 * String/Array indrection to more easily carve substring/subarrays.
