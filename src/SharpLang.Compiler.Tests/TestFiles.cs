@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using SharpLang.Compiler.Utils;
@@ -55,12 +56,42 @@ namespace SharpLang.CompilerServices.Tests
 
         private static string CompileAssembly(string sourceFile)
         {
+            var outputBase = Path.Combine(Path.GetDirectoryName(sourceFile), "output");
+            Directory.CreateDirectory(outputBase);
+            var outputAssembly = Path.Combine(outputBase, Path.GetFileNameWithoutExtension(sourceFile) + ".exe");
+
+            if (Path.GetExtension(sourceFile) == ".cs")
+                return CompileCSharpAssembly(sourceFile, outputAssembly);
+
+            if (Path.GetExtension(sourceFile) == ".il")
+                return CompileIlAssembly(sourceFile, outputAssembly);
+
+            throw new NotImplementedException("Unknown source format.");
+        }
+
+        private static string CompileIlAssembly(string sourceFile, string outputAssembly)
+        {
+            // Locate ilasm
+            var ilasmPath = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "ilasm.exe");
+
+            var ilasmArguments = string.Format("\"{0}\" /exe /out=\"{1}\"", sourceFile, outputAssembly);
+
+            var processStartInfo = new ProcessStartInfo(ilasmPath, ilasmArguments);
+
+            string ilasmOutput;
+            var ilasmProcess = Utils.ExecuteAndCaptureOutput(processStartInfo, out ilasmOutput);
+            ilasmProcess.WaitForExit();
+
+            if (ilasmProcess.ExitCode != 0)
+                throw new InvalidOperationException(string.Format("Error executing ilasm: {0}", ilasmOutput));
+
+            return outputAssembly;
+        }
+
+        private static string CompileCSharpAssembly(string sourceFile, string outputAssembly)
+        {
             if (codeDomProvider == null)
                 codeDomProvider = new Microsoft.CSharp.CSharpCodeProvider();
-
-            var outputBase = Path.Combine(Path.GetDirectoryName(sourceFile), "output");
-            var outputAssembly = Path.Combine(outputBase, Path.GetFileNameWithoutExtension(sourceFile) + ".exe");
-            Directory.CreateDirectory(outputBase);
 
             var compilerParameters = new CompilerParameters
             {
@@ -158,9 +189,10 @@ namespace SharpLang.CompilerServices.Tests
         {
             get
             {
+                // Enumerate both .cs and .il files
                 var directory = Utils.GetTestsDirectory();
-                var files = Directory.EnumerateFiles(directory, "*.cs",
-                    SearchOption.AllDirectories);
+                var files = Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories);
+                files = files.Concat(Directory.EnumerateFiles(directory, "*.il", SearchOption.AllDirectories));
                 foreach (var file in files)
                 {
                     yield return file;

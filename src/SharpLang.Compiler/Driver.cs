@@ -139,7 +139,7 @@ namespace SharpLang.CompilerServices
             processStartInfo.Arguments = arguments.ToString();
 
             string processLinkerOutput;
-            var processLinker = ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);
+            var processLinker = Utils.ExecuteAndCaptureOutput(processStartInfo, out processLinkerOutput);
             processLinker.WaitForExit();
 
             if (processLinker.ExitCode != 0)
@@ -209,52 +209,12 @@ namespace SharpLang.CompilerServices
                 processStartInfo.Arguments = string.Format("-filetype=obj {0} -o {1}", bitcodeFile, objFile);
 
                 string processLLCOutput;
-                var processLLC = ExecuteAndCaptureOutput(processStartInfo, out processLLCOutput);
+                var processLLC = Utils.ExecuteAndCaptureOutput(processStartInfo, out processLLCOutput);
                 if (processLLC.ExitCode != 0)
                 {
                     throw new InvalidOperationException(string.Format("Error executing llc: {0}", processLLCOutput));
                 }
             }
-        }
-
-        /// <summary>
-        /// Executes process and capture its output.
-        /// </summary>
-        /// <param name="processStartInfo">The process start information.</param>
-        /// <param name="output">The output.</param>
-        /// <returns></returns>
-        private static Process ExecuteAndCaptureOutput(ProcessStartInfo processStartInfo, out string output)
-        {
-            processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.RedirectStandardError = true;
-
-            var process = new Process {StartInfo = processStartInfo};
-
-            var outputBuilder = new StringBuilder();
-
-            process.OutputDataReceived += (sender, args) =>
-            {
-                lock (outputBuilder)
-                {
-                    if (args.Data != null)
-                        outputBuilder.AppendLine(args.Data);
-                }
-            };
-            process.ErrorDataReceived += (sender, args) =>
-            {
-                lock (outputBuilder)
-                {
-                    if (args.Data != null)
-                        outputBuilder.AppendLine(args.Data);
-                }
-            };
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.WaitForExit();
-
-            output = outputBuilder.ToString();
-            return process;
         }
     }
 }
