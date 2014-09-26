@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -227,7 +228,9 @@ namespace SharpLang.CompilerServices
                         staticFieldsType,
                     }, false);
 
-                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, typeReference.MangledName() + ".rtti");
+                    // Remove invalid characters so that we can easily link against it from C++
+                    var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
+                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
                     @class.GeneratedRuntimeTypeInfoGlobal = runtimeTypeInfoGlobal;
 
                     if (@class.Type.IsLocal)
@@ -338,6 +341,8 @@ namespace SharpLang.CompilerServices
         {
             if (@class.IsEmitted)
                 return;
+
+            Console.WriteLine("Build type {0}", @class);
 
             @class.IsEmitted = true;
 

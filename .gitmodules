@@ -7,3 +7,6 @@
 [submodule "deps/compiler-rt"]
 	path = deps/compiler-rt
 	url = http://llvm.org/git/compiler-rt.git
+[submodule "deps/libcxxabi"]
+	path = deps/libcxxabi
+	url = https://github.com/llvm-mirror/libcxxabi
