@@ -322,7 +322,7 @@ namespace SharpLang.CompilerServices
             // Create catch clause stack
             if (body.HasExceptionHandlers)
             {
-                // Exception handlers blocks are also branch targets
+                // Exception catch handlers blocks are also branch targets
                 foreach (var exceptionHandler in body.ExceptionHandlers)
                 {
                     exceptionHandlers.Add(new ExceptionHandlerInfo(exceptionHandler));
@@ -343,7 +343,7 @@ namespace SharpLang.CompilerServices
                     // Erase exception from exn.slot (it has been handled)
                     LLVM.BuildStore(builder2, LLVM.ConstNull(@object.DefaultType), functionContext.ExceptionSlot);
                     LLVM.BuildStore(builder2, LLVM.ConstInt(int32Type, 0, false), functionContext.ExceptionHandlerSelectorSlot);
-                     
+
                     forwardStacks[handlerStart] = new[]
                     {
                         new StackValue(catchClass.Type.StackType, catchClass.Type, exceptionObject)
@@ -469,27 +469,37 @@ namespace SharpLang.CompilerServices
                 {
                     var catchDispatchBlock = new BasicBlockRef();
 
-                    if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Catch)
+                    if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Catch
+                        || exceptionHandler.Source.HandlerType == ExceptionHandlerType.Fault)
                     {
                         catchDispatchBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "catch.dispatch");
                         LLVM.PositionBuilderAtEnd(builder2, catchDispatchBlock);
 
                         var catchBlock = functionContext.BasicBlocks[exceptionHandler.Source.HandlerStart.Offset];
-                        var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
+                        if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Catch)
+                        {
+                            var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
 
-                        // Compare exception type
-                        var ehselectorValue = LLVM.BuildLoad(builder2, functionContext.ExceptionHandlerSelectorSlot, "sel");
+                            // Compare exception type
+                            var ehselectorValue = LLVM.BuildLoad(builder2, functionContext.ExceptionHandlerSelectorSlot, "sel");
 
-                        var ehtypeIdFor = LLVM.IntrinsicGetDeclaration(module, (uint)Intrinsics.eh_typeid_for, new TypeRef[0]);
-                        var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] { LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType) }, string.Empty);
+                            var ehtypeIdFor = LLVM.IntrinsicGetDeclaration(module, (uint)Intrinsics.eh_typeid_for, new TypeRef[0]);
+                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] {LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType)}, string.Empty);
 
-                        // Jump to catch clause if type matches.
-                        // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
-                        var ehtypeComparisonResult = LLVM.BuildICmp(builder2, IntPredicate.IntEQ, ehselectorValue, ehtypeid, string.Empty);
+                            // Jump to catch clause if type matches.
+                            // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
+                            var ehtypeComparisonResult = LLVM.BuildICmp(builder2, IntPredicate.IntEQ, ehselectorValue, ehtypeid, string.Empty);
+
+                            LLVM.BuildCondBr(builder2, ehtypeComparisonResult, catchBlock, activeTryHandlers.Count > 0 ? activeTryHandlers.Last().CatchDispatch : functionContext.ResumeExceptionBlock);
+                        }
+                        else
+                        {
+                            // Fault: Jump without checking type
+                            LLVM.BuildBr(builder2, catchBlock);
+                        }
 
                         // Move this catch dispatch block just before its actual catch block
                         LLVM.MoveBasicBlockBefore(catchDispatchBlock, catchBlock);
-                        LLVM.BuildCondBr(builder2, ehtypeComparisonResult, catchBlock, activeTryHandlers.Count > 0 ? activeTryHandlers.Last().CatchDispatch : functionContext.ResumeExceptionBlock);
                     }
                     else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally)
                     {
@@ -511,6 +521,7 @@ namespace SharpLang.CompilerServices
                     switch (exceptionHandler.Source.HandlerType)
                     {
                         case ExceptionHandlerType.Catch:
+                        case ExceptionHandlerType.Fault:
                             break;
                     }
                 }
@@ -556,7 +567,8 @@ namespace SharpLang.CompilerServices
                             var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
                             LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType));
                         }
-                        else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally)
+                        else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally
+                            || exceptionHandler.Source.HandlerType == ExceptionHandlerType.Fault)
                         {
                             LLVM.SetCleanup(landingPad, true);
                         }
@@ -2330,20 +2342,35 @@ namespace SharpLang.CompilerServices
                 {
                     var currentFinallyClause = GetCurrentExceptionHandler(exceptionHandlers, instruction.Offset);
 
-                    if (currentFinallyClause == null || currentFinallyClause.Source.HandlerType != ExceptionHandlerType.Finally)
-                        throw new InvalidOperationException("Can't find finally clause matching this endfinally instruction.");
+                    if (currentFinallyClause == null)
+                        throw new InvalidOperationException("Can't find exception clause matching this endfinally/endfault instruction.");
 
-                    // Basic block to continue exception handling (if endfinally.jumptarget is -1, but we simply set it on undefined cases)
-                    var activeTryHandlers = functionContext.ActiveTryHandlers;
-                    var nextActiveTryHandler = activeTryHandlers.Count > 0 ? activeTryHandlers[activeTryHandlers.Count - 1].CatchDispatch : functionContext.ResumeExceptionBlock;
-
-                    // Generate dispatch code (with a switch/case)
-                    var @switch = LLVM.BuildSwitch(builder, LLVM.BuildLoad(builder, functionContext.EndfinallyJumpTarget, string.Empty), nextActiveTryHandler, (uint)currentFinallyClause.LeaveTargets.Count);
-                    for (int index = 0; index < currentFinallyClause.LeaveTargets.Count; index++)
+                    if (currentFinallyClause.Source.HandlerType == ExceptionHandlerType.Finally)
                     {
-                        var leaveTarget = currentFinallyClause.LeaveTargets[index];
+                        // Basic block to continue exception handling (if endfinally.jumptarget is -1, but we simply set it on undefined cases)
+                        var activeTryHandlers = functionContext.ActiveTryHandlers;
+                        var nextActiveTryHandler = activeTryHandlers.Count > 0 ? activeTryHandlers[activeTryHandlers.Count - 1].CatchDispatch : functionContext.ResumeExceptionBlock;
 
-                        LLVM.AddCase(@switch, LLVM.ConstInt(int32Type, (ulong)index, false), functionContext.BasicBlocks[leaveTarget.Offset]);
+                        // Generate dispatch code (with a switch/case)
+                        var @switch = LLVM.BuildSwitch(builder, LLVM.BuildLoad(builder, functionContext.EndfinallyJumpTarget, string.Empty), nextActiveTryHandler, (uint)currentFinallyClause.LeaveTargets.Count);
+                        for (int index = 0; index < currentFinallyClause.LeaveTargets.Count; index++)
+                        {
+                            var leaveTarget = currentFinallyClause.LeaveTargets[index];
+
+                            LLVM.AddCase(@switch, LLVM.ConstInt(int32Type, (ulong)index, false), functionContext.BasicBlocks[leaveTarget.Offset]);
+                        }
+                    }
+                    else if (currentFinallyClause.Source.HandlerType == ExceptionHandlerType.Fault)
+                    {
+                        var exceptionObject = LLVM.BuildLoad(builder, functionContext.ExceptionSlot, string.Empty);
+
+                        // Rethrow exception
+                        GenerateInvoke(functionContext, throwExceptionFunction, new[] { LLVM.BuildPointerCast(builder, exceptionObject, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                        LLVM.BuildUnreachable(builder);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Exception clause containing a endfinally/endfault is not a finally or fault clause.");
                     }
 
                     // Default is not to flow to next instruction, previous Leave instructions already tagged what was necessary
