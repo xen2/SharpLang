@@ -38,7 +38,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, System.Type[] additionalTypes = null)
+        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, bool verifyModule = false, System.Type[] additionalTypes = null)
         {
             var assemblyDefinition = LoadAssembly(inputFile);
 
@@ -60,8 +60,21 @@ namespace SharpLang.CompilerServices
             if (generateIR)
             {
                 var irFile = Path.ChangeExtension(outputFile, "ll");
-                var ir = LLVM.PrintModuleToString(module);
-                File.WriteAllText(irFile, ir);
+                string message;
+                if (LLVM.PrintModuleToFile(module, irFile, out message))
+                {
+                    throw new InvalidOperationException(message);
+                }
+            }
+
+            if (verifyModule)
+            {
+                // Verify module
+                string message;
+                if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
+                {
+                    throw new InvalidOperationException(message);
+                }
             }
 
             LLVM.WriteBitcodeToFile(module, outputFile);
