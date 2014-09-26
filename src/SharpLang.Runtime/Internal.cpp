@@ -22,7 +22,7 @@ extern "C" void System_Threading_Monitor__Exit_System_Object_(Object* object)
 	// Not implemented yet
 }
 
-extern "C" void System_Threading_Monitor__try_enter_with_atomic_var_System_Object_System_Int32_System_Boolean__(Object* object)
+extern "C" void System_Threading_Monitor__try_enter_with_atomic_var_System_Object_System_Int32_System_Boolean__(Object* object, int32_t millisecondsTimeout, bool& lockTaken)
 {
 	// Not implemented yet
 }
@@ -34,12 +34,12 @@ extern "C" String* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t
 	return NULL;
 }
 
-extern RuntimeTypeInfo* System_String_rtti;
+extern RuntimeTypeInfo System_String_rtti;
 
 extern "C" String* System_Environment__GetNewLine__()
 {
 	// TODO: String RTTI
-	static String newline = { { System_String_rtti }, 2, u"\r\n" };
+	static String newline = { { &System_String_rtti }, 2, u"\r\n" };
 	return &newline;
 }
 
@@ -98,7 +98,7 @@ extern "C" String* System_Globalization_CultureInfo__get_current_locale_name__()
 {
 	// Redirect to invariant culture by using an empty string ("")
 	// TODO: mechanism to setup VTable
-	static String locale = { { NULL }, 0, u"" };
+	static String locale = { { &System_String_rtti }, 0, u"" };
 	return &locale;
 }
 
