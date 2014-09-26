@@ -34,10 +34,12 @@ extern "C" String* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t
 	return NULL;
 }
 
+extern RuntimeTypeInfo* System_String_rtti;
+
 extern "C" String* System_Environment__GetNewLine__()
 {
 	// TODO: String RTTI
-	static String newline = { { NULL }, 2, u"\r\n" };
+	static String newline = { { System_String_rtti }, 2, u"\r\n" };
 	return &newline;
 }
 
