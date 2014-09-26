@@ -18,7 +18,6 @@ namespace SharpLang.CompilerServices.Tests
         [Test, TestCaseSource("TestCases")]
         public static void Test(string sourceFile)
         {
-            CompilerParameters compilerParameters;
             var outputAssembly = CompileAssembly(sourceFile);
 
             var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
