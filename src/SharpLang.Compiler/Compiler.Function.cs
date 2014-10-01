@@ -1583,6 +1583,10 @@ namespace SharpLang.CompilerServices
                     else
                     {
                         // Virtual table call
+                        if (targetMethod.VirtualSlot == -1)
+                        {
+                            throw new InvalidOperationException("Trying to call a virtual method without slot.");
+                        }
 
                         // Get method stored in vtable slot
                         indices = new[]
