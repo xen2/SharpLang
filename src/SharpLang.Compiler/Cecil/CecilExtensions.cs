@@ -128,6 +128,18 @@ namespace SharpLang.CompilerServices.Cecil
             return type;
         }
 
+        public static PinnedType ChangePinnedType(this PinnedType type, TypeReference elementType)
+        {
+            if (elementType != type.ElementType)
+            {
+                var result = new PinnedType(elementType);
+                if (type.HasGenericParameters)
+                    SetGenericParameters(result, type.GenericParameters);
+                return result;
+            }
+            return type;
+        }
+
         public static RequiredModifierType ChangeRequiredModifierType(this RequiredModifierType type, TypeReference elementType)
         {
             if (elementType != type.ElementType)
