@@ -194,7 +194,7 @@ namespace SharpLang.CompilerServices.Cecil
                 {
                     result = new GenericInstanceType(genericInstanceType.ElementType);
                 }
-                else if (type.GetType() == typeof(TypeReference).GetType())
+                else if (type.GetType() == typeof(TypeReference))
                 {
                     result = new TypeReference(type.Namespace, type.Name, type.Module, type.Scope, type.IsValueType);
                 }
