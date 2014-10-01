@@ -50,6 +50,10 @@ namespace SharpLang.CompilerServices.Cecil
             if (arrayType != null)
                 return Visit(arrayType);
 
+            var pinnedType = type as PinnedType;
+            if (pinnedType != null)
+                return Visit(pinnedType);
+
             var genericInstanceType = type as GenericInstanceType;
             if (genericInstanceType != null)
                 return Visit(genericInstanceType);
@@ -94,6 +98,12 @@ namespace SharpLang.CompilerServices.Cecil
         public virtual TypeReference Visit(PointerType type)
         {
             type = type.ChangePointerType(VisitDynamic(type.ElementType));
+            return type.ChangeGenericParameters(Visit(type.GenericParameters));
+        }
+
+        public virtual TypeReference Visit(PinnedType type)
+        {
+            type = type.ChangePinnedType(VisitDynamic(type.ElementType));
             return type.ChangeGenericParameters(Visit(type.GenericParameters));
         }
 
