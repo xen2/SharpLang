@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
@@ -361,21 +359,6 @@ namespace SharpLang.CompilerServices
                 return method.MakeGeneric(genericInstanceType.GenericArguments.ToArray());
 
             return method;
-        }
-
-        class MemberEqualityComparer : IEqualityComparer<MemberReference>
-        {
-            public static readonly MemberEqualityComparer Default = new MemberEqualityComparer();
-
-            public bool Equals(MemberReference x, MemberReference y)
-            {
-                return x.FullName == y.FullName;
-            }
-
-            public int GetHashCode(MemberReference obj)
-            {
-                return obj.FullName.GetHashCode();
-            }
         }
     }
 }
