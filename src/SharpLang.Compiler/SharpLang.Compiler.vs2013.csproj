@@ -96,6 +96,7 @@
     <Compile Include="FunctionCompilerContext.cs" />
     <Compile Include="FunctionSignature.cs" />
     <Compile Include="InstructionFlags.cs" />
+    <Compile Include="MemberEqualityComparer.cs" />
     <Compile Include="ObjectFields.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
