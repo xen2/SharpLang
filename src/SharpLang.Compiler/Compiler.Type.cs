@@ -60,6 +60,8 @@ namespace SharpLang.CompilerServices
             StackValueType stackType;
             var valueType = TypeRef.Empty;
 
+            var typeDefinition = GetMethodTypeDefinition(typeReference);
+
             switch (typeReference.MetadataType)
             {
                 case MetadataType.Pointer:
@@ -144,7 +146,6 @@ namespace SharpLang.CompilerServices
                         goto case MetadataType.Void;
                     }
 
-                    var typeDefinition = GetMethodTypeDefinition(typeReference);
                     if (typeDefinition.IsValueType && typeDefinition.IsEnum)
                     {
                         // Special case: enum
@@ -171,7 +172,7 @@ namespace SharpLang.CompilerServices
             if (valueType == TypeRef.Empty)
                 valueType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".value");
 
-            var result = new Type(typeReference, dataType, valueType, boxedType, stackType);
+            var result = new Type(typeReference, typeDefinition, dataType, valueType, boxedType, stackType);
 
             bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
 

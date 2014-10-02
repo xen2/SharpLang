@@ -12,9 +12,10 @@ namespace SharpLang.CompilerServices
         internal Class Class;
         internal bool IsLocal;
 
-        public Type(TypeReference typeReference, TypeRef dataType, TypeRef valueType, TypeRef objectType, StackValueType stackType)
+        public Type(TypeReference typeReference, TypeDefinition typeDefinition, TypeRef dataType, TypeRef valueType, TypeRef objectType, StackValueType stackType)
         {
             TypeReference = typeReference;
+            TypeDefinition = typeDefinition;
             DataType = dataType;
             ObjectType = objectType;
             StackType = stackType;
@@ -84,6 +85,7 @@ namespace SharpLang.CompilerServices
         public TypeRef TypeOnStack { get; private set; }
 
         public TypeReference TypeReference { get; private set; }
+        public TypeDefinition TypeDefinition { get; private set; }
 
         public StackValueType StackType { get; private set; }
 
