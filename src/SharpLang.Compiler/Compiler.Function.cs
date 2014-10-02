@@ -1538,7 +1538,7 @@ namespace SharpLang.CompilerServices
                 // If it's a byref value type, emit a normal call
                 if (thisObject.Type.TypeReference.IsByReference
                     && thisObject.Type.TypeReference.GetElementType().IsValueType
-                    && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, thisObject.Type.TypeReference.GetElementType()))
+                    && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, ((ByReferenceType)thisObject.Type.TypeReference).ElementType))
                 {
                     resolvedMethod = targetMethod.GeneratedValue;
                 }
