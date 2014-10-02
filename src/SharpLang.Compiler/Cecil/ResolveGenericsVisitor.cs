@@ -31,11 +31,11 @@ namespace SharpLang.CompilerServices.Cecil
                 return type;
 
             // Build dictionary that will map generic type to their real implementation type
-            var resolvedType = genericInstanceTypeContext.ElementType;
+            var resolvedType = genericInstanceTypeContext.Resolve();
             var genericTypeMapping = new Dictionary<TypeReference, TypeReference>();
             for (int i = 0; i < resolvedType.GenericParameters.Count; ++i)
             {
-                var genericParameter = genericInstanceTypeContext.ElementType.GenericParameters[i];
+                var genericParameter = resolvedType.GenericParameters[i];
                 genericTypeMapping.Add(genericParameter, genericInstanceTypeContext.GenericArguments[i]);
             }
 
