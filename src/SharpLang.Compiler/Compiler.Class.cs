@@ -206,6 +206,11 @@ namespace SharpLang.CompilerServices
                             continue;
     
                         var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
+
+                        // Value type: Generate class to be able to compute size
+                        if (fieldType.StackType == StackValueType.Value)
+                            GetClass(fieldType);
+
                         @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
                         fieldTypes.Add(fieldType.DefaultType);
                     }
