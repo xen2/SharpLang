@@ -809,6 +809,10 @@ namespace SharpLang.CompilerServices
 
             var obj = stack.Pop();
 
+            // Force emission of class to be sure we have RTTI type generated
+            // Another option would be to cast everything to object before querying RTTI object
+            var objClass = GetClass(obj.Type);
+
             var currentBlock = LLVM.GetInsertBlock(builder);
 
             // Prepare basic blocks (for PHI instruction)
