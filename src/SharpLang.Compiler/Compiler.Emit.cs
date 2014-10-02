@@ -611,10 +611,14 @@ namespace SharpLang.CompilerServices
         {
             var arrayClass = GetClass(new ArrayType(elementType.TypeReference));
 
+            // Emit element type class to make sure we can compute sizeof
+            // TODO: Only perform it on value type? Need to check if seeing T[] involves we should codegen T.
+            var elementClass = GetClass(elementType);
+
             var numElements = stack.Pop();
 
             // Compute object size
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementClass.Type.DefaultType), int32Type, string.Empty);
 
             // Compute array size (object size * num elements)
             var numElementsCasted = ConvertToNativeInt(numElements);
