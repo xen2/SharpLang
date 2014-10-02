@@ -1633,7 +1633,7 @@ namespace SharpLang.CompilerServices
         private static ExceptionHandlerInfo GetCurrentExceptionHandler(List<ExceptionHandlerInfo> exceptionHandlers, int offset)
         {
             ExceptionHandlerInfo currentExceptionHandler = null;
-            for (int index = exceptionHandlers.Count - 1; index >= 0; index--)
+            for (int index = 0; index < exceptionHandlers.Count; ++index)
             {
                 var exceptionHandler = exceptionHandlers[index];
 
