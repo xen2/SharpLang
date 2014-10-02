@@ -7,6 +7,7 @@ project "SharpLang.Compiler.Tests"
   SetupManagedProject()
 
   files { "*.cs" }
+  excludes { "obj/**" }
 
   libdirs 
   {

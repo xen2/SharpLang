@@ -7,6 +7,7 @@ project "SharpLLVM.Tests"
   SetupManagedProject()
 
   files { "**.cs" }
+  excludes { "obj/**" }
 
   libdirs 
   {

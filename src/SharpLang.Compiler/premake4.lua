@@ -7,6 +7,7 @@ project "SharpLang.Compiler"
   SetupManagedProject()
 
   files { "**.cs" }
+  excludes { "obj/**" }
 
   libdirs 
   {
