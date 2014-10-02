@@ -84,7 +84,7 @@ namespace SharpLang.CompilerServices
                     parameterTypeReference = declaringType.TypeReference;
 
                     // Value type uses ByReference type for this
-                    if (parameterTypeReference.IsValueType)
+                    if (declaringType.TypeDefinition.IsValueType)
                         parameterTypeReference = parameterTypeReference.MakeByReferenceType();
                 }
                 else
@@ -828,7 +828,7 @@ namespace SharpLang.CompilerServices
                     var @class = GetClass(typeReference);
 
                     // Only value types need to be boxed
-                    if (@class.Type.TypeReference.IsValueType)
+                    if (@class.Type.TypeDefinition.IsValueType)
                     {
                         EmitBoxValueType(stack, @class);
                     }
@@ -841,7 +841,7 @@ namespace SharpLang.CompilerServices
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
                     var @class = GetClass(typeReference);
 
-                    if (typeReference.IsValueType)
+                    if (@class.Type.TypeDefinition.IsValueType)
                     {
                         EmitUnboxAnyValueType(stack, @class);
                     }
@@ -1490,7 +1490,7 @@ namespace SharpLang.CompilerServices
                 // Process constrained class
                 if (constrainedClass != null)
                 {
-                    if (!constrainedClass.Type.TypeReference.IsValueType)
+                    if (!constrainedClass.Type.TypeDefinition.IsValueType)
                     {
                         // If thisType is a reference type, dereference
                         thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
@@ -1537,7 +1537,7 @@ namespace SharpLang.CompilerServices
 
                 // If it's a byref value type, emit a normal call
                 if (thisObject.Type.TypeReference.IsByReference
-                    && thisObject.Type.TypeReference.GetElementType().IsValueType
+                    && GetType(thisObject.Type.TypeReference.GetElementType()).TypeDefinition.IsValueType
                     && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, ((ByReferenceType)thisObject.Type.TypeReference).ElementType))
                 {
                     resolvedMethod = targetMethod.GeneratedValue;
