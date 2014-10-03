@@ -1646,7 +1646,7 @@ namespace SharpLang.CompilerServices
                 var exceptionHandler = exceptionHandlers[index];
 
                 if (offset >= exceptionHandler.Source.HandlerStart.Offset
-                    && offset < exceptionHandler.Source.HandlerEnd.Offset)
+                    && (exceptionHandler.Source.HandlerEnd == null || offset < exceptionHandler.Source.HandlerEnd.Offset))
                 {
                     currentExceptionHandler = exceptionHandler;
                     break;
