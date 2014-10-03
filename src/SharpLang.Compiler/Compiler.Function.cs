@@ -225,6 +225,10 @@ namespace SharpLang.CompilerServices
 
                 var type = CreateType(ResolveGenericsVisitor.Process(methodReference, local.VariableType));
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
+
+                // Force value types to be emitted right away
+                if (type.TypeDefinition.IsValueType)
+                    GetClass(type);
             }
 
             // Process args
@@ -232,6 +236,10 @@ namespace SharpLang.CompilerServices
             {
                 var argType = function.ParameterTypes[index];
                 var arg = LLVM.GetParam(functionGlobal, (uint)index);
+
+                // Force value types to be emitted right away
+                if (argType.TypeDefinition.IsValueType)
+                    GetClass(argType);
 
                 var parameterIndex = index - (functionContext.Method.HasThis ? 1 : 0);
                 var parameterName = parameterIndex == -1 ? "this" : method.Parameters[parameterIndex].Name;
