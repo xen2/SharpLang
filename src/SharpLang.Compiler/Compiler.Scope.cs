@@ -17,6 +17,7 @@ namespace SharpLang.CompilerServices
         private Dictionary<string, ValueRef> debugNamespaces = new Dictionary<string, ValueRef>();
         private Dictionary<Class, ValueRef> debugClasses = new Dictionary<Class, ValueRef>();
         private Dictionary<Type, ValueRef> debugTypeCache = new Dictionary<Type, ValueRef>();
+        private Queue<KeyValuePair<Class, ValueRef>> debugClassesToProcess = new Queue<KeyValuePair<Class, ValueRef>>();
         
         private ValueRef GetOrCreateDebugNamespace(string @namespace)
         {
@@ -151,32 +152,7 @@ namespace SharpLang.CompilerServices
 
             if (isLocal)
             {
-                // Complete members
-                var memberTypes = new List<ValueRef>(@class.Fields.Count);
-
-                foreach (var field in type.Class.Fields)
-                {
-                    if (field.Key.IsStatic)
-                        continue;
-
-                    var fieldType = CreateDebugType(field.Value.Type);
-                    var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
-                    var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
-                    var fieldOffset = LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex)*8;
-
-                    // Add object header (VTable ptr, etc...)
-                    if (type.StackType == StackValueType.Object)
-                        fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectType, (int)ObjectFields.Data) * 8;
-
-                    memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, ValueRef.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
-                }
-
-                // Update members (mutation)
-                // TODO: LLVM.DICompositeTypeSetTypeArray should take a ref, not out.
-                LLVM.DICompositeTypeSetTypeArray(out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
-
-                // debugClass being changed, set it again (old value is not valid anymore)
-                debugClasses[@class] = debugClass;
+                debugClassesToProcess.Enqueue(new KeyValuePair<Class, ValueRef>(@class, debugClass));
             }
 
             return debugClass;
@@ -272,6 +248,9 @@ namespace SharpLang.CompilerServices
         {
             var debugType = CreateDebugType(variable.Type);
 
+            // Process fields and other dependent debug types
+            ProcessMissingDebugTypes();
+
             // TODO: Detect where variable is actually declared (first use of local?)
             var debugLocalVariable = LLVM.DIBuilderCreateLocalVariable(debugBuilder,
                 (uint)dwarfType,
@@ -281,6 +260,46 @@ namespace SharpLang.CompilerServices
             var debugVariableDeclare = LLVM.DIBuilderInsertDeclareAtEnd(debugBuilder, variable.Value, debugLocalVariable,
                 LLVM.GetInsertBlock(builder));
             LLVM.SetInstDebugLocation(builder, debugVariableDeclare);
+        }
+
+        private void ProcessMissingDebugTypes()
+        {
+            // Process missing debug types.
+            // Deferred here to avoid circular issues (when processing fields).
+            while (debugClassesToProcess.Count > 0)
+            {
+                var debugClassToProcess = debugClassesToProcess.Dequeue();
+                var @class = debugClassToProcess.Key;
+                var debugClass = debugClassToProcess.Value;
+                var type = @class.Type;
+
+                // Complete members
+                var memberTypes = new List<ValueRef>(@class.Fields.Count);
+
+                foreach (var field in type.Class.Fields)
+                {
+                    if (field.Key.IsStatic)
+                        continue;
+
+                    var fieldType = CreateDebugType(field.Value.Type);
+                    var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
+                    var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
+                    var fieldOffset = LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex)*8;
+
+                    // Add object header (VTable ptr, etc...)
+                    if (type.StackType == StackValueType.Object)
+                        fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectType, (int)ObjectFields.Data)*8;
+
+                    memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, ValueRef.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
+                }
+
+                // Update members (mutation)
+                // TODO: LLVM.DICompositeTypeSetTypeArray should take a ref, not out.
+                LLVM.DICompositeTypeSetTypeArray(out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
+
+                // debugClass being changed, set it again (old value is not valid anymore)
+                debugClasses[@class] = debugClass;
+            }
         }
 
         public enum DW_TAG
