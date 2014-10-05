@@ -84,6 +84,14 @@ namespace SharpLang.CompilerServices
         /// </value>
         public TypeRef TypeOnStack { get; private set; }
 
+        /// <summary>
+        /// Gets the linkage to use for this type.
+        /// </summary>
+        /// <value>
+        /// The linkage type to use for this type.
+        /// </value>
+        public Linkage Linkage { get; set; }
+
         public TypeReference TypeReference { get; private set; }
         public TypeDefinition TypeDefinition { get; private set; }
 

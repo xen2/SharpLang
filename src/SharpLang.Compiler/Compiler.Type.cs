@@ -174,21 +174,32 @@ namespace SharpLang.CompilerServices
 
             var result = new Type(typeReference, typeDefinition, dataType, valueType, boxedType, stackType);
 
-            bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
-
-            // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
-            isLocal |= typeReference.MetadataType == MetadataType.Array;
-
-            if (isLocal)
-                EmitType(result);
+            EmitType(result);
 
             return result;
         }
 
-        private void EmitType(Type type)
+        private void EmitType(Type type, bool force = false)
         {
+            // Already emitted?
             if (type.IsLocal)
                 return;
+
+            // Should we emit it?
+            bool isLocal = type.TypeReference.Resolve().Module.Assembly == assembly;
+
+            bool isTemplate;
+            // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
+            isTemplate = type.TypeReference.MetadataType == MetadataType.Array;
+
+            // Also emit generic types locally
+            isTemplate |= type.TypeReference.HasGenericParameters;
+
+            if (!(isLocal || isTemplate) && !force)
+                return;
+
+            // Mark as
+            type.Linkage = isTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
 
             type.IsLocal = true;
             classesToGenerate.Enqueue(type);
