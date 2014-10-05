@@ -312,10 +312,6 @@ namespace SharpLang.CompilerServices
                     // Set flag so that it won't be initialized again
                     LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
 
-                    // Static ctor
-                    if (@class.StaticCtor != null)
-                        LLVM.BuildCall(builder2, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
-
                     // TODO: PInvoke initialization
                     foreach (var pinvokeModule in typeDefinition.Methods.Where(x => x.HasPInvokeInfo).GroupBy(x => x.PInvokeInfo.Module))
                     {
@@ -348,6 +344,10 @@ namespace SharpLang.CompilerServices
                             LLVM.BuildStore(builder2, pinvokeGetProcAddressResult, vtableSlot);
                         }
                     }
+
+                    // Static ctor
+                    if (@class.StaticCtor != null)
+                        LLVM.BuildCall(builder2, @class.StaticCtor.GeneratedValue, new ValueRef[0], string.Empty);
 
                     LLVM.BuildBr(builder2, nextBlock);
 
