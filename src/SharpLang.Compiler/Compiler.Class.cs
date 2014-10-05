@@ -244,6 +244,9 @@ namespace SharpLang.CompilerServices
                     if (@class.Type.IsLocal)
                     {
                         BuildRuntimeType(@class);
+
+                        // Allow classes to be defined multiple times
+                        LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
                     }
                     else
                     {
@@ -381,6 +384,7 @@ namespace SharpLang.CompilerServices
 
                             // Manually emit Array functions locally (until proper mscorlib + generic instantiation exists).
                             EmitFunction(resolvedFunction);
+                            LLVM.SetLinkage(resolvedFunction.GeneratedValue, Linkage.LinkOnceAnyLinkage);
                         }
                     }
 
@@ -442,6 +446,7 @@ namespace SharpLang.CompilerServices
                     })
                         .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryType), 1)).ToArray()); // Append { 0, 0 } terminator
                     var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), @class.Type.TypeReference.MangledName() + ".imt");
+                    LLVM.SetLinkage(imtEntryGlobal, Linkage.PrivateLinkage);
                     LLVM.SetInitializer(imtEntryGlobal, imtEntries);
 
                     // Add 1 to differentiate between single entry and IMT array
@@ -477,11 +482,13 @@ namespace SharpLang.CompilerServices
             // Super types global
             var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint) superTypes.Count),
                 @class.Type.TypeReference.MangledName() + ".supertypes");
+            LLVM.SetLinkage(superTypesConstantGlobal, Linkage.PrivateLinkage);
             var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] {zero, zero});
 
             // Interface map global
             var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrType, (uint) @class.Interfaces.Count),
                 @class.Type.TypeReference.MangledName() + ".interfaces");
+            LLVM.SetLinkage(interfacesConstantGlobal, Linkage.PrivateLinkage);
             var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
 
             // Build VTable

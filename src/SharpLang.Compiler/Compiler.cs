@@ -141,7 +141,7 @@ namespace SharpLang.CompilerServices
         public void RegisterType(TypeReference typeReference)
         {
             var type = CreateType(typeReference);
-            EmitType(type);
+            EmitType(type, true);
             BuildRuntimeType(GetClass(type));
         }
 

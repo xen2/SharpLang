@@ -128,6 +128,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Need to compile
                     EmitFunction(function);
+                    LLVM.SetLinkage(functionGlobal, declaringType.Linkage);
                 }
             }
 
