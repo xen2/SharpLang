@@ -175,10 +175,25 @@ namespace SharpLang.CompilerServices
 
                 if (typeDefinition.IsInterface)
                 {
-                    // Interface: No need for vtable, we can just use object's one
-                    var vtableGlobal = GetClass(assembly.MainModule.Import(typeof(object))).GeneratedRuntimeTypeInfoGlobal;
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(vtableGlobal), valueType }, false);
-                    @class.GeneratedRuntimeTypeInfoGlobal = vtableGlobal;
+                    // Interface: Generate an empty vtable (so that we can still compare pointer in isInstInterface, etc...)
+                    // Remove invalid characters so that we can easily link against it from C++
+                    var runtimeTypeInfoType = LLVM.GetElementType(LLVM.TypeOf(GetClass(@object).GeneratedRuntimeTypeInfoGlobal));
+                    var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
+                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
+                    @class.GeneratedRuntimeTypeInfoGlobal = runtimeTypeInfoGlobal;
+
+                    if (@class.Type.IsLocal)
+                    {
+                        LLVM.SetInitializer(runtimeTypeInfoGlobal, LLVM.ConstPointerNull(runtimeTypeInfoType));
+
+                        // Allow classes to be defined multiple times
+                        LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
+                    }
+                    else
+                    {
+                        LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalWeakLinkage);
+                    }
                 }
                 else
                 {
