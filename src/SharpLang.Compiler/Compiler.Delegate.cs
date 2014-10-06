@@ -36,7 +36,7 @@ namespace SharpLang.CompilerServices
                 //            which will call fnptr (from this._target._methodPtr) without the first argument
                 var target = Instruction.Create(OpCodes.Ldarg_0);
 
-                // if (target != null)
+                // if (target == null)
                 // {
                 il.Append(Instruction.Create(OpCodes.Ldarg, method.Parameters[0]));
                 il.Append(Instruction.Create(OpCodes.Brtrue, target));
@@ -124,6 +124,11 @@ namespace SharpLang.CompilerServices
                 return null;
             }
             return body;
+        }
+
+        private ValueRef GenerateMulticastInvokeThunk(Class declaringClass, TypeDefinition delegateType)
+        {
+            
         }
 
         private ValueRef GenerateStaticInvokeThunk(Class declaringClass, TypeDefinition delegateType, FieldDefinition methodPtrAuxField)
