@@ -235,7 +235,7 @@ namespace SharpLang.CompilerServices
         {
             var invokeMethodHelper = CreateInvokeMethodHelper(declaringClass, "_StaticHelper");
 
-            EmitStaticInvokeCall(declaringClass, invokeMethodHelper);
+            EmitStaticInvokeCall(invokeMethodHelper);
 
             return invokeMethodHelper;
         }
@@ -252,7 +252,7 @@ namespace SharpLang.CompilerServices
             return invokeMethodHelper;
         }
 
-        private void EmitStaticInvokeCall(Class declaringClass, ValueRef invokeMethodHelper)
+        private void EmitStaticInvokeCall(ValueRef invokeMethodHelper)
         {
             // Get Delegate type and _methodPtrAux field
             var delegateType = corlib.MainModule.GetType(typeof(Delegate).FullName);
