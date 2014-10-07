@@ -180,7 +180,7 @@ namespace SharpLang.CompilerServices
             functionContext.BasicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
             LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
 
-            if (body == null && (method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
+            if ((method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
             {
                 var declaringClass = GetClass(function.DeclaringType);
 
@@ -194,6 +194,9 @@ namespace SharpLang.CompilerServices
 
                     codeSize = UpdateOffsets(body);
                 }
+
+                // Reposition builder at end, in case it was used
+                LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
             }
 
             if (body == null)
@@ -396,6 +399,11 @@ namespace SharpLang.CompilerServices
             {
                 // Place eh.resume block at the very end
                 LLVM.MoveBasicBlockAfter(functionContext.ResumeExceptionBlock, LLVM.GetLastBasicBlock(functionGlobal));
+            }
+
+            if (LLVM.VerifyFunction(functionGlobal, VerifierFailureAction.PrintMessageAction))
+            { 
+                throw new InvalidOperationException(string.Format("Verification failed for function {0}", function.MethodReference));
             }
         }
 
@@ -1241,7 +1249,8 @@ namespace SharpLang.CompilerServices
                 {
                     var targetInstruction = (Instruction)instruction.Operand;
 
-                    EmitConditionalBranch(functionContext, stack, instruction.Next.Offset, targetInstruction.Offset, opcode);
+                    EmitConditionalBranch(stack, functionContext.BasicBlocks[targetInstruction.Offset], functionContext.BasicBlocks[instruction.Next.Offset], opcode);
+                    functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
 
                     break;
                 }

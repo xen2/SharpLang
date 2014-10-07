@@ -1429,7 +1429,7 @@ namespace SharpLang.CompilerServices
                 throw new InvalidOperationException(string.Format("Comparison between operands of different types, {0} and {1}.", operand1.Type, operand2.Type));
         }
 
-        private void EmitConditionalBranch(FunctionCompilerContext functionContext, List<StackValue> stack, int nextInstructionOffset, int targetInstructionOffset, Code opcode)
+        private void EmitConditionalBranch(List<StackValue> stack, BasicBlockRef thenBlock, BasicBlockRef elseBlock, Code opcode)
         {
             var operand2 = stack.Pop();
             var operand1 = stack.Pop();
@@ -1501,9 +1501,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Branch depending on previous test
-            LLVM.BuildCondBr(builder, compareResult, functionContext.BasicBlocks[targetInstructionOffset], functionContext.BasicBlocks[nextInstructionOffset]);
-
-            functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
+            LLVM.BuildCondBr(builder, compareResult, thenBlock, elseBlock);
         }
 
         private void EmitLocalloc(List<StackValue> stack)
