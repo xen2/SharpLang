@@ -168,6 +168,16 @@ namespace SharpLang.CompilerServices
                     }
                 }
 
+                if (baseType != null && baseType.FullName == typeof(MulticastDelegate).FullName)
+                {
+                    // Add GetMulticastDispatchMethod runtime class on delegates
+                    var getMulticastDispatchMethod = new MethodDefinition("GetMulticastDispatchMethod", MethodAttributes.Private, intPtr.TypeReference);
+                    getMulticastDispatchMethod.HasThis = true;
+                    getMulticastDispatchMethod.Attributes = MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final;
+                    getMulticastDispatchMethod.ImplAttributes = MethodImplAttributes.Runtime;
+                    typeDefinition.Methods.Add(getMulticastDispatchMethod);
+                }
+
                 // Build methods slots
                 // TODO: This will trigger their compilation, but maybe we might want to defer that later
                 // (esp. since vtable is not built yet => recursion issues)

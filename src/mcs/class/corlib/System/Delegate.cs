@@ -55,9 +55,9 @@ namespace System
 	{
 		#region Sync with object-internals.h
 #pragma warning disable 169, 414, 649
-		private object _target;
-		private IntPtr _methodPtr;
-		private IntPtr _methodPtrAux;
+		internal object _target;
+		internal IntPtr _methodPtr;
+		internal IntPtr _methodPtrAux;
 
 		//private IntPtr invoke_impl;
 		//private IntPtr method;
@@ -405,7 +405,15 @@ namespace System
 			if (d == null)
 				return false;
 
-			throw new NotImplementedException();
+            // If everything is equal, that's good!
+            if (_target == d._target && _methodPtr == d._methodPtr && _methodPtrAux == d._methodPtrAux)
+                return true;
+            
+            // Static delegates: _target will be different (this) but _methodPtrAux will be non-null and equal
+		    if (_methodPtrAux != IntPtr.Zero && d._methodPtrAux != IntPtr.Zero)
+		        return _methodPtrAux == d._methodPtrAux;
+
+		    return false;
 		}
 
 		public override bool Equals (object obj)
