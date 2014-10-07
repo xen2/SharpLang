@@ -402,13 +402,8 @@ namespace SharpLang.CompilerServices
             var value = stack.Pop();
             var @object = stack.Pop();
 
-            var objectValue = ConvertReferenceToExpectedType(@object, field.DeclaringClass.Type);
-
-            // Build indices for GEP
-            var indices = BuildFieldIndices(field, @object.StackType, field.DeclaringClass.Type);
-
-            // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices, string.Empty);
+            // Compute field address
+            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
 
             // Convert stack value to appropriate type
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
@@ -431,13 +426,8 @@ namespace SharpLang.CompilerServices
             }
             else
             {
-                var objectValue = ConvertReferenceToExpectedType(@object, field.DeclaringClass.Type);
-
-                // Build indices for GEP
-                var indices = BuildFieldIndices(field, @object.StackType, field.DeclaringClass.Type);
-
-                // Find field address using GEP
-                var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices, string.Empty);
+                // Compute field address
+                var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
 
                 // Load value from field and create "fake" local
                 value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
@@ -453,16 +443,16 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
         }
 
-        private ValueRef ConvertReferenceToExpectedType(StackValue stackValue, Type type)
+        private ValueRef ConvertReferenceToExpectedType(BuilderRef builder, StackValueType stackValueType, ValueRef value, Type type)
         {
-            var expectedType = stackValue.StackType == StackValueType.Object
+            var expectedType = stackValueType == StackValueType.Object
                 ? LLVM.PointerType(type.ObjectType, 0)
                 : LLVM.PointerType(type.ValueType, 0);
 
-            if (LLVM.TypeOf(stackValue.Value) == expectedType)
-                return stackValue.Value;
+            if (LLVM.TypeOf(value) == expectedType)
+                return value;
 
-            return LLVM.BuildPointerCast(builder, stackValue.Value, expectedType, string.Empty);
+            return LLVM.BuildPointerCast(builder, value, expectedType, string.Empty);
         }
 
         private void EmitLdflda(List<StackValue> stack, Field field)
@@ -471,14 +461,24 @@ namespace SharpLang.CompilerServices
 
             var refType = GetType(field.Type.TypeReference.MakeByReferenceType());
 
-            // Build indices for GEP
-            var indices = BuildFieldIndices(field, @object.StackType, @object.Type);
-
-            // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, @object.Value, indices, string.Empty);
+            // Compute field address
+            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
 
             // Add value to stack
             stack.Add(new StackValue(StackValueType.Reference, refType, fieldAddress));
+        }
+
+        private ValueRef ComputeFieldAddress(BuilderRef builder, Field field, StackValueType objectStackType, ValueRef objectValue)
+        {
+            objectValue = ConvertReferenceToExpectedType(builder, objectStackType, objectValue, field.DeclaringClass.Type);
+
+            // Build indices for GEP
+            var indices = BuildFieldIndices(field, objectStackType, field.DeclaringClass.Type);
+
+            // Find field address using GEP
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices, string.Empty);
+
+            return fieldAddress;
         }
 
         private static void SetInstructionFlags(ValueRef instruction, InstructionFlags instructionFlags)
