@@ -109,6 +109,7 @@
     <Compile Include="StackValueType.cs" />
     <Compile Include="Toolchains\MSVCToolchain.cs" />
     <Compile Include="Type.cs" />
+    <Compile Include="TypeState.cs" />
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

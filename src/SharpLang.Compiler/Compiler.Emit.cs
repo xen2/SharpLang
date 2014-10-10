@@ -41,7 +41,7 @@ namespace SharpLang.CompilerServices
         {
             var local = locals[operandIndex];
 
-            var refType = GetType(local.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(local.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
 
             // Convert from local to stack value
             var value = ConvertFromLocalToStack(refType, local.Value);
@@ -69,7 +69,7 @@ namespace SharpLang.CompilerServices
         {
             var arg = args[operandIndex];
 
-            var refType = GetType(arg.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(arg.Type.TypeReference.MakeByReferenceType(), TypeState.StackComplete);
 
             // Convert from local to stack value
             var value = ConvertFromLocalToStack(refType, arg.Value);
@@ -206,7 +206,7 @@ namespace SharpLang.CompilerServices
                 var stackItem = stack.Pop();
 
                 // Get return type
-                var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
+                var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
                 LLVM.BuildRet(builder, ConvertFromStackToLocal(returnType, stackItem));
             }
         }
@@ -459,7 +459,7 @@ namespace SharpLang.CompilerServices
         {
             var @object = stack.Pop();
 
-            var refType = GetType(field.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(field.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
 
             // Compute field address
             var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
@@ -470,10 +470,10 @@ namespace SharpLang.CompilerServices
 
         private ValueRef ComputeFieldAddress(BuilderRef builder, Field field, StackValueType objectStackType, ValueRef objectValue)
         {
-            objectValue = ConvertReferenceToExpectedType(builder, objectStackType, objectValue, field.DeclaringClass.Type);
+            objectValue = ConvertReferenceToExpectedType(builder, objectStackType, objectValue, field.DeclaringType);
 
             // Build indices for GEP
-            var indices = BuildFieldIndices(field, objectStackType, field.DeclaringClass.Type);
+            var indices = BuildFieldIndices(field, objectStackType, field.DeclaringType);
 
             // Find field address using GEP
             var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices, string.Empty);
@@ -514,7 +514,7 @@ namespace SharpLang.CompilerServices
                 var @class = GetClass(type);
                 while (@class != null)
                 {
-                    if (@class == field.DeclaringClass)
+                    if (@class.Type == field.DeclaringType)
                         break;
 
                     @class = @class.BaseType;
@@ -538,7 +538,7 @@ namespace SharpLang.CompilerServices
         {
             var value = stack.Pop();
 
-            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -558,7 +558,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
-            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -581,9 +581,9 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsflda(List<StackValue> stack, Field field)
         {
-            var runtimeTypeInfoGlobal = field.DeclaringClass.GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
 
-            var refType = GetType(field.Type.TypeReference.MakeByReferenceType());
+            var refType = GetType(field.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -611,14 +611,10 @@ namespace SharpLang.CompilerServices
         {
             var arrayClass = GetClass(new ArrayType(elementType.TypeReference));
 
-            // Emit element type class to make sure we can compute sizeof
-            // TODO: Only perform it on value type? Need to check if seeing T[] involves we should codegen T.
-            var elementClass = GetClass(elementType);
-
             var numElements = stack.Pop();
 
             // Compute object size
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementClass.Type.DefaultType), int32Type, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
 
             // Compute array size (object size * num elements)
             var numElementsCasted = ConvertToNativeInt(numElements);
@@ -680,7 +676,7 @@ namespace SharpLang.CompilerServices
 
             var indexValue = ConvertToNativeInt(index);
 
-            var refType = GetType(elementType.TypeReference.MakeByReferenceType());
+            var refType = GetType(elementType.TypeReference.MakeByReferenceType(), TypeState.Opaque);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -703,7 +699,7 @@ namespace SharpLang.CompilerServices
             var indexValue = ConvertToNativeInt(index);
 
             // Get element type
-            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
+            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType, TypeState.StackComplete);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -730,7 +726,7 @@ namespace SharpLang.CompilerServices
             var indexValue = ConvertToNativeInt(index);
 
             // Get element type
-            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType);
+            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType, TypeState.StackComplete);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -947,33 +943,33 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(obj.StackType, @class.Type, mergedVariable));
         }
 
-        private void EmitBoxValueType(List<StackValue> stack, Class @class)
+        private void EmitBoxValueType(List<StackValue> stack, Type type)
         {
             var valueType = stack.Pop();
 
-            var allocatedObject = BoxValueType(@class, valueType);
+            var allocatedObject = BoxValueType(type, valueType);
 
             // Add created object on the stack
-            stack.Add(new StackValue(StackValueType.Object, @class.Type, allocatedObject));
+            stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
         }
 
-        private void EmitUnboxAnyValueType(List<StackValue> stack, Class @class)
+        private void EmitUnboxAnyValueType(List<StackValue> stack, Type type)
         {
             var obj = stack.Pop();
 
             // TODO: check type?
-            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(@class.Type.ObjectType, 0), string.Empty);
+            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
             var dataPointer = GetDataPointer(objCast);
 
-            var expectedPointerType = LLVM.PointerType(@class.Type.DataType, 0);
+            var expectedPointerType = LLVM.PointerType(type.DataType, 0);
             if (expectedPointerType != LLVM.TypeOf(dataPointer))
                 dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
             var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
 
-            data = ConvertFromLocalToStack(@class.Type, data);
+            data = ConvertFromLocalToStack(type, data);
 
-            stack.Add(new StackValue(@class.Type.StackType, @class.Type, data));
+            stack.Add(new StackValue(type.StackType, type, data));
         }
 
         private void EmitUnaryOperation(List<StackValue> stack, Code opcode)
@@ -1584,7 +1580,7 @@ namespace SharpLang.CompilerServices
                 case Code.Ldind_R4: type = @float; break;
                 case Code.Ldind_R8: type = @double; break;
                 case Code.Ldind_Ref:
-                    type = GetType(((ByReferenceType)address.Type.TypeReference).ElementType);
+                    type = GetType(((ByReferenceType)address.Type.TypeReference).ElementType, TypeState.StackComplete);
                     break;
                 default:
                     throw new ArgumentException("opcode");

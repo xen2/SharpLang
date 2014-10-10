@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mono.Cecil;
 using SharpLLVM;
 
@@ -96,6 +97,10 @@ namespace SharpLang.CompilerServices
         public TypeDefinition TypeDefinition { get; private set; }
 
         public StackValueType StackType { get; private set; }
+
+        public Dictionary<FieldDefinition, Field> Fields { get; set; }
+
+        public TypeState State { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()

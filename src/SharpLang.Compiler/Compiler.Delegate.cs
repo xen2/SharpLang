@@ -156,7 +156,7 @@ namespace SharpLang.CompilerServices
 
             var invokeFunctionType = LLVM.GetElementType(LLVM.TypeOf(invokeMethodHelper));
             bool hasRetValue = LLVM.GetReturnType(invokeFunctionType) != LLVM.VoidTypeInContext(context);
-            var delegateArrayType = GetClass(new ArrayType(delegateType)).Type;
+            var delegateArrayType = GetType(new ArrayType(delegateType), TypeState.TypeComplete);
 
             // Prepare basic blocks
             var forCodeBlock = LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty);
@@ -274,7 +274,7 @@ namespace SharpLang.CompilerServices
             var @this = LLVM.GetParam(invokeMethodHelper, 0);
 
             // Compute field address
-            var fieldAddress = ComputeFieldAddress(builder2, GetClass(delegateType).Fields[methodPtrAuxField], StackValueType.Object, @this);
+            var fieldAddress = ComputeFieldAddress(builder2, GetType(delegateType, TypeState.TypeComplete).Fields[methodPtrAuxField], StackValueType.Object, @this);
 
             //    Load value from field
             var methodPtrAux = LLVM.BuildLoad(builder2, fieldAddress, string.Empty);

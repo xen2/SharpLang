@@ -4,10 +4,10 @@ namespace SharpLang.CompilerServices
 {
     class Field
     {
-        public Field(FieldDefinition fieldDefinition, Class declaringClass, Type type, int structIndex)
+        public Field(FieldDefinition fieldDefinition, Type declaringType, Type type, int structIndex)
         {
             FieldDefinition = fieldDefinition;
-            DeclaringClass = declaringClass;
+            DeclaringType = declaringType;
             Type = type;
             StructIndex = structIndex;
         }
@@ -20,7 +20,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public FieldDefinition FieldDefinition { get; private set; }
 
-        public Class DeclaringClass { get; private set; }
+        public Type DeclaringType { get; private set; }
 
         public Type Type { get; private set; }
 

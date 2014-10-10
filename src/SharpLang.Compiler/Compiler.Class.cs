@@ -21,7 +21,7 @@ namespace SharpLang.CompilerServices
         /// <returns></returns>
         private Class GetClass(TypeReference typeReference)
         {
-            var type = GetType(typeReference);
+            var type = GetType(typeReference, TypeState.Opaque);
 
             return GetClass(type);
         }
@@ -36,6 +36,9 @@ namespace SharpLang.CompilerServices
             bool processClass = false;
             bool processFields = false;
             var typeReference = type.TypeReference;
+
+            // Need complete type
+            GetType(type.TypeReference, TypeState.TypeComplete);
 
             switch (typeReference.MetadataType)
             {
@@ -60,7 +63,6 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Double:
                 {
                     processClass = true;
-                    processFields = true;
                     break;
                 }
                 case MetadataType.Array:
@@ -73,7 +75,6 @@ namespace SharpLang.CompilerServices
                 {
                     // Process class and instance fields
                     processClass = true;
-                    processFields = true;
                     break;
                 }
                 default:
@@ -82,7 +83,6 @@ namespace SharpLang.CompilerServices
 
             // Create class version (boxed version with VTable)
             var boxedType = type.ObjectType;
-            var dataType = type.DataType;
             var valueType = type.ValueType;
 
             if (type.Class != null)
@@ -113,48 +113,7 @@ namespace SharpLang.CompilerServices
 
                     @class.Depth = parentClass.Depth + 1;
                 }
-
-                // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
-                // In that case, do not process fields.
-                if (processFields && LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
-                {
-                    // Build actual type data (fields)
-                    // Add fields and vtable slots from parent class
-                    if (parentClass != null && type.StackType == StackValueType.Object)
-                    {
-                        fieldTypes.Add(parentClass.Type.DataType);
-                    }
-
-                    // Special cases: Array
-                    if (typeReference.MetadataType == MetadataType.Array)
-                    {
-                        // String: length (native int) + first element pointer
-                        var arrayType = (ArrayType)typeReference;
-                        var elementType = CreateType(arrayType.ElementType);
-                        fieldTypes.Add(intPtrType);
-                        fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
-                    }
-                    else
-                    {
-                        foreach (var field in typeDefinition.Fields)
-                        {
-                            if (field.IsStatic)
-                                continue;
-
-                            var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
-
-                            // Value type: Generate class to be able to compute size
-                            if (fieldType.StackType == StackValueType.Value)
-                                GetClass(fieldType);
-
-                            @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
-                            fieldTypes.Add(fieldType.DefaultType);
-                        }
-                    }
-
-                    LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
-                }
-
+                
                 if (typeReference is ArrayType)
                 {
                     var elementType = ResolveGenericsVisitor.Process(typeReference, ((ArrayType)typeReference).ElementType);
@@ -229,14 +188,10 @@ namespace SharpLang.CompilerServices
                     {
                         if (!field.IsStatic)
                             continue;
-    
-                        var fieldType = CreateType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)));
 
-                        // Value type: Generate class to be able to compute size
-                        if (fieldType.StackType == StackValueType.Value)
-                            GetClass(fieldType);
+                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
 
-                        @class.Fields.Add(field, new Field(field, @class, fieldType, fieldTypes.Count));
+                        @class.StaticFields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
                         fieldTypes.Add(fieldType.DefaultType);
                     }
 
