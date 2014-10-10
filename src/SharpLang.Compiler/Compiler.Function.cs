@@ -47,14 +47,14 @@ namespace SharpLang.CompilerServices
                 TypeReference parameterTypeReference;
                 var parameter = callSite.Parameters[index];
                 parameterTypeReference = ResolveGenericsVisitor.Process(context, parameter.ParameterType);
-                var parameterType = CreateType(parameterTypeReference);
+                var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
                 if (parameterType.DefaultType.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
                 parameterTypesLLVM[index] = parameterType.DefaultType;
             }
 
-            var returnType = CreateType(ResolveGenericsVisitor.Process(context, context.ReturnType));
+            var returnType = GetType(ResolveGenericsVisitor.Process(context, context.ReturnType), TypeState.StackComplete);
 
             return new FunctionSignature(returnType, parameterTypes);
         }
@@ -75,7 +75,7 @@ namespace SharpLang.CompilerServices
                 numParams++;
             var parameterTypes = new Type[numParams];
             var parameterTypesLLVM = new TypeRef[numParams];
-            var declaringType = CreateType(ResolveGenericsVisitor.Process(method, method.DeclaringType));
+            var declaringType = GetType(ResolveGenericsVisitor.Process(method, method.DeclaringType), TypeState.Opaque);
             for (int index = 0; index < numParams; index++)
             {
                 TypeReference parameterTypeReference;
@@ -92,18 +92,18 @@ namespace SharpLang.CompilerServices
                     var parameter = method.Parameters[method.HasThis ? index - 1 : index];
                     parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
                 }
-                var parameterType = CreateType(parameterTypeReference);
+                var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
                 if (parameterType.DefaultType.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
                 parameterTypesLLVM[index] = parameterType.DefaultType;
             }
 
-            var returnType = CreateType(ResolveGenericsVisitor.Process(method, method.ReturnType));
 
             // Generate function global
             bool isExternal = method.DeclaringType.Resolve().Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
+            var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             var resolvedMethod = method.Resolve();
@@ -227,7 +227,7 @@ namespace SharpLang.CompilerServices
                 //if (local.IsPinned)
                 //    throw new NotSupportedException();
 
-                var type = CreateType(ResolveGenericsVisitor.Process(methodReference, local.VariableType));
+                var type = GetType(ResolveGenericsVisitor.Process(methodReference, local.VariableType), TypeState.StackComplete);
                 locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
 
                 // Force value types to be emitted right away
@@ -670,8 +670,8 @@ namespace SharpLang.CompilerServices
                     var callSite = (CallSite)instruction.Operand;
 
                     // TODO: Unify with CreateFunction code
-                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType)).DefaultType;
-                    var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType)).DefaultType).ToArray();
+                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete).DefaultType;
+                    var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete).DefaultType).ToArray();
 
                     // Generate function type
                     var functionType = LLVM.FunctionType(returnType, parameterTypesLLVM, false);
@@ -719,7 +719,7 @@ namespace SharpLang.CompilerServices
                 {
                     var address = stack.Pop();
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
-                    var type = GetType(typeReference);
+                    var type = GetType(typeReference, TypeState.StackComplete);
                     EmitInitobj(address, type);
                     break;
                 }
@@ -728,7 +728,7 @@ namespace SharpLang.CompilerServices
                 {
                     var ctorReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                     var ctor = GetFunction(ctorReference);
-                    var type = GetType(ctorReference.DeclaringType);
+                    var type = GetType(ctorReference.DeclaringType, TypeState.TypeComplete);
 
                     EmitNewobj(functionContext, type, ctor);
 
@@ -737,7 +737,7 @@ namespace SharpLang.CompilerServices
 
                 case Code.Stobj:
                 {
-                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand), TypeState.StackComplete);
 
                     EmitStobj(stack, type, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
@@ -746,7 +746,7 @@ namespace SharpLang.CompilerServices
                 }
                 case Code.Ldobj:
                 {
-                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand), TypeState.StackComplete);
 
                     EmitLdobj(stack, type, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
@@ -758,8 +758,7 @@ namespace SharpLang.CompilerServices
                 case Code.Sizeof:
                 {
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
-                    var type = GetType(typeReference);
-                    var @class = GetClass(type);
+                    var type = GetType(typeReference, TypeState.StackComplete);
 
                     // Use type because @class might be null (i.e. void*)
                     var objectSize = LLVM.SizeOf(type.DefaultType);
@@ -842,12 +841,12 @@ namespace SharpLang.CompilerServices
                 case Code.Box:
                 {
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
-                    var @class = GetClass(typeReference);
+                    var type = GetType(typeReference, TypeState.VTableEmitted);
 
                     // Only value types need to be boxed
-                    if (@class.Type.TypeDefinition.IsValueType)
+                    if (type.TypeDefinition.IsValueType)
                     {
-                        EmitBoxValueType(stack, @class);
+                        EmitBoxValueType(stack, type);
                     }
 
                     break;
@@ -856,11 +855,11 @@ namespace SharpLang.CompilerServices
                 case Code.Unbox_Any:
                 {
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
-                    var @class = GetClass(typeReference);
+                    var type = GetType(typeReference, TypeState.VTableEmitted);
 
-                    if (@class.Type.TypeDefinition.IsValueType)
+                    if (type.TypeDefinition.IsValueType)
                     {
-                        EmitUnboxAnyValueType(stack, @class);
+                        EmitUnboxAnyValueType(stack, type);
                     }
                     else
                     {
@@ -875,7 +874,7 @@ namespace SharpLang.CompilerServices
                 #region Array opcodes (Newarr, Ldlen, Stelem_Ref, etc...)
                 case Code.Newarr:
                 {
-                    var elementType = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+                    var elementType = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand), TypeState.StackComplete);
 
                     EmitNewarr(stack, elementType);
 
@@ -889,7 +888,7 @@ namespace SharpLang.CompilerServices
                 }
                 case Code.Ldelema:
                 {
-                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand));
+                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand), TypeState.Opaque);
 
                     EmitLdelema(stack, type);
 
@@ -964,8 +963,8 @@ namespace SharpLang.CompilerServices
                 {
                     // TODO: Implement this opcode
                     //var value = LLVM.BuildVAArg(builder, , , string.Empty);
-                    var runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeArgumentHandle).FullName));
-                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, LLVM.ConstNull(runtimeHandleClass.Type.DataType)));
+                    var runtimeHandleType = GetType(corlib.MainModule.GetType(typeof(RuntimeArgumentHandle).FullName), TypeState.StackComplete);
+                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleType, LLVM.ConstNull(runtimeHandleType.DataType)));
                     break;
                 }
                 #endregion
@@ -1061,9 +1060,9 @@ namespace SharpLang.CompilerServices
                 {
                     var fieldReference = (FieldReference)instruction.Operand;
 
-                    // Resolve class and field
-                    var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
-                    var field = @class.Fields[fieldReference.Resolve()];
+                    // Resolve type and field
+                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType), TypeState.TypeComplete);
+                    var field = type.Fields[fieldReference.Resolve()];
 
                     if (opcode == Code.Ldflda)
                     {
@@ -1084,7 +1083,7 @@ namespace SharpLang.CompilerServices
 
                     // Resolve class and field
                     var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
-                    var field = @class.Fields[fieldReference.Resolve()];
+                    var field = @class.StaticFields[fieldReference.Resolve()];
 
                     EnsureClassInitialized(functionContext, @class);
 
@@ -1158,9 +1157,9 @@ namespace SharpLang.CompilerServices
                 {
                     var fieldReference = (FieldReference)instruction.Operand;
 
-                    // Resolve class and field
-                    var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
-                    var field = @class.Fields[fieldReference.Resolve()];
+                    // Resolve type and field
+                    var type = GetType(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType), TypeState.TypeComplete);
+                    var field = type.Fields[fieldReference.Resolve()];
 
                     EmitStfld(stack, field, functionContext.InstructionFlags);
                     functionContext.InstructionFlags = InstructionFlags.None;
@@ -1174,7 +1173,7 @@ namespace SharpLang.CompilerServices
 
                     // Resolve class and field
                     var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
-                    var field = @class.Fields[fieldReference.Resolve()];
+                    var field = @class.StaticFields[fieldReference.Resolve()];
 
                     EnsureClassInitialized(functionContext, @class);
 
@@ -1525,7 +1524,7 @@ namespace SharpLang.CompilerServices
                             targetMethod = matchingMethod;
 
                             // Convert to appropriate type (if necessary)
-                            var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType());
+                            var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
                             if (thisObject.StackType != StackValueType.Reference || thisObject.Type != refType)
                             {
                                 thisObject = new StackValue(refType.StackType, refType,
@@ -1540,7 +1539,7 @@ namespace SharpLang.CompilerServices
                                     constrainedClass.Type.DefaultType, string.Empty));
 
                             thisObject = new StackValue(StackValueType.Object, constrainedClass.Type,
-                                BoxValueType(constrainedClass, thisObject));
+                                BoxValueType(constrainedClass.Type, thisObject));
                         }
                     }
 
@@ -1555,7 +1554,7 @@ namespace SharpLang.CompilerServices
 
                 // If it's a byref value type, emit a normal call
                 if (thisObject.Type.TypeReference.IsByReference
-                    && GetType(thisObject.Type.TypeReference.GetElementType()).TypeDefinition.IsValueType
+                    && GetType(((ByReferenceType)thisObject.Type.TypeReference).ElementType, TypeState.Opaque).TypeDefinition.IsValueType
                     && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, ((ByReferenceType)thisObject.Type.TypeReference).ElementType))
                 {
                     resolvedMethod = targetMethod.GeneratedValue;
@@ -1665,15 +1664,15 @@ namespace SharpLang.CompilerServices
             return currentExceptionHandler;
         }
 
-        private ValueRef BoxValueType(Class @class, StackValue valueType)
+        private ValueRef BoxValueType(Type type, StackValue valueType)
         {
             // Allocate object
-            var allocatedObject = AllocateObject(@class.Type, StackValueType.Object);
+            var allocatedObject = AllocateObject(type, StackValueType.Object);
 
             var dataPointer = GetDataPointer(allocatedObject);
 
             // Convert to local type
-            var value = ConvertFromStackToLocal(@class.Type, valueType);
+            var value = ConvertFromStackToLocal(type, valueType);
 
             // Copy data
             var expectedPointerType = LLVM.PointerType(LLVM.TypeOf(value), 0);

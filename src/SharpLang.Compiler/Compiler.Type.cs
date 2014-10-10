@@ -15,33 +15,21 @@ namespace SharpLang.CompilerServices
         /// </summary>
         /// <param name="typeReference">The type reference.</param>
         /// <returns></returns>
-        Type GetType(TypeReference typeReference)
+        Type GetType(TypeReference typeReference, TypeState state)
         {
             Type type;
-            if (types.TryGetValue(typeReference, out type))
-                return type;
+            if (!types.TryGetValue(typeReference, out type))
+                type = BuildType(typeReference);
 
-            type = BuildType(typeReference);
+            if (type == null)
+                return null;
 
-            types.Add(typeReference, type);
+            if ((state >= TypeState.StackComplete && type.StackType == StackValueType.Value)
+                || state >= TypeState.TypeComplete)
+                CompleteType(type);
 
-            return type;
-        }
-        
-        /// <summary>
-        /// Compiles the specified type.
-        /// </summary>
-        /// <param name="typeReference">The type reference.</param>
-        /// <returns></returns>
-        private Type CreateType(TypeReference typeReference)
-        {
-            Type type;
-            if (types.TryGetValue(typeReference, out type))
-                return type;
-
-            type = BuildType(typeReference);
-
-            types.Add(typeReference, type);
+            if (state >= TypeState.VTableEmitted)
+                GetClass(type);
 
             return type;
         }
@@ -53,12 +41,13 @@ namespace SharpLang.CompilerServices
         /// <returns></returns>
         private Type BuildType(TypeReference typeReference)
         {
+            // Open type?
             if (typeReference.ContainsGenericParameter())
                 return null;
 
+            TypeRef valueType = TypeRef.Empty;
             TypeRef dataType;
             StackValueType stackType;
-            var valueType = TypeRef.Empty;
 
             var typeDefinition = GetMethodTypeDefinition(typeReference);
 
@@ -66,25 +55,27 @@ namespace SharpLang.CompilerServices
             {
                 case MetadataType.Pointer:
                 {
-                    var type = GetType(((PointerType)typeReference).ElementType);
+                    var type = GetType(((PointerType)typeReference).ElementType, TypeState.Opaque);
                     // Special case: void*
                     if (LLVM.VoidTypeInContext(context) == type.DataType)
                         dataType = intPtrType;
                     else
                         dataType = LLVM.PointerType(type.DataType, 0);
+                    valueType = dataType;
                     stackType = StackValueType.NativeInt;
                     break;
                 }
                 case MetadataType.ByReference:
                 {
-                    var type = GetType(((ByReferenceType)typeReference).ElementType);
+                    var type = GetType(((ByReferenceType)typeReference).ElementType, TypeState.Opaque);
                     dataType = LLVM.PointerType(type.DefaultType, 0);
+                    valueType = dataType;
                     stackType = StackValueType.Reference;
                     break;
                 }
                 case MetadataType.RequiredModifier:
                     // TODO: Add support for this feature
-                    return GetType(((RequiredModifierType)typeReference).ElementType);
+                    return GetType(((RequiredModifierType)typeReference).ElementType, TypeState.Opaque);
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
                     stackType = StackValueType.Unknown;
@@ -140,6 +131,10 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Class:
                 case MetadataType.Object:
                 {
+                    // Open type?
+                    if (typeDefinition.HasGenericParameters && !(typeReference is GenericInstanceType))
+                        return null;
+
                     // When resolved, void becomes a real type
                     if (typeReference.FullName == typeof(void).FullName)
                     {
@@ -149,14 +144,15 @@ namespace SharpLang.CompilerServices
                     if (typeDefinition.IsValueType && typeDefinition.IsEnum)
                     {
                         // Special case: enum
-                        var enumUnderlyingType = GetType(typeDefinition.GetEnumUnderlyingType());
+                        // Uses underlying type
+                        var enumUnderlyingType = GetType(typeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete);
                         dataType = enumUnderlyingType.DataType;
                         stackType = enumUnderlyingType.StackType;
                     }
                     else
                     {
-                        dataType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".data");
                         stackType = typeDefinition.IsValueType ? StackValueType.Value : StackValueType.Object;
+                        dataType = GenerateDataType(typeReference);
                     }
 
                     valueType = dataType;
@@ -173,10 +169,74 @@ namespace SharpLang.CompilerServices
                 valueType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".value");
 
             var result = new Type(typeReference, typeDefinition, dataType, valueType, boxedType, stackType);
+            types.Add(typeReference, result);
 
+            // Enqueue class generation, if needed
             EmitType(result);
 
             return result;
+        }
+
+        private TypeRef GenerateDataType(TypeReference typeReference)
+        {
+            return LLVM.StructCreateNamed(context, typeReference.MangledName() + ".data");
+        }
+
+        private void CompleteType(Type type)
+        {
+            var valueType = type.ValueType;
+            var typeReference = type.TypeReference;
+            var typeDefinition = GetMethodTypeDefinition(typeReference);
+            var stackType = type.StackType;
+
+            // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
+            // In that case, do not process fields.
+            if (LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
+            {
+                // Avoid recursion
+                //type.IsBeingComplete = true;
+
+                var fields = new Dictionary<FieldDefinition, Field>(MemberEqualityComparer.Default);
+
+                var baseType = GetBaseTypeDefinition(typeReference);
+                var parentType = baseType != null ? GetType(ResolveGenericsVisitor.Process(typeReference, baseType), TypeState.TypeComplete) : null;
+
+                // Build actual type data (fields)
+                // Add fields and vtable slots from parent class
+                var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count + 1);
+
+                if (parentType != null && stackType == StackValueType.Object)
+                {
+                    fieldTypes.Add(parentType.DataType);
+                }
+
+                // Special cases: Array
+                if (typeReference.MetadataType == MetadataType.Array)
+                {
+                    // String: length (native int) + first element pointer
+                    var arrayType = (ArrayType)typeReference;
+                    var elementType = GetType(arrayType.ElementType, TypeState.StackComplete);
+                    fieldTypes.Add(intPtrType);
+                    fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
+                }
+                else
+                {
+                    foreach (var field in typeDefinition.Fields)
+                    {
+                        if (field.IsStatic)
+                            continue;
+
+                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+
+                        fields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
+                        fieldTypes.Add(fieldType.DefaultType);
+                    }
+                }
+
+                LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
+
+                type.Fields = fields;
+            }
         }
 
         private void EmitType(Type type, bool force = false)
@@ -198,9 +258,13 @@ namespace SharpLang.CompilerServices
             if (!(isLocal || isTemplate) && !force)
                 return;
 
-            // Mark as
+            // Type is local, make sure it's complete right away because it will be needed anyway
+            CompleteType(type);
+
+            // Setup proper linkage
             type.Linkage = isTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
 
+            // Enqueue for later generation
             type.IsLocal = true;
             classesToGenerate.Enqueue(type);
         }

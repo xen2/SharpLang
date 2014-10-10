@@ -274,13 +274,13 @@ namespace SharpLang.CompilerServices
                 var type = @class.Type;
 
                 // Complete members
-                var memberTypes = new List<ValueRef>(@class.Fields.Count);
+                if (type.Fields == null)
+                    continue;
 
-                foreach (var field in type.Class.Fields)
+                var memberTypes = new List<ValueRef>(type.Fields.Count);
+
+                foreach (var field in type.Fields)
                 {
-                    if (field.Key.IsStatic)
-                        continue;
-
                     var fieldType = CreateDebugType(field.Value.Type);
                     var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
                     var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
@@ -295,10 +295,15 @@ namespace SharpLang.CompilerServices
 
                 // Update members (mutation)
                 // TODO: LLVM.DICompositeTypeSetTypeArray should take a ref, not out.
+                var oldDebugClass = debugClass;
                 LLVM.DICompositeTypeSetTypeArray(out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
 
                 // debugClass being changed, set it again (old value is not valid anymore)
                 debugClasses[@class] = debugClass;
+
+                // Same in debugTypeCache (if value type)
+                if (debugTypeCache.ContainsKey(@class.Type) && debugTypeCache[@class.Type] == oldDebugClass)
+                    debugTypeCache[@class.Type] = debugClass;
             }
         }
 
@@ -383,7 +388,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.UIntPtr:
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "UIntPtr", size, align, (uint)DW_ATE.Unsigned);
                 case MetadataType.Pointer:
-                    var elementType = GetType(((PointerType)type.TypeReference).ElementType);
+                    var elementType = GetType(((PointerType)type.TypeReference).ElementType, TypeState.TypeComplete);
                     return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
                 case MetadataType.Array:
                 case MetadataType.String:

@@ -105,20 +105,20 @@ namespace SharpLang.CompilerServices
 
             debugBuilder = LLVM.DIBuilderCreate(module);
 
-            intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName));
-            int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName));
-            int16 = GetType(corlib.MainModule.GetType(typeof(short).FullName));
-            int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName));
-            int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName));
-            uint8 = GetType(corlib.MainModule.GetType(typeof(byte).FullName));
-            uint16 = GetType(corlib.MainModule.GetType(typeof(ushort).FullName));
-            uint32 = GetType(corlib.MainModule.GetType(typeof(uint).FullName));
-            uint64 = GetType(corlib.MainModule.GetType(typeof(ulong).FullName));
-            @bool = GetType(corlib.MainModule.GetType(typeof(bool).FullName));
-            @float = GetType(corlib.MainModule.GetType(typeof(float).FullName));
-            @double = GetType(corlib.MainModule.GetType(typeof(double).FullName));
+            intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName), TypeState.StackComplete);
+            int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName), TypeState.StackComplete);
+            int16 = GetType(corlib.MainModule.GetType(typeof(short).FullName), TypeState.StackComplete);
+            int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName), TypeState.StackComplete);
+            int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName), TypeState.StackComplete);
+            uint8 = GetType(corlib.MainModule.GetType(typeof(byte).FullName), TypeState.StackComplete);
+            uint16 = GetType(corlib.MainModule.GetType(typeof(ushort).FullName), TypeState.StackComplete);
+            uint32 = GetType(corlib.MainModule.GetType(typeof(uint).FullName), TypeState.StackComplete);
+            uint64 = GetType(corlib.MainModule.GetType(typeof(ulong).FullName), TypeState.StackComplete);
+            @bool = GetType(corlib.MainModule.GetType(typeof(bool).FullName), TypeState.StackComplete);
+            @float = GetType(corlib.MainModule.GetType(typeof(float).FullName), TypeState.StackComplete);
+            @double = GetType(corlib.MainModule.GetType(typeof(double).FullName), TypeState.StackComplete);
 
-            @object = GetType(corlib.MainModule.GetType(typeof(object).FullName));
+            @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
 
             // struct IMTEntry { i32 functionId, i8* functionPtr }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
@@ -140,7 +140,7 @@ namespace SharpLang.CompilerServices
 
         public void RegisterType(TypeReference typeReference)
         {
-            var type = CreateType(typeReference);
+            var type = GetType(typeReference, TypeState.TypeComplete);
             EmitType(type, true);
             BuildRuntimeType(GetClass(type));
         }
@@ -153,7 +153,7 @@ namespace SharpLang.CompilerServices
                 var typeReferences = assemblyModule.GetTypeReferences();
                 foreach (var type in typeReferences)
                 {
-                    CreateType(type);
+                    GetType(type, TypeState.TypeComplete);
                 }
 
                 var memberReferences = assemblyModule.GetMemberReferences();
@@ -162,7 +162,7 @@ namespace SharpLang.CompilerServices
                     var method = member as MethodReference;
                     if (member.DeclaringType.ContainsGenericParameter())
                         continue;
-                    CreateType(member.DeclaringType);
+                    GetType(member.DeclaringType, TypeState.TypeComplete);
                     if (method != null)
                     {
                         if (!method.HasGenericParameters)

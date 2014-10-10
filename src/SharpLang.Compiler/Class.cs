@@ -16,7 +16,7 @@ namespace SharpLang.CompilerServices
         public Class(Type type)
         {
             Type = type;
-            Fields = new Dictionary<FieldDefinition, Field>();
+            StaticFields = new Dictionary<FieldDefinition, Field>(MemberEqualityComparer.Default);
             VirtualTable = new List<Function>();
             Functions = new List<Function>();
             Interfaces = new HashSet<Class>();
@@ -30,7 +30,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public Type Type { get; private set; }
 
-        public Dictionary<FieldDefinition, Field> Fields { get; private set; }
+        public Dictionary<FieldDefinition, Field> StaticFields { get; private set; }
 
         public List<Function> VirtualTable { get; private set; }
 
