@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct RuntimeTypeInfo
+struct RuntimeTypeInfo
 {
 	RuntimeTypeInfo* base;
 	uint32_t superTypeCount;
@@ -12,32 +12,40 @@ typedef struct RuntimeTypeInfo
 	RuntimeTypeInfo** interfaceMap;
 	uint8_t initialized;
 	uint32_t objectSize;
+	uint32_t elementSize;
 	void* interfaceMethodTable[19];
 	void* virtualTable[0];
-} RuntimeTypeInfo;
+};
 
-typedef struct Object
+struct Object
 {
+	Object(RuntimeTypeInfo* runtimeTypeInfo) : runtimeTypeInfo(runtimeTypeInfo) {}
+
 	RuntimeTypeInfo* runtimeTypeInfo;
-} Object;
+};
 
-typedef struct Exception
+struct Exception : Object
 {
-	Object base;
-} Exception;
+};
 
-typedef struct String
+extern RuntimeTypeInfo System_String_rtti;
+
+struct String : Object
 {
-	Object base;
+	String(uint32_t length, const char16_t* value) : Object(&System_String_rtti), length(length), value(value) {}
+
 	uint32_t length;
 	const char16_t* value;
-} String;
+};
+
+struct ArrayBase : Object
+{
+	size_t length;
+};
 
 template <class T>
-struct Array
+struct Array : ArrayBase
 {
-	Object base;
-	size_t length;
 	const T* value;
 };
 
