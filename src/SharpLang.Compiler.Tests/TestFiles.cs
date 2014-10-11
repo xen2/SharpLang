@@ -62,8 +62,8 @@ namespace SharpLang.CompilerServices.Tests
             var outputFile = Path.Combine(Path.GetDirectoryName(outputAssembly),
                 Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");
 
-            // Compile MiniCorlib.c
-            Driver.ExecuteClang(string.Format("{0} -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.c"), Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc")));
+            // Compile MiniCorlib.cpp
+            Driver.ExecuteClang(string.Format("{0} -std=c++11 -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.cpp"), Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc")));
 
             // Link bitcode and runtime
             Driver.LinkBitcodes(outputFile, bitcodeFile, Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc"));
