@@ -835,7 +835,7 @@ namespace SharpLang.CompilerServices
             LLVM.MoveBasicBlockAfter(typeCheckDoneBlock, typeNotMatchBlock);
 
             var isObjNonNull = LLVM.BuildICmp(builder, IntPredicate.IntNE, obj.Value, LLVM.ConstPointerNull(LLVM.TypeOf(obj.Value)), string.Empty);
-            LLVM.BuildCondBr(builder, isObjNonNull, typeIsNotNullBlock, typeNotMatchBlock);
+            LLVM.BuildCondBr(builder, isObjNonNull, typeIsNotNullBlock, opcode == Code.Castclass ? typeCheckDoneBlock : typeNotMatchBlock);
 
             LLVM.PositionBuilderAtEnd(builder, typeIsNotNullBlock);
 
@@ -944,7 +944,10 @@ namespace SharpLang.CompilerServices
             ValueRef mergedVariable;
             if (opcode == Code.Castclass)
             {
-                mergedVariable = castedPointerObject;
+                mergedVariable = LLVM.BuildPhi(builder, castedPointerType, string.Empty);
+                LLVM.AddIncoming(mergedVariable,
+                    new[] { castedPointerObject, LLVM.ConstPointerNull(castedPointerType) },
+                    new[] { typeCheckBlock, currentBlock });
             }
             else
             {

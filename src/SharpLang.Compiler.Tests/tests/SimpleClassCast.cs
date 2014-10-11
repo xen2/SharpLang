@@ -28,12 +28,17 @@ public static class Program
     {
         object test1 = new Test1();
         object test2 = new Test2();
+        object test3 = null;
 
         // Test valid casts
         System.Console.WriteLine((Test1)test1 != null);
         System.Console.WriteLine((Test1)test2 != null);
         System.Console.WriteLine((Test2)test2 != null);
         System.Console.WriteLine((ITest)test2 != null);
+
+        System.Console.WriteLine((Test1)test3 != null);
+        System.Console.WriteLine((Test2)test3 != null);
+        System.Console.WriteLine((ITest)test3 != null);
 
         try
         {
