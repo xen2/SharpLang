@@ -39,7 +39,7 @@ extern RuntimeTypeInfo System_String_rtti;
 extern "C" String* System_Environment__GetNewLine__()
 {
 	// TODO: String RTTI
-	static String newline = { { &System_String_rtti }, 2, u"\r\n" };
+	static String newline = String(2, u"\r\n");
 	return &newline;
 }
 
@@ -98,7 +98,7 @@ extern "C" String* System_Globalization_CultureInfo__get_current_locale_name__()
 {
 	// Redirect to invariant culture by using an empty string ("")
 	// TODO: mechanism to setup VTable
-	static String locale = { { &System_String_rtti }, 0, u"" };
+	static String locale = String(0, u"");
 	return &locale;
 }
 
@@ -113,9 +113,19 @@ extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToS
 	return 0;
 }
 
+extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_IntPtr_(Array<uint8_t>* arr, uint8_t* fieldHandle)
+{
+	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->runtimeTypeInfo->elementSize);
+}
+
 static Object* AllocateObject(RuntimeTypeInfo* rtti)
 {
-	Object* object = (Object*) malloc(rtti->objectSize);
+	auto objectSize = rtti->objectSize;
+	Object* object = (Object*)malloc(objectSize);
+
+	// TODO: Maybe we could avoid zero-ing memory in various cases?
+	memset(object, 0, objectSize);
+
 	object->runtimeTypeInfo = rtti;
 	return object;
 }
@@ -148,12 +158,12 @@ extern "C" Object* System_GC__get_ephemeron_tombstone__()
 	return NULL;
 }
 
-extern "C" bool System_Buffer__BlockCopyInternal_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Object* src, int32_t src_offset, Object* dest, int32_t dest_offset, int32_t count)
+extern "C" bool System_Buffer__BlockCopyInternal_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* src, int32_t src_offset, Array<uint8_t>* dest, int32_t dest_offset, int32_t count)
 {
-	auto srcB = ((Array<uint8_t>*)src)->value + src_offset;
-	auto destB = ((Array<uint8_t>*)dest)->value + dest_offset;
+	auto srcB = src->value + src_offset;
+	auto destB = dest->value + dest_offset;
 
-	if (srcB == destB) // Move inside same array
+	if (src == dest) // Move inside same array
 		memmove((void*)destB, (void*)srcB, count);
 	else
 		memcpy((void*)destB, (void*)srcB, count);
