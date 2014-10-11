@@ -791,6 +791,8 @@ namespace SharpLang.CompilerServices
                     var token = instruction.Operand;
 
                     Class runtimeHandleClass;
+                    var runtimeHandleValue = ValueRef.Empty;
+
                     if (token is TypeReference)
                     {
                         runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
@@ -798,6 +800,24 @@ namespace SharpLang.CompilerServices
                     else if (token is FieldReference)
                     {
                         runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeFieldHandle).FullName));
+
+                        var fieldReference = (FieldReference)token;
+                        var fieldDefinition = fieldReference.Resolve();
+
+                        // HACK: Temporary hack so that RuntimeHelpers.InitialiseArray can properly initialize array constants from static struct with initial data.
+                        // For now we just pass the field address (instead of a real RuntimeFieldHandle.
+                        if (fieldDefinition.IsStatic && (fieldDefinition.Attributes & FieldAttributes.HasFieldRVA) != 0)
+                        {
+                            // Resolve class and field
+                            var @class = GetClass(ResolveGenericsVisitor.Process(methodReference, fieldReference.DeclaringType));
+                            var field = @class.StaticFields[fieldDefinition];
+
+                            EmitLdsflda(stack, field);
+                            var fieldAddress = stack.Pop().Value;
+                            fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, intPtrType, string.Empty);
+                            runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataType);
+                            runtimeHandleValue = LLVM.BuildInsertValue(builder, runtimeHandleValue, fieldAddress, 0, string.Empty);
+                        }
                     }
                     else if (token is MethodReference)
                     {
@@ -808,8 +828,12 @@ namespace SharpLang.CompilerServices
                         throw new NotSupportedException("Invalid ldtoken operand.");
                     }
 
+                    // Setup default value
+                    if (runtimeHandleValue == ValueRef.Empty)
+                        runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataType);
+
                     // TODO: Actually transform type to RTTI token.
-                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, LLVM.ConstNull(runtimeHandleClass.Type.DataType)));
+                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, runtimeHandleValue));
 
                     break;
                 }
