@@ -154,7 +154,7 @@ namespace SharpLang.CompilerServices
 
                     if (@class.Type.IsLocal)
                     {
-                        LLVM.SetInitializer(runtimeTypeInfoGlobal, LLVM.ConstPointerNull(runtimeTypeInfoType));
+                        LLVM.SetInitializer(runtimeTypeInfoGlobal, LLVM.ConstNull(runtimeTypeInfoType));
 
                         // Allow classes to be defined multiple times
                         LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);

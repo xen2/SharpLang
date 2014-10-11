@@ -274,7 +274,8 @@ namespace SharpLang.CompilerServices
             var @this = LLVM.GetParam(invokeMethodHelper, 0);
 
             // Compute field address
-            var fieldAddress = ComputeFieldAddress(builder2, GetType(delegateType, TypeState.TypeComplete).Fields[methodPtrAuxField], StackValueType.Object, @this);
+            var instructionFlags = InstructionFlags.None;
+            var fieldAddress = ComputeFieldAddress(builder2, GetType(delegateType, TypeState.TypeComplete).Fields[methodPtrAuxField], StackValueType.Object, @this, ref instructionFlags);
 
             //    Load value from field
             var methodPtrAux = LLVM.BuildLoad(builder2, fieldAddress, string.Empty);
