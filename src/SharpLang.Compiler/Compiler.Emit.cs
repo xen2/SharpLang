@@ -403,7 +403,7 @@ namespace SharpLang.CompilerServices
             var @object = stack.Pop();
 
             // Compute field address
-            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
+            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value, ref instructionFlags);
 
             // Convert stack value to appropriate type
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
@@ -422,12 +422,15 @@ namespace SharpLang.CompilerServices
             ValueRef value;
             if (@object.StackType == StackValueType.Value)
             {
+                bool isCustomLayout = IsCustomLayout(field.DeclaringType.TypeDefinition);
+                if (isCustomLayout)
+                    throw new NotImplementedException("Ldfld on value types with custom layout is not supported yet.");
                 value = LLVM.BuildExtractValue(builder, @object.Value, (uint)field.StructIndex, string.Empty);
             }
             else
             {
                 // Compute field address
-                var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
+                var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value, ref instructionFlags);
 
                 // Load value from field and create "fake" local
                 value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
@@ -462,21 +465,75 @@ namespace SharpLang.CompilerServices
             var refType = GetType(field.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
 
             // Compute field address
-            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value);
+            var instructionFlags = InstructionFlags.None;
+            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value, ref instructionFlags);
 
             // Add value to stack
             stack.Add(new StackValue(StackValueType.Reference, refType, fieldAddress));
         }
 
-        private ValueRef ComputeFieldAddress(BuilderRef builder, Field field, StackValueType objectStackType, ValueRef objectValue)
+        private ValueRef ComputeFieldAddress(BuilderRef builder, Field field, StackValueType objectStackType, ValueRef objectValue, ref InstructionFlags instructionFlags)
         {
             objectValue = ConvertReferenceToExpectedType(builder, objectStackType, objectValue, field.DeclaringType);
+            Type type = field.DeclaringType;
 
             // Build indices for GEP
-            var indices = BuildFieldIndices(field, objectStackType, field.DeclaringType);
+            var indices = new List<ValueRef>(3);
+
+            if (objectStackType == StackValueType.Reference || objectStackType == StackValueType.Object || objectStackType == StackValueType.NativeInt)
+            {
+                // First pointer indirection
+                indices.Add(LLVM.ConstInt(int32Type, 0, false));
+            }
+
+            bool isCustomLayout = IsCustomLayout(type.TypeDefinition);
+
+            if (objectStackType == StackValueType.Object)
+            {
+                // Access data
+                indices.Add(LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false));
+
+                if (!isCustomLayout)
+                {
+                    // For now, go through hierarchy and check that type match
+                    // Other options:
+                    // - cast
+                    // - store class depth (and just do a substraction)
+                    int depth = 0;
+                    var @class = GetClass(type);
+                    while (@class != null)
+                    {
+                        if (@class.Type == field.DeclaringType)
+                            break;
+
+                        @class = @class.BaseType;
+                        depth++;
+                    }
+
+                    if (@class == null)
+                        throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, type.TypeReference));
+
+                    // Apply GEP indices to find right object (parent is always stored in first element)
+                    for (int i = 0; i < depth; ++i)
+                        indices.Add(LLVM.ConstInt(int32Type, 0, false));
+                }
+            }
+
+            // Access the appropriate field
+            indices.Add(LLVM.ConstInt(int32Type, (uint)field.StructIndex, false));
 
             // Find field address using GEP
-            var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices, string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices.ToArray(), string.Empty);
+
+            // Cast to real field type (if stored in a custom layout array)
+            if (isCustomLayout)
+            {
+                fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, LLVM.PointerType(field.Type.DefaultType, 0), string.Empty);
+
+                // Check if non aligned
+                if (field.StructIndex % 4 != 0)
+                    instructionFlags = InstructionFlags.Unaligned;
+            }
 
             return fieldAddress;
         }
@@ -488,50 +545,6 @@ namespace SharpLang.CompilerServices
                 LLVM.SetVolatile(instruction, true);
             if ((instructionFlags & InstructionFlags.Unaligned) != 0)
                 LLVM.SetAlignment(instruction, 1);
-        }
-
-        private ValueRef[] BuildFieldIndices(Field field, StackValueType stackValueType, Type type)
-        {
-            // Build indices for GEP
-            var indices = new List<ValueRef>(3);
-
-            if (stackValueType == StackValueType.Reference || stackValueType == StackValueType.Object || stackValueType == StackValueType.NativeInt)
-            {
-                // First pointer indirection
-                indices.Add(LLVM.ConstInt(int32Type, 0, false));
-            }
-
-            if (stackValueType == StackValueType.Object)
-            {
-                // Access data
-                indices.Add(LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false));
-
-                // For now, go through hierarchy and check that type match
-                // Other options:
-                // - cast
-                // - store class depth (and just do a substraction)
-                int depth = 0;
-                var @class = GetClass(type);
-                while (@class != null)
-                {
-                    if (@class.Type == field.DeclaringType)
-                        break;
-
-                    @class = @class.BaseType;
-                    depth++;
-                }
-
-                if (@class == null)
-                    throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, type.TypeReference));
-
-                // Apply GEP indices to find right object (parent is always stored in first element)
-                for (int i = 0; i < depth; ++i)
-                    indices.Add(LLVM.ConstInt(int32Type, 0, false));
-            }
-
-            // Access the appropriate field
-            indices.Add(LLVM.ConstInt(int32Type, (uint)field.StructIndex, false));
-            return indices.ToArray();
         }
 
         private void EmitStsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)

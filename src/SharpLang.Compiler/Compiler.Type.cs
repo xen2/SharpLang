@@ -76,6 +76,9 @@ namespace SharpLang.CompilerServices
                 case MetadataType.RequiredModifier:
                     // TODO: Add support for this feature
                     return GetType(((RequiredModifierType)typeReference).ElementType, TypeState.Opaque);
+                case MetadataType.Pinned:
+                    // TODO: Add support for this feature
+                    return GetType(((PinnedType)typeReference).ElementType, TypeState.Opaque);
                 case MetadataType.Void:
                     dataType = LLVM.VoidTypeInContext(context);
                     stackType = StackValueType.Unknown;
@@ -179,24 +182,100 @@ namespace SharpLang.CompilerServices
 
         private TypeRef GenerateDataType(TypeReference typeReference)
         {
-            return LLVM.StructCreateNamed(context, typeReference.MangledName() + ".data");
+            TypeRef dataType;
+
+            var typeDefinition = GetMethodTypeDefinition(typeReference);
+
+            // Struct / Class
+            // Auto layout or Sequential Layout with packing size 0 (auto) will result in normal LLVM struct (optimized for target)
+            // Otherwise (Explicit layout or Sequential layout with custom packing), make a i8 array and access field with GEP in it.
+            if (IsCustomLayout(typeDefinition))
+            {
+                var classSize = ComputeClassSize(typeDefinition, typeReference);
+
+                dataType = LLVM.ArrayType(LLVM.Int8TypeInContext(context), (uint)classSize);
+            }
+            else
+            {
+                dataType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".data");
+            }
+            return dataType;
+        }
+
+        private int ComputeClassSize(TypeDefinition typeDefinition, TypeReference typeReference)
+        {
+            // Maybe class size is explicitely declared?
+            var classSize = typeDefinition.ClassSize;
+
+            // If not, use fields
+            if (classSize == -1 || classSize == 0)
+            {
+                if (typeDefinition.PackingSize > 4)
+                    throw new NotImplementedException("Only pack size 1, 2 and 4 are supported.");
+
+                // TODO: Check if type is blittable, otherwise I think it is supposed to affect marshalled version only (or affect managed version differently?)
+
+                if (typeDefinition.IsExplicitLayout)
+                {
+                    // Find offset of last field
+                    foreach (var field in typeDefinition.Fields)
+                    {
+                        if (field.IsStatic)
+                            continue;
+
+                        // TODO: Align using pack size? Need to study .NET behavior.
+
+                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        classSize = Math.Max((int)classSize, field.Offset + (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType));
+                    }
+                }
+                else if (typeDefinition.IsSequentialLayout)
+                {
+                    foreach (var field in typeDefinition.Fields)
+                    {
+                        if (field.IsStatic)
+                            continue;
+
+                        // Align for next field, according to packing size
+                        classSize = (classSize + typeDefinition.PackingSize - 1) & ~(typeDefinition.PackingSize - 1);
+
+                        // Add size of field
+                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType);
+                    }
+                }
+            }
+            return classSize;
+        }
+
+        private static bool IsCustomLayout(TypeDefinition typeDefinition)
+        {
+            return typeDefinition.IsExplicitLayout || (typeDefinition.IsSequentialLayout && typeDefinition.PackingSize != -1 && typeDefinition.PackingSize != 0);
         }
 
         private void CompleteType(Type type)
         {
-            var valueType = type.ValueType;
             var typeReference = type.TypeReference;
+            switch (typeReference.MetadataType)
+            {
+                case MetadataType.Pointer:
+                case MetadataType.ByReference:
+                case MetadataType.RequiredModifier:
+                    return;
+            }
+
+            var valueType = type.ValueType;
             var typeDefinition = GetMethodTypeDefinition(typeReference);
             var stackType = type.StackType;
 
             // Sometime, GetType might already define DataType (for standard CLR types such as int, enum, string, array, etc...).
             // In that case, do not process fields.
-            if (LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind && LLVM.IsOpaqueStruct(valueType))
+            if (type.Fields == null && (LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind || LLVM.GetTypeKind(valueType) == TypeKind.ArrayTypeKind))
             {
-                // Avoid recursion
-                //type.IsBeingComplete = true;
-
                 var fields = new Dictionary<FieldDefinition, Field>(MemberEqualityComparer.Default);
+
+                // Avoid recursion (need a better way?)
+                type.Fields = fields;
 
                 var baseType = GetBaseTypeDefinition(typeReference);
                 var parentType = baseType != null ? GetType(ResolveGenericsVisitor.Process(typeReference, baseType), TypeState.TypeComplete) : null;
@@ -221,6 +300,9 @@ namespace SharpLang.CompilerServices
                 }
                 else
                 {
+                    bool isCustomLayout = IsCustomLayout(typeDefinition); // Do we use a struct or array?
+                    int classSize = 0; // Used for sequential layout
+
                     foreach (var field in typeDefinition.Fields)
                     {
                         if (field.IsStatic)
@@ -228,14 +310,37 @@ namespace SharpLang.CompilerServices
 
                         var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
 
-                        fields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
+                        // Compute struct index (that we can use to access the field). Either struct index or array offset.
+                        int structIndex;
+                        if (!isCustomLayout)
+                        {
+                            // Default case, if no custom layout (index so that we can use it in GEP)
+                            structIndex = fieldTypes.Count;
+                        }
+                        else if (typeDefinition.IsExplicitLayout)
+                        {
+                            structIndex = field.Offset;
+                        }
+                        else if (typeDefinition.IsSequentialLayout)
+                        {
+                            // Align for next field, according to packing size
+                            classSize = (classSize + typeDefinition.PackingSize - 1) & ~(typeDefinition.PackingSize - 1);
+                            structIndex = classSize;
+                            classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Invalid class layouting when computing field offsets.");
+                        }
+
+                        fields.Add(field, new Field(field, type, fieldType, structIndex));
                         fieldTypes.Add(fieldType.DefaultType);
                     }
                 }
 
-                LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
-
-                type.Fields = fields;
+                // Set struct (if not custom layout with array type)
+                if (LLVM.GetTypeKind(valueType) == TypeKind.StructTypeKind)
+                    LLVM.StructSetBody(valueType, fieldTypes.ToArray(), false);
             }
         }
 

@@ -284,7 +284,7 @@ namespace SharpLang.CompilerServices
                     var fieldType = CreateDebugType(field.Value.Type);
                     var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
                     var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
-                    var fieldOffset = LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex)*8;
+                    var fieldOffset = IsCustomLayout(type.TypeDefinition) ? (ulong)field.Value.StructIndex * 8 : LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex) * 8;
 
                     // Add object header (VTable ptr, etc...)
                     if (type.StackType == StackValueType.Object)
