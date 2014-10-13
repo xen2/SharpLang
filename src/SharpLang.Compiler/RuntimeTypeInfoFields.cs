@@ -12,6 +12,7 @@ namespace SharpLang.CompilerServices
         InterfaceMap,
         TypeInitialized,
         ObjectSize,
+        ElementSize,
         InterfaceMethodTable,
         VirtualTable,
         StaticFields,
