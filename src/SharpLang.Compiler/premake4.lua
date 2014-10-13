@@ -24,4 +24,5 @@ project "SharpLang.Compiler"
     "Mono.Cecil.Pdb",
     "Mono.Cecil.Rocks",
     "Mono.Options",
+    "Mono.Linker",
   }

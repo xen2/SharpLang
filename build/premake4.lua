@@ -34,6 +34,19 @@ solution "SharpLang"
     include (srcdir .. "/SharpLLVM.Native")
     include (srcdir .. "/SharpLLVM.Tests")
 
+  group "Tools"
+    external "Mono.Linker"
+      location (srcdir .. "/mcs/tools/linker")
+      uuid "DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46"
+      kind "ConsoleApp"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+
   group "Class Libraries"
     external "corlib-net_4_5"
         location (srcdir .. "/mcs/class/corlib")

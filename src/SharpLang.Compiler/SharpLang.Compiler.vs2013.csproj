@@ -117,6 +117,10 @@
       <Project>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</Project>
       <Name>SharpLLVM</Name>
     </ProjectReference>
+    <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
+      <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
+      <Name>Mono.Linker</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
