@@ -661,7 +661,7 @@ namespace SharpLang.CompilerServices
                         overrideMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
                     }
 
-                    EmitCall(functionContext, new FunctionSignature(targetMethod.ReturnType, targetMethod.ParameterTypes), overrideMethod);
+                    EmitCall(functionContext, targetMethod.Signature, overrideMethod);
 
                     break;
                 }
