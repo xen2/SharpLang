@@ -76,14 +76,14 @@ namespace SharpLang.CompilerServices.Tests
             Assert.That(output2, Is.EqualTo(output1));
         }
 
-        private static string CompileAssembly(string sourceFile)
+        private static string CompileAssembly(string sourceFile, params string[] references)
         {
             var outputBase = Path.Combine(Path.GetDirectoryName(sourceFile), "output");
             Directory.CreateDirectory(outputBase);
             var outputAssembly = Path.Combine(outputBase, Path.GetFileNameWithoutExtension(sourceFile) + ".exe");
 
             if (Path.GetExtension(sourceFile) == ".cs")
-                return CompileCSharpAssembly(sourceFile, outputAssembly);
+                return CompileCSharpAssembly(sourceFile, outputAssembly, references);
 
             if (Path.GetExtension(sourceFile) == ".il")
                 return CompileIlAssembly(sourceFile, outputAssembly);
@@ -110,7 +110,7 @@ namespace SharpLang.CompilerServices.Tests
             return outputAssembly;
         }
 
-        private static string CompileCSharpAssembly(string sourceFile, string outputAssembly)
+        private static string CompileCSharpAssembly(string sourceFile, string outputAssembly, string[] references)
         {
             if (codeDomProvider == null)
                 codeDomProvider = new Microsoft.CSharp.CSharpCodeProvider();
@@ -124,6 +124,8 @@ namespace SharpLang.CompilerServices.Tests
                 CompilerOptions = "/unsafe /debug+ /debug:full",
                 OutputAssembly = outputAssembly,
             };
+
+            compilerParameters.ReferencedAssemblies.AddRange(references);
 
             var compilerResults = codeDomProvider.CompileAssemblyFromFile(
                 compilerParameters, sourceFile);
