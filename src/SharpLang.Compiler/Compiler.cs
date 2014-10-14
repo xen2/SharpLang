@@ -73,7 +73,7 @@ namespace SharpLang.CompilerServices
             
             MemoryBufferRef memoryBuffer;
             string message;
-            if (LLVM.CreateMemoryBufferWithContentsOfFile(@"..\..\..\..\src\SharpLang.Runtime\Runtime.bc", out memoryBuffer, out message))
+            if (LLVM.CreateMemoryBufferWithContentsOfFile(@"SharpLang.Runtime.bc", out memoryBuffer, out message))
                 throw new InvalidOperationException(message);
 
             if (LLVM.GetBitcodeModuleInContext(context, memoryBuffer, out runtimeModule, out message))

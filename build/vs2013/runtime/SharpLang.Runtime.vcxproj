@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <OutDir>..\lib\Debug_x32\</OutDir>
+    <IntDir>..\obj\x32\Debug\SharpLang.Runtime\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <OutDir>..\lib\Debug_x64\</OutDir>
+    <IntDir>..\obj\x64\Debug\SharpLang.Runtime\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <OutDir>..\lib\Release_x32\</OutDir>
+    <IntDir>..\obj\x32\Release\SharpLang.Runtime\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <OutDir>..\lib\Release_x64\</OutDir>
+    <IntDir>..\obj\x64\Release\SharpLang.Runtime\</IntDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeOutput>$(OutDir)SharpLang.Runtime.bc</NMakeOutput>
+    <NMakeBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x32 all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x32 clean all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x32 clean CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeCleanCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeOutput>$(OutDir)SharpLang.Runtime.bc</NMakeOutput>
+    <NMakeBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x64 all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x64 clean all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=debug_x64 clean CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeCleanCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeOutput>$(OutDir)SharpLang.Runtime.bc</NMakeOutput>
+    <NMakeBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x32 all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x32 clean all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x32 clean CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeCleanCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeOutput>$(OutDir)SharpLang.Runtime.bc</NMakeOutput>
+    <NMakeBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x64 all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x64 clean all CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>..\..\..\deps\mingw32\bin\mingw32-make config=release_x64 clean CC=../../../deps/llvm/build/RelWithDebInfo/bin/clang CXX=../../../deps/llvm/build/RelWithDebInfo/bin/clang LLVM_LINK=../../../deps/llvm/build/RelWithDebInfo/bin/llvm-link.exe CFLAGS="-I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"</NMakeCleanCommandLine>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\RuntimeType.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\char-category-data.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\char-conversions.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\number-formatter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.c" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\Exception.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\Internal.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\PInvoke.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\RuntimeType.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

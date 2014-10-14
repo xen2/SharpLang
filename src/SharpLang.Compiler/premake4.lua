@@ -15,6 +15,8 @@ project "SharpLang.Compiler"
     depsdir .. "/Mono.Options",
   }
 
+  dependson { "SharpLang.Runtime" }
+
   links
   {
     "System",
