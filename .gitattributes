@@ -1,0 +1,2 @@
+Makefile eol=lf
+*.Make eol=lf

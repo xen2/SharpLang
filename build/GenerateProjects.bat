@@ -21,14 +21,17 @@ if "%C%"=="0" goto clean
 goto quit
 
 :vs2012
+"premake5" --file=premake4-gmake.lua --outdir=vs2012 gmake
 "premake5" --file=premake4.lua vs2012
 goto quit
 
 :vs2013
+"premake5" --file=premake4-gmake.lua --outdir=vs2013 gmake
 "premake5" --file=premake4.lua vs2013
 goto quit
 
 :gmake
+"premake5" --file=premake4-gmake.lua --outdir=gmake gmake
 "premake5" --file=premake4.lua gmake
 goto quit
 

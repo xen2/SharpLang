@@ -150,7 +150,7 @@ namespace SharpLang.CompilerServices
         public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
         {
             var filesToLink = new List<string>();
-            filesToLink.Add(Path.Combine(Utils.GetTestsDirectory(), @"..\..\SharpLang.Runtime\Runtime.bc"));
+            filesToLink.Add(@"SharpLang.Runtime.bc");
 
             var arguments = new StringBuilder();
             
