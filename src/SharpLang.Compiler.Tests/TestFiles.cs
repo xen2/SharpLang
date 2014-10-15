@@ -21,21 +21,47 @@ namespace SharpLang.CompilerServices.Tests
             var testName = "WriteLine";
             var sourceFile = Path.Combine(Utils.GetTestsDirectory(), testName + ".cs");
 
-            var outputAssembly = CompileAssembly(sourceFile);
+            // Compile assembly to IL
+            var sourceAssembly = CompileAssembly(sourceFile);
 
-            Driver.CompileAssembly(@"..\..\..\..\src\mcs\class\lib\net_4_5\mscorlib.dll", "mscorlib.bc", true);
-            Driver.CompileAssembly(outputAssembly, testName + ".bc", true);
-
-            // Link bitcode and runtime
-            SetupLocalToolchain();
-            Driver.LinkBitcodes(testName + ".exe", testName + ".bc", "mscorlib.bc");
+            // Compile and link to LLVM
+            var outputAssembly = CompileAndLinkToLLVM(sourceAssembly);
 
             // Execute original and ours
-            var output1 = ExecuteAndCaptureOutput(outputAssembly);
-            var output2 = ExecuteAndCaptureOutput(testName + ".exe");
+            var output1 = ExecuteAndCaptureOutput(sourceAssembly);
+            var output2 = ExecuteAndCaptureOutput(outputAssembly);
 
             // Compare output
             Assert.That(output2, Is.EqualTo(output1));
+        }
+
+        private static string CompileAndLinkToLLVM(string sourceAssembly)
+        {
+            // Link assembly
+            var assemblyBaseName = Path.GetFileNameWithoutExtension(sourceAssembly);
+            sourceAssembly = LinkAssembly(sourceAssembly, assemblyBaseName + "_linker_output");
+
+            var outputBitcodes = new List<string>();
+
+            // Compile each assembly to LLVM bitcode
+            foreach (var assemblyFile in Directory.EnumerateFiles(Path.GetDirectoryName(sourceAssembly)))
+            {
+                var assemblyExtension = Path.GetExtension(assemblyFile).ToLowerInvariant();
+                if (assemblyExtension != ".exe" && assemblyExtension != ".dll")
+                    continue;
+
+                var outputBitcode = Path.Combine(Path.GetDirectoryName(assemblyFile), Path.GetFileNameWithoutExtension(assemblyFile) + ".bc");
+                Driver.CompileAssembly(assemblyFile, outputBitcode, true);
+                outputBitcodes.Add(outputBitcode);
+            }
+
+            var outputAssembly = assemblyBaseName + "-llvm.exe";
+
+            // Link bitcodes
+            SetupLocalToolchain();
+            Driver.LinkBitcodes(outputAssembly, outputBitcodes.ToArray());
+
+            return outputAssembly;
         }
 
         [Test, TestCaseSource("TestCases")]
@@ -89,6 +115,16 @@ namespace SharpLang.CompilerServices.Tests
                 return CompileIlAssembly(sourceFile, outputAssembly);
 
             throw new NotImplementedException("Unknown source format.");
+        }
+
+        public static string LinkAssembly(string assemblyFile, string outputDirectory)
+        {
+            var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", @"..\..\..\..\src\mcs\class\lib\net_4_5", "-c", "link", "-b", "true" });
+            if (monoLinkerResult != 0)
+                throw new InvalidOperationException("Error during Mono Linker phase.");
+
+            // Return combined assembly name
+            return Path.Combine(outputDirectory, Path.GetFileName(assemblyFile));
         }
 
         private static string CompileIlAssembly(string sourceFile, string outputAssembly)

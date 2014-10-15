@@ -27,5 +27,6 @@ project "SharpLang.Compiler.Tests"
     "SharpLang.Compiler",
     "SharpLLVM",
     "Microsoft.CSharp",
-    "nunit.framework"
+    "nunit.framework",
+    "Mono.Linker"
   }
