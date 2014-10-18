@@ -5,6 +5,15 @@ namespace SharpLang.CompilerServices.Cecil
 {
     class CustomAssemblyResolver : DefaultAssemblyResolver
     {
+        public CustomAssemblyResolver()
+        {
+            // Start with an empty search directory list
+            foreach (var searchDirectory in GetSearchDirectories())
+            {
+                RemoveSearchDirectory(searchDirectory);
+            }
+        }
+
         /// <summary>
         /// Registers the specified assembly.
         /// </summary>
