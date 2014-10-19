@@ -101,13 +101,13 @@ namespace SharpLang.CompilerServices
 
 
             // Generate function global
-            bool isExternal = method.DeclaringType.Resolve().Module.Assembly != assembly;
             var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
             var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             var resolvedMethod = method.Resolve();
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
+            var linkageType = GetLinkageType(method.DeclaringType);
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
             var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal || isRuntime);
             var functionGlobal = hasDefinition
@@ -119,7 +119,7 @@ namespace SharpLang.CompilerServices
 
             if (hasDefinition)
             {
-                if (isExternal || isInternal)
+                if (linkageType == Linkage.ExternalWeakLinkage || isInternal)
                 {
                     // External weak linkage
                     LLVM.SetLinkage(functionGlobal, Linkage.ExternalWeakLinkage);

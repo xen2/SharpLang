@@ -622,7 +622,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitNewarr(List<StackValue> stack, Type elementType)
         {
-            var arrayClass = GetClass(new ArrayType(elementType.TypeReference));
+            var arrayType = GetType(new ArrayType(elementType.TypeReference), TypeState.VTableEmitted);
 
             var numElements = stack.Pop();
 
@@ -640,7 +640,7 @@ namespace SharpLang.CompilerServices
             var numElementsAsPointer = LLVM.BuildIntToPtr(builder, numElements.Value, intPtrType, string.Empty);
 
             // Allocate object
-            var allocatedObject = AllocateObject(arrayClass.Type);
+            var allocatedObject = AllocateObject(arrayType);
 
             // Prepare indices
             var indices = new[]
@@ -659,7 +659,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, values, dataPointerLocation);
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Object, arrayClass.Type, allocatedObject));
+            stack.Add(new StackValue(StackValueType.Object, arrayType, allocatedObject));
         }
 
         private void EmitLdlen(List<StackValue> stack)
@@ -674,6 +674,9 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(int32Type, 1, false),                         // Access length
             };
 
+            // Force array type to be emitted
+            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
+
             // Load data pointer
             var arraySizeLocation = LLVM.BuildInBoundsGEP(builder, array.Value, indices, string.Empty);
             var arraySize = LLVM.BuildLoad(builder, arraySizeLocation, string.Empty);
@@ -686,6 +689,9 @@ namespace SharpLang.CompilerServices
         {
             var index = stack.Pop();
             var array = stack.Pop();
+
+            // Force array type to be emitted
+            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
@@ -708,6 +714,9 @@ namespace SharpLang.CompilerServices
         {
             var index = stack.Pop();
             var array = stack.Pop();
+
+            // Force array type to be emitted
+            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
@@ -735,6 +744,9 @@ namespace SharpLang.CompilerServices
             var value = stack.Pop();
             var index = stack.Pop();
             var array = stack.Pop();
+
+            // Force array type to be emitted
+            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
