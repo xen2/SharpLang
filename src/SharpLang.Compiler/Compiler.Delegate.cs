@@ -152,6 +152,7 @@ namespace SharpLang.CompilerServices
             var invokeMethod = declaringClass.Functions.Single(x => x.MethodReference.Name == "Invoke");
 
             var invokeMethodHelper = LLVM.AddFunction(module, LLVM.GetValueName(invokeMethod.GeneratedValue) + "_MulticastHelper", invokeMethod.FunctionType);
+            LLVM.SetLinkage(invokeMethodHelper, declaringClass.Type.Linkage);
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty));
 
             var invokeFunctionType = LLVM.GetElementType(LLVM.TypeOf(invokeMethodHelper));
@@ -234,6 +235,7 @@ namespace SharpLang.CompilerServices
         private ValueRef GenerateStaticInvokeThunk(Class declaringClass)
         {
             var invokeMethodHelper = CreateInvokeMethodHelper(declaringClass, "_StaticHelper");
+            LLVM.SetLinkage(invokeMethodHelper, declaringClass.Type.Linkage);
 
             EmitStaticInvokeCall(invokeMethodHelper);
 
