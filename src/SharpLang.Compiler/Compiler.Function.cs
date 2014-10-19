@@ -363,7 +363,7 @@ namespace SharpLang.CompilerServices
                 }
             }
 
-            PrepareScopes(functionContext);
+            PrepareScopes(functionContext, function);
 
             foreach (var instruction in body.Instructions)
             {
@@ -459,7 +459,7 @@ namespace SharpLang.CompilerServices
 
         private void UpdateExceptionHandlers(FunctionCompilerContext functionContext, Instruction instruction)
         {
-            var functionGlobal = functionContext.Function.GeneratedValue;
+            var functionGlobal = functionContext.FunctionGlobal;
             var exceptionHandlers = functionContext.ExceptionHandlers;
             var activeTryHandlers = functionContext.ActiveTryHandlers;
             var methodReference = functionContext.MethodReference;
@@ -600,11 +600,10 @@ namespace SharpLang.CompilerServices
 
         private void EmitInstruction(FunctionCompilerContext functionContext, Instruction instruction)
         {
-            var methodReference = functionContext.Function.MethodReference;
+            var methodReference = functionContext.MethodReference;
             var stack = functionContext.Stack;
             var args = functionContext.Arguments;
             var locals = functionContext.Locals;
-            var functionGlobal = functionContext.Function.GeneratedValue;
             var exceptionHandlers = functionContext.ExceptionHandlers;
 
             var opcode = instruction.OpCode.Code;
@@ -1466,7 +1465,7 @@ namespace SharpLang.CompilerServices
             //  }
             if (@class.InitializeType != ValueRef.Empty)
             {
-                var functionGlobal = functionContext.Function.GeneratedValue;
+                var functionGlobal = functionContext.FunctionGlobal;
 
                 // Note: we temporarily ignore extern class
                 // TODO: This will be reactivated as soon as we start linking multiple modules

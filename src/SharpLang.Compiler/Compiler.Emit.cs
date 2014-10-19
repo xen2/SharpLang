@@ -784,7 +784,7 @@ namespace SharpLang.CompilerServices
 
             if (functionContext.LandingPadBlock.Value != IntPtr.Zero)
             {
-                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.Function.GeneratedValue, string.Empty);
+                var nextBlock = LLVM.AppendBasicBlockInContext(context, functionContext.FunctionGlobal, string.Empty);
                 LLVM.MoveBasicBlockAfter(nextBlock, LLVM.GetInsertBlock(builder));
                 callResult = LLVM.BuildInvoke(builder, function, args, nextBlock, functionContext.LandingPadBlock, string.Empty);
                 LLVM.PositionBuilderAtEnd(builder, nextBlock);
@@ -814,7 +814,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitIsOrCastclass(FunctionCompilerContext functionContext, List<StackValue> stack, Class @class, Code opcode, int instructionOffset)
         {
-            var functionGlobal = functionContext.Function.GeneratedValue;
+            var functionGlobal = functionContext.FunctionGlobal;
 
             var obj = stack.Pop();
 
@@ -1034,7 +1034,7 @@ namespace SharpLang.CompilerServices
         
         private void EmitBinaryOperation(FunctionCompilerContext functionContext, List<StackValue> stack, Code opcode)
         {
-            var functionGlobal = functionContext.Function.GeneratedValue;
+            var functionGlobal = functionContext.FunctionGlobal;
 
             var operand2 = stack.Pop();
             var operand1 = stack.Pop();

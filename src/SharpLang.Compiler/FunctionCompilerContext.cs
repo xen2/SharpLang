@@ -7,19 +7,22 @@ namespace SharpLang.CompilerServices
 {
     class FunctionCompilerContext
     {
-        public FunctionCompilerContext(Function function)
+        public FunctionCompilerContext(Function function) : this(function.GeneratedValue)
         {
-            Function = function;
             MethodReference = function.MethodReference;
             Method = MethodReference.Resolve();
+        }
 
+        public FunctionCompilerContext(ValueRef functionGlobal)
+        {
+            FunctionGlobal = functionGlobal;
             FlowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
         }
 
         public MethodReference MethodReference { get; set; }
         public MethodDefinition Method { get; set; }
         public MethodBody Body { get; set; }
-        public Function Function { get; set; }
+        public ValueRef FunctionGlobal { get; set; }
         public BasicBlockRef BasicBlock { get; set; }
         public List<StackValue> Stack { get; set; }
         public List<StackValue> Locals { get; set; }
