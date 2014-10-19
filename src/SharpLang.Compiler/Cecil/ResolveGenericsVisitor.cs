@@ -66,11 +66,15 @@ namespace SharpLang.CompilerServices.Cecil
             var genericTypeMapping = new Dictionary<TypeReference, TypeReference>(TypeReferenceComparer.Default);
             if (genericInstanceTypeContext != null)
             {
-                var resolvedType = genericInstanceTypeContext.ElementType;
-                for (int i = 0; i < resolvedType.GenericParameters.Count; ++i)
+                var resolvedType1 = genericInstanceTypeContext.ElementType;
+                var resolvedType2 = genericInstanceTypeContext.Resolve();
+                for (int i = 0; i < resolvedType1.GenericParameters.Count; ++i)
                 {
-                    var genericParameter = genericInstanceTypeContext.ElementType.GenericParameters[i];
-                    genericTypeMapping.Add(genericParameter, genericInstanceTypeContext.GenericArguments[i]);
+                    var genericParameter1 = resolvedType1.GenericParameters[i];
+                    var genericParameter2 = resolvedType2.GenericParameters[i];
+                    genericTypeMapping.Add(genericParameter1, genericInstanceTypeContext.GenericArguments[i]);
+                    if (genericParameter2 != genericParameter1)
+                        genericTypeMapping.Add(genericParameter2, genericInstanceTypeContext.GenericArguments[i]);
                 }
             }
 
