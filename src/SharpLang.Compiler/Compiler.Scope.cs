@@ -49,9 +49,8 @@ namespace SharpLang.CompilerServices
             return debugNamespace;
         }
 
-        private void PrepareScopes(FunctionCompilerContext functionContext)
+        private void PrepareScopes(FunctionCompilerContext functionContext, Function function)
         {
-            var function = functionContext.Function;
             var methodReference = function.MethodReference;
             var body = functionContext.Body;
 
