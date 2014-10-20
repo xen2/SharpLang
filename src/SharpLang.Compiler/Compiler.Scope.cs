@@ -349,6 +349,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.IntPtr:
                 case MetadataType.UIntPtr:
                 case MetadataType.Pointer:
+                case MetadataType.ByReference:
                     size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
                     align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
                     break;
@@ -386,9 +387,16 @@ namespace SharpLang.CompilerServices
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "IntPtr", size, align, (uint)DW_ATE.Signed);
                 case MetadataType.UIntPtr:
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "UIntPtr", size, align, (uint)DW_ATE.Unsigned);
+                case MetadataType.ByReference:
+                {
+                    var elementType = GetType(((ByReferenceType)type.TypeReference).ElementType, TypeState.TypeComplete);
+                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
+                }
                 case MetadataType.Pointer:
+                {
                     var elementType = GetType(((PointerType)type.TypeReference).ElementType, TypeState.TypeComplete);
                     return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
+                }
                 case MetadataType.Array:
                 case MetadataType.String:
                 case MetadataType.TypedByReference:
