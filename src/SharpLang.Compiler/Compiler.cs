@@ -39,6 +39,7 @@ namespace SharpLang.CompilerServices
         private Type @bool;
         private Type @float;
         private Type @double;
+        private Type @char;
         private Type @object;
         private TypeRef intPtrType; // Native integer, pointer representation
         private int intPtrSize;
@@ -117,6 +118,7 @@ namespace SharpLang.CompilerServices
             @bool = GetType(corlib.MainModule.GetType(typeof(bool).FullName), TypeState.StackComplete);
             @float = GetType(corlib.MainModule.GetType(typeof(float).FullName), TypeState.StackComplete);
             @double = GetType(corlib.MainModule.GetType(typeof(double).FullName), TypeState.StackComplete);
+            @char = GetType(corlib.MainModule.GetType(typeof(char).FullName), TypeState.StackComplete);
 
             @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
 
