@@ -134,7 +134,7 @@ namespace SharpLang.CompilerServices
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
 
-            function = new Function(declaringType, method, functionType, functionGlobal, returnType, parameterTypes);
+            function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes));
             functions.Add(method, function);
 
             if (hasDefinition)

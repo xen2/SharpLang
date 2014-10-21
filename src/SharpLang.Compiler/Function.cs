@@ -5,9 +5,9 @@ namespace SharpLang.CompilerServices
 {
     class Function
     {
-        public Function(Type declaringType, MethodReference methodReference, TypeRef functionType, ValueRef generatedValue, Type returnType, Type[] parameterTypes)
+        public Function(Type declaringType, MethodReference methodReference, TypeRef functionType, ValueRef generatedValue, FunctionSignature signature)
         {
-            Signature = new FunctionSignature(returnType, parameterTypes);
+            Signature = signature;
             DeclaringType = declaringType;
             MethodReference = methodReference;
             FunctionType = functionType;
