@@ -1,12 +1,16 @@
 [submodule "deps/llvm"]
 	path = deps/llvm
 	url = http://llvm.org/git/llvm.git
+	ignore = dirty
 [submodule "deps/clang"]
 	path = deps/clang
 	url = http://llvm.org/git/clang.git
+	ignore = dirty
 [submodule "deps/compiler-rt"]
 	path = deps/compiler-rt
 	url = http://llvm.org/git/compiler-rt.git
+	ignore = dirty
 [submodule "deps/libcxxabi"]
 	path = deps/libcxxabi
 	url = https://github.com/llvm-mirror/libcxxabi
+	ignore = dirty
