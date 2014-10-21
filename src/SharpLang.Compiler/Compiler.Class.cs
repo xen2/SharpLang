@@ -385,7 +385,7 @@ namespace SharpLang.CompilerServices
                         throw new InvalidOperationException("Interface method not found");
 
                     var methodId = GetMethodId(resolvedInterfaceMethod);
-                    var imtSlotIndex = (int) (methodId%interfaceMethodTable.Length);
+                    var imtSlotIndex = (int)(methodId % InterfaceMethodTableSize);
 
                     var imtSlot = interfaceMethodTable[imtSlotIndex];
                     if (imtSlot == null)
@@ -394,8 +394,7 @@ namespace SharpLang.CompilerServices
                     imtSlot.AddLast(new InterfaceMethodTableEntry
                     {
                         Function = resolvedFunction,
-                        MethodId = methodId,
-                        SlotIndex = imtSlotIndex
+                        MethodId = GetFunction(resolvedInterfaceMethod).GeneratedValue, // Should be a fake global, that we use as IMT key
                     });
                 }
             }
@@ -421,8 +420,8 @@ namespace SharpLang.CompilerServices
                     {
                         return LLVM.ConstNamedStruct(imtEntryType, new[]
                         {
-                            LLVM.ConstInt(int32Type, (ulong) imtEntry.MethodId, false), // i32 functionId
-                            LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType), // i8* functionPtr
+                            imtEntry.MethodId,                                                      // i8* functionId
+                            LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrType),    // i8* functionPtr
                         });
                     })
                         .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryType), 1)).ToArray()); // Append { 0, 0 } terminator
@@ -582,8 +581,7 @@ namespace SharpLang.CompilerServices
         private struct InterfaceMethodTableEntry
         {
             public Function Function;
-            public uint MethodId;
-            public int SlotIndex;
+            public ValueRef MethodId;
         }
     }
 }
