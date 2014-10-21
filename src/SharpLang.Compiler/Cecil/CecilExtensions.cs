@@ -102,6 +102,24 @@ namespace SharpLang.CompilerServices.Cecil
             return method;
         }
 
+        public static MethodReference ChangeDeclaringType(this MethodReference self, TypeReference declaringType)
+        {
+            var reference = new MethodReference(self.Name, self.ReturnType, declaringType)
+            {
+                HasThis = self.HasThis,
+                ExplicitThis = self.ExplicitThis,
+                CallingConvention = self.CallingConvention,
+            };
+
+            foreach (var parameter in self.Parameters)
+                reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+
+            foreach (var generic_parameter in self.GenericParameters)
+                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+
+            return reference;
+        }
+
         public static GenericInstanceType ChangeGenericInstanceType(this GenericInstanceType type, TypeReference elementType, IEnumerable<TypeReference> genericArguments)
         {
             if (elementType != type.ElementType || genericArguments != type.GenericArguments)
