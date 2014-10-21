@@ -70,12 +70,33 @@ namespace SharpLang.CompilerServices
             if (functions.TryGetValue(method, out function))
                 return function;
 
+            var resolvedMethod = method.Resolve();
+            var declaringType = GetType(ResolveGenericsVisitor.Process(method, method.DeclaringType), TypeState.Opaque);
+
+            // Check if method is only defined in a parent class (can happen in some rare case, i.e. PCL TypeInfo.get_Assembly()).
+            bool hasMatch = MetadataResolver.GetMethod(declaringType.TypeDefinition.Methods, method.GetElementMethod()) != null;
+            if (resolvedMethod != null && !hasMatch)
+            {
+                var parentType = declaringType.TypeDefinition.BaseType != null ? ResolveGenericsVisitor.Process(declaringType.TypeReference, declaringType.TypeDefinition.BaseType) : null;
+                if (parentType == null)
+                    throw new InvalidOperationException(string.Format("Could not find a matching method in any of the type or its parent for {0}", method));
+
+                // Create function with parent type
+                // TODO: Maybe we need to replace generic context with parent type?
+                var parentMethod = method.ChangeDeclaringType(parentType);
+                function = CreateFunction(parentMethod);
+
+                // Register it so that it can be cached
+                functions.Add(method, function);
+                return function;
+            }
+
             var numParams = method.Parameters.Count;
             if (method.HasThis)
                 numParams++;
             var parameterTypes = new Type[numParams];
             var parameterTypesLLVM = new TypeRef[numParams];
-            var declaringType = GetType(ResolveGenericsVisitor.Process(method, method.DeclaringType), TypeState.Opaque);
+
             for (int index = 0; index < numParams; index++)
             {
                 TypeReference parameterTypeReference;
@@ -105,7 +126,6 @@ namespace SharpLang.CompilerServices
             var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
-            var resolvedMethod = method.Resolve();
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
             var linkageType = GetLinkageType(method.DeclaringType);
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
