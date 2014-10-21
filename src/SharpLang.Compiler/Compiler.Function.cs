@@ -129,10 +129,20 @@ namespace SharpLang.CompilerServices
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
             var linkageType = GetLinkageType(method.DeclaringType);
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
+            bool isInterfaceMethod = declaringType.TypeDefinition.IsInterface;
             var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal || isRuntime);
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
+
+            // Interface method uses a global so that we can have a unique pointer to use as IMT key
+            if (isInterfaceMethod)
+            {
+                functionGlobal = LLVM.AddGlobal(module, LLVM.Int8TypeInContext(context), methodMangledName);
+                if (linkageType != Linkage.ExternalWeakLinkage)
+                    LLVM.SetInitializer(functionGlobal, LLVM.ConstNull(LLVM.Int8TypeInContext(context)));
+                LLVM.SetLinkage(functionGlobal, linkageType);
+            }
 
             function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes));
             functions.Add(method, function);
@@ -148,7 +158,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Need to compile
                     EmitFunction(function);
-                    LLVM.SetLinkage(functionGlobal, declaringType.Linkage);
+                    LLVM.SetLinkage(functionGlobal, linkageType);
                 }
             }
 
@@ -1627,14 +1637,12 @@ namespace SharpLang.CompilerServices
 
                         var methodPointer = LLVM.BuildLoad(builder, imtEntry, string.Empty);
 
-                        // TODO: Compare method ID and iterate in the linked list until the correct match is found
-                        // If no match is found, it's likely due to covariance/contravariance, so we will need a fallback
-                        var methodId = GetMethodId(targetMethod.MethodReference);
-
                         // Resolve interface call
+                        // TODO: Improve resolveInterfaceCall(): if no match is found, it's likely due to covariance/contravariance, so we will need a fallback
                         resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunction, new[]
                         {
-                            LLVM.ConstInt(int32Type, methodId, false),
+                            //LLVM.ConstInt(int32Type, methodId, false),
+                            LLVM.ConstPointerCast(targetMethod.GeneratedValue, intPtrType),
                             methodPointer,
                         }, string.Empty);
                         resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod,

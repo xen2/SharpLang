@@ -368,6 +368,7 @@ namespace SharpLang.CompilerServices
                 return;
 
             var linkageType = GetLinkageType(type.TypeReference, force);
+            type.Linkage = linkageType;
 
             if (linkageType != Linkage.ExternalWeakLinkage)
             {
@@ -375,7 +376,6 @@ namespace SharpLang.CompilerServices
                 CompleteType(type);
 
                 // Enqueue for later generation
-                type.Linkage = linkageType;
                 type.IsLocal = true;
                 classesToGenerate.Enqueue(type);
             }

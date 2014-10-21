@@ -24,11 +24,11 @@ extern "C" void* allocObject(uint32_t size)
 
 typedef struct IMTEntry
 {
-	int32_t methodId;
+	void* methodId;
 	void* methodPointer;
 } IMTEntry;
 
-extern "C" void* resolveInterfaceCall(uint32_t method, void* content)
+extern "C" void* resolveInterfaceCall(void* methodId, void* content)
 {
 	void* result;
 
@@ -41,7 +41,7 @@ extern "C" void* resolveInterfaceCall(uint32_t method, void* content)
 	{
 		// Normal path: multiple entry in this IMT slot, go through the list
 		IMTEntry* imtEntry = (IMTEntry*)((size_t)content & ~1);
-		while (imtEntry->methodId != method && imtEntry->methodId != 0) { imtEntry++; }
+		while (imtEntry->methodId != methodId && imtEntry->methodId != 0) { imtEntry++; }
 
 		result = imtEntry->methodPointer;
 

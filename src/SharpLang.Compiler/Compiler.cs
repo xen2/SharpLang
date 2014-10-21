@@ -122,9 +122,9 @@ namespace SharpLang.CompilerServices
 
             @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
 
-            // struct IMTEntry { i32 functionId, i8* functionPtr }
+            // struct IMTEntry { i8* interfaceFunctionPtr, i8* functionPtr }
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
-            LLVM.StructSetBody(imtEntryType, new[] { int32Type, intPtrType }, false);
+            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, intPtrType }, false);
 
             caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
@@ -316,8 +316,9 @@ namespace SharpLang.CompilerServices
                 {
                     if (isInterface)
                     {
-                        // Store IMT slot
+                        // Store IMT slot, and unique IMT key (generated using global pointer)
                         function.VirtualSlot = (int)(GetMethodId(methodReference) % InterfaceMethodTableSize);
+                        function.InterfaceSlot = function.GeneratedValue;
                     }
                     else if (method.IsNewSlot)
                     {
