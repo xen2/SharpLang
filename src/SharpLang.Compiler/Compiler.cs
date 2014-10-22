@@ -64,14 +64,22 @@ namespace SharpLang.CompilerServices
 
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
+        // List of all referenced assemblies (including indirect ones)
+        private HashSet<AssemblyDefinition> referencedAssemblies = new HashSet<AssemblyDefinition>();
+
         public void RegisterMainAssembly(AssemblyDefinition assembly)
         {
             this.assembly = assembly;
+
+            // Load all dependent assemblies (except ourself)
+            CollectAssemblyReferences(referencedAssemblies, assembly);
+            referencedAssemblies.Remove(assembly);
+
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
 
             context = LLVM.GetGlobalContext();
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
-            
+
             MemoryBufferRef memoryBuffer;
             string message;
             if (LLVM.CreateMemoryBufferWithContentsOfFile(@"SharpLang.Runtime.bc", out memoryBuffer, out message))
@@ -106,6 +114,7 @@ namespace SharpLang.CompilerServices
 
             debugBuilder = LLVM.DIBuilderCreate(module);
 
+            // Prepare system types, for easier access
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName), TypeState.StackComplete);
             int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName), TypeState.StackComplete);
             int16 = GetType(corlib.MainModule.GetType(typeof(short).FullName), TypeState.StackComplete);
@@ -126,10 +135,29 @@ namespace SharpLang.CompilerServices
             imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
             LLVM.StructSetBody(imtEntryType, new[] { intPtrType, intPtrType }, false);
 
+            // struct CaughtResultType { i8*, i32 }
             caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
 
             RegisterAssembly(assembly);
+        }
+
+        private static void CollectAssemblyReferences(HashSet<AssemblyDefinition> assemblies, AssemblyDefinition assemblyDefinition)
+        {
+            if (!assemblies.Add(assemblyDefinition))
+                return;
+
+            foreach (var assemblyReference in assemblyDefinition.MainModule.AssemblyReferences)
+            {
+                // Resolve
+                var resolvedAssembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(assemblyReference);
+                
+                if (resolvedAssembly != null)
+                {
+                    // If new, load its references
+                    CollectAssemblyReferences(assemblies, resolvedAssembly);
+                }
+            }
         }
 
         private ValueRef ImportRuntimeFunction(ModuleRef module, string name)

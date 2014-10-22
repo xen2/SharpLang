@@ -12,10 +12,6 @@ namespace SharpLang.CompilerServices
             if (ReferenceEquals(x, y))
                 return true;
 
-            // Fast path
-            if (x.FullName == y.FullName)
-                return true;
-
             return AreSame(x, y);
         }
 
@@ -202,8 +198,15 @@ namespace SharpLang.CompilerServices
                 return false;
 
             //TODO: check scope
+            if (!AreSame(a.DeclaringType, b.DeclaringType))
+                return false;
 
-            return AreSame(a.DeclaringType, b.DeclaringType);
+            if (!a.HasGenericParameters && !b.HasGenericParameters
+                && !(a is GenericInstanceType) && !(b is GenericInstanceType))
+                if (a.Resolve().Module != b.Resolve().Module)
+                    return false;
+
+            return true;
         }
     }
 }
