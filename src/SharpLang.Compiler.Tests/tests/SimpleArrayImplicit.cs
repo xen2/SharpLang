@@ -1,3 +1,10 @@
+[System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true)]
+class EmbedTestAttribute : System.Attribute
+{
+    public EmbedTestAttribute(System.Type type) { }
+}
+
+[EmbedTestAttribute(typeof(string[]))]
 public static class Program
 {
     public static void Main()

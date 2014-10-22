@@ -1,3 +1,9 @@
+class EmbedTestAttribute : System.Attribute
+{
+    public EmbedTestAttribute(System.Type type) { }
+}
+
+[EmbedTestAttribute(typeof(byte[]))]
 public static class Program
 {
     private static byte[] Test = new byte[] {1, 2, 3, 4, 5, 6, 7, 8};
