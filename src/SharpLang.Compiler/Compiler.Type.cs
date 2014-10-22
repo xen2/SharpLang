@@ -349,14 +349,17 @@ namespace SharpLang.CompilerServices
             // Is it inside this assembly
             bool isLocal = (typeReference.Resolve().Module.Assembly == assembly);
 
+            // TODO: Ideally we would check if type is still not being imported in a referenced assembly
+            // However, it didn't seem worth it. Might need further investigation.
+
+            if (!isLocal && !force)
+                return Linkage.ExternalWeakLinkage;
+
             // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
             bool isTemplate = typeReference.MetadataType == MetadataType.Array;
 
             // Also emit generic types locally
             isTemplate |= typeReference.HasGenericParameters || typeReference is GenericInstanceType;
-
-            if (!(isLocal || isTemplate) && !force)
-                return Linkage.ExternalWeakLinkage;
 
             return isTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
         }

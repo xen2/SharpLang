@@ -38,7 +38,7 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, bool verifyModule = false, System.Type[] additionalTypes = null)
+        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, bool verifyModule = true, System.Type[] additionalTypes = null)
         {
             var assemblyDefinition = LoadAssembly(inputFile);
 
@@ -51,7 +51,7 @@ namespace SharpLang.CompilerServices
                 {
                     var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
                     var resolvedType = assembly.MainModule.GetType(type.FullName);
-                    compiler.RegisterType(resolvedType);
+                    compiler.RegisterType(assemblyDefinition.MainModule.Import(resolvedType));
                 }
             }
 
