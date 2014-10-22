@@ -138,6 +138,10 @@ namespace SharpLang.CompilerServices
             // Interface method uses a global so that we can have a unique pointer to use as IMT key
             if (isInterfaceMethod)
             {
+                // For test code only: Use linkonce instead of linkageType so that we know if type was forced
+                if (TestMode)
+                    linkageType = Linkage.LinkOnceAnyLinkage;
+
                 functionGlobal = LLVM.AddGlobal(module, LLVM.Int8TypeInContext(context), methodMangledName);
                 if (linkageType != Linkage.ExternalWeakLinkage)
                     LLVM.SetInitializer(functionGlobal, LLVM.ConstNull(LLVM.Int8TypeInContext(context)));

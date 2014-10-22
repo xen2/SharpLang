@@ -43,8 +43,19 @@ namespace SharpLang.CompilerServices
             var assemblyDefinition = LoadAssembly(inputFile);
 
             var compiler = new Compiler();
-            compiler.RegisterMainAssembly(assemblyDefinition);
+            compiler.PrepareAssembly(assemblyDefinition);
 
+            foreach (var type in assemblyDefinition.MainModule.Types)
+            {
+                foreach (var attribute in type.CustomAttributes)
+                {
+                    if (attribute.AttributeType.Name == "EmbedTestAttribute")
+                    {
+                        compiler.RegisterType((TypeReference)attribute.ConstructorArguments[0].Value);
+                        compiler.TestMode = true;
+                    }
+                }
+            }
             if (additionalTypes != null)
             {
                 foreach (var type in additionalTypes)
@@ -54,6 +65,8 @@ namespace SharpLang.CompilerServices
                     compiler.RegisterType(assemblyDefinition.MainModule.Import(resolvedType));
                 }
             }
+
+            compiler.ProcessAssembly(assemblyDefinition);
 
             var module = compiler.GenerateModule();
 

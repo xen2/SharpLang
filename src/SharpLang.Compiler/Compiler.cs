@@ -67,7 +67,9 @@ namespace SharpLang.CompilerServices
         // List of all referenced assemblies (including indirect ones)
         private HashSet<AssemblyDefinition> referencedAssemblies = new HashSet<AssemblyDefinition>();
 
-        public void RegisterMainAssembly(AssemblyDefinition assembly)
+        public bool TestMode { get; set; }
+
+        public void PrepareAssembly(AssemblyDefinition assembly)
         {
             this.assembly = assembly;
 
@@ -138,8 +140,6 @@ namespace SharpLang.CompilerServices
             // struct CaughtResultType { i8*, i32 }
             caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
-
-            RegisterAssembly(assembly);
         }
 
         private static void CollectAssemblyReferences(HashSet<AssemblyDefinition> assemblies, AssemblyDefinition assemblyDefinition)
@@ -172,10 +172,9 @@ namespace SharpLang.CompilerServices
         {
             var type = GetType(typeReference, TypeState.TypeComplete);
             EmitType(type, true);
-            BuildRuntimeType(GetClass(type));
         }
 
-        public void RegisterAssembly(AssemblyDefinition assembly)
+        public void ProcessAssembly(AssemblyDefinition assembly)
         {
             // Process types
             foreach (var assemblyModule in assembly.Modules)
