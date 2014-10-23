@@ -66,6 +66,7 @@ namespace SharpLang.CompilerServices
 
         // List of all referenced assemblies (including indirect ones)
         private HashSet<AssemblyDefinition> referencedAssemblies = new HashSet<AssemblyDefinition>();
+        private HashSet<TypeReference> referencedTypes = new HashSet<TypeReference>(MemberEqualityComparer.Default);
 
         public bool TestMode { get; set; }
 
@@ -76,6 +77,14 @@ namespace SharpLang.CompilerServices
             // Load all dependent assemblies (except ourself)
             CollectAssemblyReferences(referencedAssemblies, assembly);
             referencedAssemblies.Remove(assembly);
+
+            foreach (var referencedAssembly in referencedAssemblies)
+            {
+                foreach (var type in referencedAssembly.MainModule.Types)
+                {
+                    referencedTypes.Add(type);
+                }
+            }
 
             corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
 
