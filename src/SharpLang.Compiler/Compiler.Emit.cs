@@ -240,6 +240,15 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Object, stringClass.Type, allocatedObject));
         }
 
+        private ValueRef CreateDataConstant(byte[] data)
+        {
+            // Probably inefficient, need to maybe add new LLVM bindings for that?
+            var dataArray = data.Select(x => LLVM.ConstInt(LLVM.Int8TypeInContext(context), x, false));
+            var constantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), dataArray.ToArray());
+
+            return constantData;
+        }
+
         private ValueRef CreateStringConstant(string str, bool utf16, bool nullTerminate)
         {
             ValueRef stringConstantData;
