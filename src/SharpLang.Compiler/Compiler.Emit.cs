@@ -335,6 +335,15 @@ namespace SharpLang.CompilerServices
             var actualMethod = overrideMethod;
 
             callResult = GenerateInvoke(functionContext, actualMethod, args);
+            switch (targetMethod.CallingConvention)
+            {
+                case MethodCallingConvention.StdCall:
+                    LLVM.SetInstructionCallConv(callResult, (uint)CallConv.X86StdcallCallConv);
+                    break;
+                case MethodCallingConvention.FastCall:
+                    LLVM.SetInstructionCallConv(callResult, (uint)CallConv.X86FastcallCallConv);
+                    break;
+            }
 
             // Mark method as needed (if non-virtual call)
             if (LLVM.IsAGlobalVariable(actualMethod).Value != IntPtr.Zero)

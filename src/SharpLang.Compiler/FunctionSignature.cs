@@ -1,11 +1,15 @@
+using Mono.Cecil;
+
 namespace SharpLang.CompilerServices
 {
     class FunctionSignature
     {
-        public FunctionSignature(Type returnType, Type[] parameterTypes)
+        public FunctionSignature(Type returnType, Type[] parameterTypes, MethodCallingConvention callingConvention, PInvokeInfo pinvoke)
         {
             ReturnType = returnType;
             ParameterTypes = parameterTypes;
+            CallingConvention = callingConvention;
+            PInvokeInfo = pinvoke;
         }
 
         /// <summary>
@@ -23,5 +27,15 @@ namespace SharpLang.CompilerServices
         /// The parameter types.
         /// </value>
         public Type[] ParameterTypes { get; private set; }
+
+        /// <summary>
+        /// Gets the calling convention.
+        /// </summary>
+        /// <value>
+        /// The calling convention.
+        /// </value>
+        public MethodCallingConvention CallingConvention { get; private set; }
+
+        public PInvokeInfo PInvokeInfo { get; private set; }
     }
 }

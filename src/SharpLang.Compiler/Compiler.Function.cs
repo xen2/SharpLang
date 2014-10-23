@@ -56,7 +56,7 @@ namespace SharpLang.CompilerServices
 
             var returnType = GetType(ResolveGenericsVisitor.Process(context, context.ReturnType), TypeState.StackComplete);
 
-            return new FunctionSignature(returnType, parameterTypes);
+            return new FunctionSignature(returnType, parameterTypes, callSite.CallingConvention, null);
         }
 
         /// <summary>
@@ -148,11 +148,29 @@ namespace SharpLang.CompilerServices
                 LLVM.SetLinkage(functionGlobal, linkageType);
             }
 
-            function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes));
+            // Find calling convention
+            var callingConvention = method.CallingConvention;
+            PInvokeInfo pinvokeInfo = null;
+            if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
+            {
+                pinvokeInfo = resolvedMethod.PInvokeInfo;
+            }
+
+            function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes, callingConvention, pinvokeInfo));
             functions.Add(method, function);
 
             if (hasDefinition)
             {
+                switch (callingConvention)
+                {
+                    case MethodCallingConvention.StdCall:
+                        LLVM.SetInstructionCallConv(functionGlobal, (uint)CallConv.X86StdcallCallConv);
+                        break;
+                    case MethodCallingConvention.FastCall:
+                        LLVM.SetInstructionCallConv(functionGlobal, (uint)CallConv.X86FastcallCallConv);
+                        break;
+                }
+
                 if (linkageType == Linkage.ExternalWeakLinkage || isInternal)
                 {
                     // External weak linkage
