@@ -346,22 +346,23 @@ namespace SharpLang.CompilerServices
 
         internal Linkage GetLinkageType(TypeReference typeReference, bool force = false)
         {
-            // Is it inside this assembly
-            bool isLocal = (typeReference.Resolve().Module.Assembly == assembly);
-
-            // TODO: Ideally we would check if type is still not being imported in a referenced assembly
-            // However, it didn't seem worth it. Might need further investigation.
-
-            if (!isLocal && !force)
-                return Linkage.ExternalWeakLinkage;
+            // Is it inside this assembly? (either type ref or underlying type def)
+            bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
 
             // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
-            bool isTemplate = typeReference.MetadataType == MetadataType.Array;
+            bool isLocalTemplate = typeReference.MetadataType == MetadataType.Array;
 
             // Also emit generic types locally
-            isTemplate |= typeReference.HasGenericParameters || typeReference is GenericInstanceType;
+            isLocalTemplate |= typeReference.HasGenericParameters || typeReference is GenericInstanceType;
 
-            return isTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
+            // Then, check if this type is already contained in another dependent assembly (in which case we can skip it)
+            if (isLocalTemplate && referencedTypes.Contains(typeReference))
+                isLocalTemplate = false;
+
+            if (!isLocal && !isLocalTemplate && !force)
+                return Linkage.ExternalWeakLinkage;
+
+            return isLocalTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
         }
 
         private void EmitType(Type type, bool force = false)
