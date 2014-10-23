@@ -39,7 +39,19 @@ namespace SharpLang.CompilerServices.Tests
         {
             // Link assembly
             var assemblyBaseName = Path.GetFileNameWithoutExtension(sourceAssembly);
-            sourceAssembly = LinkAssembly(sourceAssembly, assemblyBaseName + "_linker_output");
+
+            // Prepare output directory (and clean it if already existing)
+            var outputDirectory = assemblyBaseName + "_linker_output";
+            try
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            catch (Exception)
+            {
+            }
+
+            // Use Mono.Linker to reduce IL code to process (tree-shaking)
+            sourceAssembly = LinkAssembly(sourceAssembly, outputDirectory);
 
             var outputBitcodes = new List<string>();
 
