@@ -35,6 +35,47 @@ solution "SharpLang"
     include (srcdir .. "/SharpLLVM.Native")
     include (srcdir .. "/SharpLLVM.Tests")
 
+  group "Cecil"
+    external "Mono.Cecil"
+      location (depsdir .. "/Mono.Cecil")
+      uuid "D68133BD-1E63-496E-9EDE-4FBDBF77B486"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["Release"] = "net_4_0_Release",
+          ["Debug"] = "net_4_0_Debug",
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "Mono.Cecil.Pdb"
+      location (depsdir .. "/Mono.Cecil/symbols/pdb")
+      uuid "63E6915C-7EA4-4D76-AB28-0D7191EEA626"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["Release"] = "net_4_0_Release",
+          ["Debug"] = "net_4_0_Debug",
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "Mono.Cecil.Rocks"
+      location (depsdir .. "/Mono.Cecil/rocks")
+      uuid "FBC6DD59-D09D-499C-B03C-99C1C78FF2AC"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["Release"] = "net_4_0_Release",
+          ["Debug"] = "net_4_0_Debug",
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+
   group "Tools"
     external "Mono.Linker"
       location (srcdir .. "/mcs/tools/linker")

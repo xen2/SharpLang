@@ -14,3 +14,6 @@
 	path = deps/libcxxabi
 	url = https://github.com/llvm-mirror/libcxxabi
 	ignore = dirty
+[submodule "deps/Mono.Cecil"]
+	path = deps/Mono.Cecil
+	url = https://github.com/xen2/cecil.git
