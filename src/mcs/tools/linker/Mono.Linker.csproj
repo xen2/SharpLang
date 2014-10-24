@@ -96,8 +96,9 @@
     <None Include="README" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\..\..\..\deps\Mono.Cecil\Mono.Cecil.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\..\..\deps\Mono.Cecil\Mono.Cecil.csproj">
+      <Project>{d68133bd-1e63-496e-9ede-4fbdbf77b486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
