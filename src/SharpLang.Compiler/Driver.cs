@@ -52,12 +52,12 @@ namespace SharpLang.CompilerServices
                     if (attribute.AttributeType.Name == "EmbedTestAttribute")
                     {
                         compiler.RegisterType((TypeReference)attribute.ConstructorArguments[0].Value);
-                        compiler.TestMode = true;
                     }
                 }
             }
             if (additionalTypes != null)
             {
+                compiler.TestMode = true;
                 foreach (var type in additionalTypes)
                 {
                     var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
