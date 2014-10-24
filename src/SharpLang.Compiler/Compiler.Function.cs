@@ -1519,9 +1519,9 @@ namespace SharpLang.CompilerServices
             {
                 var functionGlobal = functionContext.FunctionGlobal;
 
-                // Note: we temporarily ignore extern class
-                // TODO: This will be reactivated as soon as we start linking multiple modules
-                if (!@class.Type.IsLocal)
+                // TODO: We temporarily ignore extern class in test mode
+                // Not sure if that's the way we want to keep it
+                if (TestMode && !@class.Type.IsLocal)
                     return;
 
                 // Check if class is initialized
