@@ -250,6 +250,9 @@ namespace SharpLang.CompilerServices
             // Process fields and other dependent debug types
             ProcessMissingDebugTypes();
 
+            // Read it again in case it was mutated
+            debugType = CreateDebugType(variable.Type);
+
             // TODO: Detect where variable is actually declared (first use of local?)
             var debugLocalVariable = LLVM.DIBuilderCreateLocalVariable(debugBuilder,
                 (uint)dwarfType,
