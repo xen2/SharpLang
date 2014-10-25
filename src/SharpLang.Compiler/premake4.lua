@@ -11,7 +11,6 @@ project "SharpLang.Compiler"
 
   libdirs 
   {
-    depsdir .. "/Mono.Cecil",
     depsdir .. "/Mono.Options",
   }
 
