@@ -344,24 +344,25 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        internal Linkage GetLinkageType(TypeReference typeReference, bool force = false)
+        internal Linkage GetLinkageType(TypeReference typeReference, out bool isLocal, bool force = false)
         {
             // Is it inside this assembly? (either type ref or underlying type def)
-            bool isLocal = typeReference.Resolve().Module.Assembly == assembly;
+            isLocal = typeReference.Resolve().Module.Assembly == assembly;
 
-            // Manually emit Array classes locally (until proper mscorlib + generic instantiation exists).
-            bool isLocalTemplate = typeReference.MetadataType == MetadataType.Array;
-
-            // Also emit generic types locally
-            isLocalTemplate |= typeReference.HasGenericParameters || typeReference is GenericInstanceType;
+            // Manually emit TypeSpec classes locally (until proper mscorlib + generic instantiation exists).
+            bool isLocalTemplate = typeReference is TypeSpecification;
 
             // Then, check if this type is already contained in another dependent assembly (in which case we can skip it)
             if (isLocalTemplate && referencedTypes.Contains(typeReference))
+            {
+                isLocal = false;
                 isLocalTemplate = false;
+            }
 
             if (!isLocal && !isLocalTemplate && !force)
-                return Linkage.ExternalWeakLinkage;
+                return TestMode ? Linkage.ExternalWeakLinkage : Linkage.ExternalLinkage;
 
+            isLocal = true;
             return isLocalTemplate ? Linkage.LinkOnceAnyLinkage : Linkage.ExternalLinkage;
         }
 
@@ -371,16 +372,15 @@ namespace SharpLang.CompilerServices
             if (type.IsLocal)
                 return;
 
-            var linkageType = GetLinkageType(type.TypeReference, force);
+            var linkageType = GetLinkageType(type.TypeReference, out type.IsLocal, force);
             type.Linkage = linkageType;
 
-            if (linkageType != Linkage.ExternalWeakLinkage)
+            if (type.IsLocal)
             {
                 // Type is local, make sure it's complete right away because it will be needed anyway
                 CompleteType(type);
 
                 // Enqueue for later generation
-                type.IsLocal = true;
                 classesToGenerate.Enqueue(type);
             }
         }
