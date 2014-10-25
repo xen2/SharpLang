@@ -155,14 +155,10 @@ namespace SharpLang.CompilerServices
                     if (@class.Type.IsLocal)
                     {
                         LLVM.SetInitializer(runtimeTypeInfoGlobal, LLVM.ConstNull(runtimeTypeInfoType));
+                    }
 
-                        // Allow classes to be defined multiple times
-                        LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
-                    }
-                    else
-                    {
-                        LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalWeakLinkage);
-                    }
+                    // Apply linkage
+                    LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
                 }
                 else
                 {
@@ -225,14 +221,10 @@ namespace SharpLang.CompilerServices
                     if (@class.Type.IsLocal)
                     {
                         BuildRuntimeType(@class);
+                    }
 
-                        // Allow classes to be defined multiple times
-                        LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
-                    }
-                    else
-                    {
-                        LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalWeakLinkage);
-                    }
+                    // Apply linkage
+                    LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
                 }
 
                 // Prepare class initializer

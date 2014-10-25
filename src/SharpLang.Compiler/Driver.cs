@@ -43,7 +43,18 @@ namespace SharpLang.CompilerServices
             var assemblyDefinition = LoadAssembly(inputFile);
 
             var compiler = new Compiler();
+            compiler.TestMode = additionalTypes != null;
             compiler.PrepareAssembly(assemblyDefinition);
+
+            if (additionalTypes != null)
+            {
+                foreach (var type in additionalTypes)
+                {
+                    var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
+                    var resolvedType = assembly.MainModule.GetType(type.FullName);
+                    compiler.RegisterType(assemblyDefinition.MainModule.Import(resolvedType));
+                }
+            }
 
             foreach (var type in assemblyDefinition.MainModule.Types)
             {
@@ -53,16 +64,6 @@ namespace SharpLang.CompilerServices
                     {
                         compiler.RegisterType((TypeReference)attribute.ConstructorArguments[0].Value);
                     }
-                }
-            }
-            if (additionalTypes != null)
-            {
-                compiler.TestMode = true;
-                foreach (var type in additionalTypes)
-                {
-                    var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
-                    var resolvedType = assembly.MainModule.GetType(type.FullName);
-                    compiler.RegisterType(assemblyDefinition.MainModule.Import(resolvedType));
                 }
             }
 

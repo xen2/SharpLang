@@ -127,7 +127,13 @@ namespace SharpLang.CompilerServices
             var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
 
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
-            var linkageType = GetLinkageType(method.DeclaringType);
+
+            // Determine if type and function is local, and linkage type
+            bool isLocal;
+            var linkageType = GetLinkageType(method.DeclaringType, out isLocal);
+            if (isInternal)
+                linkageType = Linkage.ExternalWeakLinkage; // Should be switched to non-weak when we have complete implementation of every internal calls
+
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
             bool isInterfaceMethod = declaringType.TypeDefinition.IsInterface;
             var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal || isRuntime);
@@ -140,10 +146,13 @@ namespace SharpLang.CompilerServices
             {
                 // For test code only: Use linkonce instead of linkageType so that we know if type was forced
                 if (TestMode)
+                {
+                    isLocal = true;
                     linkageType = Linkage.LinkOnceAnyLinkage;
+                }
 
                 functionGlobal = LLVM.AddGlobal(module, LLVM.Int8TypeInContext(context), methodMangledName);
-                if (linkageType != Linkage.ExternalWeakLinkage)
+                if (isLocal)
                     LLVM.SetInitializer(functionGlobal, LLVM.ConstNull(LLVM.Int8TypeInContext(context)));
                 LLVM.SetLinkage(functionGlobal, linkageType);
             }
@@ -171,17 +180,14 @@ namespace SharpLang.CompilerServices
                         break;
                 }
 
-                if (linkageType == Linkage.ExternalWeakLinkage || isInternal)
-                {
-                    // External weak linkage
-                    LLVM.SetLinkage(functionGlobal, Linkage.ExternalWeakLinkage);
-                }
-                else
+                if (isLocal && !isInternal)
                 {
                     // Need to compile
                     EmitFunction(function);
-                    LLVM.SetLinkage(functionGlobal, linkageType);
                 }
+
+                // Apply linkage
+                LLVM.SetLinkage(functionGlobal, linkageType);
             }
 
             return function;
