@@ -82,7 +82,15 @@ namespace SharpLang.CompilerServices
             {
                 foreach (var type in referencedAssembly.MainModule.Types)
                 {
-                    referencedTypes.Add(type);
+                    RegisterExternalType(type);
+                }
+                foreach (var type in referencedAssembly.MainModule.GetTypeSpecifications())
+                {
+                    RegisterExternalType(type);
+                }
+                foreach (var type in referencedAssembly.MainModule.GetTypeReferences())
+                {
+                    RegisterExternalType(type);
                 }
             }
 
@@ -149,6 +157,76 @@ namespace SharpLang.CompilerServices
             // struct CaughtResultType { i8*, i32 }
             caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
+        }
+
+        private void RegisterExternalType(TypeReference typeReference)
+        {
+            // Ignore open types
+            if (typeReference.ContainsGenericParameter())
+                return;
+
+            // Register type
+            if (!referencedTypes.Add(typeReference))
+                return; // Already processed?
+
+            var typeDefinition = typeReference.Resolve();
+
+            // Process its base type
+            if (typeDefinition.BaseType != null)
+                RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType));
+
+            // Process nested types
+            if (typeDefinition.HasNestedTypes)
+            {
+                foreach (var nestedType in typeDefinition.NestedTypes)
+                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, nestedType));
+            }
+
+            // Process its fields
+            if (typeDefinition.HasFields)
+            {
+                foreach (var field in typeDefinition.Fields)
+                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, field.FieldType));
+            }
+
+            // Process its properties
+            if (typeDefinition.HasProperties)
+            {
+                foreach (var property in typeDefinition.Properties)
+                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, property.PropertyType));
+            }
+
+            // Process its methods
+            if (typeDefinition.HasMethods)
+            {
+                foreach (var method in typeDefinition.Methods)
+                {
+                    var methodReference = ResolveGenericMethod(typeReference, method);
+
+                    // If a method contains generic parameters, skip it
+                    if (ResolveGenericsVisitor.ContainsGenericParameters(methodReference))
+                        continue;
+
+                    // Process method parameters
+                    foreach (var parameter in method.Parameters)
+                        RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, parameter.ParameterType));
+
+                    if (method.HasBody)
+                    {
+                        // Process method variables and locals
+                        foreach (var variable in method.Body.Variables)
+                            RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, variable.VariableType));
+
+                        // Process method opcodes
+                        foreach (var instruction in method.Body.Instructions)
+                        {
+                            var typeToken = instruction.Operand as TypeReference;
+                            if (typeToken != null)
+                                RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, typeToken));
+                        }
+                    }
+                }
+            }
         }
 
         private static void CollectAssemblyReferences(HashSet<AssemblyDefinition> assemblies, AssemblyDefinition assemblyDefinition)
