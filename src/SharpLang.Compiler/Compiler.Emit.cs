@@ -181,6 +181,12 @@ namespace SharpLang.CompilerServices
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
 
+            SetupVTable(allocatedObject, @class);
+            return allocatedObject;
+        }
+
+        private void SetupVTable(ValueRef @object, Class @class)
+        {
             // Store vtable global into first field of the object
             var indices = new[]
             {
@@ -188,9 +194,8 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false),     // Access RTTI
             };
 
-            var vtablePointer = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
+            var vtablePointer = LLVM.BuildInBoundsGEP(builder, @object, indices, string.Empty);
             LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobal, vtablePointer);
-            return allocatedObject;
         }
 
         private void EmitRet(List<StackValue> stack, MethodReference method)
