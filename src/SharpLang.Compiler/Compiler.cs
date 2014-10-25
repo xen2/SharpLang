@@ -84,8 +84,12 @@ namespace SharpLang.CompilerServices
                 {
                     RegisterExternalType(type);
                 }
-                foreach (var type in referencedAssembly.MainModule.GetTypeSpecifications())
+                for (uint i = 1;; ++i)
                 {
+                    var type = (TypeReference)referencedAssembly.MainModule.LookupToken(new MetadataToken(TokenType.TypeSpec, i));
+                    if (type == null)
+                        break;
+
                     RegisterExternalType(type);
                 }
                 foreach (var type in referencedAssembly.MainModule.GetTypeReferences())
