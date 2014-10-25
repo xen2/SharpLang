@@ -55,7 +55,7 @@ namespace SharpLang.CompilerServices.Cecil
                 }
                 else
                 {
-                    builder.Append(method.Parameters[0].ParameterType.MangledName());
+                    builder.Append(ResolveGenericsVisitor.Process(method, method.Parameters[0].ParameterType).MangledName());
                 }
             }
             else
@@ -67,12 +67,12 @@ namespace SharpLang.CompilerServices.Cecil
             return builder.ToString();
         }
 
-        public static void MethodSignatureMangledName(this IMethodSignature self, StringBuilder builder)
+        public static void MethodSignatureMangledName(this MethodReference method, StringBuilder builder)
         {
             builder.Append("(");
-            if (self.HasParameters)
+            if (method.HasParameters)
             {
-                var parameters = self.Parameters;
+                var parameters = method.Parameters;
                 for (int i = 0; i < parameters.Count; i++)
                 {
                     ParameterDefinition definition = parameters[i];
@@ -84,7 +84,7 @@ namespace SharpLang.CompilerServices.Cecil
                     {
                         builder.Append("...,");
                     }
-                    builder.Append(definition.ParameterType.MangledName());
+                    builder.Append(ResolveGenericsVisitor.Process(method, definition.ParameterType).MangledName());
                 }
             }
             builder.Append(")");

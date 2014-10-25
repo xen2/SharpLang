@@ -169,11 +169,17 @@ namespace SharpLang.CompilerServices
             if (typeReference.ContainsGenericParameter())
                 return;
 
+            // Handle circular assembly references
+            if (typeReference.Module == assembly.MainModule)
+                return;
+
+            var typeDefinition = typeReference.Resolve();
+            if (typeDefinition.Module == assembly.MainModule)
+                return;
+
             // Register type
             if (!referencedTypes.Add(typeReference))
                 return; // Already processed?
-
-            var typeDefinition = typeReference.Resolve();
 
             // Process its base type
             if (typeDefinition.BaseType != null)
