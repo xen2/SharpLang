@@ -132,7 +132,15 @@ namespace SharpLang.CompilerServices
             bool isLocal;
             var linkageType = GetLinkageType(method.DeclaringType, out isLocal);
             if (isInternal)
-                linkageType = Linkage.ExternalWeakLinkage; // Should be switched to non-weak when we have complete implementation of every internal calls
+            {
+                // Should be switched to non-weak when we have complete implementation of every internal calls
+                linkageType = Linkage.ExternalWeakLinkage;
+            }
+            else if (resolvedMethod != null && resolvedMethod.HasGenericParameters)
+            {
+                isLocal = true;
+                linkageType = Linkage.LinkOnceAnyLinkage;
+            }
 
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
             bool isInterfaceMethod = declaringType.TypeDefinition.IsInterface;
