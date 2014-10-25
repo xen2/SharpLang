@@ -26,13 +26,44 @@ namespace SharpLang.CompilerServices.Cecil
             return assembly.Name.Name + "_" + typeReference.FullName;
         }
 
-        public static string MangledName(this MethodReference self)
+        public static string MangledName(this MethodReference method)
         {
             var builder = new StringBuilder();
-            if (self.DeclaringType != null)
-                builder.Append(self.DeclaringType.MangledName()).Append("::");
-            builder.Append(self.Name);
-            MethodSignatureMangledName(self, builder);
+            if (method.DeclaringType != null)
+                builder.Append(method.DeclaringType.MangledName()).Append("::");
+            builder.Append(method.Name);
+
+            // Append generic arguments
+            var genericInstanceMethod = method as GenericInstanceMethod;
+            if (genericInstanceMethod != null)
+            {
+                foreach (var genericArgument in genericInstanceMethod.GenericArguments)
+                {
+                    builder.Append('_');
+                    builder.Append(genericArgument.MangledName());
+                }
+            }
+
+            if (method.Name == "op_Implicit" || method.Name == "op_Explicit")
+            {
+                // If it's op_Implicit or op_Explicit, we might want to use return type instead of first parameter (depending on which way the conversion is)
+                builder.Append("_");
+                if (MemberEqualityComparer.Default.Equals(method.Parameters[0].ParameterType, method.DeclaringType))
+                {
+                    builder.Append("ret_");
+                    builder.Append(method.ReturnType.MangledName());
+                }
+                else
+                {
+                    builder.Append(method.Parameters[0].ParameterType.MangledName());
+                }
+            }
+            else
+            {
+                // Method signature
+                MethodSignatureMangledName(method, builder);
+            }
+
             return builder.ToString();
         }
 
