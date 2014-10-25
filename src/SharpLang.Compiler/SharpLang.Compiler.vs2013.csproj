@@ -67,9 +67,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Mono.Cecil" />
-    <Reference Include="Mono.Cecil.Pdb" />
-    <Reference Include="Mono.Cecil.Rocks" />
     <Reference Include="Mono.Options" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +113,18 @@
     <ProjectReference Include="..\SharpLLVM\SharpLLVM.vs2013.csproj">
       <Project>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</Project>
       <Name>SharpLLVM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\deps\Mono.Cecil\Mono.Cecil.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\deps\Mono.Cecil\symbols\pdb\Mono.Cecil.Pdb.csproj">
+      <Project>{63E6915C-7EA4-4D76-AB28-0D7191EEA626}</Project>
+      <Name>Mono.Cecil.Pdb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\deps\Mono.Cecil\rocks\Mono.Cecil.Rocks.csproj">
+      <Project>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</Project>
+      <Name>Mono.Cecil.Rocks</Name>
     </ProjectReference>
     <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
       <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
