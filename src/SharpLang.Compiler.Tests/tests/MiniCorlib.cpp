@@ -52,13 +52,13 @@ extern "C" void System_NotSupportedException___ctor_System_String_(void* excepti
 }
 
 // System.IntPtr::op_Explicit(void*)
-extern "C" void* System_IntPtr__op_Explicit_System_Void__(void* p)
+extern "C" void* System_IntPtr__op_Explicit_System_Void_(void* p)
 {
 	return p;
 }
 
 // System.UIntPtr::op_Explicit(ulong)
-extern "C" void* System_UIntPtr__op_Explicit_System_UInt64_(uint64_t p)
+extern "C" void* System_UIntPtr__op_Explicit_System_UInt64(uint64_t p)
 {
 	return (void*)p;
 }
