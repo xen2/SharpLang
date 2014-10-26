@@ -49,6 +49,62 @@ namespace SharpLang.CompilerServices.Cecil
             return result;
         }
 
+        /// <summary>
+        /// Replaces GenericInstance of type !0 with their real definitions (T, U, etc...)
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static TypeReference ProcessSignatureType(MethodReference context, TypeReference type)
+        {
+            if (type == null)
+                return null;
+
+            if (context == null)
+                return type;
+
+            var genericInstanceTypeContext = context.DeclaringType as GenericInstanceType;
+            var genericInstanceMethodContext = context as GenericInstanceMethod;
+            if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)
+                return type;
+
+            // Build dictionary that will map generic type to their real implementation type
+            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>(TypeReferenceComparer.Default);
+            if (genericInstanceTypeContext != null)
+            {
+                var resolvedType1 = genericInstanceTypeContext.ElementType;
+                var resolvedType2 = genericInstanceTypeContext.Resolve();
+                for (int i = 0; i < resolvedType1.GenericParameters.Count; ++i)
+                {
+                    var genericParameter1 = resolvedType1.GenericParameters[i];
+                    var genericParameter2 = resolvedType2.GenericParameters[i];
+                    if (genericParameter2 != genericParameter1)
+                        genericTypeMapping.Add(genericParameter1, genericParameter2);
+                }
+            }
+
+            if (genericInstanceMethodContext != null)
+            {
+                var elementMethod = genericInstanceMethodContext.ElementMethod;
+                var resolvedMethod = genericInstanceMethodContext.Resolve();
+                for (int i = 0; i < elementMethod.GenericParameters.Count; ++i)
+                {
+                    var genericParameter1 = elementMethod.GenericParameters[i];
+                    var genericParameter2 = resolvedMethod.GenericParameters[i];
+                    if (genericParameter2 != genericParameter1)
+                        genericTypeMapping.Add(genericParameter1, genericParameter2);
+                }
+            }
+
+            if (genericTypeMapping.Count == 0)
+                return type;
+
+            var visitor = new ResolveGenericsVisitor(genericTypeMapping);
+            var result = visitor.VisitDynamic(type);
+
+            return result;
+        }
+
         public static TypeReference Process(MethodReference context, TypeReference type)
         {
             if (type == null)
