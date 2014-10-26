@@ -75,16 +75,19 @@ namespace SharpLang.CompilerServices.Cecil
                 var parameters = method.Parameters;
                 for (int i = 0; i < parameters.Count; i++)
                 {
-                    ParameterDefinition definition = parameters[i];
+                    ParameterDefinition parameter = parameters[i];
                     if (i > 0)
                     {
                         builder.Append(",");
                     }
-                    if (definition.ParameterType.IsSentinel)
+                    if (parameter.ParameterType.IsSentinel)
                     {
                         builder.Append("...,");
                     }
-                    builder.Append(ResolveGenericsVisitor.Process(method, definition.ParameterType).MangledName());
+
+                    // We are replacing GenericInstance of type !0 with their real definitions (T, U, etc...)
+                    var parameterType = ResolveGenericsVisitor.ProcessSignatureType(method, parameter.ParameterType);
+                    builder.Append(parameterType.MangledName());
                 }
             }
             builder.Append(")");
