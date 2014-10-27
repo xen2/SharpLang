@@ -52,7 +52,7 @@ namespace SharpLang.CompilerServices
                 {
                     var assembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(type.Assembly.FullName);
                     var resolvedType = assembly.MainModule.GetType(type.FullName);
-                    compiler.RegisterType(assemblyDefinition.MainModule.Import(resolvedType));
+                    compiler.RegisterType(resolvedType);
                 }
             }
 
