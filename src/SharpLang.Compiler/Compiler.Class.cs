@@ -185,7 +185,7 @@ namespace SharpLang.CompilerServices
                         if (!field.IsStatic)
                             continue;
 
-                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
 
                         @class.StaticFields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
                         fieldTypes.Add(fieldType.DefaultType);

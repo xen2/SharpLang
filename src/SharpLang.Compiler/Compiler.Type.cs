@@ -225,7 +225,7 @@ namespace SharpLang.CompilerServices
 
                         // TODO: Align using pack size? Need to study .NET behavior.
 
-                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
                         classSize = Math.Max((int)classSize, field.Offset + (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType));
                     }
                 }
@@ -240,7 +240,7 @@ namespace SharpLang.CompilerServices
                         classSize = (classSize + typeDefinition.PackingSize - 1) & ~(typeDefinition.PackingSize - 1);
 
                         // Add size of field
-                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
                         classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType);
                     }
                 }
@@ -308,7 +308,7 @@ namespace SharpLang.CompilerServices
                         if (field.IsStatic)
                             continue;
 
-                        var fieldType = GetType(assembly.MainModule.Import(ResolveGenericsVisitor.Process(typeReference, field.FieldType)), TypeState.StackComplete);
+                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
 
                         // Compute struct index (that we can use to access the field). Either struct index or array offset.
                         int structIndex;
