@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
 
@@ -408,9 +409,16 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Class:
                 case MetadataType.Object:
                 {
-                    var debugClass = GetOrCreateDebugClass(GetClass(type));
-
                     var typeDefinition = GetMethodTypeDefinition(type.TypeReference);
+                    if (typeDefinition.IsEnum)
+                    {
+                        var enumDebugType = CreateDebugType(GetType(typeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete));
+                        debugTypeCache.Add(type, enumDebugType);
+
+                        return enumDebugType;
+                    }
+
+                    var debugClass = GetOrCreateDebugClass(GetClass(type));
 
                     // Try again from cache, it might have been done through recursion already
                     if (debugTypeCache.TryGetValue(type, out result))
