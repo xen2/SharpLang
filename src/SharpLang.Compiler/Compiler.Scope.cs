@@ -128,10 +128,10 @@ namespace SharpLang.CompilerServices
             var type = @class.Type;
 
             // Find namespace scope
-            var debugNamespace = GetOrCreateDebugNamespace(type.TypeReference.Namespace);
+            var debugNamespace = GetOrCreateDebugNamespace(type.TypeReferenceCecil.Namespace);
 
             // Create debug version of the class
-            var structType = type.StackType == StackValueType.Object ? type.ObjectType : type.ValueType;
+            var structType = type.StackType == StackValueType.Object ? type.ObjectTypeLLVM : type.ValueTypeLLVM;
             var size = LLVM.ABISizeOfType(targetData, structType) * 8;
             var align = LLVM.ABIAlignmentOfType(targetData, structType) * 8;
             var emptyArray = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
@@ -141,11 +141,11 @@ namespace SharpLang.CompilerServices
             {
                 var parentClass = @class.BaseType;
                 var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : ValueRef.Empty;
-                debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, type.TypeReference.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, type.TypeReference.FullName);
+                debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, type.TypeReferenceCecil.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, type.TypeReferenceCecil.FullName);
             }
             else
             {
-                debugClass = LLVM.DIBuilderCreateForwardDecl(debugBuilder, (int)DW_TAG.class_type, type.TypeReference.Name, debugNamespace, ValueRef.Empty, 0, 0, size, align, type.TypeReference.FullName);
+                debugClass = LLVM.DIBuilderCreateForwardDecl(debugBuilder, (int)DW_TAG.class_type, type.TypeReferenceCecil.Name, debugNamespace, ValueRef.Empty, 0, 0, size, align, type.TypeReferenceCecil.FullName);
             }
 
             debugClasses.Add(@class, debugClass);
@@ -206,7 +206,7 @@ namespace SharpLang.CompilerServices
             var debugLoc = LLVM.MDNodeInContext(context,
                 new[]
                 {
-                    LLVM.ConstInt(int32Type, (ulong) line, true), LLVM.ConstInt(int32Type, (ulong) column, true),
+                    LLVM.ConstInt(int32LLVM, (ulong) line, true), LLVM.ConstInt(int32LLVM, (ulong) column, true),
                     lastScope.GeneratedScope, ValueRef.Empty
                 });
             LLVM.SetCurrentDebugLocation(builder, debugLoc);
@@ -285,13 +285,13 @@ namespace SharpLang.CompilerServices
                 foreach (var field in type.Fields)
                 {
                     var fieldType = CreateDebugType(field.Value.Type);
-                    var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultType)*8;
-                    var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultType)*8;
-                    var fieldOffset = IsCustomLayout(type.TypeDefinition) ? (ulong)field.Value.StructIndex * 8 : LLVM.OffsetOfElement(targetData, type.ValueType, (uint)field.Value.StructIndex) * 8;
+                    var fieldSize = LLVM.ABISizeOfType(targetData, field.Value.Type.DefaultTypeLLVM)*8;
+                    var fieldAlign = LLVM.ABIAlignmentOfType(targetData, field.Value.Type.DefaultTypeLLVM)*8;
+                    var fieldOffset = IsCustomLayout(type.TypeDefinitionCecil) ? (ulong)field.Value.StructIndex * 8 : LLVM.OffsetOfElement(targetData, type.ValueTypeLLVM, (uint)field.Value.StructIndex) * 8;
 
                     // Add object header (VTable ptr, etc...)
                     if (type.StackType == StackValueType.Object)
-                        fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectType, (int)ObjectFields.Data)*8;
+                        fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectTypeLLVM, (int)ObjectFields.Data)*8;
 
                     memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, ValueRef.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
                 }
@@ -336,7 +336,7 @@ namespace SharpLang.CompilerServices
             ulong size = 0;
             ulong align = 0;
 
-            switch (type.TypeReference.MetadataType)
+            switch (type.TypeReferenceCecil.MetadataType)
             {
                 case MetadataType.Boolean:
                 case MetadataType.SByte:
@@ -354,14 +354,14 @@ namespace SharpLang.CompilerServices
                 case MetadataType.UIntPtr:
                 case MetadataType.Pointer:
                 case MetadataType.ByReference:
-                    size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
-                    align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
+                    size = LLVM.ABISizeOfType(targetData, type.DefaultTypeLLVM) * 8;
+                    align = LLVM.ABIAlignmentOfType(targetData, type.DefaultTypeLLVM) * 8;
                     break;
                 default:
                     break;
             }
 
-            switch (type.TypeReference.MetadataType)
+            switch (type.TypeReferenceCecil.MetadataType)
             {
                 case MetadataType.Boolean:
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "bool", size, align, (uint)DW_ATE.Boolean);
@@ -393,13 +393,13 @@ namespace SharpLang.CompilerServices
                     return LLVM.DIBuilderCreateBasicType(debugBuilder, "UIntPtr", size, align, (uint)DW_ATE.Unsigned);
                 case MetadataType.ByReference:
                 {
-                    var elementType = GetType(((ByReferenceType)type.TypeReference).ElementType, TypeState.TypeComplete);
-                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
+                    var elementType = GetType(((ByReferenceType)type.TypeReferenceCecil).ElementType, TypeState.TypeComplete);
+                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReferenceCecil.Name);
                 }
                 case MetadataType.Pointer:
                 {
-                    var elementType = GetType(((PointerType)type.TypeReference).ElementType, TypeState.TypeComplete);
-                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReference.Name);
+                    var elementType = GetType(((PointerType)type.TypeReferenceCecil).ElementType, TypeState.TypeComplete);
+                    return LLVM.DIBuilderCreatePointerType(debugBuilder, CreateDebugType(elementType), size, align, type.TypeReferenceCecil.Name);
                 }
                 case MetadataType.Array:
                 case MetadataType.String:
@@ -409,7 +409,7 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Class:
                 case MetadataType.Object:
                 {
-                    var typeDefinition = GetMethodTypeDefinition(type.TypeReference);
+                    var typeDefinition = GetMethodTypeDefinition(type.TypeReferenceCecil);
                     if (typeDefinition.IsEnum)
                     {
                         var enumDebugType = CreateDebugType(GetType(typeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete));
@@ -426,8 +426,8 @@ namespace SharpLang.CompilerServices
 
                     if (!typeDefinition.IsValueType)
                     {
-                        size = LLVM.ABISizeOfType(targetData, type.DefaultType) * 8;
-                        align = LLVM.ABIAlignmentOfType(targetData, type.DefaultType) * 8;
+                        size = LLVM.ABISizeOfType(targetData, type.DefaultTypeLLVM) * 8;
+                        align = LLVM.ABIAlignmentOfType(targetData, type.DefaultTypeLLVM) * 8;
 
                         debugClass = LLVM.DIBuilderCreatePointerType(debugBuilder, debugClass, size, align, string.Empty);
                     }

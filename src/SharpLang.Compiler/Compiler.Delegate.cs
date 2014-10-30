@@ -56,7 +56,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Push the generated method pointer on the stack
                     stack.Add(new StackValue(StackValueType.NativeInt, intPtr,
-                        LLVM.BuildPointerCast(builder, invokeMethodHelper, intPtrType, string.Empty)));
+                        LLVM.BuildPointerCast(builder, invokeMethodHelper, intPtrLLVM, string.Empty)));
                 });
                 il.Append(loadFunctionPointerInstruction);
                 il.Append(Instruction.Create(OpCodes.Stfld, methodPtrField));
@@ -98,7 +98,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Push the generated method pointer on the stack
                     stack.Add(new StackValue(StackValueType.NativeInt, intPtr,
-                        LLVM.BuildPointerCast(builder, invokeMethodHelper, intPtrType, string.Empty)));
+                        LLVM.BuildPointerCast(builder, invokeMethodHelper, intPtrLLVM, string.Empty)));
                 });
                 il.Append(loadFunctionPointerInstruction);
 
@@ -167,11 +167,11 @@ namespace SharpLang.CompilerServices
 
             // Load first argument and cast as Delegate[]
             var @this = LLVM.GetParam(invokeMethodHelper, 0);
-            @this = LLVM.BuildPointerCast(builder, @this, delegateArrayType.DefaultType, string.Empty);
+            @this = LLVM.BuildPointerCast(builder, @this, delegateArrayType.DefaultTypeLLVM, string.Empty);
 
             // Create index (i = 0)
             var locals = new List<StackValue>();
-            locals.Add(new StackValue(StackValueType.Int32, int32, LLVM.BuildAlloca(builder, int32.DefaultType, "i")));
+            locals.Add(new StackValue(StackValueType.Int32, int32, LLVM.BuildAlloca(builder, int32.DefaultTypeLLVM, "i")));
             EmitI4(stack, 0);
             EmitStloc(stack, locals, 0);
 
@@ -193,7 +193,7 @@ namespace SharpLang.CompilerServices
 
             // Call
             var helperArgs = new ValueRef[LLVM.CountParams(invokeMethodHelper)];
-            helperArgs[0] = LLVM.BuildPointerCast(builder, stack.Pop().Value, declaringClass.Type.DefaultType, string.Empty);
+            helperArgs[0] = LLVM.BuildPointerCast(builder, stack.Pop().Value, declaringClass.Type.DefaultTypeLLVM, string.Empty);
             for (int i = 1; i < helperArgs.Length; ++i)
             {
                 helperArgs[i] = LLVM.GetParam(invokeMethodHelper, (uint)i);
@@ -203,7 +203,7 @@ namespace SharpLang.CompilerServices
             // i++
             EmitLdloc(stack, locals, 0);
             var lastStack = stack[stack.Count - 1];
-            var incrementedValue = LLVM.BuildAdd(builder, lastStack.Value, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+            var incrementedValue = LLVM.BuildAdd(builder, lastStack.Value, LLVM.ConstInt(int32LLVM, 1, false), string.Empty);
             lastStack = new StackValue(StackValueType.Int32, int32, incrementedValue);
             stack[stack.Count - 1] = lastStack;
             EmitStloc(stack, locals, 0);

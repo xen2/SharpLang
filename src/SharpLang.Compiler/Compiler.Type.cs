@@ -63,10 +63,10 @@ namespace SharpLang.CompilerServices
                         return result;
 
                     // Special case: void*
-                    if (LLVM.VoidTypeInContext(context) == type.DataType)
-                        dataType = intPtrType;
+                    if (LLVM.VoidTypeInContext(context) == type.DataTypeLLVM)
+                        dataType = intPtrLLVM;
                     else
-                        dataType = LLVM.PointerType(type.DataType, 0);
+                        dataType = LLVM.PointerType(type.DataTypeLLVM, 0);
                     valueType = dataType;
                     stackType = StackValueType.NativeInt;
                     break;
@@ -79,7 +79,7 @@ namespace SharpLang.CompilerServices
                     if (types.TryGetValue(typeReference, out result))
                         return result;
 
-                    dataType = LLVM.PointerType(type.DefaultType, 0);
+                    dataType = LLVM.PointerType(type.DefaultTypeLLVM, 0);
                     valueType = dataType;
                     stackType = StackValueType.Reference;
                     break;
@@ -124,17 +124,17 @@ namespace SharpLang.CompilerServices
                     break;
                 case MetadataType.Int32:
                 case MetadataType.UInt32:
-                    dataType = int32Type;
+                    dataType = int32LLVM;
                     stackType = StackValueType.Int32;
                     break;
                 case MetadataType.Int64:
                 case MetadataType.UInt64:
-                    dataType = int64Type;
+                    dataType = int64LLVM;
                     stackType = StackValueType.Int64;
                     break;
                 case MetadataType.UIntPtr:
                 case MetadataType.IntPtr:
-                    dataType = intPtrType;
+                    dataType = intPtrLLVM;
                     stackType = StackValueType.NativeInt;
                     break;
                 case MetadataType.Array:
@@ -160,7 +160,7 @@ namespace SharpLang.CompilerServices
                         // Special case: enum
                         // Uses underlying type
                         var enumUnderlyingType = GetType(typeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete);
-                        dataType = enumUnderlyingType.DataType;
+                        dataType = enumUnderlyingType.DataTypeLLVM;
                         stackType = enumUnderlyingType.StackType;
                     }
                     else
@@ -265,9 +265,9 @@ namespace SharpLang.CompilerServices
 
             // Try to avoid recursive GetType if possible
             if (type is PointerType || type is ByReferenceType)
-                dataType = intPtrType;
+                dataType = intPtrLLVM;
             else
-                dataType = GetType(type, TypeState.StackComplete).DefaultType;
+                dataType = GetType(type, TypeState.StackComplete).DefaultTypeLLVM;
             return (int)LLVM.ABISizeOfType(targetData, dataType);
         }
 
@@ -278,7 +278,7 @@ namespace SharpLang.CompilerServices
 
         private void CompleteType(Type type)
         {
-            var typeReference = type.TypeReference;
+            var typeReference = type.TypeReferenceCecil;
             switch (typeReference.MetadataType)
             {
                 case MetadataType.Pointer:
@@ -287,7 +287,7 @@ namespace SharpLang.CompilerServices
                     return;
             }
 
-            var valueType = type.ValueType;
+            var valueType = type.ValueTypeLLVM;
             var typeDefinition = GetMethodTypeDefinition(typeReference);
             var stackType = type.StackType;
 
@@ -309,7 +309,7 @@ namespace SharpLang.CompilerServices
 
                 if (parentType != null && stackType == StackValueType.Object)
                 {
-                    fieldTypes.Add(parentType.DataType);
+                    fieldTypes.Add(parentType.DataTypeLLVM);
                 }
 
                 // Special cases: Array
@@ -318,8 +318,8 @@ namespace SharpLang.CompilerServices
                     // String: length (native int) + first element pointer
                     var arrayType = (ArrayType)typeReference;
                     var elementType = GetType(arrayType.ElementType, TypeState.StackComplete);
-                    fieldTypes.Add(intPtrType);
-                    fieldTypes.Add(LLVM.PointerType(elementType.DefaultType, 0));
+                    fieldTypes.Add(intPtrLLVM);
+                    fieldTypes.Add(LLVM.PointerType(elementType.DefaultTypeLLVM, 0));
                 }
                 else
                 {
@@ -349,7 +349,7 @@ namespace SharpLang.CompilerServices
                             // Align for next field, according to packing size
                             classSize = (classSize + typeDefinition.PackingSize - 1) & ~(typeDefinition.PackingSize - 1);
                             structIndex = classSize;
-                            classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType);
+                            classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultTypeLLVM);
                         }
                         else
                         {
@@ -357,7 +357,7 @@ namespace SharpLang.CompilerServices
                         }
 
                         fields.Add(field, new Field(field, type, fieldType, structIndex));
-                        fieldTypes.Add(fieldType.DefaultType);
+                        fieldTypes.Add(fieldType.DefaultTypeLLVM);
                     }
                 }
 
@@ -395,7 +395,7 @@ namespace SharpLang.CompilerServices
             if (type.IsLocal)
                 return;
 
-            var linkageType = GetLinkageType(type.TypeReference, out type.IsLocal, force);
+            var linkageType = GetLinkageType(type.TypeReferenceCecil, out type.IsLocal, force);
             type.Linkage = linkageType;
 
             if (type.IsLocal)
