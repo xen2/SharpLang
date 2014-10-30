@@ -47,6 +47,7 @@ namespace SharpLang.CompilerServices
 
             TypeRef valueType = TypeRef.Empty;
             TypeRef dataType;
+            Type result;
             StackValueType stackType;
 
             var typeDefinition = GetMethodTypeDefinition(typeReference);
@@ -56,6 +57,11 @@ namespace SharpLang.CompilerServices
                 case MetadataType.Pointer:
                 {
                     var type = GetType(((PointerType)typeReference).ElementType, TypeState.Opaque);
+
+                    // In case we recursively created the type, just returns it
+                    if (types.TryGetValue(typeReference, out result))
+                        return result;
+
                     // Special case: void*
                     if (LLVM.VoidTypeInContext(context) == type.DataType)
                         dataType = intPtrType;
@@ -68,6 +74,11 @@ namespace SharpLang.CompilerServices
                 case MetadataType.ByReference:
                 {
                     var type = GetType(((ByReferenceType)typeReference).ElementType, TypeState.Opaque);
+
+                    // In case we recursively created the type, just returns it
+                    if (types.TryGetValue(typeReference, out result))
+                        return result;
+
                     dataType = LLVM.PointerType(type.DefaultType, 0);
                     valueType = dataType;
                     stackType = StackValueType.Reference;
@@ -171,7 +182,7 @@ namespace SharpLang.CompilerServices
             if (valueType == TypeRef.Empty)
                 valueType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".value");
 
-            var result = new Type(typeReference, typeDefinition, dataType, valueType, boxedType, stackType);
+            result = new Type(typeReference, typeDefinition, dataType, valueType, boxedType, stackType);
             types.Add(typeReference, result);
 
             // Enqueue class generation, if needed
@@ -225,8 +236,8 @@ namespace SharpLang.CompilerServices
 
                         // TODO: Align using pack size? Need to study .NET behavior.
 
-                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
-                        classSize = Math.Max((int)classSize, field.Offset + (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType));
+                        var fieldType = ResolveGenericsVisitor.Process(typeReference, field.FieldType);
+                        classSize = Math.Max(classSize, field.Offset + GetSize(fieldType));
                     }
                 }
                 else if (typeDefinition.IsSequentialLayout)
@@ -240,12 +251,24 @@ namespace SharpLang.CompilerServices
                         classSize = (classSize + typeDefinition.PackingSize - 1) & ~(typeDefinition.PackingSize - 1);
 
                         // Add size of field
-                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
-                        classSize += (int)LLVM.ABISizeOfType(targetData, fieldType.DefaultType);
+                        var fieldType = ResolveGenericsVisitor.Process(typeReference, field.FieldType);
+                        classSize += GetSize(fieldType);
                     }
                 }
             }
             return classSize;
+        }
+
+        int GetSize(TypeReference type)
+        {
+            TypeRef dataType;
+
+            // Try to avoid recursive GetType if possible
+            if (type is PointerType || type is ByReferenceType)
+                dataType = intPtrType;
+            else
+                dataType = GetType(type, TypeState.StackComplete).DefaultType;
+            return (int)LLVM.ABISizeOfType(targetData, dataType);
         }
 
         private static bool IsCustomLayout(TypeDefinition typeDefinition)
