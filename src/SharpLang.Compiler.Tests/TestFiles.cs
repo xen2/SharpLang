@@ -76,8 +76,13 @@ namespace SharpLang.CompilerServices.Tests
             return outputAssembly;
         }
 
-        [Test, TestCaseSource("TestCases")]
-        public static void Test(string sourceFile)
+        /// <summary>
+        /// Runs various codegen tests that are not dependent on corlib, for faster testing (avoid codegen and linking of corlib).
+        /// It only requires bare minimum contained in MiniCorlib.cpp.
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        [Test, TestCaseSource("TestCodegenNoCorlibCases")]
+        public static void TestCodegenNoCorlib(string sourceFile)
         {
             var outputAssembly = CompileAssembly(sourceFile);
 
@@ -257,7 +262,7 @@ namespace SharpLang.CompilerServices.Tests
             return output.ToString();
         }
 
-        public static IEnumerable<string> TestCases
+        public static IEnumerable<string> TestCodegenNoCorlibCases
         {
             get
             {
