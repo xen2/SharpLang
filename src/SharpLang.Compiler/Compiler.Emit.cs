@@ -41,7 +41,7 @@ namespace SharpLang.CompilerServices
         {
             var local = locals[operandIndex];
 
-            var refType = GetType(local.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
+            var refType = GetType(local.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
 
             // Convert from local to stack value
             var value = ConvertFromLocalToStack(refType, local.Value);
@@ -69,7 +69,7 @@ namespace SharpLang.CompilerServices
         {
             var arg = args[operandIndex];
 
-            var refType = GetType(arg.Type.TypeReference.MakeByReferenceType(), TypeState.StackComplete);
+            var refType = GetType(arg.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.StackComplete);
 
             // Convert from local to stack value
             var value = ConvertFromLocalToStack(refType, arg.Value);
@@ -96,7 +96,7 @@ namespace SharpLang.CompilerServices
             var address = stack.Pop();
 
             // Load value at address
-            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultType, 0), string.Empty);
+            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
             var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
             SetInstructionFlags(loadInst, instructionFlags);
 
@@ -116,7 +116,7 @@ namespace SharpLang.CompilerServices
             var sourceValue = ConvertFromStackToLocal(type, value);
 
             // Store value at address
-            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultType, 0), string.Empty);
+            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
             var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
             SetInstructionFlags(storeInst, instructionFlags);
         }
@@ -124,7 +124,7 @@ namespace SharpLang.CompilerServices
         private void EmitInitobj(StackValue address, Type type)
         {
             var value = address.Value;
-            var expectedType = LLVM.PointerType(type.DefaultType, 0);
+            var expectedType = LLVM.PointerType(type.DefaultTypeLLVM, 0);
 
             // If necessary, cast to expected type
             if (LLVM.TypeOf(value) != expectedType)
@@ -133,7 +133,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Store null value (should be all zero)
-            LLVM.BuildStore(builder, LLVM.ConstNull(type.DefaultType), value);
+            LLVM.BuildStore(builder, LLVM.ConstNull(type.DefaultTypeLLVM), value);
         }
 
         private void EmitNewobj(FunctionCompilerContext functionContext, Type type, Function ctor)
@@ -172,14 +172,14 @@ namespace SharpLang.CompilerServices
             if (stackValueType != StackValueType.Object)
             {
                 // Value types are allocated on the stack
-                return LLVM.BuildAlloca(builder, type.DataType, string.Empty);
+                return LLVM.BuildAlloca(builder, type.DataTypeLLVM, string.Empty);
             }
 
             // TODO: Improve performance (better inlining, etc...)
             // Invoke malloc
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectType), int32Type, string.Empty);
-            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { typeSize }, string.Empty);
-            var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectType, 0), string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectTypeLLVM), int32LLVM, string.Empty);
+            var allocatedData = LLVM.BuildCall(builder, allocObjectFunctionLLVM, new[] { typeSize }, string.Empty);
+            var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectTypeLLVM, 0), string.Empty);
 
             SetupVTable(allocatedObject, @class);
             return allocatedObject;
@@ -190,12 +190,12 @@ namespace SharpLang.CompilerServices
             // Store vtable global into first field of the object
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                                     // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false),     // Access RTTI
+                LLVM.ConstInt(int32LLVM, 0, false),                                     // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)ObjectFields.RuntimeTypeInfo, false),     // Access RTTI
             };
 
             var vtablePointer = LLVM.BuildInBoundsGEP(builder, @object, indices, string.Empty);
-            LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobal, vtablePointer);
+            LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, vtablePointer);
         }
 
         private void EmitRet(List<StackValue> stack, MethodReference method)
@@ -228,16 +228,16 @@ namespace SharpLang.CompilerServices
             // Prepare indices
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
-                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
+                LLVM.ConstInt(int32LLVM, 1, false),                         // Access length
             };
 
             // Update array with size and 0 data
             var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-            LLVM.BuildStore(builder, LLVM.ConstInt(int32Type, (ulong)operand.Length, false), sizeLocation);
+            LLVM.BuildStore(builder, LLVM.ConstInt(int32LLVM, (ulong)operand.Length, false), sizeLocation);
 
-            indices[2] = LLVM.ConstInt(int32Type, 2, false);                // Access data pointer
+            indices[2] = LLVM.ConstInt(int32LLVM, 2, false);                // Access data pointer
             var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
             LLVM.BuildStore(builder, stringConstantDataGlobal, dataPointerLocation);
 
@@ -278,7 +278,7 @@ namespace SharpLang.CompilerServices
 
             // Cast from i8-array to i8*
             LLVM.SetInitializer(stringConstantDataGlobal, stringConstantData);
-            var zero = LLVM.ConstInt(int32Type, 0, false);
+            var zero = LLVM.ConstInt(int32LLVM, 0, false);
             stringConstantDataGlobal = LLVM.ConstInBoundsGEP(stringConstantDataGlobal, new[] {zero, zero});
 
             return stringConstantDataGlobal;
@@ -288,34 +288,34 @@ namespace SharpLang.CompilerServices
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int32, int32,
-                LLVM.ConstInt(int32Type, (uint)operandIndex, true)));
+                LLVM.ConstInt(int32LLVM, (uint)operandIndex, true)));
         }
 
         private void EmitI8(List<StackValue> stack, long operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int64, int64,
-                LLVM.ConstInt(int64Type, (ulong)operandIndex, true)));
+                LLVM.ConstInt(int64LLVM, (ulong)operandIndex, true)));
         }
 
         private void EmitR4(List<StackValue> stack, float operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Float, @float,
-                LLVM.ConstReal(@float.DataType, operandIndex)));
+                LLVM.ConstReal(@float.DataTypeLLVM, operandIndex)));
         }
 
         private void EmitR8(List<StackValue> stack, double operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Float, @double,
-                LLVM.ConstReal(@double.DataType, operandIndex)));
+                LLVM.ConstReal(@double.DataTypeLLVM, operandIndex)));
         }
 
         private void EmitLdnull(List<StackValue> stack)
         {
             // Add constant integer value to stack
-            stack.Add(new StackValue(StackValueType.Object, @object, LLVM.ConstNull(@object.DefaultType)));
+            stack.Add(new StackValue(StackValueType.Object, @object, LLVM.ConstNull(@object.DefaultTypeLLVM)));
         }
 
         private void EmitCall(FunctionCompilerContext functionContext, FunctionSignature targetMethod, ValueRef overrideMethod)
@@ -357,7 +357,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Push return result on stack
-            if (targetMethod.ReturnType.TypeReference.MetadataType != MetadataType.Void)
+            if (targetMethod.ReturnType.TypeReferenceCecil.MetadataType != MetadataType.Void)
             {
                 // Convert return value from local to stack value
                 var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, callResult);
@@ -391,7 +391,7 @@ namespace SharpLang.CompilerServices
                 }
                 case StackValueType.Int32:
                 {
-                    var zero = LLVM.ConstInt(int32Type, 0, false);
+                    var zero = LLVM.ConstInt(int32LLVM, 0, false);
                     cmpInst = LLVM.BuildICmp(builder, zeroPredicate, stack.Value, zero, string.Empty);
                     break;
                 }
@@ -445,7 +445,7 @@ namespace SharpLang.CompilerServices
             ValueRef value;
             if (@object.StackType == StackValueType.Value)
             {
-                bool isCustomLayout = IsCustomLayout(field.DeclaringType.TypeDefinition);
+                bool isCustomLayout = IsCustomLayout(field.DeclaringType.TypeDefinitionCecil);
                 if (isCustomLayout)
                     throw new NotImplementedException("Ldfld on value types with custom layout is not supported yet.");
                 value = LLVM.BuildExtractValue(builder, @object.Value, (uint)field.StructIndex, string.Empty);
@@ -472,8 +472,8 @@ namespace SharpLang.CompilerServices
         private ValueRef ConvertReferenceToExpectedType(BuilderRef builder, StackValueType stackValueType, ValueRef value, Type type)
         {
             var expectedType = stackValueType == StackValueType.Object
-                ? LLVM.PointerType(type.ObjectType, 0)
-                : LLVM.PointerType(type.ValueType, 0);
+                ? LLVM.PointerType(type.ObjectTypeLLVM, 0)
+                : LLVM.PointerType(type.ValueTypeLLVM, 0);
 
             if (LLVM.TypeOf(value) == expectedType)
                 return value;
@@ -485,7 +485,7 @@ namespace SharpLang.CompilerServices
         {
             var @object = stack.Pop();
 
-            var refType = GetType(field.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
+            var refType = GetType(field.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
 
             // Compute field address
             var instructionFlags = InstructionFlags.None;
@@ -506,15 +506,15 @@ namespace SharpLang.CompilerServices
             if (objectStackType == StackValueType.Reference || objectStackType == StackValueType.Object || objectStackType == StackValueType.NativeInt)
             {
                 // First pointer indirection
-                indices.Add(LLVM.ConstInt(int32Type, 0, false));
+                indices.Add(LLVM.ConstInt(int32LLVM, 0, false));
             }
 
-            bool isCustomLayout = IsCustomLayout(type.TypeDefinition);
+            bool isCustomLayout = IsCustomLayout(type.TypeDefinitionCecil);
 
             if (objectStackType == StackValueType.Object)
             {
                 // Access data
-                indices.Add(LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false));
+                indices.Add(LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false));
 
                 if (!isCustomLayout)
                 {
@@ -534,16 +534,16 @@ namespace SharpLang.CompilerServices
                     }
 
                     if (@class == null)
-                        throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, type.TypeReference));
+                        throw new InvalidOperationException(string.Format("Could not find field {0} in hierarchy of {1}", field.FieldDefinition, type.TypeReferenceCecil));
 
                     // Apply GEP indices to find right object (parent is always stored in first element)
                     for (int i = 0; i < depth; ++i)
-                        indices.Add(LLVM.ConstInt(int32Type, 0, false));
+                        indices.Add(LLVM.ConstInt(int32LLVM, 0, false));
                 }
             }
 
             // Access the appropriate field
-            indices.Add(LLVM.ConstInt(int32Type, (uint)field.StructIndex, false));
+            indices.Add(LLVM.ConstInt(int32LLVM, (uint)field.StructIndex, false));
 
             // Find field address using GEP
             var fieldAddress = LLVM.BuildInBoundsGEP(builder, objectValue, indices.ToArray(), string.Empty);
@@ -551,7 +551,7 @@ namespace SharpLang.CompilerServices
             // Cast to real field type (if stored in a custom layout array)
             if (isCustomLayout)
             {
-                fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, LLVM.PointerType(field.Type.DefaultType, 0), string.Empty);
+                fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, LLVM.PointerType(field.Type.DefaultTypeLLVM, 0), string.Empty);
 
                 // Check if non aligned
                 if (field.StructIndex % 4 != 0)
@@ -574,7 +574,7 @@ namespace SharpLang.CompilerServices
         {
             var value = stack.Pop();
 
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -594,7 +594,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -617,9 +617,9 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsflda(List<StackValue> stack, Field field)
         {
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobal;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
 
-            var refType = GetType(field.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
+            var refType = GetType(field.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -635,9 +635,9 @@ namespace SharpLang.CompilerServices
         {
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.StaticFields, false),   // Access static fields
-                LLVM.ConstInt(int32Type, (ulong)field.StructIndex, false),                  // Access specific static field
+                LLVM.ConstInt(int32LLVM, 0, false),                                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.StaticFields, false),   // Access static fields
+                LLVM.ConstInt(int32LLVM, (ulong)field.StructIndex, false),                  // Access specific static field
             };
 
             return indices;
@@ -645,22 +645,22 @@ namespace SharpLang.CompilerServices
 
         private void EmitNewarr(List<StackValue> stack, Type elementType)
         {
-            var arrayType = GetType(new ArrayType(elementType.TypeReference), TypeState.VTableEmitted);
+            var arrayType = GetType(new ArrayType(elementType.TypeReferenceCecil), TypeState.VTableEmitted);
 
             var numElements = stack.Pop();
 
             // Compute object size
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultType), int32Type, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultTypeLLVM), int32LLVM, string.Empty);
 
             // Compute array size (object size * num elements)
             var numElementsCasted = ConvertToNativeInt(numElements);
             var arraySize = LLVM.BuildMul(builder, typeSize, numElementsCasted, string.Empty);
 
             // Invoke malloc
-            var allocatedData = LLVM.BuildCall(builder, allocObjectFunction, new[] { arraySize }, string.Empty);
-            var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultType, 0), string.Empty);
+            var allocatedData = LLVM.BuildCall(builder, allocObjectFunctionLLVM, new[] { arraySize }, string.Empty);
+            var values = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(elementType.DefaultTypeLLVM, 0), string.Empty);
 
-            var numElementsAsPointer = LLVM.BuildIntToPtr(builder, numElements.Value, intPtrType, string.Empty);
+            var numElementsAsPointer = LLVM.BuildIntToPtr(builder, numElements.Value, intPtrLLVM, string.Empty);
 
             // Allocate object
             var allocatedObject = AllocateObject(arrayType);
@@ -668,16 +668,16 @@ namespace SharpLang.CompilerServices
             // Prepare indices
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
-                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
+                LLVM.ConstInt(int32LLVM, 1, false),                         // Access length
             };
 
             // Update array with size and 0 data
             var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
             LLVM.BuildStore(builder, numElementsAsPointer, sizeLocation);
 
-            indices[2] = LLVM.ConstInt(int32Type, 2, false);                // Access data pointer
+            indices[2] = LLVM.ConstInt(int32LLVM, 2, false);                // Access data pointer
             var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
             LLVM.BuildStore(builder, values, dataPointerLocation);
 
@@ -692,13 +692,13 @@ namespace SharpLang.CompilerServices
             // Prepare indices
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false),   // Data
-                LLVM.ConstInt(int32Type, 1, false),                         // Access length
+                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int) ObjectFields.Data, false),   // Data
+                LLVM.ConstInt(int32LLVM, 1, false),                         // Access length
             };
 
             // Force array type to be emitted
-            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
+            GetType(array.Type.TypeReferenceCecil, TypeState.VTableEmitted);
 
             // Load data pointer
             var arraySizeLocation = LLVM.BuildInBoundsGEP(builder, array.Value, indices, string.Empty);
@@ -714,11 +714,11 @@ namespace SharpLang.CompilerServices
             var array = stack.Pop();
 
             // Force array type to be emitted
-            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
+            GetType(array.Type.TypeReferenceCecil, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
-            var refType = GetType(elementType.TypeReference.MakeByReferenceType(), TypeState.Opaque);
+            var refType = GetType(elementType.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -739,12 +739,12 @@ namespace SharpLang.CompilerServices
             var array = stack.Pop();
 
             // Force array type to be emitted
-            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
+            GetType(array.Type.TypeReferenceCecil, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
             // Get element type
-            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType, TypeState.StackComplete);
+            var elementType = GetType(((ArrayType)array.Type.TypeReferenceCecil).ElementType, TypeState.StackComplete);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -769,12 +769,12 @@ namespace SharpLang.CompilerServices
             var array = stack.Pop();
 
             // Force array type to be emitted
-            GetType(array.Type.TypeReference, TypeState.VTableEmitted);
+            GetType(array.Type.TypeReferenceCecil, TypeState.VTableEmitted);
 
             var indexValue = ConvertToNativeInt(index);
 
             // Get element type
-            var elementType = GetType(((ArrayType)array.Type.TypeReference).ElementType, TypeState.StackComplete);
+            var elementType = GetType(((ArrayType)array.Type.TypeReferenceCecil).ElementType, TypeState.StackComplete);
 
             // Load array data pointer
             var arrayFirstElement = LoadArrayDataPointer(array);
@@ -794,9 +794,9 @@ namespace SharpLang.CompilerServices
             // Prepare indices
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int) ObjectFields.Data, false),   // Data
-                LLVM.ConstInt(int32Type, 2, false),                         // Access data pointer
+                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int) ObjectFields.Data, false),   // Data
+                LLVM.ConstInt(int32LLVM, 2, false),                         // Access data pointer
             };
 
             // Load data pointer
@@ -837,11 +837,11 @@ namespace SharpLang.CompilerServices
         {
             // NatveInt: cast to integer
             if (index.StackType == StackValueType.NativeInt)
-                return LLVM.BuildPtrToInt(builder, index.Value, nativeIntType, string.Empty);
+                return LLVM.BuildPtrToInt(builder, index.Value, nativeIntLLVM, string.Empty);
 
             // Integer of different size: cast
             if (LLVM.GetIntTypeWidth(LLVM.TypeOf(index.Value)) != intPtrSize * 8)
-                return LLVM.BuildIntCast(builder, index.Value, nativeIntType, string.Empty);
+                return LLVM.BuildIntCast(builder, index.Value, nativeIntLLVM, string.Empty);
 
             // Otherwise, return as is
             return index.Value;
@@ -877,29 +877,29 @@ namespace SharpLang.CompilerServices
             // Get RTTI pointer
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+                LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)ObjectFields.RuntimeTypeInfo, false), // Access RTTI
             };
 
             var rttiPointer = LLVM.BuildInBoundsGEP(builder, obj.Value, indices, string.Empty);
             rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
 
             // castedPointerObject is valid only from typeCheckBlock
-            var castedPointerType = LLVM.PointerType(@class.Type.ObjectType, 0);
+            var castedPointerType = LLVM.PointerType(@class.Type.ObjectTypeLLVM, 0);
             ValueRef castedPointerObject;
 
             BasicBlockRef typeCheckBlock;
 
-            if (@class.Type.TypeReference.Resolve().IsInterface)
+            if (@class.Type.TypeReferenceCecil.Resolve().IsInterface)
             {
                 // Cast as appropriate pointer type (for next PHI incoming if success)
                 castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
 
-                var inlineRuntimeTypeInfoType = LLVM.TypeOf(LLVM.GetParam(isInstInterfaceFunction, 0));
-                var isInstInterfaceResult = LLVM.BuildCall(builder, isInstInterfaceFunction, new[]
+                var inlineRuntimeTypeInfoType = LLVM.TypeOf(LLVM.GetParam(isInstInterfaceFunctionLLVM, 0));
+                var isInstInterfaceResult = LLVM.BuildCall(builder, isInstInterfaceFunctionLLVM, new[]
                 {
                     LLVM.BuildPointerCast(builder, rttiPointer, inlineRuntimeTypeInfoType, string.Empty),
-                    LLVM.BuildPointerCast(builder, @class.GeneratedRuntimeTypeInfoGlobal, inlineRuntimeTypeInfoType, string.Empty),
+                    LLVM.BuildPointerCast(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, inlineRuntimeTypeInfoType, string.Empty),
                 }, string.Empty);
 
                 LLVM.BuildCondBr(builder, isInstInterfaceResult, typeCheckDoneBlock, typeNotMatchBlock);
@@ -913,8 +913,8 @@ namespace SharpLang.CompilerServices
                 // Get method stored in IMT slot
                 indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypeCount, false), // Super type count
+                    LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.SuperTypeCount, false), // Super type count
                 };
 
                 typeCheckBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Format("L_{0:x4}_type_check", instructionOffset));
@@ -923,7 +923,7 @@ namespace SharpLang.CompilerServices
                 var superTypeCount = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
                 superTypeCount = LLVM.BuildLoad(builder, superTypeCount, string.Empty);
 
-                var depthCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntSGE, superTypeCount, LLVM.ConstInt(int32Type, (ulong)@class.Depth, false), string.Empty);
+                var depthCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntSGE, superTypeCount, LLVM.ConstInt(int32LLVM, (ulong)@class.Depth, false), string.Empty);
                 LLVM.BuildCondBr(builder, depthCompareResult, typeCheckBlock, typeNotMatchBlock);
 
                 // Start new typeCheckBlock
@@ -932,8 +932,8 @@ namespace SharpLang.CompilerServices
                 // Get super types
                 indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.SuperTypes, false), // Super types
+                    LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.SuperTypes, false), // Super types
                 };
 
                 var superTypes = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
@@ -942,7 +942,7 @@ namespace SharpLang.CompilerServices
                 // Get actual super type
                 indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, (ulong)@class.Depth, false), // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (ulong)@class.Depth, false), // Pointer indirection
                 };
                 var superType = LLVM.BuildGEP(builder, superTypes, indices, string.Empty);
                 superType = LLVM.BuildLoad(builder, superType, string.Empty);
@@ -951,7 +951,7 @@ namespace SharpLang.CompilerServices
                 castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
 
                 // Compare super type in array at given depth with expected one
-                var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedRuntimeTypeInfoGlobal, intPtrType), string.Empty);
+                var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM), string.Empty);
                 LLVM.BuildCondBr(builder, typeCompareResult, typeCheckDoneBlock, typeNotMatchBlock);
             }
 
@@ -963,7 +963,7 @@ namespace SharpLang.CompilerServices
                 var invalidCastExceptionClass = GetClass(corlib.MainModule.GetType(typeof(InvalidCastException).FullName));
                 EmitNewobj(functionContext, invalidCastExceptionClass.Type, invalidCastExceptionClass.Functions.Single(x => x.MethodReference.Name == ".ctor" && x.MethodReference.Parameters.Count == 0));
                 var invalidCastException = stack.Pop();
-                GenerateInvoke(functionContext, throwExceptionFunction, new[] {LLVM.BuildPointerCast(builder, invalidCastException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty)});
+                GenerateInvoke(functionContext, throwExceptionFunctionLLVM, new[] {LLVM.BuildPointerCast(builder, invalidCastException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunctionLLVM, 0)), string.Empty)});
                 LLVM.BuildUnreachable(builder);
             }
             else
@@ -1009,11 +1009,11 @@ namespace SharpLang.CompilerServices
             var obj = stack.Pop();
 
             // TODO: check type?
-            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(type.ObjectType, 0), string.Empty);
+            var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(type.ObjectTypeLLVM, 0), string.Empty);
 
             var dataPointer = GetDataPointer(objCast);
 
-            var expectedPointerType = LLVM.PointerType(type.DataType, 0);
+            var expectedPointerType = LLVM.PointerType(type.DataTypeLLVM, 0);
             if (expectedPointerType != LLVM.TypeOf(dataPointer))
                 dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
             var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
@@ -1037,7 +1037,7 @@ namespace SharpLang.CompilerServices
                         throw new InvalidOperationException("Not opcode doesn't work with float");
                     break;
                 case StackValueType.NativeInt:
-                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                    value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
                     break;
                 case StackValueType.Int32:
                 case StackValueType.Int64:
@@ -1061,7 +1061,7 @@ namespace SharpLang.CompilerServices
             }
 
             if (operand1.StackType == StackValueType.NativeInt)
-                value1 = LLVM.BuildIntToPtr(builder, value1, intPtrType, string.Empty);
+                value1 = LLVM.BuildIntToPtr(builder, value1, intPtrLLVM, string.Empty);
 
             // Add back to stack (with same type as before)
             stack.Add(new StackValue(operand1.StackType, operand1.Type, value1));
@@ -1105,7 +1105,7 @@ namespace SharpLang.CompilerServices
                 {
                     case StackValueType.Int32:
                     case StackValueType.NativeInt:
-                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
                         break;
                     default:
                         goto InvalidBinaryOperation;
@@ -1115,14 +1115,14 @@ namespace SharpLang.CompilerServices
                 switch (operand1.StackType)
                 {
                     case StackValueType.Int32:
-                        value2 = LLVM.BuildIntCast(builder, value2, int32Type, string.Empty);
+                        value2 = LLVM.BuildIntCast(builder, value2, int32LLVM, string.Empty);
                         break;
                     case StackValueType.Int64:
-                        value2 = LLVM.BuildIntCast(builder, value2, int64Type, string.Empty);
+                        value2 = LLVM.BuildIntCast(builder, value2, int64LLVM, string.Empty);
                         break;
                     case StackValueType.NativeInt:
-                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
-                        value2 = LLVM.BuildIntCast(builder, value2, nativeIntType, string.Empty);
+                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
+                        value2 = LLVM.BuildIntCast(builder, value2, nativeIntLLVM, string.Empty);
                         break;
                     default:
                         goto InvalidBinaryOperation;
@@ -1142,15 +1142,15 @@ namespace SharpLang.CompilerServices
                         outputOperandType = operand1;
                         break;
                     case StackValueType.NativeInt:
-                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
-                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
+                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
                         outputOperandType = operand1;
                         break;
                     case StackValueType.Reference:
                         if (opcode != Code.Sub && opcode != Code.Sub_Ovf_Un)
                             goto InvalidBinaryOperation;
-                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
-                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                        value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
+                        value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
                         outputOperandType = new StackValue(StackValueType.NativeInt, intPtr, ValueRef.Empty);
                         break;
                     default:
@@ -1159,12 +1159,12 @@ namespace SharpLang.CompilerServices
             }
             else if (operand1.StackType == StackValueType.NativeInt && operand2.StackType == StackValueType.Int32)
             {
-                value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntType, string.Empty);
+                value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
                 outputOperandType = operand1;
             }
             else if (operand1.StackType == StackValueType.Int32 && operand2.StackType == StackValueType.NativeInt)
             {
-                value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntType, string.Empty);
+                value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
                 outputOperandType = operand2;
             }
             else if (!isIntegerOperation
@@ -1193,7 +1193,7 @@ namespace SharpLang.CompilerServices
                     case StackValueType.Int32:
                         break;
                     case StackValueType.NativeInt:
-                        valueInt = LLVM.BuildPtrToInt(builder, valueInt, nativeIntType, string.Empty);
+                        valueInt = LLVM.BuildPtrToInt(builder, valueInt, nativeIntLLVM, string.Empty);
                         break;
                     default:
                         goto InvalidBinaryOperation;
@@ -1217,13 +1217,13 @@ namespace SharpLang.CompilerServices
 
                 // If necessary, cast to i8*
                 var valueRefType = LLVM.TypeOf(valueRef);
-                if (valueRefType != intPtrType)
-                    valueRef = LLVM.BuildPointerCast(builder, valueRef, intPtrType, string.Empty);
+                if (valueRefType != intPtrLLVM)
+                    valueRef = LLVM.BuildPointerCast(builder, valueRef, intPtrLLVM, string.Empty);
 
                 valueRef = LLVM.BuildGEP(builder, valueRef, new[] {valueInt}, string.Empty);
 
                 // Cast back to original type
-                if (valueRefType != intPtrType)
+                if (valueRefType != intPtrLLVM)
                     valueRef = LLVM.BuildPointerCast(builder, valueRef, valueRefType, string.Empty);
 
                 stack.Add(new StackValue(StackValueType.Reference, operandRef.Type, valueRef));
@@ -1257,13 +1257,13 @@ namespace SharpLang.CompilerServices
                 // Special case: char is size 1, not 2!
                 if (CharUsesUTF8)
                 {
-                    if (opcode == Code.Add && operand1.Type.TypeReference.FullName == typeof(char*).FullName)
+                    if (opcode == Code.Add && operand1.Type.TypeReferenceCecil.FullName == typeof(char*).FullName)
                     {
-                        value2 = LLVM.BuildLShr(builder, value2, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                        value2 = LLVM.BuildLShr(builder, value2, LLVM.ConstInt(int32LLVM, 1, false), string.Empty);
                     }
-                    else if (opcode == Code.Add && operand2.Type.TypeReference.FullName == typeof(char*).FullName)
+                    else if (opcode == Code.Add && operand2.Type.TypeReferenceCecil.FullName == typeof(char*).FullName)
                     {
-                        value1 = LLVM.BuildLShr(builder, value1, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                        value1 = LLVM.BuildLShr(builder, value1, LLVM.ConstInt(int32LLVM, 1, false), string.Empty);
                     }
                 }
 
@@ -1330,7 +1330,7 @@ namespace SharpLang.CompilerServices
                         var overflowExceptionClass = GetClass(corlib.MainModule.GetType(typeof(OverflowException).FullName));
                         EmitNewobj(functionContext, overflowExceptionClass.Type, overflowExceptionClass.Functions.Single(x => x.MethodReference.Name == ".ctor" && x.MethodReference.Parameters.Count == 0));
                         var overflowException = stack.Pop();
-                        GenerateInvoke(functionContext, throwExceptionFunction, new[] {LLVM.BuildPointerCast(builder, overflowException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty)});
+                        GenerateInvoke(functionContext, throwExceptionFunctionLLVM, new[] {LLVM.BuildPointerCast(builder, overflowException.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunctionLLVM, 0)), string.Empty)});
                         LLVM.BuildUnreachable(builder);
 
                         functionContext.BasicBlock = nextBlock;
@@ -1346,10 +1346,10 @@ namespace SharpLang.CompilerServices
                 if (CharUsesUTF8)
                 {
                     if (opcode == Code.Sub
-                        && operand1.Type.TypeReference.FullName == typeof(char*).FullName
-                        && operand2.Type.TypeReference.FullName == typeof(char*).FullName)
+                        && operand1.Type.TypeReferenceCecil.FullName == typeof(char*).FullName
+                        && operand2.Type.TypeReferenceCecil.FullName == typeof(char*).FullName)
                     {
-                        result = LLVM.BuildLShr(builder, result, LLVM.ConstInt(int32Type, 1, false), string.Empty);
+                        result = LLVM.BuildLShr(builder, result, LLVM.ConstInt(int32LLVM, 1, false), string.Empty);
                     }
                 }
             }
@@ -1366,10 +1366,10 @@ namespace SharpLang.CompilerServices
                     break;
                 case StackValueType.NativeInt:
                     outputType = intPtr;
-                    result = LLVM.BuildIntToPtr(builder, result, intPtrType, string.Empty);
+                    result = LLVM.BuildIntToPtr(builder, result, intPtrLLVM, string.Empty);
                     break;
                 case StackValueType.Reference:
-                    result = LLVM.BuildIntToPtr(builder, result, intPtrType, string.Empty);
+                    result = LLVM.BuildIntToPtr(builder, result, intPtrLLVM, string.Empty);
 
                     // Get type from one of its operand (if output is reference type, one of the two operand must be too)
                     if (operand1.StackType == StackValueType.Reference)
@@ -1434,7 +1434,7 @@ namespace SharpLang.CompilerServices
 
 
             // Extends to int32
-            compareResult = LLVM.BuildZExt(builder, compareResult, int32Type, string.Empty);
+            compareResult = LLVM.BuildZExt(builder, compareResult, int32LLVM, string.Empty);
 
             // Push result back on the stack
             stack.Add(new StackValue(StackValueType.Int32, int32, compareResult));
@@ -1467,8 +1467,8 @@ namespace SharpLang.CompilerServices
                 && operand2.StackType == StackValueType.Object
                 && operand1.Type != operand2.Type)
             {
-                value1 = LLVM.BuildPointerCast(builder, value1, @object.DefaultType, string.Empty);
-                value2 = LLVM.BuildPointerCast(builder, value2, @object.DefaultType, string.Empty);
+                value1 = LLVM.BuildPointerCast(builder, value1, @object.DefaultTypeLLVM, string.Empty);
+                value2 = LLVM.BuildPointerCast(builder, value2, @object.DefaultTypeLLVM, string.Empty);
             }
 
             if (operand1.StackType != operand2.StackType
@@ -1558,15 +1558,15 @@ namespace SharpLang.CompilerServices
             ValueRef numElementsCasted;
             if (numElements.StackType == StackValueType.NativeInt)
             {
-                numElementsCasted = LLVM.BuildPtrToInt(builder, numElements.Value, int32Type, string.Empty);
+                numElementsCasted = LLVM.BuildPtrToInt(builder, numElements.Value, int32LLVM, string.Empty);
             }
             else
             {
-                numElementsCasted = LLVM.BuildIntCast(builder, numElements.Value, int32Type, string.Empty);
+                numElementsCasted = LLVM.BuildIntCast(builder, numElements.Value, int32LLVM, string.Empty);
             }
 
             var alloca = LLVM.BuildArrayAlloca(builder, LLVM.Int8TypeInContext(context), numElementsCasted, string.Empty);
-            alloca = LLVM.BuildPointerCast(builder, alloca, intPtr.DataType, string.Empty);
+            alloca = LLVM.BuildPointerCast(builder, alloca, intPtr.DataTypeLLVM, string.Empty);
 
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, alloca));
         }
@@ -1596,7 +1596,7 @@ namespace SharpLang.CompilerServices
 
             if (CharUsesUTF8)
             {
-                if (opcode == Code.Stind_I2 && address.Type.TypeReference.FullName == typeof(char*).FullName)
+                if (opcode == Code.Stind_I2 && address.Type.TypeReferenceCecil.FullName == typeof(char*).FullName)
                 {
                     type = int8;
                 }
@@ -1631,7 +1631,7 @@ namespace SharpLang.CompilerServices
                 case Code.Ldind_R4: type = @float; break;
                 case Code.Ldind_R8: type = @double; break;
                 case Code.Ldind_Ref:
-                    type = GetType(((ByReferenceType)address.Type.TypeReference).ElementType, TypeState.StackComplete);
+                    type = GetType(((ByReferenceType)address.Type.TypeReferenceCecil).ElementType, TypeState.StackComplete);
                     break;
                 default:
                     throw new ArgumentException("opcode");
@@ -1639,14 +1639,14 @@ namespace SharpLang.CompilerServices
 
             if (CharUsesUTF8)
             {
-                if (opcode == Code.Ldind_I2 && address.Type.TypeReference.FullName == typeof(char*).FullName)
+                if (opcode == Code.Ldind_I2 && address.Type.TypeReferenceCecil.FullName == typeof(char*).FullName)
                 {
                     type = int8;
                 }
             }
 
             // Load value at address
-            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultType, 0), string.Empty);
+            var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
             var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
             SetInstructionFlags(loadInst, functionContext.InstructionFlags);
             functionContext.InstructionFlags = InstructionFlags.None;
@@ -1665,15 +1665,15 @@ namespace SharpLang.CompilerServices
             // Special case: string contains an extra indirection to access its first character.
             // We resolve it on conv.i.
             if (stringSliceable
-                && value.Type.TypeReference.FullName == typeof(string).FullName
+                && value.Type.TypeReferenceCecil.FullName == typeof(string).FullName
                 && (opcode == Code.Conv_I || opcode == Code.Conv_U))
             {
                 // Prepare indices
                 var indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
-                    LLVM.ConstInt(int32Type, 2, false),                         // Access string pointer
+                    LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
+                    LLVM.ConstInt(int32LLVM, 2, false),                         // Access string pointer
                 };
 
                 var charPointerLocation = LLVM.BuildInBoundsGEP(builder, value.Value, indices, string.Empty);
@@ -1721,7 +1721,7 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_Ovf_I8_Un: isOverflow = true; goto case Code.Conv_I8;
                 case Code.Conv_R4:
                 case Code.Conv_R8:
-                    var inputTypeFullName = value.Type.TypeReference.FullName;
+                    var inputTypeFullName = value.Type.TypeReferenceCecil.FullName;
                     isSigned = inputTypeFullName == typeof(int).FullName
                         || inputTypeFullName == typeof(short).FullName
                         || inputTypeFullName == typeof(sbyte).FullName
@@ -1743,7 +1743,7 @@ namespace SharpLang.CompilerServices
             if (value.StackType == StackValueType.NativeInt)
             {
                 // Convert to integer
-                currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
+                currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntLLVM, string.Empty);
             }
             else if (value.StackType == StackValueType.Reference
                 || value.StackType == StackValueType.Object)
@@ -1753,7 +1753,7 @@ namespace SharpLang.CompilerServices
                     throw new InvalidOperationException();
 
                 // Convert to integer
-                currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntType, string.Empty);
+                currentValue = LLVM.BuildPtrToInt(builder, currentValue, nativeIntLLVM, string.Empty);
             }
             else if (value.StackType == StackValueType.Float)
             {
@@ -1761,7 +1761,7 @@ namespace SharpLang.CompilerServices
                 {
                     // Special case: float to float, avoid usual case that goes through an intermediary integer.
                     var outputType = opcode == Code.Conv_R8 ? @double : @float;
-                    currentValue = LLVM.BuildFPCast(builder, currentValue, outputType.DataType, string.Empty);
+                    currentValue = LLVM.BuildFPCast(builder, currentValue, outputType.DataTypeLLVM, string.Empty);
                     stack.Add(new StackValue(StackValueType.Float, outputType, currentValue));
                     return;
                 }
@@ -1814,7 +1814,7 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_Ovf_U_Un:
                 case Code.Conv_Ovf_I_Un:
                     // Convert to native int (if necessary)
-                    currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrType, string.Empty);
+                    currentValue = LLVM.BuildIntToPtr(builder, currentValue, intPtrLLVM, string.Empty);
                     stack.Add(new StackValue(StackValueType.NativeInt, intPtr, currentValue));
                     break;
                 case Code.Conv_U1:
@@ -1850,9 +1850,9 @@ namespace SharpLang.CompilerServices
                 case Code.Conv_R_Un:
                     var outputType = opcode == Code.Conv_R8 || opcode == Code.Conv_R_Un ? @double : @float;
                     if (isSigned)
-                        currentValue = LLVM.BuildSIToFP(builder, currentValue, outputType.DataType, string.Empty);
+                        currentValue = LLVM.BuildSIToFP(builder, currentValue, outputType.DataTypeLLVM, string.Empty);
                     else
-                        currentValue = LLVM.BuildUIToFP(builder, currentValue, outputType.DataType, string.Empty);
+                        currentValue = LLVM.BuildUIToFP(builder, currentValue, outputType.DataTypeLLVM, string.Empty);
                     stack.Add(new StackValue(StackValueType.Float, outputType, currentValue));
                     break;
                 default:
@@ -1874,7 +1874,7 @@ namespace SharpLang.CompilerServices
                 {
                     var leaveTarget = currentFinallyClause.LeaveTargets[index];
 
-                    LLVM.AddCase(@switch, LLVM.ConstInt(int32Type, (ulong)index, false), functionContext.BasicBlocks[leaveTarget.Offset]);
+                    LLVM.AddCase(@switch, LLVM.ConstInt(int32LLVM, (ulong)index, false), functionContext.BasicBlocks[leaveTarget.Offset]);
                 }
             }
             else if (currentFinallyClause.Source.HandlerType == ExceptionHandlerType.Fault)
@@ -1882,7 +1882,7 @@ namespace SharpLang.CompilerServices
                 var exceptionObject = LLVM.BuildLoad(builder, functionContext.ExceptionSlot, string.Empty);
 
                 // Rethrow exception
-                GenerateInvoke(functionContext, throwExceptionFunction, new[] {LLVM.BuildPointerCast(builder, exceptionObject, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty)});
+                GenerateInvoke(functionContext, throwExceptionFunctionLLVM, new[] {LLVM.BuildPointerCast(builder, exceptionObject, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunctionLLVM, 0)), string.Empty)});
                 LLVM.BuildUnreachable(builder);
             }
             else

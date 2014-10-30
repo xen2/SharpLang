@@ -13,17 +13,17 @@ namespace SharpLang.CompilerServices
         Opaque,
 
         /// <summary>
-        /// <see cref="Type.DefaultType"/> will be non opaque.
+        /// <see cref="Type.DefaultTypeLLVM"/> will be non opaque.
         /// </summary>
         StackComplete,
 
         /// <summary>
-        /// <see cref="Type.ValueType"/> will be non opaque, and <see cref="Type.Fields"/> can be used.
+        /// <see cref="Type.ValueTypeLLVM"/> will be non opaque, and <see cref="Type.Fields"/> can be used.
         /// </summary>
         TypeComplete,
 
         /// <summary>
-        /// <see cref="Type.ObjectType"/> will be valid.
+        /// <see cref="Type.ObjectTypeLLVM"/> will be valid.
         /// </summary>
         VTableEmitted,
     }

@@ -21,7 +21,7 @@ namespace SharpLang.CompilerServices
             // Same type, return as is
             if ((stack.StackType == StackValueType.Value
                     || stack.StackType == StackValueType.NativeInt)
-                && localType.DefaultType == LLVM.TypeOf(stack.Value))
+                && localType.DefaultTypeLLVM == LLVM.TypeOf(stack.Value))
             {
                 return stackValue;
             }
@@ -30,7 +30,7 @@ namespace SharpLang.CompilerServices
             // Need pointer conversion
             if (stack.StackType == StackValueType.NativeInt && localType.StackType == StackValueType.NativeInt)
             {
-                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
             }
 
             // Int32 to NativeInt
@@ -42,7 +42,7 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
                 }
 
-                return LLVM.BuildIntToPtr(builder, stackValue, localType.DataType, string.Empty);
+                return LLVM.BuildIntToPtr(builder, stackValue, localType.DataTypeLLVM, string.Empty);
             }
 
             // NativeInt to Reference
@@ -51,27 +51,27 @@ namespace SharpLang.CompilerServices
             if (stack.StackType == StackValueType.NativeInt && localType.StackType == StackValueType.Reference)
             {
                 // Fallback: allow everything for now...
-                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
             }
 
             // Object: allow upcast as well
             if (stack.StackType == StackValueType.Reference
                 || stack.StackType == StackValueType.Object)
             {
-                if (localType.DefaultType == stack.Type.DefaultType)
+                if (localType.DefaultTypeLLVM == stack.Type.DefaultTypeLLVM)
                 {
                     return stackValue;
                 }
 
-                if (localType.TypeReference.Resolve().IsInterface)
+                if (localType.TypeReferenceCecil.Resolve().IsInterface)
                 {
                     // Interface upcast
                     var stackClass = GetClass(stack.Type);
                     foreach (var @interface in stackClass.Interfaces)
                     {
-                        if (MemberEqualityComparer.Default.Equals(@interface.Type.TypeReference, localType.TypeReference))
+                        if (MemberEqualityComparer.Default.Equals(@interface.Type.TypeReferenceCecil, localType.TypeReferenceCecil))
                         {
-                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
                         }
                     }
                 }
@@ -80,13 +80,13 @@ namespace SharpLang.CompilerServices
                     // Class upcast
                     // Check upcast in hierarchy
                     // TODO: we could optimize by storing Depth
-                    var stackType = stack.Type.TypeReference;
+                    var stackType = stack.Type.TypeReferenceCecil;
                     while (stackType != null)
                     {
-                        if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReference))
+                        if (MemberEqualityComparer.Default.Equals(stackType, localType.TypeReferenceCecil))
                         {
                             // It's an upcast, do LLVM pointer cast
-                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                            return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
                         }
 
                         stackType = stackType.Resolve().BaseType;
@@ -94,7 +94,7 @@ namespace SharpLang.CompilerServices
                 }
 
                 // Fallback: allow everything for now...
-                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultType, string.Empty);
+                return LLVM.BuildPointerCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
             }
 
             if (stack.StackType == StackValueType.Float && stack.Type == localType)
@@ -104,9 +104,9 @@ namespace SharpLang.CompilerServices
 
             // Spec: Storing into locals that hold an integer value smaller than 4 bytes long truncates the value as it moves from the stack to the local variable.
             if ((stack.StackType == StackValueType.Int32 || stack.StackType == StackValueType.Int64)
-                && LLVM.GetTypeKind(localType.DefaultType) == TypeKind.IntegerTypeKind)
+                && LLVM.GetTypeKind(localType.DefaultTypeLLVM) == TypeKind.IntegerTypeKind)
             {
-                return LLVM.BuildIntCast(builder, stackValue, localType.DefaultType, string.Empty);
+                return LLVM.BuildIntCast(builder, stackValue, localType.DefaultTypeLLVM, string.Empty);
             }
 
             // TODO: Other cases
@@ -127,13 +127,13 @@ namespace SharpLang.CompilerServices
             {
                 case StackValueType.Int32:
                 case StackValueType.Int64:
-                    var expectedIntType = localType.StackType == StackValueType.Int32 ? int32Type : int64Type;
-                    if (localType.DefaultType != expectedIntType)
+                    var expectedIntType = localType.StackType == StackValueType.Int32 ? int32LLVM : int64LLVM;
+                    if (localType.DefaultTypeLLVM != expectedIntType)
                     {
-                        if (LLVM.GetTypeKind(localType.DefaultType) != TypeKind.IntegerTypeKind)
+                        if (LLVM.GetTypeKind(localType.DefaultTypeLLVM) != TypeKind.IntegerTypeKind)
                             throw new InvalidOperationException();
 
-                        if (LLVM.GetIntTypeWidth(localType.DefaultType) < LLVM.GetIntTypeWidth(expectedIntType))
+                        if (LLVM.GetIntTypeWidth(localType.DefaultTypeLLVM) < LLVM.GetIntTypeWidth(expectedIntType))
                         {
                             if (IsSigned(localType))
                                 return LLVM.BuildIntCast(builder, stack, expectedIntType, string.Empty);
@@ -163,7 +163,7 @@ namespace SharpLang.CompilerServices
         bool IsSigned(Type type)
         {
             bool isSigned = false;
-            switch (type.TypeReference.MetadataType)
+            switch (type.TypeReferenceCecil.MetadataType)
             {
                 case MetadataType.SByte:
                 case MetadataType.Int16:
@@ -173,9 +173,9 @@ namespace SharpLang.CompilerServices
                     isSigned = true;
                     break;
                 default:
-                    if (type.TypeDefinition.IsValueType && type.TypeDefinition.IsEnum)
+                    if (type.TypeDefinitionCecil.IsValueType && type.TypeDefinitionCecil.IsEnum)
                     {
-                        var enumUnderlyingType = GetType(type.TypeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete);
+                        var enumUnderlyingType = GetType(type.TypeDefinitionCecil.GetEnumUnderlyingType(), TypeState.StackComplete);
                         return IsSigned(enumUnderlyingType);
                     }
                     break;

@@ -48,10 +48,10 @@ namespace SharpLang.CompilerServices
                 var parameter = callSite.Parameters[index];
                 parameterTypeReference = ResolveGenericsVisitor.Process(context, parameter.ParameterType);
                 var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
-                if (parameterType.DefaultType.Value == IntPtr.Zero)
+                if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
-                parameterTypesLLVM[index] = parameterType.DefaultType;
+                parameterTypesLLVM[index] = parameterType.DefaultTypeLLVM;
             }
 
             var returnType = GetType(ResolveGenericsVisitor.Process(context, context.ReturnType), TypeState.StackComplete);
@@ -74,10 +74,10 @@ namespace SharpLang.CompilerServices
             var declaringType = GetType(ResolveGenericsVisitor.Process(method, method.DeclaringType), TypeState.Opaque);
 
             // Check if method is only defined in a parent class (can happen in some rare case, i.e. PCL TypeInfo.get_Assembly()).
-            bool hasMatch = MetadataResolver.GetMethod(declaringType.TypeDefinition.Methods, method.GetElementMethod()) != null;
+            bool hasMatch = MetadataResolver.GetMethod(declaringType.TypeDefinitionCecil.Methods, method.GetElementMethod()) != null;
             if (resolvedMethod != null && !hasMatch)
             {
-                var parentType = declaringType.TypeDefinition.BaseType != null ? ResolveGenericsVisitor.Process(declaringType.TypeReference, declaringType.TypeDefinition.BaseType) : null;
+                var parentType = declaringType.TypeDefinitionCecil.BaseType != null ? ResolveGenericsVisitor.Process(declaringType.TypeReferenceCecil, declaringType.TypeDefinitionCecil.BaseType) : null;
                 if (parentType == null)
                     throw new InvalidOperationException(string.Format("Could not find a matching method in any of the type or its parent for {0}", method));
 
@@ -102,10 +102,10 @@ namespace SharpLang.CompilerServices
                 TypeReference parameterTypeReference;
                 if (method.HasThis && index == 0)
                 {
-                    parameterTypeReference = declaringType.TypeReference;
+                    parameterTypeReference = declaringType.TypeReferenceCecil;
 
                     // Value type uses ByReference type for this
-                    if (declaringType.TypeDefinition.IsValueType)
+                    if (declaringType.TypeDefinitionCecil.IsValueType)
                         parameterTypeReference = parameterTypeReference.MakeByReferenceType();
                 }
                 else
@@ -114,17 +114,17 @@ namespace SharpLang.CompilerServices
                     parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
                 }
                 var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
-                if (parameterType.DefaultType.Value == IntPtr.Zero)
+                if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
                 parameterTypes[index] = parameterType;
-                parameterTypesLLVM[index] = parameterType.DefaultType;
+                parameterTypesLLVM[index] = parameterType.DefaultTypeLLVM;
             }
 
 
             // Generate function global
             var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
             var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
-            var functionType = LLVM.FunctionType(returnType.DefaultType, parameterTypesLLVM, false);
+            var functionType = LLVM.FunctionType(returnType.DefaultTypeLLVM, parameterTypesLLVM, false);
 
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
 
@@ -143,7 +143,7 @@ namespace SharpLang.CompilerServices
             }
 
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
-            bool isInterfaceMethod = declaringType.TypeDefinition.IsInterface;
+            bool isInterfaceMethod = declaringType.TypeDefinitionCecil.IsInterface;
             var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal || isRuntime);
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
@@ -252,7 +252,7 @@ namespace SharpLang.CompilerServices
 
                 // Generate IL for various methods
                 if (declaringClass.BaseType != null &&
-                    declaringClass.BaseType.Type.TypeReference.FullName == typeof(MulticastDelegate).FullName)
+                    declaringClass.BaseType.Type.TypeReferenceCecil.FullName == typeof(MulticastDelegate).FullName)
                 {
                     body = GenerateDelegateMethod(method, declaringClass);
                     if (body == null)
@@ -294,10 +294,10 @@ namespace SharpLang.CompilerServices
                 //    throw new NotSupportedException();
 
                 var type = GetType(ResolveGenericsVisitor.Process(methodReference, local.VariableType), TypeState.StackComplete);
-                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultType, local.Name)));
+                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultTypeLLVM, local.Name)));
 
                 // Force value types to be emitted right away
-                if (type.TypeDefinition.IsValueType)
+                if (type.TypeDefinitionCecil.IsValueType)
                     GetClass(type);
             }
 
@@ -308,14 +308,14 @@ namespace SharpLang.CompilerServices
                 var arg = LLVM.GetParam(functionGlobal, (uint)index);
 
                 // Force value types to be emitted right away
-                if (argType.TypeDefinition.IsValueType)
+                if (argType.TypeDefinitionCecil.IsValueType)
                     GetClass(argType);
 
                 var parameterIndex = index - (functionContext.Method.HasThis ? 1 : 0);
                 var parameterName = parameterIndex == -1 ? "this" : method.Parameters[parameterIndex].Name;
 
                 // Copy argument on stack
-                var storage = LLVM.BuildAlloca(builder, argType.DefaultType, parameterName);
+                var storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
                 LLVM.BuildStore(builder, arg, storage);
 
                 args.Add(new StackValue(argType.StackType, argType, storage));
@@ -363,9 +363,9 @@ namespace SharpLang.CompilerServices
             if (body.HasExceptionHandlers)
             {
                 // Add an "ehselector.slot" i32 local, and a "exn.slot" Object reference local
-                functionContext.ExceptionHandlerSelectorSlot = LLVM.BuildAlloca(builder, int32Type, "ehselector.slot");
-                functionContext.ExceptionSlot = LLVM.BuildAlloca(builder, @object.DefaultType, "exn.slot");
-                functionContext.EndfinallyJumpTarget = LLVM.BuildAlloca(builder, int32Type, "endfinally.jumptarget");
+                functionContext.ExceptionHandlerSelectorSlot = LLVM.BuildAlloca(builder, int32LLVM, "ehselector.slot");
+                functionContext.ExceptionSlot = LLVM.BuildAlloca(builder, @object.DefaultTypeLLVM, "exn.slot");
+                functionContext.EndfinallyJumpTarget = LLVM.BuildAlloca(builder, int32LLVM, "endfinally.jumptarget");
 
                 // Create resume exception block
                 functionContext.ResumeExceptionBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "eh.resume");
@@ -373,8 +373,8 @@ namespace SharpLang.CompilerServices
                 var exceptionObject = LLVM.BuildLoad(builder2, functionContext.ExceptionSlot, "exn");
                 var ehselectorValue = LLVM.BuildLoad(builder2, functionContext.ExceptionHandlerSelectorSlot, "sel");
 
-                exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, intPtrType, "exn");
-                var landingPadValue = LLVM.BuildInsertValue(builder2, LLVM.GetUndef(caughtResultType), exceptionObject, 0, "lpad.val");
+                exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, intPtrLLVM, "exn");
+                var landingPadValue = LLVM.BuildInsertValue(builder2, LLVM.GetUndef(caughtResultLLVM), exceptionObject, 0, "lpad.val");
                 landingPadValue = LLVM.BuildInsertValue(builder2, landingPadValue, ehselectorValue, 1, "lpad.val");
 
                 LLVM.BuildResume(builder2, landingPadValue);
@@ -416,11 +416,11 @@ namespace SharpLang.CompilerServices
                     // Extract exception
                     LLVM.PositionBuilderAtEnd(builder2, catchBlock);
                     var exceptionObject = LLVM.BuildLoad(builder2, functionContext.ExceptionSlot, string.Empty);
-                    exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, catchClass.Type.DefaultType, string.Empty);
+                    exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, catchClass.Type.DefaultTypeLLVM, string.Empty);
 
                     // Erase exception from exn.slot (it has been handled)
-                    LLVM.BuildStore(builder2, LLVM.ConstNull(@object.DefaultType), functionContext.ExceptionSlot);
-                    LLVM.BuildStore(builder2, LLVM.ConstInt(int32Type, 0, false), functionContext.ExceptionHandlerSelectorSlot);
+                    LLVM.BuildStore(builder2, LLVM.ConstNull(@object.DefaultTypeLLVM), functionContext.ExceptionSlot);
+                    LLVM.BuildStore(builder2, LLVM.ConstInt(int32LLVM, 0, false), functionContext.ExceptionHandlerSelectorSlot);
 
                     forwardStacks[handlerStart] = new[]
                     {
@@ -567,7 +567,7 @@ namespace SharpLang.CompilerServices
                             var ehselectorValue = LLVM.BuildLoad(builder2, functionContext.ExceptionHandlerSelectorSlot, "sel");
 
                             var ehtypeIdFor = LLVM.IntrinsicGetDeclaration(module, (uint)Intrinsics.eh_typeid_for, new TypeRef[0]);
-                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] {LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType)}, string.Empty);
+                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] {LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM)}, string.Empty);
 
                             // Jump to catch clause if type matches.
                             // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
@@ -617,11 +617,11 @@ namespace SharpLang.CompilerServices
                     // Prepare landing pad block
                     functionContext.LandingPadBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "landingpad");
                     LLVM.PositionBuilderAtEnd(builder2, functionContext.LandingPadBlock);
-                    var landingPad = LLVM.BuildLandingPad(builder2, caughtResultType, sharpPersonalityFunction, 1, string.Empty);
+                    var landingPad = LLVM.BuildLandingPad(builder2, caughtResultLLVM, sharpPersonalityFunctionLLVM, 1, string.Empty);
 
                     // Extract exception, and store it in exn.slot
                     var exceptionObject = LLVM.BuildExtractValue(builder2, landingPad, 0, string.Empty);
-                    exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, @object.Class.Type.DefaultType, string.Empty);
+                    exceptionObject = LLVM.BuildPointerCast(builder2, exceptionObject, @object.Class.Type.DefaultTypeLLVM, string.Empty);
                     LLVM.BuildStore(builder2, exceptionObject, functionContext.ExceptionSlot);
 
                     // Extract selector slot, and store it in ehselector.slot
@@ -630,7 +630,7 @@ namespace SharpLang.CompilerServices
 
                     // Let future finally clause know that we need to propage exception after they are executed
                     // A future Leave instruction should clear that if necessary
-                    LLVM.BuildStore(builder2, LLVM.ConstInt(int32Type, unchecked((ulong)-1), true), functionContext.EndfinallyJumpTarget);
+                    LLVM.BuildStore(builder2, LLVM.ConstInt(int32LLVM, unchecked((ulong)-1), true), functionContext.EndfinallyJumpTarget);
 
                     // Add jump to catch dispatch block or finally block
                     var lastActiveTryHandler = activeTryHandlers.Last();
@@ -648,7 +648,7 @@ namespace SharpLang.CompilerServices
                         if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Catch)
                         {
                             var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
-                            LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobal, intPtrType));
+                            LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM));
                         }
                         else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally
                             || exceptionHandler.Source.HandlerType == ExceptionHandlerType.Fault)
@@ -735,8 +735,8 @@ namespace SharpLang.CompilerServices
                     var callSite = (CallSite)instruction.Operand;
 
                     // TODO: Unify with CreateFunction code
-                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete).DefaultType;
-                    var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete).DefaultType).ToArray();
+                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete).DefaultTypeLLVM;
+                    var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete).DefaultTypeLLVM).ToArray();
 
                     // Generate function type
                     var functionType = LLVM.FunctionType(returnType, parameterTypesLLVM, false);
@@ -826,8 +826,8 @@ namespace SharpLang.CompilerServices
                     var type = GetType(typeReference, TypeState.StackComplete);
 
                     // Use type because @class might be null (i.e. void*)
-                    var objectSize = LLVM.SizeOf(type.DefaultType);
-                    objectSize = LLVM.BuildIntCast(builder, objectSize, int32Type, string.Empty);
+                    var objectSize = LLVM.SizeOf(type.DefaultTypeLLVM);
+                    objectSize = LLVM.BuildIntCast(builder, objectSize, int32LLVM, string.Empty);
 
                     stack.Add(new StackValue(StackValueType.Int32, int32.Class.Type, objectSize));
 
@@ -879,8 +879,8 @@ namespace SharpLang.CompilerServices
 
                             EmitLdsflda(stack, field);
                             var fieldAddress = stack.Pop().Value;
-                            fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, intPtrType, string.Empty);
-                            runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataType);
+                            fieldAddress = LLVM.BuildPointerCast(builder, fieldAddress, intPtrLLVM, string.Empty);
+                            runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
                             runtimeHandleValue = LLVM.BuildInsertValue(builder, runtimeHandleValue, fieldAddress, 0, string.Empty);
                         }
                     }
@@ -895,7 +895,7 @@ namespace SharpLang.CompilerServices
 
                     // Setup default value
                     if (runtimeHandleValue == ValueRef.Empty)
-                        runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataType);
+                        runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
 
                     // TODO: Actually transform type to RTTI token.
                     stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, runtimeHandleValue));
@@ -908,7 +908,7 @@ namespace SharpLang.CompilerServices
                     var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                     var targetMethod = GetFunction(targetMethodReference);
 
-                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrType, string.Empty)));
+                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrLLVM, string.Empty)));
 
                     break;
                 }
@@ -921,7 +921,7 @@ namespace SharpLang.CompilerServices
 
                     var resolvedMethod = ResolveVirtualMethod(functionContext, ref targetMethod, ref thisObject);
 
-                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, resolvedMethod, intPtrType, string.Empty)));
+                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, resolvedMethod, intPtrLLVM, string.Empty)));
 
                     break;
                 }
@@ -933,7 +933,7 @@ namespace SharpLang.CompilerServices
                     var type = GetType(typeReference, TypeState.VTableEmitted);
 
                     // Only value types need to be boxed
-                    if (type.TypeDefinition.IsValueType)
+                    if (type.TypeDefinitionCecil.IsValueType)
                     {
                         EmitBoxValueType(stack, type);
                     }
@@ -946,7 +946,7 @@ namespace SharpLang.CompilerServices
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
                     var type = GetType(typeReference, TypeState.VTableEmitted);
 
-                    if (type.TypeDefinition.IsValueType)
+                    if (type.TypeDefinitionCecil.IsValueType)
                     {
                         EmitUnboxAnyValueType(stack, type);
                     }
@@ -1053,7 +1053,7 @@ namespace SharpLang.CompilerServices
                     // TODO: Implement this opcode
                     //var value = LLVM.BuildVAArg(builder, , , string.Empty);
                     var runtimeHandleType = GetType(corlib.MainModule.GetType(typeof(RuntimeArgumentHandle).FullName), TypeState.StackComplete);
-                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleType, LLVM.ConstNull(runtimeHandleType.DataType)));
+                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleType, LLVM.ConstNull(runtimeHandleType.DataTypeLLVM)));
                     break;
                 }
                 #endregion
@@ -1306,7 +1306,7 @@ namespace SharpLang.CompilerServices
                     for (int i = 0; i < targets.Length; ++i)
                     {
                         var target = targets[i];
-                        LLVM.AddCase(@switch, LLVM.ConstInt(int32Type, (ulong)i, false), functionContext.BasicBlocks[target.Offset]);
+                        LLVM.AddCase(@switch, LLVM.ConstInt(int32LLVM, (ulong)i, false), functionContext.BasicBlocks[target.Offset]);
                     }
                     functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.Explicit;
                     break;
@@ -1442,7 +1442,7 @@ namespace SharpLang.CompilerServices
 
                     // Throw exception
                     // TODO: Update callstack
-                    GenerateInvoke(functionContext, throwExceptionFunction, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                    GenerateInvoke(functionContext, throwExceptionFunctionLLVM, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunctionLLVM, 0)), string.Empty) });
                     LLVM.BuildUnreachable(builder);
 
                     functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.None;
@@ -1460,7 +1460,7 @@ namespace SharpLang.CompilerServices
                     var exceptionObject = catchClauseStack[0];
 
                     // Rethrow exception
-                    GenerateInvoke(functionContext, throwExceptionFunction, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunction, 0)), string.Empty) });
+                    GenerateInvoke(functionContext, throwExceptionFunctionLLVM, new ValueRef[] { LLVM.BuildPointerCast(builder, exceptionObject.Value, LLVM.TypeOf(LLVM.GetParam(throwExceptionFunctionLLVM, 0)), string.Empty) });
                     LLVM.BuildUnreachable(builder);
 
                     functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.None;
@@ -1541,11 +1541,11 @@ namespace SharpLang.CompilerServices
                 // Check if class is initialized
                 var indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false),                                                 // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
+                    LLVM.ConstInt(int32LLVM, 0, false),                                                 // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
                 };
 
-                var classInitializedAddress = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                var classInitializedAddress = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
                 var classInitialized = LLVM.BuildLoad(builder, classInitializedAddress, string.Empty);
 
                 var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
@@ -1587,8 +1587,8 @@ namespace SharpLang.CompilerServices
                 // Build indices for GEP
                 var indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int) ObjectFields.RuntimeTypeInfo, false), // Access RTTI
+                    LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int) ObjectFields.RuntimeTypeInfo, false), // Access RTTI
                 };
 
                 Class @class;
@@ -1596,12 +1596,12 @@ namespace SharpLang.CompilerServices
                 // Process constrained class
                 if (constrainedClass != null)
                 {
-                    if (!constrainedClass.Type.TypeDefinition.IsValueType)
+                    if (!constrainedClass.Type.TypeDefinitionCecil.IsValueType)
                     {
                         // If thisType is a reference type, dereference
                         thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
                             LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
-                                constrainedClass.Type.DefaultType, string.Empty));
+                                constrainedClass.Type.DefaultTypeLLVM, string.Empty));
                     }
                     else
                     {
@@ -1613,11 +1613,11 @@ namespace SharpLang.CompilerServices
                             targetMethod = matchingMethod;
 
                             // Convert to appropriate type (if necessary)
-                            var refType = GetType(constrainedClass.Type.TypeReference.MakeByReferenceType(), TypeState.Opaque);
+                            var refType = GetType(constrainedClass.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
                             if (thisObject.StackType != StackValueType.Reference || thisObject.Type != refType)
                             {
                                 thisObject = new StackValue(refType.StackType, refType,
-                                    LLVM.BuildPointerCast(builder, thisObject.Value, refType.DefaultType, string.Empty));
+                                    LLVM.BuildPointerCast(builder, thisObject.Value, refType.DefaultTypeLLVM, string.Empty));
                             }
                         }
                         else
@@ -1625,7 +1625,7 @@ namespace SharpLang.CompilerServices
                             // If thisType is a value type and doesn't implement method, dereference, box and pass as this
                             thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
                                 LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
-                                    constrainedClass.Type.DefaultType, string.Empty));
+                                    constrainedClass.Type.DefaultTypeLLVM, string.Empty));
 
                             thisObject = new StackValue(StackValueType.Object, constrainedClass.Type,
                                 BoxValueType(constrainedClass.Type, thisObject));
@@ -1642,9 +1642,9 @@ namespace SharpLang.CompilerServices
                 // TODO: Checking actual type stored in thisObject we might be able to statically resolve method?
 
                 // If it's a byref value type, emit a normal call
-                if (thisObject.Type.TypeReference.IsByReference
-                    && GetType(((ByReferenceType)thisObject.Type.TypeReference).ElementType, TypeState.Opaque).TypeDefinition.IsValueType
-                    && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReference, ((ByReferenceType)thisObject.Type.TypeReference).ElementType))
+                if (thisObject.Type.TypeReferenceCecil.IsByReference
+                    && GetType(((ByReferenceType)thisObject.Type.TypeReferenceCecil).ElementType, TypeState.Opaque).TypeDefinitionCecil.IsValueType
+                    && MemberEqualityComparer.Default.Equals(targetMethod.DeclaringType.TypeReferenceCecil, ((ByReferenceType)thisObject.Type.TypeReferenceCecil).ElementType))
                 {
                     resolvedMethod = targetMethod.GeneratedValue;
                 }
@@ -1655,7 +1655,7 @@ namespace SharpLang.CompilerServices
                     rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
 
                     // Cast to expected RTTI type
-                    rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobal), string.Empty);
+                    rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobalLLVM), string.Empty);
 
                     if (targetMethod.MethodReference.DeclaringType.Resolve().IsInterface)
                     {
@@ -1664,9 +1664,9 @@ namespace SharpLang.CompilerServices
                         // Get method stored in IMT slot
                         indices = new[]
                         {
-                            LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                            LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.InterfaceMethodTable, false), // Access IMT
-                            LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific IMT slot
+                            LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                            LLVM.ConstInt(int32LLVM, (int) RuntimeTypeInfoFields.InterfaceMethodTable, false), // Access IMT
+                            LLVM.ConstInt(int32LLVM, (ulong) targetMethod.VirtualSlot, false), // Access specific IMT slot
                         };
 
                         var imtEntry = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
@@ -1675,10 +1675,10 @@ namespace SharpLang.CompilerServices
 
                         // Resolve interface call
                         // TODO: Improve resolveInterfaceCall(): if no match is found, it's likely due to covariance/contravariance, so we will need a fallback
-                        resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunction, new[]
+                        resolvedMethod = LLVM.BuildCall(builder, resolveInterfaceCallFunctionLLVM, new[]
                         {
-                            //LLVM.ConstInt(int32Type, methodId, false),
-                            LLVM.ConstPointerCast(targetMethod.GeneratedValue, intPtrType),
+                            //LLVM.ConstInt(int32LLVM, methodId, false),
+                            LLVM.ConstPointerCast(targetMethod.GeneratedValue, intPtrLLVM),
                             methodPointer,
                         }, string.Empty);
                         resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod,
@@ -1695,9 +1695,9 @@ namespace SharpLang.CompilerServices
                         // Get method stored in vtable slot
                         indices = new[]
                         {
-                            LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                            LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
-                            LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
+                            LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                            LLVM.ConstInt(int32LLVM, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
+                            LLVM.ConstInt(int32LLVM, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
                         };
 
                         var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
@@ -1714,12 +1714,12 @@ namespace SharpLang.CompilerServices
                 // Get method stored in vtable slot
                 var indices = new[]
                 {
-                    LLVM.ConstInt(int32Type, 0, false), // Pointer indirection
-                    LLVM.ConstInt(int32Type, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
-                    LLVM.ConstInt(int32Type, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
+                    LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                    LLVM.ConstInt(int32LLVM, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
+                    LLVM.ConstInt(int32LLVM, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
                 };
 
-                var vtable = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobal, indices, string.Empty);
+                var vtable = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
                 resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
                 resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
             }
@@ -1793,7 +1793,7 @@ namespace SharpLang.CompilerServices
                     }
 
                     // Update desired jump target
-                    LLVM.BuildStore(builder, LLVM.ConstInt(int32Type, (ulong)leaveTargetIndex, false), endfinallyJumpTarget);
+                    LLVM.BuildStore(builder, LLVM.ConstInt(int32LLVM, (ulong)leaveTargetIndex, false), endfinallyJumpTarget);
 
                     // Actual jump will be to finally clause
                     targetInstruction = exceptionHandler.Source.HandlerStart;
@@ -1809,8 +1809,8 @@ namespace SharpLang.CompilerServices
             // Get data pointer
             var indices = new[]
             {
-                LLVM.ConstInt(int32Type, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32Type, (int)ObjectFields.Data, false),    // Data
+                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
             };
 
             var dataPointer = LLVM.BuildInBoundsGEP(builder, obj, indices, string.Empty);

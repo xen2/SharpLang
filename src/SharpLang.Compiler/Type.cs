@@ -15,32 +15,32 @@ namespace SharpLang.CompilerServices
 
         public Type(TypeReference typeReference, TypeDefinition typeDefinition, TypeRef dataType, TypeRef valueType, TypeRef objectType, StackValueType stackType)
         {
-            TypeReference = typeReference;
-            TypeDefinition = typeDefinition;
-            DataType = dataType;
-            ObjectType = objectType;
+            TypeReferenceCecil = typeReference;
+            TypeDefinitionCecil = typeDefinition;
+            DataTypeLLVM = dataType;
+            ObjectTypeLLVM = objectType;
             StackType = stackType;
-            ValueType = valueType;
-            DefaultType = stackType == StackValueType.Object ? LLVM.PointerType(ObjectType, 0) : DataType;
+            ValueTypeLLVM = valueType;
+            DefaultTypeLLVM = stackType == StackValueType.Object ? LLVM.PointerType(ObjectTypeLLVM, 0) : DataTypeLLVM;
 
             switch (stackType)
             {
                 case StackValueType.NativeInt:
-                    TypeOnStack = LLVM.PointerType(LLVM.Int8TypeInContext(LLVM.GetTypeContext(dataType)), 0);
+                    TypeOnStackLLVM = LLVM.PointerType(LLVM.Int8TypeInContext(LLVM.GetTypeContext(dataType)), 0);
                     break;
                 case StackValueType.Float:
-                    TypeOnStack = LLVM.DoubleTypeInContext(LLVM.GetTypeContext(dataType));
+                    TypeOnStackLLVM = LLVM.DoubleTypeInContext(LLVM.GetTypeContext(dataType));
                     break;
                 case StackValueType.Int32:
-                    TypeOnStack = LLVM.Int32TypeInContext(LLVM.GetTypeContext(dataType));
+                    TypeOnStackLLVM = LLVM.Int32TypeInContext(LLVM.GetTypeContext(dataType));
                     break;
                 case StackValueType.Int64:
-                    TypeOnStack = LLVM.Int64TypeInContext(LLVM.GetTypeContext(dataType));
+                    TypeOnStackLLVM = LLVM.Int64TypeInContext(LLVM.GetTypeContext(dataType));
                     break;
                 case StackValueType.Value:
                 case StackValueType.Object:
                 case StackValueType.Reference:
-                    TypeOnStack = DefaultType;
+                    TypeOnStackLLVM = DefaultTypeLLVM;
                     break;
             }
         }
@@ -51,15 +51,15 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The LLVM default type.
         /// </value>
-        public TypeRef DefaultType { get; private set; }
+        public TypeRef DefaultTypeLLVM { get; private set; }
 
         /// <summary>
-        /// Gets the LLVM object type (object header and <see cref="DataType"/>).
+        /// Gets the LLVM object type (object header and <see cref="DataTypeLLVM"/>).
         /// </summary>
         /// <value>
-        /// The LLVM boxed type (object header and <see cref="DataType"/>).
+        /// The LLVM boxed type (object header and <see cref="DataTypeLLVM"/>).
         /// </value>
-        public TypeRef ObjectType { get; private set; }
+        public TypeRef ObjectTypeLLVM { get; private set; }
 
         /// <summary>
         /// Gets the LLVM data type.
@@ -67,7 +67,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The LLVM data type (fields).
         /// </value>
-        public TypeRef DataType { get; private set; }
+        public TypeRef DataTypeLLVM { get; private set; }
 
         /// <summary>
         /// Gets the LLVM value type.
@@ -75,7 +75,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The LLVM value type (fields).
         /// </value>
-        public TypeRef ValueType { get; private set; }
+        public TypeRef ValueTypeLLVM { get; private set; }
 
         /// <summary>
         /// Gets the LLVM type when on the stack.
@@ -83,7 +83,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The LLVM type when on the stack.
         /// </value>
-        public TypeRef TypeOnStack { get; private set; }
+        public TypeRef TypeOnStackLLVM { get; private set; }
 
         /// <summary>
         /// Gets the linkage to use for this type.
@@ -93,8 +93,8 @@ namespace SharpLang.CompilerServices
         /// </value>
         public Linkage Linkage { get; set; }
 
-        public TypeReference TypeReference { get; private set; }
-        public TypeDefinition TypeDefinition { get; private set; }
+        public TypeReference TypeReferenceCecil { get; private set; }
+        public TypeDefinition TypeDefinitionCecil { get; private set; }
 
         public StackValueType StackType { get; private set; }
 
@@ -105,7 +105,7 @@ namespace SharpLang.CompilerServices
         /// <inheritdoc/>
         public override string ToString()
         {
-            return TypeReference.ToString();
+            return TypeReferenceCecil.ToString();
         }
     }
 }

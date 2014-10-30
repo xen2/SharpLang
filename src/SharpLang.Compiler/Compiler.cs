@@ -12,62 +12,41 @@ namespace SharpLang.CompilerServices
     /// </summary>
     public sealed partial class Compiler
     {
+        /// <summary> Current module being generated. </summary>
         private ModuleRef module;
-        private ModuleRef runtimeModule;
         private ContextRef context;
 
-        // RuntimeInline
-        private ValueRef allocObjectFunction;
-        private ValueRef resolveInterfaceCallFunction;
-        private ValueRef isInstInterfaceFunction;
-        private ValueRef throwExceptionFunction;
-        private ValueRef sharpPersonalityFunction;
-        private ValueRef pinvokeLoadLibraryFunction;
-        private ValueRef pinvokeGetProcAddressFunction;
-
-        // Builder for normal instructions
+        // <summary> Builder used for method codegen. <summary>
         private BuilderRef builder;
-        private Type intPtr;
-        private Type int8;
-        private Type int16;
-        private Type int32;
-        private Type int64;
-        private Type uint8;
-        private Type uint16;
-        private Type uint32;
-        private Type uint64;
-        private Type @bool;
-        private Type @float;
-        private Type @double;
-        private Type @char;
-        private Type @object;
-        private TypeRef intPtrType; // Native integer, pointer representation
-        private int intPtrSize;
-        private TypeRef nativeIntType; // Native integer, integer representation
-        private TypeRef int32Type;
-        private TypeRef int64Type;
-        private TypeRef imtEntryType;
-        private TypeRef caughtResultType;
-
-        // Builder that is used for PHI nodes
+        // <summary> Extra builder used for method codegen. <summary>
         private BuilderRef builder2;
 
         private DIBuilderRef debugBuilder;
         private TargetDataRef targetData;
 
+        /// <summary> Currently compiled assembly. </summary>
         private AssemblyDefinition assembly;
+        
+        /// <summary> Corlib assembly. </summary>
         private AssemblyDefinition corlib;
 
+        /// <summary> Cecil TypeReference to generated SharpLang Type mapping. </summary>
         private Dictionary<TypeReference, Type> types = new Dictionary<TypeReference, Type>(MemberEqualityComparer.Default);
+
+        /// <summary> Cecil methodReference to generated SharpLang Function mapping. </summary>
         private Dictionary<MethodReference, Function> functions = new Dictionary<MethodReference, Function>(MemberEqualityComparer.Default);
+
+        /// <summary> List of classes that still need to be generated. </summary>
         private Queue<Type> classesToGenerate = new Queue<Type>();
 
+        /// <summary> List of methods that still need to be generated. </summary>
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
-        // List of all referenced assemblies (including indirect ones)
+        /// <summary> List of all referenced assemblies (including indirect ones). </summary>
         private HashSet<AssemblyDefinition> referencedAssemblies = new HashSet<AssemblyDefinition>();
         private HashSet<TypeReference> referencedTypes = new HashSet<TypeReference>(MemberEqualityComparer.Default);
 
+        /// <summary> True when running unit tests. This will try to avoid using real mscorlib for faster codegen, linking and testing. </summary>
         public bool TestMode { get; set; }
 
         public void PrepareAssembly(AssemblyDefinition assembly)
@@ -78,6 +57,30 @@ namespace SharpLang.CompilerServices
             CollectAssemblyReferences(referencedAssemblies, assembly);
             referencedAssemblies.Remove(assembly);
 
+            RegisterExternalTypes();
+
+            // Resolve corlib assembly
+            corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
+
+            // Prepare LLVM context, module and data layouts
+            context = LLVM.GetGlobalContext();
+            module = LLVM.ModuleCreateWithName(assembly.Name.Name);
+
+            // TODO: Choose appropriate triple depending on target
+            LLVM.SetTarget(module, "i686-pc-mingw32");
+
+            // Prepare system types, for easier access
+            InitializeCommonTypes();
+
+            // Prepare LLVM builders
+            builder = LLVM.CreateBuilderInContext(context);
+            builder2 = LLVM.CreateBuilderInContext(context);
+            debugBuilder = LLVM.DIBuilderCreate(module);
+        }
+
+        private void RegisterExternalTypes()
+        {
+            // Iterate over each external assembly, and register all types
             foreach (var referencedAssembly in referencedAssemblies)
             {
                 foreach (var type in referencedAssembly.MainModule.Types)
@@ -97,70 +100,6 @@ namespace SharpLang.CompilerServices
                     RegisterExternalType(type);
                 }
             }
-
-            corlib = assembly.MainModule.Import(typeof (void)).Resolve().Module.Assembly;
-
-            context = LLVM.GetGlobalContext();
-            module = LLVM.ModuleCreateWithName(assembly.Name.Name);
-
-            MemoryBufferRef memoryBuffer;
-            string message;
-            if (LLVM.CreateMemoryBufferWithContentsOfFile(@"SharpLang.Runtime.bc", out memoryBuffer, out message))
-                throw new InvalidOperationException(message);
-
-            if (LLVM.GetBitcodeModuleInContext(context, memoryBuffer, out runtimeModule, out message))
-                throw new InvalidOperationException(message);
-
-            LLVM.DisposeMemoryBuffer(memoryBuffer);
-
-            // TODO: Choose appropriate triple depending on target
-            LLVM.SetTarget(module, "i686-pc-mingw32");
-
-            var dataLayout = LLVM.GetDataLayout(runtimeModule);
-            targetData = LLVM.CreateTargetData(dataLayout);
-
-            allocObjectFunction = ImportRuntimeFunction(module, "allocObject");
-            resolveInterfaceCallFunction = ImportRuntimeFunction(module, "resolveInterfaceCall");
-            isInstInterfaceFunction = ImportRuntimeFunction(module, "isInstInterface");
-            throwExceptionFunction = ImportRuntimeFunction(module, "throwException");
-            sharpPersonalityFunction = ImportRuntimeFunction(module, "sharpPersonality");
-            pinvokeLoadLibraryFunction = ImportRuntimeFunction(module, "PInvokeOpenLibrary");
-            pinvokeGetProcAddressFunction = ImportRuntimeFunction(module, "PInvokeGetProcAddress");
-
-            builder = LLVM.CreateBuilderInContext(context);
-            intPtrType = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-            int32Type = LLVM.Int32TypeInContext(context);
-            int64Type = LLVM.Int64TypeInContext(context);
-            intPtrSize = 4;            // Or 8?
-            nativeIntType = int32Type; // Or int64Type?
-            builder2 = LLVM.CreateBuilderInContext(context);
-
-            debugBuilder = LLVM.DIBuilderCreate(module);
-
-            // Prepare system types, for easier access
-            intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName), TypeState.StackComplete);
-            int8 = GetType(corlib.MainModule.GetType(typeof(sbyte).FullName), TypeState.StackComplete);
-            int16 = GetType(corlib.MainModule.GetType(typeof(short).FullName), TypeState.StackComplete);
-            int32 = GetType(corlib.MainModule.GetType(typeof(int).FullName), TypeState.StackComplete);
-            int64 = GetType(corlib.MainModule.GetType(typeof(long).FullName), TypeState.StackComplete);
-            uint8 = GetType(corlib.MainModule.GetType(typeof(byte).FullName), TypeState.StackComplete);
-            uint16 = GetType(corlib.MainModule.GetType(typeof(ushort).FullName), TypeState.StackComplete);
-            uint32 = GetType(corlib.MainModule.GetType(typeof(uint).FullName), TypeState.StackComplete);
-            uint64 = GetType(corlib.MainModule.GetType(typeof(ulong).FullName), TypeState.StackComplete);
-            @bool = GetType(corlib.MainModule.GetType(typeof(bool).FullName), TypeState.StackComplete);
-            @float = GetType(corlib.MainModule.GetType(typeof(float).FullName), TypeState.StackComplete);
-            @double = GetType(corlib.MainModule.GetType(typeof(double).FullName), TypeState.StackComplete);
-            @char = GetType(corlib.MainModule.GetType(typeof(char).FullName), TypeState.StackComplete);
-
-            @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
-
-            // struct IMTEntry { i8* interfaceFunctionPtr, i8* functionPtr }
-            imtEntryType = LLVM.StructCreateNamed(context, "IMTEntry");
-            LLVM.StructSetBody(imtEntryType, new[] { intPtrType, intPtrType }, false);
-
-            // struct CaughtResultType { i8*, i32 }
-            caughtResultType = LLVM.StructCreateNamed(context, "CaughtResultType");
-            LLVM.StructSetBody(caughtResultType, new[] { intPtrType, int32Type }, false);
         }
 
         private void RegisterExternalType(TypeReference typeReference)
@@ -257,14 +196,6 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private ValueRef ImportRuntimeFunction(ModuleRef module, string name)
-        {
-            var function = LLVM.GetNamedFunction(runtimeModule, name);
-            var functionType = LLVM.GetElementType(LLVM.TypeOf(function));
-
-            return LLVM.AddFunction(module, name, functionType);
-        }
-
         public void RegisterType(TypeReference typeReference)
         {
             var type = GetType(typeReference, TypeState.TypeComplete);
@@ -273,7 +204,7 @@ namespace SharpLang.CompilerServices
 
         public void ProcessAssembly(AssemblyDefinition assembly)
         {
-            // Process types
+            // Transfom all types in this assembly into SharpLang types.
             foreach (var assemblyModule in assembly.Modules)
             {
                 var typeReferences = assemblyModule.GetTypeReferences();
@@ -341,17 +272,17 @@ namespace SharpLang.CompilerServices
             Function entryPoint;
 	        if (assembly.EntryPoint != null && functions.TryGetValue(assembly.EntryPoint, out entryPoint))
 	        {
-                var mainFunctionType = LLVM.FunctionType(int32Type, new TypeRef[0], false);
+                var mainFunctionType = LLVM.FunctionType(int32LLVM, new TypeRef[0], false);
 	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
                 LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
 
 	            var parameters = (entryPoint.ParameterTypes.Length > 0)
-	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultType) }
+	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultTypeLLVM) }
 	                : new ValueRef[0];
 
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);
-                LLVM.BuildRet(builder, LLVM.ConstInt(int32Type, 0, false));
+                LLVM.BuildRet(builder, LLVM.ConstInt(int32LLVM, 0, false));
 	        }
 
             LLVM.DIBuilderFinalize(debugBuilder);
@@ -407,17 +338,17 @@ namespace SharpLang.CompilerServices
             @class.MethodCompiled = true;
 
             // Array: no need to do anything (its type definition, Array, has already been processed)
-            if (@class.Type.TypeReference is ArrayType)
+            if (@class.Type.TypeReferenceCecil is ArrayType)
                 return;
 
-            var typeDefinition = GetMethodTypeDefinition(@class.Type.TypeReference);
+            var typeDefinition = GetMethodTypeDefinition(@class.Type.TypeReferenceCecil);
 
             bool isInterface = typeDefinition.IsInterface;
 
             // Process methods, Virtual first, then non virtual, then static
             foreach (var method in typeDefinition.Methods.OrderBy(x => x.IsVirtual ? 0 : (!x.IsStatic ? 1 : 2)))
             {
-                var methodReference = ResolveGenericMethod(@class.Type.TypeReference, method);
+                var methodReference = ResolveGenericMethod(@class.Type.TypeReferenceCecil, method);
 
                 // If a method contains generic parameters, skip it
                 // Its closed instantiations (with generic arguments) is what needs to be generated.
@@ -464,7 +395,7 @@ namespace SharpLang.CompilerServices
                         }
 
                         if (matchedMethod == null)
-                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.Type.TypeReference));
+                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.Type.TypeReferenceCecil));
 
                         function.VirtualSlot = matchedMethod.VirtualSlot;
                         @class.VirtualTable[function.VirtualSlot] = function;

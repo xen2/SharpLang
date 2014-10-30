@@ -56,9 +56,9 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The generated RTTI global variable.
         /// </value>
-        public ValueRef GeneratedRuntimeTypeInfoGlobal { get; internal set; }
+        public ValueRef GeneratedRuntimeTypeInfoGlobalLLVM { get; internal set; }
 
-        public TypeRef VTableType { get; internal set; }
+        public TypeRef VTableTypeLLVM { get; internal set; }
 
         /// <summary>
         /// Gets or sets the depth of this class in type hierarchy.
