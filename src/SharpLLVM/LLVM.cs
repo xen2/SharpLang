@@ -3091,6 +3091,11 @@ public class LLVM {
     LLVMPINVOKE.ViewFunctionCFGOnly(Fn.Value);
   }
 
+  public unsafe static ValueRef BuildUnsignedIntCast(BuilderRef arg0, ValueRef Val, TypeRef DestTy, string Name) {
+    ValueRef ret = new ValueRef(LLVMPINVOKE.BuildUnsignedIntCast(arg0.Value, Val.Value, DestTy.Value, Name));
+    return ret;
+  }
+
   public unsafe static ValueRef IntrinsicGetDeclaration(ModuleRef M, uint ID, TypeRef[] ParamTypes) {
     fixed (TypeRef* swig_ptrTo_ParamTypes = ParamTypes)
     {
