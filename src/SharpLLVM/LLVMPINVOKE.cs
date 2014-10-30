@@ -2088,6 +2088,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ViewFunctionCFGOnly")]
   public static extern void ViewFunctionCFGOnly(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_BuildUnsignedIntCast")]
+  public static extern System.IntPtr BuildUnsignedIntCast(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, string jarg4);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IntrinsicGetDeclaration")]
   public static extern System.IntPtr IntrinsicGetDeclaration(System.IntPtr jarg1, uint jarg2, System.IntPtr arg3_data, uint jarg3);
 

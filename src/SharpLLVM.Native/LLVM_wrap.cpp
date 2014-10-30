@@ -8331,6 +8331,24 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ViewFunctionCFGOnly(void * jarg1) {
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_BuildUnsignedIntCast(void * jarg1, void * jarg2, void * jarg3, char * jarg4) {
+  void * jresult ;
+  LLVMBuilderRef arg1 ;
+  LLVMValueRef arg2 ;
+  LLVMTypeRef arg3 ;
+  char *arg4 = (char *) 0 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMBuilderRef)jarg1; 
+  arg2 = (LLVMValueRef)jarg2; 
+  arg3 = (LLVMTypeRef)jarg3; 
+  arg4 = (char *)jarg4; 
+  result = LLVMBuildUnsignedIntCast(arg1,arg2,arg3,(char const *)arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_IntrinsicGetDeclaration(void * jarg1, unsigned int jarg2, void* arg3_data, unsigned int jarg3) {
   void * jresult ;
   LLVMModuleRef arg1 ;

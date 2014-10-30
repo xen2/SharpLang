@@ -1,4 +1,6 @@
 ﻿using System;
+using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -133,11 +135,9 @@ namespace SharpLang.CompilerServices
 
                         if (LLVM.GetIntTypeWidth(localType.DefaultType) < LLVM.GetIntTypeWidth(expectedIntType))
                         {
-                            // Extend sign if needed
-                            // TODO: Need a way to handle unsigned int. Unfortunately it seems that
-                            // LLVMBuildIntCast doesn't have CastInst::CreateIntegerCast isSigned parameter.
-                            // Probably need to directly create ZExt/SExt.
-                            return LLVM.BuildIntCast(builder, stack, expectedIntType, string.Empty);
+                            if (IsSigned(localType))
+                                return LLVM.BuildIntCast(builder, stack, expectedIntType, string.Empty);
+                            return LLVM.BuildUnsignedIntCast(builder, stack, expectedIntType, string.Empty);
                         }
                     }
                     break;
@@ -158,6 +158,30 @@ namespace SharpLang.CompilerServices
                     throw new NotImplementedException();
             }
             return stack;
+        }
+
+        bool IsSigned(Type type)
+        {
+            bool isSigned = false;
+            switch (type.TypeReference.MetadataType)
+            {
+                case MetadataType.SByte:
+                case MetadataType.Int16:
+                case MetadataType.Int32:
+                case MetadataType.Int64:
+                case MetadataType.IntPtr:
+                    isSigned = true;
+                    break;
+                default:
+                    if (type.TypeDefinition.IsValueType && type.TypeDefinition.IsEnum)
+                    {
+                        var enumUnderlyingType = GetType(type.TypeDefinition.GetEnumUnderlyingType(), TypeState.StackComplete);
+                        return IsSigned(enumUnderlyingType);
+                    }
+                    break;
+            }
+
+            return isSigned;
         }
     }
 }
