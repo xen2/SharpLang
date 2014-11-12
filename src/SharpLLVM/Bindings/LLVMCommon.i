@@ -1,11 +1,4 @@
-%define REF_CLASS(TYPE, CSTYPE)
-    typedef struct TYPE { } TYPE;
-    %typemap(cstype) TYPE* "out $csclassname"
-    %typemap(csin) TYPE* "out $csinput.Value"
-    %typemap(csin) TYPE "$csinput.Value"
-    %typemap(imtype) TYPE "System.IntPtr"
-    %typemap(imtype) TYPE* "out System.IntPtr"
-
+%define REF_ARRAY(TYPE, CSTYPE)
     // Arrays (ptr)
     %typemap(csin, pre="    fixed (CSTYPE* swig_ptrTo_$csinput = $csinput)")
                      (TYPE *ARRAY) "(System.IntPtr)swig_ptrTo_$csinput"
@@ -19,6 +12,17 @@
                      (TYPE *ARRAY, unsigned ARRAYSIZE) "(System.IntPtr)swig_ptrTo_$csinput, (uint)$csinput.Length"
     %typemap(imtype) (TYPE *ARRAY, unsigned ARRAYSIZE) "System.IntPtr $1_data, uint"
     %typemap(cstype) (TYPE *ARRAY, unsigned ARRAYSIZE) "CSTYPE[]"
+%enddef
+
+%define REF_CLASS(TYPE, CSTYPE)
+    typedef struct TYPE { } TYPE;
+    %typemap(cstype) TYPE* "out $csclassname"
+    %typemap(csin) TYPE* "out $csinput.Value"
+    %typemap(csin) TYPE "$csinput.Value"
+    %typemap(imtype) TYPE "System.IntPtr"
+    %typemap(imtype) TYPE* "out System.IntPtr"
+
+    REF_ARRAY(TYPE, CSTYPE)
 %enddef
 
 %nodefault;

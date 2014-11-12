@@ -3608,7 +3608,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstShuffleVector(void * jarg1, void * jar
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ConstExtractValue(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ConstExtractValue(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMValueRef arg1 ;
   unsigned int *arg2 = (unsigned int *) 0 ;
@@ -3616,15 +3616,14 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstExtractValue(void * jarg1, void * jarg
   LLVMValueRef result;
   
   arg1 = (LLVMValueRef)jarg1; 
-  arg2 = (unsigned int *)jarg2; 
-  arg3 = (unsigned int)jarg3; 
+  arg2 = (unsigned*)arg2_data; arg3 = jarg2;
   result = LLVMConstExtractValue(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ConstInsertValue(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ConstInsertValue(void * jarg1, void * jarg2, void* arg3_data, unsigned int jarg3) {
   void * jresult ;
   LLVMValueRef arg1 ;
   LLVMValueRef arg2 ;
@@ -3634,8 +3633,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstInsertValue(void * jarg1, void * jarg2
   
   arg1 = (LLVMValueRef)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (unsigned int *)jarg3; 
-  arg4 = (unsigned int)jarg4; 
+  arg3 = (unsigned*)arg3_data; arg4 = jarg3;
   result = LLVMConstInsertValue(arg1,arg2,arg3,arg4);
   jresult = result; 
   return jresult;
