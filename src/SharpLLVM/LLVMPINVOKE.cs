@@ -988,10 +988,10 @@ class LLVMPINVOKE {
   public static extern System.IntPtr ConstShuffleVector(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstExtractValue")]
-  public static extern System.IntPtr ConstExtractValue(System.IntPtr jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, uint jarg3);
+  public static extern System.IntPtr ConstExtractValue(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstInsertValue")]
-  public static extern System.IntPtr ConstInsertValue(System.IntPtr jarg1, System.IntPtr jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, uint jarg4);
+  public static extern System.IntPtr ConstInsertValue(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr arg3_data, uint jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstInlineAsm")]
   public static extern System.IntPtr ConstInlineAsm(System.IntPtr jarg1, string jarg2, string jarg3, bool jarg4, bool jarg5);

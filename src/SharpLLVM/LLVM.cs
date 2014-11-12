@@ -1361,14 +1361,20 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef ConstExtractValue(ValueRef AggConstant, SWIGTYPE_p_unsigned_int IdxList, uint NumIdx) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.ConstExtractValue(AggConstant.Value, SWIGTYPE_p_unsigned_int.getCPtr(IdxList), NumIdx));
-    return ret;
+  public unsafe static ValueRef ConstExtractValue(ValueRef AggConstant, uint[] IdxList) {
+    fixed (uint* swig_ptrTo_IdxList = IdxList)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.ConstExtractValue(AggConstant.Value, (System.IntPtr)swig_ptrTo_IdxList, (uint)IdxList.Length));
+      return ret;
+    }
   }
 
-  public unsafe static ValueRef ConstInsertValue(ValueRef AggConstant, ValueRef ElementValueConstant, SWIGTYPE_p_unsigned_int IdxList, uint NumIdx) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.ConstInsertValue(AggConstant.Value, ElementValueConstant.Value, SWIGTYPE_p_unsigned_int.getCPtr(IdxList), NumIdx));
-    return ret;
+  public unsafe static ValueRef ConstInsertValue(ValueRef AggConstant, ValueRef ElementValueConstant, uint[] IdxList) {
+    fixed (uint* swig_ptrTo_IdxList = IdxList)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.ConstInsertValue(AggConstant.Value, ElementValueConstant.Value, (System.IntPtr)swig_ptrTo_IdxList, (uint)IdxList.Length));
+      return ret;
+    }
   }
 
   public unsafe static ValueRef ConstInlineAsm(TypeRef Ty, string AsmString, string Constraints, bool HasSideEffects, bool IsAlignStack) {
