@@ -45,6 +45,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Pdb", "..\..\dep
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Rocks", "..\..\deps\Mono.Cecil\rocks\Mono.Cecil.Rocks.csproj", "{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "corefx", "corefx", "{6C99E6F6-583B-11CD-41F6-24212D37981D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Immutable", "..\..\src\corefx\System.Collections.Immutable\System.Collections.Immutable.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Metadata", "..\..\src\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj", "{F3E433C8-352F-4944-BF7F-765CE435370D}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker", "..\..\src\mcs\tools\linker\Mono.Linker.csproj", "{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}"
@@ -156,6 +162,22 @@ Global
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.Release|x64.Build.0 = net_4_0_Release|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.Release|x86.ActiveCfg = net_4_0_Release|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.Release|x86.Build.0 = net_4_0_Release|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|x64.Build.0 = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|x86.Build.0 = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|x64.ActiveCfg = Release|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|x64.Build.0 = Release|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|x86.ActiveCfg = Release|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|x86.Build.0 = Release|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Release|x64.Build.0 = Release|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3E433C8-352F-4944-BF7F-765CE435370D}.Release|x86.Build.0 = Release|Any CPU
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Debug|x64.Build.0 = Debug|Any CPU
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Debug|x86.ActiveCfg = Debug|Any CPU

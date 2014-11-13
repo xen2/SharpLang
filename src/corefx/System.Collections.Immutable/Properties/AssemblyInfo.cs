@@ -28,6 +28,5 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(false)]
 
-[assembly: InternalsVisibleTo("System.Collections.Immutable.Tests")]
-
-
+[assembly: AssemblyDelaySign(true)]
+[assembly: AssemblyKeyFile("../../mcs/class/ecma.pub")]

@@ -13,4 +13,5 @@ using System.Runtime.CompilerServices;
 
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
 
-[assembly: InternalsVisibleTo("System.Reflection.Metadata.Tests")]
+[assembly: AssemblyDelaySign (true)]
+[assembly: AssemblyKeyFile ("../../mcs/class/ecma.pub")]
