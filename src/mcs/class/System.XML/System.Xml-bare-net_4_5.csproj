@@ -447,19 +447,19 @@
     <PreBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
 mono $(ProjectDir)\..\..\..\msvc\scripts\prepare.exe $(ProjectDir)..\.. xml
 $(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\System.Xml.XPath\Parser.jay &gt; $(ProjectDir)\System.Xml.XPath\Parser.cs
-echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\PatternParser.cs
-$(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\Mono.Xml.Xsl\PatternParser.jay &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\PatternParser.cs
-echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\PatternTokenizer.cs
-cat $(ProjectDir)\System.Xml.XPath\Tokenizer.cs &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\PatternTokenizer.cs
+echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternParser.cs
+$(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\Mono.Xml.Xsl\PatternParser.jay &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternParser.cs
+echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternTokenizer.cs
+cat $(ProjectDir)\System.Xml.XPath\Tokenizer.cs &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternTokenizer.cs
 
     </PreBuildEvent>
     <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
  $(ProjectDir)\..\..\..\msvc\scripts\prepare.exe $(ProjectDir)..\.. xml
 $(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\System.Xml.XPath\Parser.jay &gt; $(ProjectDir)\System.Xml.XPath\Parser.cs
-echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\PatternParser.cs
-$(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\Mono.Xml.Xsl\PatternParser.jay &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\PatternParser.cs
-echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\PatternTokenizer.cs
-type $(ProjectDir)\System.Xml.XPath\Tokenizer.cs &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\PatternTokenizer.cs
+echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternParser.cs
+$(ProjectDir)\..\..\jay\jay -ct &lt; $(ProjectDir)\..\..\jay\skeleton.cs $(ProjectDir)\Mono.Xml.Xsl\PatternParser.jay &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternParser.cs
+echo "#define XSLT_PATTERN" &gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternTokenizer.cs
+type $(ProjectDir)\System.Xml.XPath\Tokenizer.cs &gt;&gt; $(ProjectDir)\Mono.Xml.Xsl\net_4_5_PatternTokenizer.cs
 
     </PreBuildEvent>
 
