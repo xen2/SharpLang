@@ -120,7 +120,6 @@ solution "SharpLang"
         kind "ConsoleApp"
         language "C++"
         removeplatforms "*"
-        platforms { "Win32" }
         configmap {
             ["x32"] = "Win32",
             ["x64"] = "Win32"

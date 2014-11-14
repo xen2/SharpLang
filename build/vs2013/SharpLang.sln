@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
-MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0259E1F6-6EC3-956D-B701-471323AB73C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler.vs2013", "..\..\src\SharpLang.Compiler\SharpLang.Compiler.vs2013.csproj", "{AEEE66AF-9AD2-2705-0333-2258EF351287}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler", "..\..\src\SharpLang.Compiler\SharpLang.Compiler.vs2013.csproj", "{AEEE66AF-9AD2-2705-0333-2258EF351287}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9} = {1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}
 		{D68133BD-1E63-496E-9EDE-4FBDBF77B486} = {D68133BD-1E63-496E-9EDE-4FBDBF77B486}
@@ -15,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler.vs2013",
 		{F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01} = {F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler.Tests.vs2013", "..\..\src\SharpLang.Compiler.Tests\SharpLang.Compiler.Tests.vs2013.csproj", "{4F6BED8B-3B90-3C0C-64DB-219C505F3B2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler.Tests", "..\..\src\SharpLang.Compiler.Tests\SharpLang.Compiler.Tests.vs2013.csproj", "{4F6BED8B-3B90-3C0C-64DB-219C505F3B2A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AEEE66AF-9AD2-2705-0333-2258EF351287} = {AEEE66AF-9AD2-2705-0333-2258EF351287}
 		{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9} = {1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}
@@ -25,14 +23,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler.Tests.vs
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharpLang.Runtime", "runtime\SharpLang.Runtime.vcxproj", "{F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLLVM.vs2013", "..\..\src\SharpLLVM\SharpLLVM.vs2013.csproj", "{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLLVM", "..\..\src\SharpLLVM\SharpLLVM.vs2013.csproj", "{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{332B76CC-1F24-951E-4856-7AA334AE742A} = {332B76CC-1F24-951E-4856-7AA334AE742A}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharpLLVM.Native", "projects\SharpLLVM.Native.vcxproj", "{332B76CC-1F24-951E-4856-7AA334AE742A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLLVM.Tests.vs2013", "..\..\src\SharpLLVM.Tests\SharpLLVM.Tests.vs2013.csproj", "{BFCA4392-2B56-B156-3467-344BA0710D57}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLLVM.Tests", "..\..\src\SharpLLVM.Tests\SharpLLVM.Tests.vs2013.csproj", "{BFCA4392-2B56-B156-3467-344BA0710D57}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9} = {1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}
 	EndProjectSection
@@ -188,10 +186,8 @@ Global
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Release|x86.Build.0 = Release|Any CPU
 		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Debug|x64.ActiveCfg = Debug|Win32
 		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Debug|x86.ActiveCfg = Debug|Win32
-		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Debug|x86.Build.0 = Debug|Win32
 		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Release|x64.ActiveCfg = Release|Win32
 		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Release|x86.ActiveCfg = Release|Win32
-		{5D485D32-3B9F-4287-AB24-C8DA5B89F537}.Release|x86.Build.0 = Release|Win32
 		{33BF0182-AC5C-464C-995B-C9CFE74E1A95}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{33BF0182-AC5C-464C-995B-C9CFE74E1A95}.Debug|x64.Build.0 = Debug|Any CPU
 		{33BF0182-AC5C-464C-995B-C9CFE74E1A95}.Debug|x86.ActiveCfg = Debug|Any CPU
