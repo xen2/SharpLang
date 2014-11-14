@@ -114,7 +114,7 @@ solution "SharpLang"
       }
 
   group "Class Libraries"
-    external "jay2010"
+    external "jay"
         location (srcdir .. "/mcs/jay")
         uuid "5D485D32-3B9F-4287-AB24-C8DA5B89F537"
         kind "ConsoleApp"
@@ -146,7 +146,7 @@ solution "SharpLang"
       uuid "21FB091E-0F84-479E-AB16-6503D36852F9"
       kind "SharedLib"
       language "C#"
-      dependson { "jay2010" }
+      dependson { "jay" }
       removeplatforms "*"
       platforms { "Any CPU" }
       configmap {
