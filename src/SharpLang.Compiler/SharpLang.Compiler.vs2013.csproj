@@ -77,6 +77,7 @@
     <Compile Include="Cecil\TypeReferenceVisitor.cs" />
     <Compile Include="Class.cs" />
     <Compile Include="Compiler.Class.cs" />
+    <Compile Include="Compiler.CommonTypes.cs" />
     <Compile Include="Compiler.Delegate.cs" />
     <Compile Include="Compiler.Emit.cs" />
     <Compile Include="Compiler.Function.cs" />
@@ -85,7 +86,6 @@
     <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.Type.cs" />
     <Compile Include="Compiler.cs" />
-    <Compile Include="Compiler.CommonTypes.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="ExceptionHandlerInfo.cs" />
     <Compile Include="Field.cs" />
