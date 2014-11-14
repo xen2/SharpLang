@@ -55,7 +55,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker", "..\..\src\mc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Class Libraries", "Class Libraries", "{F82601D3-64B2-6E97-6DC3-F18BD9CDCA97}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jay2010", "..\..\src\mcs\jay\jay2010.vcxproj", "{5D485D32-3B9F-4287-AB24-C8DA5B89F537}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jay", "..\..\src\mcs\jay\jay.vcxproj", "{5D485D32-3B9F-4287-AB24-C8DA5B89F537}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "corlib-net_4_5", "..\..\src\mcs\class\corlib\corlib-net_4_5.csproj", "{33BF0182-AC5C-464C-995B-C9CFE74E1A95}"
 EndProject
