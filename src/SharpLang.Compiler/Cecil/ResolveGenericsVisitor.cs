@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mono.Cecil;
 
 namespace SharpLang.CompilerServices.Cecil
@@ -10,11 +9,18 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     class ResolveGenericsVisitor : TypeReferenceVisitor
     {
-        private Dictionary<TypeReference, TypeReference> genericTypeMapping;
+        private GenericInstanceMethod genericContextMethod;
+        private GenericInstanceType genericContextType;
 
-        public ResolveGenericsVisitor(Dictionary<TypeReference, TypeReference> genericTypeMapping)
+        public ResolveGenericsVisitor(MethodReference genericContext)
         {
-            this.genericTypeMapping = genericTypeMapping;
+            genericContextMethod = genericContext as GenericInstanceMethod;
+            genericContextType = genericContext.DeclaringType as GenericInstanceType;
+        }
+
+        public ResolveGenericsVisitor(TypeReference genericContext)
+        {
+            genericContextType = genericContext as GenericInstanceType;
         }
 
         /// <summary>
@@ -30,16 +36,8 @@ namespace SharpLang.CompilerServices.Cecil
             if (genericInstanceTypeContext == null)
                 return type;
 
-            // Build dictionary that will map generic type to their real implementation type
-            var resolvedType = genericInstanceTypeContext.Resolve();
-            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>();
-            for (int i = 0; i < resolvedType.GenericParameters.Count; ++i)
-            {
-                var genericParameter = resolvedType.GenericParameters[i];
-                genericTypeMapping.Add(genericParameter, genericInstanceTypeContext.GenericArguments[i]);
-            }
-
-            var visitor = new ResolveGenericsVisitor(genericTypeMapping);
+            // Visit recursively and replace generic parameters with generic arguments from context
+            var visitor = new ResolveGenericsVisitor(context);
             var result = visitor.VisitDynamic(type);
 
             // Make sure type is closed now
@@ -63,43 +61,13 @@ namespace SharpLang.CompilerServices.Cecil
             if (context == null)
                 return type;
 
+            // Visit recursively and replace generic parameters with generic arguments from context
             var genericInstanceTypeContext = context.DeclaringType as GenericInstanceType;
             var genericInstanceMethodContext = context as GenericInstanceMethod;
             if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)
                 return type;
 
-            // Build dictionary that will map generic type to their real implementation type
-            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>(TypeReferenceComparer.Default);
-            if (genericInstanceTypeContext != null)
-            {
-                var resolvedType1 = genericInstanceTypeContext.ElementType;
-                var resolvedType2 = genericInstanceTypeContext.Resolve();
-                for (int i = 0; i < resolvedType1.GenericParameters.Count; ++i)
-                {
-                    var genericParameter1 = resolvedType1.GenericParameters[i];
-                    var genericParameter2 = resolvedType2.GenericParameters[i];
-                    if (genericParameter2 != genericParameter1)
-                        genericTypeMapping.Add(genericParameter1, genericParameter2);
-                }
-            }
-
-            if (genericInstanceMethodContext != null)
-            {
-                var elementMethod = genericInstanceMethodContext.ElementMethod;
-                var resolvedMethod = genericInstanceMethodContext.Resolve();
-                for (int i = 0; i < elementMethod.GenericParameters.Count; ++i)
-                {
-                    var genericParameter1 = elementMethod.GenericParameters[i];
-                    var genericParameter2 = resolvedMethod.GenericParameters[i];
-                    if (genericParameter2 != genericParameter1)
-                        genericTypeMapping.Add(genericParameter1, genericParameter2);
-                }
-            }
-
-            if (genericTypeMapping.Count == 0)
-                return type;
-
-            var visitor = new ResolveGenericsVisitor(genericTypeMapping);
+            var visitor = new ResolveGenericsVisitor(context);
             var result = visitor.VisitDynamic(type);
 
             return result;
@@ -113,48 +81,14 @@ namespace SharpLang.CompilerServices.Cecil
             if (context == null)
                 return type;
 
+            // Visit recursively and replace generic parameters with generic arguments from context
             var genericInstanceTypeContext = context.DeclaringType as GenericInstanceType;
             var genericInstanceMethodContext = context as GenericInstanceMethod;
             if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)
                 return type;
 
-            // Build dictionary that will map generic type to their real implementation type
-            var genericTypeMapping = new Dictionary<TypeReference, TypeReference>(TypeReferenceComparer.Default);
-            if (genericInstanceTypeContext != null)
-            {
-                var resolvedType1 = genericInstanceTypeContext.ElementType;
-                var resolvedType2 = genericInstanceTypeContext.Resolve();
-                for (int i = 0; i < resolvedType1.GenericParameters.Count; ++i)
-                {
-                    var genericParameter1 = resolvedType1.GenericParameters[i];
-                    var genericParameter2 = resolvedType2.GenericParameters[i];
-                    genericTypeMapping.Add(genericParameter1, genericInstanceTypeContext.GenericArguments[i]);
-                    if (genericParameter2 != genericParameter1)
-                        genericTypeMapping.Add(genericParameter2, genericInstanceTypeContext.GenericArguments[i]);
-                }
-            }
-
-            if (genericInstanceMethodContext != null)
-            {
-                var elementMethod = genericInstanceMethodContext.ElementMethod;
-                var resolvedMethod = genericInstanceMethodContext.Resolve();
-                for (int i = 0; i < elementMethod.GenericParameters.Count; ++i)
-                {
-                    var genericParameter = elementMethod.GenericParameters[i];
-                    genericTypeMapping.Add(genericParameter, genericInstanceMethodContext.GenericArguments[i]);
-
-                    var genericParameter2 = resolvedMethod.GenericParameters[i];
-                    if (genericParameter != genericParameter2)
-                        genericTypeMapping.Add(genericParameter2, genericInstanceMethodContext.GenericArguments[i]);
-                }
-            }
-
-            var visitor = new ResolveGenericsVisitor(genericTypeMapping);
+            var visitor = new ResolveGenericsVisitor(context);
             var result = visitor.VisitDynamic(type);
-
-            // Make sure type is closed now
-            //if (result.ContainsGenericParameter())
-            //    throw new InvalidOperationException("Unsupported generic resolution.");
 
             return result;
         }
@@ -194,21 +128,6 @@ namespace SharpLang.CompilerServices.Cecil
                 result2.GenericArguments.Add(Process(context, genericArgument));
 
             return result2;
-            //else
-            //{
-            //    result = new MethodReference(method.Name, Process(context, method.ReturnType), Process(context, method.DeclaringType))
-            //    {
-            //        HasThis = method.HasThis,
-            //        ExplicitThis = method.ExplicitThis,
-            //        CallingConvention = method.CallingConvention,
-            //    };
-            //
-            //    foreach (var parameter in method.Parameters)
-            //        result.Parameters.Add(new ParameterDefinition(Process(context, parameter.ParameterType)));
-            //}
-            //
-            //foreach (var generic_parameter in method.GenericParameters)
-            //    result.GenericParameters.Add(new GenericParameter(generic_parameter.Name, result));
         }
 
         public static bool ContainsGenericParameters(MethodReference method)
@@ -239,26 +158,42 @@ namespace SharpLang.CompilerServices.Cecil
 
         public override TypeReference Visit(GenericParameter type)
         {
-            TypeReference result;
-            if (genericTypeMapping.TryGetValue(type, out result))
-                return result;
+            if (type.Type == GenericParameterType.Method)
+            {
+                if (genericContextMethod != null && type.Position < genericContextMethod.GenericArguments.Count)
+                {
+                    // Look for generic parameter in both resolved and element method
+                    var genericContext1 = genericContextMethod.Resolve();
+                    var genericContext2 = genericContextMethod.ElementMethod;
+
+                    var genericParameter = genericContext1.GenericParameters[type.Position];
+                    if (genericParameter.Name == type.Name)
+                        return genericContextMethod.GenericArguments[type.Position];
+
+                    genericParameter = genericContext2.GenericParameters[type.Position];
+                    if (genericParameter.Name == type.Name)
+                        return genericContextMethod.GenericArguments[type.Position];
+                }
+            }
+            else
+            {
+                if (genericContextType != null && type.Position < genericContextType.GenericArguments.Count)
+                {
+                    // Look for generic parameter in both resolved and element method
+                    var genericContext1 = genericContextType.Resolve();
+                    var genericContext2 = genericContextType.ElementType;
+
+                    var genericParameter = genericContext1.GenericParameters[type.Position];
+                    if (genericParameter.Name == type.Name)
+                        return genericContextType.GenericArguments[type.Position];
+
+                    genericParameter = genericContext2.GenericParameters[type.Position];
+                    if (genericParameter.Name == type.Name)
+                        return genericContextType.GenericArguments[type.Position];
+                }
+            }
 
             return base.Visit(type);
-        }
-
-        class TypeReferenceComparer : EqualityComparer<TypeReference>
-        {
-            public static readonly EqualityComparer<TypeReference> Default =  new TypeReferenceComparer();
-
-            public override bool Equals(TypeReference x, TypeReference y)
-            {
-                return x.FullName == y.FullName;
-            }
-
-            public override int GetHashCode(TypeReference obj)
-            {
-                return obj.FullName.GetHashCode();
-            }
         }
     }
 }
