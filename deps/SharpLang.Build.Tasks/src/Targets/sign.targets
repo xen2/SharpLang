@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)SharpLang.Build.Tasks.dll" TaskName="OpenSourceSign" />
+  
+  <PropertyGroup Condition="'$(SkipSigning)'!='true'">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)MSFT.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+    <DefineConstants>$(DefineConstants);SIGNED</DefineConstants>
+  </PropertyGroup>
+  
+  <Target Name="OpenSourceSign" 
+          BeforeTargets="CopyFilesToOutputDirectory"
+          Condition="'$(DelaySign)' == 'true' and '@(IntermediateAssembly)' != ''"
+          Inputs="@(IntermediateAssembly)"
+          Outputs="%(IntermediateAssembly.Identity).oss_signed"
+          >
+    <OpenSourceSign AssemblyPath="%(IntermediateAssembly.Identity)" />
+    <Touch Files="%(IntermediateAssembly.Identity).oss_signed" AlwaysCreate="true" />
+    <ItemGroup>
+       <FileWrites Include="%(IntermediateAssembly.Identity).oss_signed" />
+    </ItemGroup>
+  </Target>
+
+</Project>

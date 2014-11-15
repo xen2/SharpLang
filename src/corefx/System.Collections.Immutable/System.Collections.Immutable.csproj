@@ -139,4 +139,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\deps\SharpLang.Build.Tasks\sign.targets"/>
 </Project>

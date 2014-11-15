@@ -12,6 +12,3 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("999.999.999.0")]
 
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
-
-[assembly: AssemblyDelaySign (true)]
-[assembly: AssemblyKeyFile ("../../mcs/class/ecma.pub")]
