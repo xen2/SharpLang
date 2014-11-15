@@ -42,7 +42,7 @@ namespace SharpLang.CompilerServices
         private Type BuildType(TypeReference typeReference)
         {
             // Open type?
-            if (typeReference.ContainsGenericParameter())
+            if (typeReference.ContainsGenericParameter)
                 return null;
 
             TypeRef valueType = TypeRef.Empty;

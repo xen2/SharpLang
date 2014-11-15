@@ -43,7 +43,7 @@ namespace SharpLang.CompilerServices.Cecil
             var result = visitor.VisitDynamic(type);
 
             // Make sure type is closed now
-            if (result.ContainsGenericParameter())
+            if (result.ContainsGenericParameter)
                 throw new InvalidOperationException("Unsupported generic resolution.");
 
             return result;
@@ -217,7 +217,7 @@ namespace SharpLang.CompilerServices.Cecil
             // TODO: Might need a more robust generic resolver/analyzer system soon.
 
             // First, check resolved declaring type
-            if (Process(method, method.DeclaringType).ContainsGenericParameter())
+            if (Process(method, method.DeclaringType).ContainsGenericParameter)
                 return true;
 
             var genericInstanceMethod = method as GenericInstanceMethod;
@@ -225,7 +225,7 @@ namespace SharpLang.CompilerServices.Cecil
             {
                 // Check that each generic argument is closed
                 foreach (var genericArgument in genericInstanceMethod.GenericArguments)
-                    if (Process(method, genericArgument).ContainsGenericParameter())
+                    if (Process(method, genericArgument).ContainsGenericParameter)
                         return true;
 
                 return false;
