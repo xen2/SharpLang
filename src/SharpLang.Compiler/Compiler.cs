@@ -42,9 +42,6 @@ namespace SharpLang.CompilerServices
         /// <summary> List of methods that still need to be generated. </summary>
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
-        /// <summary> List of all referenced assemblies (including indirect ones). </summary>
-        private HashSet<AssemblyDefinition> referencedAssemblies = new HashSet<AssemblyDefinition>();
-        private HashSet<TypeReference> referencedTypes = new HashSet<TypeReference>(MemberEqualityComparer.Default);
 
         /// <summary> True when running unit tests. This will try to avoid using real mscorlib for faster codegen, linking and testing. </summary>
         public bool TestMode { get; set; }
@@ -52,10 +49,6 @@ namespace SharpLang.CompilerServices
         public void PrepareAssembly(AssemblyDefinition assembly)
         {
             this.assembly = assembly;
-
-            // Load all dependent assemblies (except ourself)
-            CollectAssemblyReferences(referencedAssemblies, assembly);
-            referencedAssemblies.Remove(assembly);
 
             RegisterExternalTypes();
 
@@ -76,124 +69,6 @@ namespace SharpLang.CompilerServices
             builder = LLVM.CreateBuilderInContext(context);
             builder2 = LLVM.CreateBuilderInContext(context);
             debugBuilder = LLVM.DIBuilderCreate(module);
-        }
-
-        private void RegisterExternalTypes()
-        {
-            // Iterate over each external assembly, and register all types
-            foreach (var referencedAssembly in referencedAssemblies)
-            {
-                foreach (var type in referencedAssembly.MainModule.Types)
-                {
-                    RegisterExternalType(type);
-                }
-                for (uint i = 1;; ++i)
-                {
-                    var type = (TypeReference)referencedAssembly.MainModule.LookupToken(new MetadataToken(TokenType.TypeSpec, i));
-                    if (type == null)
-                        break;
-
-                    RegisterExternalType(type);
-                }
-                foreach (var type in referencedAssembly.MainModule.GetTypeReferences())
-                {
-                    RegisterExternalType(type);
-                }
-            }
-        }
-
-        private void RegisterExternalType(TypeReference typeReference)
-        {
-            // Ignore open types
-            if (typeReference.ContainsGenericParameter)
-                return;
-
-            // Handle circular assembly references
-            if (typeReference.Module == assembly.MainModule)
-                return;
-
-            var typeDefinition = typeReference.Resolve();
-            if (typeDefinition.Module == assembly.MainModule)
-                return;
-
-            // Register type
-            if (!referencedTypes.Add(typeReference))
-                return; // Already processed?
-
-            // Process its base type
-            if (typeDefinition.BaseType != null)
-                RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, typeDefinition.BaseType));
-
-            // Process nested types
-            if (typeDefinition.HasNestedTypes)
-            {
-                foreach (var nestedType in typeDefinition.NestedTypes)
-                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, nestedType));
-            }
-
-            // Process its fields
-            if (typeDefinition.HasFields)
-            {
-                foreach (var field in typeDefinition.Fields)
-                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, field.FieldType));
-            }
-
-            // Process its properties
-            if (typeDefinition.HasProperties)
-            {
-                foreach (var property in typeDefinition.Properties)
-                    RegisterExternalType(ResolveGenericsVisitor.Process(typeReference, property.PropertyType));
-            }
-
-            // Process its methods
-            if (typeDefinition.HasMethods)
-            {
-                foreach (var method in typeDefinition.Methods)
-                {
-                    var methodReference = ResolveGenericMethod(typeReference, method);
-
-                    // If a method contains generic parameters, skip it
-                    if (ResolveGenericsVisitor.ContainsGenericParameters(methodReference))
-                        continue;
-
-                    // Process method parameters
-                    foreach (var parameter in method.Parameters)
-                        RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, parameter.ParameterType));
-
-                    if (method.HasBody)
-                    {
-                        // Process method variables and locals
-                        foreach (var variable in method.Body.Variables)
-                            RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, variable.VariableType));
-
-                        // Process method opcodes
-                        foreach (var instruction in method.Body.Instructions)
-                        {
-                            var typeToken = instruction.Operand as TypeReference;
-                            if (typeToken != null)
-                                RegisterExternalType(ResolveGenericsVisitor.Process(methodReference, typeToken));
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void CollectAssemblyReferences(HashSet<AssemblyDefinition> assemblies, AssemblyDefinition assemblyDefinition)
-        {
-            if (!assemblies.Add(assemblyDefinition))
-                return;
-
-            foreach (var assemblyReference in assemblyDefinition.MainModule.AssemblyReferences)
-            {
-                // Resolve
-                var resolvedAssembly = assemblyDefinition.MainModule.AssemblyResolver.Resolve(assemblyReference);
-                
-                if (resolvedAssembly != null)
-                {
-                    // If new, load its references
-                    CollectAssemblyReferences(assemblies, resolvedAssembly);
-                }
-            }
         }
 
         public void RegisterType(TypeReference typeReference)

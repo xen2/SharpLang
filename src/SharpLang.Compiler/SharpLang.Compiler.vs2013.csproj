@@ -86,6 +86,7 @@
     <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.Type.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="Compiler.MarkExternals.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="ExceptionHandlerInfo.cs" />
     <Compile Include="Field.cs" />
