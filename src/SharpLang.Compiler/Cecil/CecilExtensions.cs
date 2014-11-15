@@ -14,9 +14,6 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     static partial class CecilExtensions
     {
-        // Not sure why Cecil made ContainsGenericParameter internal, but let's work around it by reflection.
-        private static readonly MethodInfo containsGenericParameterGetMethod = typeof(MemberReference).GetProperty("ContainsGenericParameter", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).GetMethod;
-
         public static string MangledName(this TypeReference typeReference)
         {
             var assembly = (typeReference.Resolve() ?? typeReference).Module.Assembly;
@@ -259,11 +256,6 @@ namespace SharpLang.CompilerServices.Cecil
             SetGenericParameters(result, genericParameters);
 
             return result;
-        }
-
-        public static bool ContainsGenericParameter(this MemberReference memberReference)
-        {
-            return (bool)containsGenericParameterGetMethod.Invoke(memberReference, null);
         }
 
         private static void SetGenericParameters(TypeReference result, IEnumerable<GenericParameter> genericParameters)

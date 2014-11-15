@@ -105,7 +105,7 @@ namespace SharpLang.CompilerServices
         private void RegisterExternalType(TypeReference typeReference)
         {
             // Ignore open types
-            if (typeReference.ContainsGenericParameter())
+            if (typeReference.ContainsGenericParameter)
                 return;
 
             // Handle circular assembly references
@@ -217,7 +217,7 @@ namespace SharpLang.CompilerServices
                 foreach (var member in memberReferences)
                 {
                     var method = member as MethodReference;
-                    if (member.DeclaringType.ContainsGenericParameter())
+                    if (member.DeclaringType.ContainsGenericParameter)
                         continue;
                     GetType(member.DeclaringType, TypeState.TypeComplete);
                     if (method != null)
