@@ -3,11 +3,21 @@ using Mono.Cecil;
 
 namespace SharpLang.CompilerServices
 {
-    public class MemberEqualityComparer : IEqualityComparer<MemberReference>
+    public class MemberEqualityComparer : IEqualityComparer<TypeReference>, IEqualityComparer<MethodReference>, IEqualityComparer<FieldReference>
     {
         public static readonly MemberEqualityComparer Default = new MemberEqualityComparer();
 
-        public bool Equals(MemberReference x, MemberReference y)
+        public bool Equals(TypeReference x, TypeReference y)
+        {
+            return AreSame(x, y);
+        }
+
+        public bool Equals(MethodReference x, MethodReference y)
+        {
+            return AreSame(x, y);
+        }
+
+        public bool Equals(FieldReference x, FieldReference y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -15,31 +25,43 @@ namespace SharpLang.CompilerServices
             return AreSame(x, y);
         }
 
-        public int GetHashCode(MemberReference obj)
+        public int GetHashCode(TypeReference typeReference)
         {
-            return ComputeHashCode(obj);
-        }
-
-        static int ComputeHashCode(MemberReference obj)
-        {
-            if (obj == null)
-                return 0;
-
             unchecked
             {
-                var result = obj.Name.GetHashCode();
+                // Sometimes, IsValueType is not properly set in type references, so let's map it to Class.
+                var metadataType = typeReference.MetadataType;
+                if (metadataType == MetadataType.ValueType)
+                    metadataType = MetadataType.Class;
+                var result = ((byte)metadataType).GetHashCode();
 
-                var typeReference = obj as TypeReference;
-                if (typeReference != null)
+                var typeSpecification = typeReference as TypeSpecification;
+                if (typeSpecification != null)
                 {
-                    result ^= typeReference.Namespace.GetHashCode();
+                    result ^= GetHashCode(typeSpecification.ElementType);
+
+                    var genericInstanceType = typeSpecification as GenericInstanceType;
+                    if (genericInstanceType != null)
+                    {
+                        foreach (var arg in genericInstanceType.GenericArguments)
+                            result = result * 23 + GetHashCode(arg);
+                    }
                 }
                 else
                 {
-                    var methodReference = obj as MethodReference;
-                    if (methodReference != null)
+                    // TODO: Not sure if comparing declaring type should be done for GenericParameter
+                    if (typeReference.DeclaringType != null)
+                        result ^= GetHashCode(typeReference.DeclaringType);
+
+                    var genericParameter = typeReference as GenericParameter;
+                    if (genericParameter != null)
                     {
-                        result ^= ComputeHashCode(methodReference.DeclaringType);
+                        result ^= genericParameter.Position;
+                    }
+                    else
+                    {
+                        result ^= typeReference.Name.GetHashCode();
+                        result ^= typeReference.Namespace.GetHashCode();
                     }
                 }
 
@@ -47,20 +69,63 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        static bool AreSame(MemberReference a, MemberReference b)
+        public int GetHashCode(MethodReference methodReference)
         {
-            if (a is TypeReference && b is TypeReference)
-                return AreSame((TypeReference)a, (TypeReference)b);
+            unchecked
+            {
+                int result;
 
-            if (a is MethodReference && b is MethodReference)
-                return AreSame((MethodReference)a, (MethodReference)b);
+                var genericInstanceMethod = methodReference as GenericInstanceMethod;
+                if (genericInstanceMethod != null)
+                {
+                    result = GetHashCode(genericInstanceMethod.ElementMethod);
 
-            return false;
+                    foreach (var arg in genericInstanceMethod.GenericArguments)
+                        result = result * 23 + GetHashCode(arg);
+                }
+                else
+                {
+                    result = methodReference.Name.GetHashCode();
+                    result ^= GetHashCode(methodReference.DeclaringType);
+
+                    // TODO: Investigate why hashing parameter types seems to cause issues (virtual methods with no slots)
+                    foreach (var parameter in methodReference.Parameters)
+                        result = result * 23 + GetHashCode(parameter.ParameterType);
+                }
+
+                return result;
+            }
         }
 
+        public int GetHashCode(FieldReference fieldReference)
+        {
+            unchecked
+            {
+                var result = fieldReference.Name.GetHashCode();
+                result ^= GetHashCode(fieldReference.DeclaringType);
+                return result;
+            }
+        }
+
+        static bool AreSame(FieldReference a, FieldReference b)
+        {
+            if (a.Name != b.Name)
+                return false;
+
+            if (!AreSame(a.DeclaringType, b.DeclaringType))
+                return false;
+
+            if (!AreSame(a.FieldType, b.FieldType))
+                return false;
+
+            return true;
+        }
 
         static bool AreSame(MethodReference a, MethodReference b)
         {
+            if (ReferenceEquals(a, b))
+                return true;
+
             if (a.Name != b.Name)
                 return false;
 
