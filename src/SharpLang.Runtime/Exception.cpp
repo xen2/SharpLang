@@ -201,10 +201,10 @@ static bool handleActionValue(int64_t *resultAction,
 			uintptr_t P = readEncodedPointer(&EntryP, TTypeEncoding);
 			
 			// Expected exception type
-			struct RuntimeTypeInfo* expectedExceptionType = reinterpret_cast<struct RuntimeTypeInfo*>(P);
+			struct EEType* expectedExceptionType = reinterpret_cast<struct EEType*>(P);
 
 			// Actual exception type
-			struct RuntimeTypeInfo* exceptionType = exceptionInfo->exceptionObject->runtimeTypeInfo;
+			struct EEType* exceptionType = exceptionInfo->exceptionObject->eeType;
 
 			// Check if they match (by testing each class in hierarchy)
 			while (exceptionType != NULL)
@@ -379,4 +379,36 @@ extern "C" void throwException(Object* obj)
 	ex->unwindException.exception_cleanup = cleanupException;
 	_Unwind_RaiseException(&ex->unwindException);
 	__builtin_unreachable();
+}
+
+
+struct CallstackData
+{
+	CallstackData(Array<uintptr_t>* callback) : callstack(callback), entries(0) {}
+
+	Array<uintptr_t>* callstack;
+	int entries;
+};
+
+static _Unwind_Reason_Code trace_func(struct _Unwind_Context* context, void* arg)
+{
+	auto data = (CallstackData*)arg;
+	uintptr_t pc = _Unwind_GetIP(context);
+	if (pc != 0)
+	{
+		uintptr_t funcStart = _Unwind_GetRegionStart(context);
+		data->callstack->value[data->entries++] = funcStart;
+		if (data->entries == data->callstack->length)
+			return _URC_NORMAL_STOP;
+	}
+
+	return(_URC_NO_REASON);
+}
+
+// TODO: A variant that can take a List, so that it can appends instead of predetermined size
+extern "C" uint32_t System_Reflection_Assembly__GetCallStack_System_IntPtr___(Array<uintptr_t>* result)
+{
+	CallstackData data(result);
+	_Unwind_Backtrace(&trace_func, &data);
+	return data.entries;
 }

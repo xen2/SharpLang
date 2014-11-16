@@ -142,81 +142,90 @@ namespace SharpLang.CompilerServices
                 // (esp. since vtable is not built yet => recursion issues)
                 PrepareClassMethods(type);
 
-                if (typeDefinition.IsInterface)
-                {
-                    // Interface: Generate an empty vtable (so that we can still compare pointer in isInstInterface, etc...)
-                    // Remove invalid characters so that we can easily link against it from C++
-                    var runtimeTypeInfoType = LLVM.GetElementType(LLVM.TypeOf(GetClass(@object).GeneratedRuntimeTypeInfoGlobalLLVM));
-                    var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
-                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
-                    @class.GeneratedRuntimeTypeInfoGlobalLLVM = runtimeTypeInfoGlobal;
-
-                    if (@class.Type.IsLocal)
-                    {
-                        LLVM.SetInitializer(runtimeTypeInfoGlobal, LLVM.ConstNull(runtimeTypeInfoType));
-                    }
-
-                    // Apply linkage
-                    LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
-                }
-                else
                 {
                     // Get parent type RTTI
                     var parentRuntimeTypeInfoType = parentClass != null
-                        ? LLVM.TypeOf(parentClass.GeneratedRuntimeTypeInfoGlobalLLVM)
+                        ? LLVM.TypeOf(parentClass.GeneratedEETypeRuntimeLLVM)
                         : intPtrLLVM;
-    
-                    // Build vtable
-                    @class.VTableTypeLLVM = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
-                    LLVM.StructSetBody(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
-        
-                    foreach (var @interface in typeDefinition.Interfaces)
-                    {
-                        var resolvedInterface = ResolveGenericsVisitor.Process(typeReference, @interface);
-                        @class.Interfaces.Add(GetClass(resolvedInterface));
-    
-                        // TODO: Add any inherited interface inherited by the resolvedInterface as well
-                    }
-            
-                    // Build static fields
-                    foreach (var field in typeDefinition.Fields)
-                    {
-                        if (!field.IsStatic)
-                            continue;
 
-                        var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
-
-                        @class.StaticFields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
-                        fieldTypes.Add(fieldType.DefaultTypeLLVM);
-                    }
-
-                    var staticFieldsType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".static");
-                    LLVM.StructSetBody(staticFieldsType, fieldTypes.ToArray(), false);
-                    fieldTypes.Clear(); // Reused for non-static fields after
-
-                    var runtimeTypeInfoType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".rtti_type");
-                    LLVM.StructSetBody(runtimeTypeInfoType, new[]
+                    var runtimeTypeInfoFields = new List<TypeRef>
                     {
                         parentRuntimeTypeInfoType,
-                        int32LLVM,
-                        int32LLVM,
-                        LLVM.PointerType(intPtrLLVM, 0),
-                        LLVM.PointerType(intPtrLLVM, 0),
-                        LLVM.Int1TypeInContext(context),
-                        LLVM.Int32TypeInContext(context),
-                        LLVM.Int32TypeInContext(context),
-                        LLVM.ArrayType(intPtrLLVM, InterfaceMethodTableSize),
-                        @class.VTableTypeLLVM,
-                        staticFieldsType,
-                    }, false);
+                        LLVM.Int8TypeInContext(context), // IsConcreteType
+                        typeDefLLVM,
+                        intPtrLLVM,
+                        sharpLangTypeType.DefaultTypeLLVM, // CachedType
+                    };
+
+                    bool isConcreteType = IsConcreteType(@class.Type);
+
+                    // Create runtime type (still opaque struct)
+                    var runtimeTypeInfoType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".rtti_type");
 
                     // Remove invalid characters so that we can easily link against it from C++
                     var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
                     var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
-                    @class.GeneratedRuntimeTypeInfoGlobalLLVM = runtimeTypeInfoGlobal;
 
-                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(runtimeTypeInfoGlobal), valueType }, false);
+                    if (typeDefinition.IsInterface)
+                    {
+                        // Interface use object as execution engine type
+                        @class.GeneratedEETypeRuntimeLLVM = GetClass(@object).GeneratedEETypeTokenLLVM;
+                    }
+                    else
+                    {
+                        @class.GeneratedEETypeRuntimeLLVM = runtimeTypeInfoGlobal;
+                    }
+
+                    @class.GeneratedEETypeTokenLLVM = runtimeTypeInfoGlobal;
+
+                    if (isConcreteType)
+                    {
+                        // Build vtable
+                        @class.VTableTypeLLVM = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
+                        LLVM.StructSetBody(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
+
+                        foreach (var @interface in typeDefinition.Interfaces)
+                        {
+                            var resolvedInterface = ResolveGenericsVisitor.Process(typeReference, @interface);
+                            @class.Interfaces.Add(GetClass(resolvedInterface));
+
+                            // TODO: Add any inherited interface inherited by the resolvedInterface as well
+                        }
+
+                        // Build static fields
+                        foreach (var field in typeDefinition.Fields)
+                        {
+                            if (!field.IsStatic)
+                                continue;
+
+                            var fieldType = GetType(ResolveGenericsVisitor.Process(typeReference, field.FieldType), TypeState.StackComplete);
+
+                            @class.StaticFields.Add(field, new Field(field, type, fieldType, fieldTypes.Count));
+                            fieldTypes.Add(fieldType.DefaultTypeLLVM);
+                        }
+
+                        var staticFieldsType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".static");
+                        LLVM.StructSetBody(staticFieldsType, fieldTypes.ToArray(), false);
+                        fieldTypes.Clear(); // Reused for non-static fields after
+
+                        runtimeTypeInfoFields.AddRange(new[]
+                        {
+                            int32LLVM, // SuperTypesCount
+                            int32LLVM, // InterfacesCount
+                            LLVM.PointerType(intPtrLLVM, 0), // SuperTypes
+                            LLVM.PointerType(intPtrLLVM, 0), // InterfaceMap
+                            LLVM.Int8TypeInContext(context), // TypeInitialized
+                            LLVM.Int32TypeInContext(context), // ObjectSize
+                            LLVM.Int32TypeInContext(context), // ElementSize
+                            LLVM.ArrayType(intPtrLLVM, InterfaceMethodTableSize), // IMT
+                            int32LLVM, // VTableSize
+                            @class.VTableTypeLLVM, // VTable
+                            staticFieldsType, // StaticFields
+                        });
+                    }
+
+                    LLVM.StructSetBody(runtimeTypeInfoType, runtimeTypeInfoFields.ToArray(), false);
+                    LLVM.StructSetBody(boxedType, new[] { LLVM.TypeOf(@class.GeneratedEETypeRuntimeLLVM), valueType }, false);
 
                     if (@class.Type.IsLocal)
                     {
@@ -256,8 +265,9 @@ namespace SharpLang.CompilerServices
                         LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
                     };
 
-                    var classInitializedAddress = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
+                    var classInitializedAddress = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedEETypeRuntimeLLVM, indices, string.Empty);
                     var classInitialized = LLVM.BuildLoad(builder2, classInitializedAddress, string.Empty);
+                    classInitialized = LLVM.BuildIntCast(builder2, classInitialized, LLVM.Int1TypeInContext(context), string.Empty);
 
                     var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
                     var nextBlock = LLVM.AppendBasicBlockInContext(context, initTypeFunction, string.Empty);
@@ -268,7 +278,7 @@ namespace SharpLang.CompilerServices
                     LLVM.PositionBuilderAtEnd(builder2, typeNeedInitBlock);
 
                     // Set flag so that it won't be initialized again
-                    LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int1TypeInContext(context), 1, false), classInitializedAddress);
+                    LLVM.BuildStore(builder2, LLVM.ConstInt(LLVM.Int8TypeInContext(context), 1, false), classInitializedAddress);
 
                     // TODO: PInvoke initialization
                     foreach (var pinvokeModule in typeDefinition.Methods.Where(x => x.HasPInvokeInfo).GroupBy(x => x.PInvokeInfo.Module))
@@ -284,6 +294,7 @@ namespace SharpLang.CompilerServices
                                 {
                                     pinvokeLoadLibraryResult,
                                     entryPoint,
+                                    LLVM.ConstInt(int16.DataTypeLLVM, (ushort)method.PInvokeInfo.Attributes, false),
                                 }, string.Empty);
 
                             // TODO: Resolve method using generic context.
@@ -295,7 +306,7 @@ namespace SharpLang.CompilerServices
                             };
 
                             // Get vtable slot and cast to proper type
-                            var vtableSlot = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
+                            var vtableSlot = LLVM.BuildInBoundsGEP(builder2, @class.GeneratedEETypeRuntimeLLVM, indices, string.Empty);
                             pinvokeGetProcAddressResult = LLVM.BuildPointerCast(builder2, pinvokeGetProcAddressResult, LLVM.GetElementType(LLVM.TypeOf(vtableSlot)), string.Empty);
 
                             // Store value
@@ -319,227 +330,310 @@ namespace SharpLang.CompilerServices
             return @class;
         }
 
+        private bool IsConcreteType(Type type)
+        {
+            // TODO: Support open generic types
+            return !type.TypeDefinitionCecil.IsInterface;
+        }
+
         private void BuildRuntimeType(Class @class)
         {
             if (@class.IsEmitted)
                 return;
 
-            Console.WriteLine("Build type {0}", @class);
+            //Console.WriteLine("Build type {0}", @class);
 
             @class.IsEmitted = true;
 
-            // Build IMT
-            var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
-            foreach (var @interface in @class.Interfaces)
-            {
-                foreach (var interfaceMethod in @interface.Type.TypeReferenceCecil.Resolve().Methods)
-                {
-                    var resolvedInterfaceMethod = ResolveGenericMethod(@interface.Type.TypeReferenceCecil, interfaceMethod);
-
-                    // If method is not fully resolved (generic method in interface), ignore it
-                    // We are waiting for actual closed uses.
-                    if (ResolveGenericsVisitor.ContainsGenericParameters(resolvedInterfaceMethod))
-                        continue;
-
-                    var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
-                    if (resolvedFunction == null && @class.Type.TypeReferenceCecil is ArrayType)
-                    {
-                        var arrayType = corlib.MainModule.GetType(typeof(Array).FullName);
-                        var matchingMethod = (MethodReference)arrayType.Methods.First(x => x.Name.StartsWith("InternalArray_") && x.Name.EndsWith(resolvedInterfaceMethod.Name));
-                        if (matchingMethod != null)
-                        {
-                            if (matchingMethod.HasGenericParameters)
-                            {
-                                matchingMethod = matchingMethod.MakeGenericMethod(((ArrayType)@class.Type.TypeReferenceCecil).ElementType);
-                            }
-
-                            resolvedFunction = GetFunction(matchingMethod);
-
-                            // Manually emit Array functions locally (until proper mscorlib + generic instantiation exists).
-                            EmitFunction(resolvedFunction);
-                            LLVM.SetLinkage(resolvedFunction.GeneratedValue, Linkage.LinkOnceAnyLinkage);
-                        }
-                    }
-
-                    if (resolvedFunction == null)
-                        throw new InvalidOperationException(string.Format("Could not find matching method for {0} in {1}", resolvedInterfaceMethod, @class));
-
-                    var isInterface = resolvedFunction.DeclaringType.TypeReferenceCecil.Resolve().IsInterface;
-                    if (!isInterface && resolvedFunction.MethodReference.Resolve().IsVirtual && resolvedFunction.VirtualSlot != -1)
-                    {
-                        // We might have found a base virtual method matching this interface method.
-                        // Let's get the actual method override for this virtual slot.
-                        resolvedFunction = @class.VirtualTable[resolvedFunction.VirtualSlot];
-                    }
-
-                    // If method is not found, it could be due to covariance/contravariance
-                    if (resolvedFunction == null)
-                        throw new InvalidOperationException("Interface method not found");
-
-                    var methodId = GetMethodId(resolvedInterfaceMethod);
-                    var imtSlotIndex = (int)(methodId % InterfaceMethodTableSize);
-
-                    var imtSlot = interfaceMethodTable[imtSlotIndex];
-                    if (imtSlot == null)
-                        interfaceMethodTable[imtSlotIndex] = imtSlot = new LinkedList<InterfaceMethodTableEntry>();
-
-                    imtSlot.AddLast(new InterfaceMethodTableEntry
-                    {
-                        Function = resolvedFunction,
-                        MethodId = GetFunction(resolvedInterfaceMethod).GeneratedValue, // Should be a fake global, that we use as IMT key
-                    });
-                }
-            }
-            var interfaceMethodTableConstant = LLVM.ConstArray(intPtrLLVM, interfaceMethodTable.Select(imtSlot =>
-            {
-                if (imtSlot == null)
-                {
-                    // No entries: null slot
-                    return LLVM.ConstNull(intPtrLLVM);
-                }
-
-                if (imtSlot.Count == 1)
-                {
-                    // Single entry
-                    var imtEntry = imtSlot.First.Value;
-                    return LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM);
-                }
-                else
-                {
-                    // Multiple entries, create IMT array with all entries
-                    // TODO: Support covariance/contravariance?
-                    var imtEntries = LLVM.ConstArray(imtEntryLLVM, imtSlot.Select(imtEntry =>
-                    {
-                        return LLVM.ConstNamedStruct(imtEntryLLVM, new[]
-                        {
-                            imtEntry.MethodId,                                                      // i8* functionId
-                            LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM),    // i8* functionPtr
-                        });
-                    })
-                        .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryLLVM), 1)).ToArray()); // Append { 0, 0 } terminator
-                    var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), @class.Type.TypeReferenceCecil.MangledName() + ".imt");
-                    LLVM.SetLinkage(imtEntryGlobal, Linkage.PrivateLinkage);
-                    LLVM.SetInitializer(imtEntryGlobal, imtEntries);
-
-                    // Add 1 to differentiate between single entry and IMT array
-                    return LLVM.ConstIntToPtr(
-                        LLVM.ConstAdd(
-                            LLVM.ConstPtrToInt(imtEntryGlobal, nativeIntLLVM),
-                            LLVM.ConstInt(nativeIntLLVM, 1, false)),
-                        intPtrLLVM);
-                }
-            }).ToArray());
-
-
-            // Build list of super types
-            var superTypes = new List<Class>(@class.Depth);
-            var currentClass = @class;
-            while (currentClass != null)
-            {
-                superTypes.Add(currentClass);
-                currentClass = currentClass.BaseType;
-            }
-
-            // Reverse so that the list start with most inherited object
-            // (allows faster type checking since a given type will always be at a given index)
-            superTypes.Reverse();
-
-            // Build super types
-            // Helpful for fast is/as checks on class hierarchy
-            var superTypeCount = LLVM.ConstInt(int32LLVM, (ulong) @class.Depth + 1, false);
-            var interfacesCount = LLVM.ConstInt(int32LLVM, (ulong) @class.Interfaces.Count, false);
-
             var zero = LLVM.ConstInt(int32LLVM, 0, false);
+            bool isConcreteType = IsConcreteType(@class.Type);
 
-            // Super types global
-            var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrLLVM, (uint) superTypes.Count),
-                @class.Type.TypeReferenceCecil.MangledName() + ".supertypes");
-            LLVM.SetLinkage(superTypesConstantGlobal, Linkage.PrivateLinkage);
-            var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] {zero, zero});
+            // Prepare metadata info
+            var sharpLangModule = TestMode ? LLVM.ConstNull(intPtrLLVM) : metadataPerModule[@class.Type.TypeDefinitionCecil.Module];
+            var extraTypeInfo = LLVM.ConstNull(intPtrLLVM);
 
-            // Interface map global
-            var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrLLVM, (uint) @class.Interfaces.Count),
-                @class.Type.TypeReferenceCecil.MangledName() + ".interfaces");
-            LLVM.SetLinkage(interfacesConstantGlobal, Linkage.PrivateLinkage);
-            var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
-
-            // Build VTable
-            var vtableConstant = LLVM.ConstNamedStruct(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray());
+            var elementTypeSize = zero;
 
             // Build RTTI
-            var runtimeTypeInfoGlobal = @class.GeneratedRuntimeTypeInfoGlobalLLVM;
+            var runtimeTypeInfoGlobal = @class.GeneratedEETypeTokenLLVM;
             var runtimeTypeInfoType = LLVM.GetElementType(LLVM.TypeOf(runtimeTypeInfoGlobal));
             var runtimeTypeInfoTypeElements = new TypeRef[LLVM.CountStructElementTypes(runtimeTypeInfoType)];
             LLVM.GetStructElementTypes(runtimeTypeInfoType, runtimeTypeInfoTypeElements);
 
-            var staticFieldsInitializer = LLVM.ConstNamedStruct(runtimeTypeInfoTypeElements[(int)RuntimeTypeInfoFields.StaticFields], @class.StaticFields.Select(field =>
+            var typeSpecification = @class.Type.TypeReferenceCecil as TypeSpecification;
+            if (typeSpecification != null)
             {
-                var fieldType = field.Value.Type;
-
-                if ((field.Key.Attributes & FieldAttributes.HasFieldRVA) != 0)
+                if (typeSpecification is ArrayType || typeSpecification is ByReferenceType || typeSpecification is PointerType)
                 {
-                    var initialValue = field.Key.InitialValue;
+                    // Get element type
+                    var elementType = GetType(typeSpecification.ElementType, TypeState.VTableEmitted);
+                    elementTypeSize = LLVM.ConstIntCast(LLVM.SizeOf(elementType.DefaultTypeLLVM), int32LLVM, false);
+                    extraTypeInfo = LLVM.ConstPtrToInt(elementType.Class.GeneratedEETypeRuntimeLLVM, nativeIntLLVM);
 
-                    // Seems like if type size is 8, it uses int64 as backing type
-                    // Maybe at some point it might be better to encode static fields in a big byte array and use casts instead?
-                    if (LLVM.GetTypeKind(fieldType.DefaultTypeLLVM) == TypeKind.IntegerTypeKind)
+                    if (typeSpecification is ArrayType)
                     {
-                        unsafe
-                        {
-                            fixed (byte* initalValueStart = initialValue)
-                            {
-                                if (LLVM.GetIntTypeWidth(fieldType.DefaultTypeLLVM) == 64)
-                                    return LLVM.ConstInt(fieldType.DefaultTypeLLVM, *(ulong*)initalValueStart, false);
-                                if (LLVM.GetIntTypeWidth(fieldType.DefaultTypeLLVM) == 32)
-                                    return LLVM.ConstInt(fieldType.DefaultTypeLLVM, *(uint*)initalValueStart, false);
-                            }
-                        }
+                        extraTypeInfo = LLVM.ConstAdd(extraTypeInfo, LLVM.ConstInt(nativeIntLLVM, (int)ExtraTypeKind.Array, false));
+                    }
+                    else if (typeSpecification is ByReferenceType)
+                    {
+                        extraTypeInfo = LLVM.ConstAdd(extraTypeInfo, LLVM.ConstInt(nativeIntLLVM, (int)ExtraTypeKind.ByRef, false));
+                    }
+                    else if (typeSpecification is PointerType)
+                    {
+                        extraTypeInfo = LLVM.ConstAdd(extraTypeInfo, LLVM.ConstInt(nativeIntLLVM, (int)ExtraTypeKind.Pointer, false));
                     }
 
-                    // Otherwise, for now we assume that if there was a RVA, it was a type with custom layout (default type is i8[]),
-                    // as currently generated by compiler in <PrivateImplementationDetails> class.
-                    if (LLVM.GetTypeKind(fieldType.DefaultTypeLLVM) != TypeKind.ArrayTypeKind)
-                        throw new NotSupportedException();
-
-                    var arrayElementType = LLVM.Int8TypeInContext(context);
-                    return LLVM.ConstArray(arrayElementType, initialValue.Select(x => LLVM.ConstInt(arrayElementType, x, false)).ToArray());
+                    extraTypeInfo = LLVM.ConstIntToPtr(extraTypeInfo, intPtrLLVM);
                 }
 
-                return LLVM.ConstNull(fieldType.DefaultTypeLLVM);
-            }).ToArray());
+                var genericInstanceType = typeSpecification as GenericInstanceType;
+                if (genericInstanceType != null)
+                {
+                    // Build global with array of VTable (one for each generic argument)
+                    var genericArgumentsTypes = genericInstanceType.GenericArguments.Select(x => GetType(x, TypeState.VTableEmitted)).ToArray();
+                    var genericArgumentesTypeGlobalType = LLVM.ArrayType(intPtrLLVM, (uint)genericArgumentsTypes.Length + 1);
+                    var genericArgumentsTypesGlobal = LLVM.AddGlobal(module, genericArgumentesTypeGlobalType, @class.Type.TypeReferenceCecil.MangledName() + ".genericarguments");
+                    LLVM.SetLinkage(genericArgumentsTypesGlobal, Linkage.PrivateLinkage);
+                    LLVM.SetInitializer(genericArgumentsTypesGlobal, LLVM.ConstArray(intPtrLLVM,
+                        genericArgumentsTypes
+                        .Select(x => LLVM.ConstPointerCast(x.Class.GeneratedEETypeTokenLLVM, intPtrLLVM))
+                        .Concat(new[] { LLVM.ConstPointerNull(intPtrLLVM) })
+                        .ToArray()));
+                    extraTypeInfo = LLVM.ConstInBoundsGEP(genericArgumentsTypesGlobal, new[] { zero, zero });
+                    extraTypeInfo = LLVM.ConstPointerCast(extraTypeInfo, intPtrLLVM);
+                }
+            }
 
-            // Get array element type
-            var elementTypeRef = @class.Type.TypeReferenceCecil is ArrayType ? ((ArrayType)@class.Type.TypeReferenceCecil).ElementType : null;
-            var elementType = elementTypeRef != null ? GetType(elementTypeRef, TypeState.StackComplete) : null;
-            var elementTypeSize = elementType != null ? LLVM.ConstIntCast(LLVM.SizeOf(elementType.DefaultTypeLLVM), int32LLVM, false) : LLVM.ConstInt(int32LLVM, 0, false);
-
-            var runtimeTypeInfoConstant = LLVM.ConstNamedStruct(runtimeTypeInfoType, new[]
+            var runtimeTypeFields = new List<ValueRef>
             {
-                @class.BaseType != null ? @class.BaseType.GeneratedRuntimeTypeInfoGlobalLLVM : LLVM.ConstPointerNull(intPtrLLVM),
-                superTypeCount,
-                interfacesCount,
-                superTypesGlobal,
-                interfacesGlobal,
-                LLVM.ConstInt(LLVM.Int1TypeInContext(context), 0, false), // Class initialized?
-                LLVM.ConstIntCast(LLVM.SizeOf(@class.Type.ObjectTypeLLVM), int32LLVM, false),
-                elementTypeSize,
-                interfaceMethodTableConstant,
-                vtableConstant,
-                staticFieldsInitializer,
-            });
-            LLVM.SetInitializer(runtimeTypeInfoGlobal, runtimeTypeInfoConstant);
+                @class.BaseType != null ? @class.BaseType.GeneratedEETypeTokenLLVM : LLVM.ConstPointerNull(intPtrLLVM),
+                LLVM.ConstInt(LLVM.Int8TypeInContext(context), isConcreteType ? 1U : 0U, false),
+                LLVM.ConstNamedStruct(typeDefLLVM, new[]
+                {
+                    sharpLangModule,
+                    LLVM.ConstInt(int32LLVM, @class.Type.TypeDefinitionCecil.MetadataToken.ToUInt32(), false),
+                }),
+                extraTypeInfo,
+                LLVM.ConstNull(sharpLangTypeType.DefaultTypeLLVM),
+            };
 
-            // Build super type list (after RTTI since we need pointer to RTTI)
-            var superTypesConstant = LLVM.ConstArray(intPtrLLVM,
-                superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM))
-                    .ToArray());
-            LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
+            // Prepare the runtime type object
+            var mangledTypeName = Regex.Replace(@class.Type.TypeReferenceCecil.MangledName() + ".sharplangtype", @"(\W)", "_");
+            var sharpLangTypeGlobal = LLVM.AddGlobal(module, sharpLangTypeType.ObjectTypeLLVM, mangledTypeName);
+            LLVM.SetLinkage(sharpLangTypeGlobal, Linkage.PrivateLinkage);
+            LLVM.SetInitializer(sharpLangTypeGlobal, LLVM.ConstNull(sharpLangTypeType.ObjectTypeLLVM));
 
-            // Build interface map
-            var interfacesConstant = LLVM.ConstArray(intPtrLLVM,
-                @class.Interfaces.Select(
-                    @interface => LLVM.ConstPointerCast(@interface.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM)).ToArray());
-            LLVM.SetInitializer(interfacesConstantGlobal, interfacesConstant);
+            if (isConcreteType)
+            {
+                // Build IMT
+                var interfaceMethodTable = new LinkedList<InterfaceMethodTableEntry>[InterfaceMethodTableSize];
+                foreach (var @interface in @class.Interfaces)
+                {
+                    foreach (var interfaceMethod in @interface.Type.TypeReferenceCecil.Resolve().Methods)
+                    {
+                        var resolvedInterfaceMethod = ResolveGenericMethod(@interface.Type.TypeReferenceCecil, interfaceMethod);
+
+                        // If method is not fully resolved (generic method in interface), ignore it
+                        // We are waiting for actual closed uses.
+                        if (ResolveGenericsVisitor.ContainsGenericParameters(resolvedInterfaceMethod))
+                            continue;
+
+                        var resolvedFunction = CecilExtensions.TryMatchMethod(@class, resolvedInterfaceMethod);
+                        if (resolvedFunction == null && @class.Type.TypeReferenceCecil is ArrayType)
+                        {
+                            var arrayType = corlib.MainModule.GetType(typeof(Array).FullName);
+                            var matchingMethod = (MethodReference)arrayType.Methods.First(x => x.Name.StartsWith("InternalArray_") && x.Name.EndsWith(resolvedInterfaceMethod.Name));
+                            if (matchingMethod != null)
+                            {
+                                if (matchingMethod.HasGenericParameters)
+                                {
+                                    matchingMethod = matchingMethod.MakeGenericMethod(((ArrayType)@class.Type.TypeReferenceCecil).ElementType);
+                                }
+
+                                resolvedFunction = GetFunction(matchingMethod);
+
+                                // Manually emit Array functions locally (until proper mscorlib + generic instantiation exists).
+                                EmitFunction(resolvedFunction);
+                                LLVM.SetLinkage(resolvedFunction.GeneratedValue, Linkage.LinkOnceAnyLinkage);
+                            }
+                        }
+
+                        if (resolvedFunction == null)
+                            throw new InvalidOperationException(string.Format("Could not find matching method for {0} in {1}", resolvedInterfaceMethod, @class));
+
+                        var isInterface = resolvedFunction.DeclaringType.TypeReferenceCecil.Resolve().IsInterface;
+                        if (!isInterface && resolvedFunction.MethodReference.Resolve().IsVirtual && resolvedFunction.VirtualSlot != -1)
+                        {
+                            // We might have found a base virtual method matching this interface method.
+                            // Let's get the actual method override for this virtual slot.
+                            resolvedFunction = @class.VirtualTable[resolvedFunction.VirtualSlot];
+                        }
+
+                        // If method is not found, it could be due to covariance/contravariance
+                        if (resolvedFunction == null)
+                            throw new InvalidOperationException("Interface method not found");
+
+                        var methodId = GetMethodId(resolvedInterfaceMethod);
+                        var imtSlotIndex = (int)(methodId % InterfaceMethodTableSize);
+
+                        var imtSlot = interfaceMethodTable[imtSlotIndex];
+                        if (imtSlot == null)
+                            interfaceMethodTable[imtSlotIndex] = imtSlot = new LinkedList<InterfaceMethodTableEntry>();
+
+                        imtSlot.AddLast(new InterfaceMethodTableEntry
+                        {
+                            Function = resolvedFunction,
+                            MethodId = GetFunction(resolvedInterfaceMethod).GeneratedValue, // Should be a fake global, that we use as IMT key
+                        });
+                    }
+                }
+                var interfaceMethodTableConstant = LLVM.ConstArray(intPtrLLVM, interfaceMethodTable.Select(imtSlot =>
+                {
+                    if (imtSlot == null)
+                    {
+                        // No entries: null slot
+                        return LLVM.ConstNull(intPtrLLVM);
+                    }
+
+                    if (imtSlot.Count == 1)
+                    {
+                        // Single entry
+                        var imtEntry = imtSlot.First.Value;
+                        return LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM);
+                    }
+                    else
+                    {
+                        // Multiple entries, create IMT array with all entries
+                        // TODO: Support covariance/contravariance?
+                        var imtEntries = LLVM.ConstArray(imtEntryLLVM, imtSlot.Select(imtEntry =>
+                        {
+                            return LLVM.ConstNamedStruct(imtEntryLLVM, new[]
+                            {
+                                imtEntry.MethodId,                                                      // i8* functionId
+                                LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM),    // i8* functionPtr
+                            });
+                        })
+                            .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryLLVM), 1)).ToArray()); // Append { 0, 0 } terminator
+                        var imtEntryGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(imtEntries), @class.Type.TypeReferenceCecil.MangledName() + ".imt");
+                        LLVM.SetLinkage(imtEntryGlobal, Linkage.PrivateLinkage);
+                        LLVM.SetInitializer(imtEntryGlobal, imtEntries);
+
+                        // Add 1 to differentiate between single entry and IMT array
+                        return LLVM.ConstIntToPtr(
+                            LLVM.ConstAdd(
+                                LLVM.ConstPtrToInt(imtEntryGlobal, nativeIntLLVM),
+                                LLVM.ConstInt(nativeIntLLVM, 1, false)),
+                            intPtrLLVM);
+                    }
+                }).ToArray());
+
+
+                // Build list of super types
+                var superTypes = new List<Class>(@class.Depth);
+                var currentClass = @class;
+                while (currentClass != null)
+                {
+                    superTypes.Add(currentClass);
+                    currentClass = currentClass.BaseType;
+                }
+
+                // Reverse so that the list start with most inherited object
+                // (allows faster type checking since a given type will always be at a given index)
+                superTypes.Reverse();
+
+                // Build super types
+                // Helpful for fast is/as checks on class hierarchy
+                var superTypeCount = LLVM.ConstInt(int32LLVM, (ulong)@class.Depth + 1, false);
+                var interfacesCount = LLVM.ConstInt(int32LLVM, (ulong)@class.Interfaces.Count, false);
+
+                // Super types global
+                var superTypesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrLLVM, (uint)superTypes.Count),
+                    @class.Type.TypeReferenceCecil.MangledName() + ".supertypes");
+                LLVM.SetLinkage(superTypesConstantGlobal, Linkage.PrivateLinkage);
+                var superTypesGlobal = LLVM.ConstInBoundsGEP(superTypesConstantGlobal, new[] {zero, zero});
+
+                // Interface map global
+                var interfacesConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrLLVM, (uint)@class.Interfaces.Count),
+                    @class.Type.TypeReferenceCecil.MangledName() + ".interfaces");
+                LLVM.SetLinkage(interfacesConstantGlobal, Linkage.PrivateLinkage);
+                var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
+
+                // Build VTable
+                var vtableConstant = LLVM.ConstNamedStruct(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray());
+
+                var staticFieldsInitializer = LLVM.ConstNamedStruct(runtimeTypeInfoTypeElements[(int)RuntimeTypeInfoFields.StaticFields], @class.StaticFields.Select(field =>
+                {
+                    var fieldType = field.Value.Type;
+
+                    if ((field.Key.Attributes & FieldAttributes.HasFieldRVA) != 0)
+                    {
+                        var initialValue = field.Key.InitialValue;
+
+                        // Seems like if type size is 8, it uses int64 as backing type
+                        // Maybe at some point it might be better to encode static fields in a big byte array and use casts instead?
+                        if (LLVM.GetTypeKind(fieldType.DefaultTypeLLVM) == TypeKind.IntegerTypeKind)
+                        {
+                            unsafe
+                            {
+                                fixed (byte* initalValueStart = initialValue)
+                                {
+                                    if (LLVM.GetIntTypeWidth(fieldType.DefaultTypeLLVM) == 64)
+                                        return LLVM.ConstInt(fieldType.DefaultTypeLLVM, *(ulong*)initalValueStart, false);
+                                    if (LLVM.GetIntTypeWidth(fieldType.DefaultTypeLLVM) == 32)
+                                        return LLVM.ConstInt(fieldType.DefaultTypeLLVM, *(uint*)initalValueStart, false);
+                                }
+                            }
+                        }
+
+                        // Otherwise, for now we assume that if there was a RVA, it was a type with custom layout (default type is i8[]),
+                        // as currently generated by compiler in <PrivateImplementationDetails> class.
+                        if (LLVM.GetTypeKind(fieldType.DefaultTypeLLVM) != TypeKind.ArrayTypeKind)
+                            throw new NotSupportedException();
+
+                        var arrayElementType = LLVM.Int8TypeInContext(context);
+                        return LLVM.ConstArray(arrayElementType, initialValue.Select(x => LLVM.ConstInt(arrayElementType, x, false)).ToArray());
+                    }
+
+                    return LLVM.ConstNull(fieldType.DefaultTypeLLVM);
+                }).ToArray());
+
+                runtimeTypeFields.AddRange(new[]
+                {
+                    superTypeCount,
+                    interfacesCount,
+                    superTypesGlobal,
+                    interfacesGlobal,
+                    LLVM.ConstInt(LLVM.Int8TypeInContext(context), 0, false), // Class initialized?
+                    LLVM.ConstIntCast(LLVM.SizeOf(@class.Type.ObjectTypeLLVM), int32LLVM, false),
+                    elementTypeSize,
+                    interfaceMethodTableConstant,
+
+                    LLVM.ConstInt(int32LLVM, (ulong)@class.VirtualTable.Count, false),
+                    vtableConstant,
+                    staticFieldsInitializer,
+                });
+
+                var runtimeTypeInfoConstant = LLVM.ConstNamedStruct(runtimeTypeInfoType, runtimeTypeFields.ToArray());
+                LLVM.SetInitializer(runtimeTypeInfoGlobal, runtimeTypeInfoConstant);
+
+                // Build super type list (after RTTI since we need pointer to RTTI)
+                var superTypesConstant = LLVM.ConstArray(intPtrLLVM,
+                    superTypes.Select(superType => LLVM.ConstPointerCast(superType.GeneratedEETypeTokenLLVM, intPtrLLVM))
+                        .ToArray());
+                LLVM.SetInitializer(superTypesConstantGlobal, superTypesConstant);
+
+                // Build interface map
+                var interfacesConstant = LLVM.ConstArray(intPtrLLVM,
+                    @class.Interfaces.Select(
+                        @interface => LLVM.ConstPointerCast(@interface.GeneratedEETypeTokenLLVM, intPtrLLVM)).ToArray());
+                LLVM.SetInitializer(interfacesConstantGlobal, interfacesConstant);
+            }
+            else
+            {
+                // Non-concrete type, create type with current fields
+                var runtimeTypeInfoConstant = LLVM.ConstNamedStruct(runtimeTypeInfoType, runtimeTypeFields.ToArray());
+                LLVM.SetInitializer(runtimeTypeInfoGlobal, runtimeTypeInfoConstant);
+            }
 
             // Mark RTTI as external
             LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalLinkage);

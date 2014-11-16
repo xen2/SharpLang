@@ -168,11 +168,11 @@ extern "C" uint8_t System_ValueType__Equals_System_Object_(struct Object* boxedV
 	if (obj == 0)
 		return 0;
 
-	if (boxedValue->runtimeTypeInfo != obj->runtimeTypeInfo)
+	if (boxedValue->eeType != obj->eeType)
 		return 0;
 
 	// Compare area after object header
-	// TODO: Store actual size in RuntimeTypeInfo and use it for comparison size.
+	// TODO: Store actual size in EEType and use it for comparison size.
 	// Currently using 4 for SimpleGenericConstrained.cs.
 	return memcmp(boxedValue + 1, obj + 1, 4) == 0;
 }
@@ -185,5 +185,11 @@ extern "C" uint8_t System_Int32__Equals_System_Object_(int32_t* i, void* obj)
 
 extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_RuntimeFieldHandle_(Array<uint8_t>* arr, uint8_t* fieldHandle)
 {
-	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->runtimeTypeInfo->elementSize);
+	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->eeType->elementSize);
+}
+
+extern "C" Object* System_SharpLangModule__ResolveType_System_SharpLangEEType__(EEType* eeType)
+{
+	// Needed by System_Object__GetType__
+	assert(false);
 }

@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
+using System.Text.RegularExpressions;
 using Mono.Cecil;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
+using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
+using TypeDefinition = Mono.Cecil.TypeDefinition;
+using TypeReference = Mono.Cecil.TypeReference;
 
 namespace SharpLang.CompilerServices
 {
@@ -42,6 +48,7 @@ namespace SharpLang.CompilerServices
         /// <summary> List of methods that still need to be generated. </summary>
         private Queue<KeyValuePair<MethodReference, Function>> methodsToCompile = new Queue<KeyValuePair<MethodReference, Function>>();
 
+        private Dictionary<Mono.Cecil.ModuleDefinition, ValueRef> metadataPerModule;
 
         /// <summary> True when running unit tests. This will try to avoid using real mscorlib for faster codegen, linking and testing. </summary>
         public bool TestMode { get; set; }
@@ -69,6 +76,38 @@ namespace SharpLang.CompilerServices
             builder = LLVM.CreateBuilderInContext(context);
             builder2 = LLVM.CreateBuilderInContext(context);
             debugBuilder = LLVM.DIBuilderCreate(module);
+
+            if (!TestMode)
+            {
+                // Register SharpLangModule objects for each module
+                metadataPerModule = new Dictionary<Mono.Cecil.ModuleDefinition, ValueRef>();
+                var mangledModuleName = Regex.Replace(assembly.Name.Name + ".sharplangmodule", @"(\W)", "_");
+                var sharpLangModuleGlobal = LLVM.AddGlobal(module, sharpLangModuleType.ObjectTypeLLVM, mangledModuleName);
+                metadataPerModule[assembly.MainModule] = sharpLangModuleGlobal;
+
+                // Generate extern globals for SharpLangModule instances of other modules
+                foreach (var referencedAssembly in referencedAssemblies)
+                {
+                    mangledModuleName = Regex.Replace(referencedAssembly.Name.Name + ".sharplangmodule", @"(\W)", "_");
+                    var externalSharpLangModuleGlobal = LLVM.AddGlobal(module, sharpLangModuleType.ObjectTypeLLVM, mangledModuleName);
+                    LLVM.SetLinkage(externalSharpLangModuleGlobal, Linkage.ExternalLinkage);
+                    metadataPerModule[referencedAssembly.MainModule] = externalSharpLangModuleGlobal;
+                }
+            }
+        }
+
+        public byte[] ReadMetadata(string fileName)
+        {
+            using (var stream = File.OpenRead(fileName))
+            {
+                var peHeader = new PEHeaders(stream);
+
+                var metadata = new byte[peHeader.MetadataSize];
+                stream.Position = peHeader.MetadataStartOffset;
+                stream.Read(metadata, 0, peHeader.MetadataSize);
+
+                return metadata;
+            }
         }
 
         public void RegisterType(TypeReference typeReference)
@@ -139,8 +178,97 @@ namespace SharpLang.CompilerServices
             while (methodsToCompile.Count > 0)
             {
                 var methodToCompile = methodsToCompile.Dequeue();
-                Console.WriteLine("Compiling {0}", methodToCompile.Key.FullName);
+                //Console.WriteLine("Compiling {0}", methodToCompile.Key.FullName);
                 CompileFunction(methodToCompile.Key, methodToCompile.Value);
+            }
+
+            // Prepare global module constructor
+            var globalCtorFunctionType = LLVM.FunctionType(LLVM.VoidTypeInContext(context), new TypeRef[0], false);
+            var globalCtor = LLVM.AddFunction(module, "initializeSharpLangModule", globalCtorFunctionType);
+            LLVM.SetLinkage(globalCtor, Linkage.PrivateLinkage);
+            LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, globalCtor, string.Empty));
+
+            if (!TestMode)
+            {
+                // Emit metadata
+                var metadataBytes = ReadMetadata(assembly.MainModule.FullyQualifiedName);
+                var metadataData = CreateDataConstant(metadataBytes);
+
+                var metadataGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(metadataData), "metadata");
+                LLVM.SetInitializer(metadataGlobal, metadataData);
+                LLVM.SetLinkage(metadataGlobal, Linkage.PrivateLinkage);
+
+
+                // Use metadata to initialize a SharpLangModule, that will be created at module load time using a global ctor
+                sharpLangModuleType = GetType(corlib.MainModule.GetType("System.SharpLangModule"), TypeState.VTableEmitted);
+                sharpLangTypeType = GetType(corlib.MainModule.GetType("System.SharpLangTypeDefinition"), TypeState.VTableEmitted); // Was only StackComplete until now
+
+                // Get ctor for SharpLangModule and SharpLangType
+                var moduleCtor = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Resolve().IsConstructor);
+
+                var registerTypeMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "RegisterType");
+                var sortTypesMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "SortTypes");
+
+                // Initialize SharpLangModule instance:
+                //   new SharpLangModule(moduleName, metadataStart, metadataLength)
+                var sharpLangModuleGlobal = metadataPerModule[assembly.MainModule];
+                var functionContext = new FunctionCompilerContext(globalCtor);
+                functionContext.Stack = new List<StackValue>();
+                functionContext.Stack.Add(new StackValue(StackValueType.Object, sharpLangModuleType, sharpLangModuleGlobal));
+                functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, metadataGlobal));
+                functionContext.Stack.Add(new StackValue(StackValueType.Int32, int32, LLVM.ConstInt(int32LLVM, (ulong)metadataBytes.Length, false)));
+
+                // Setup initial value (note: VTable should be valid)
+                LLVM.SetLinkage(sharpLangModuleGlobal, Linkage.ExternalLinkage);
+                LLVM.SetInitializer(sharpLangModuleGlobal, SetupVTableConstant(LLVM.ConstNull(sharpLangModuleType.ObjectTypeLLVM), sharpLangModuleType.Class));
+                metadataPerModule[assembly.MainModule] = sharpLangModuleGlobal;
+
+                EmitCall(functionContext, moduleCtor.Signature, moduleCtor.GeneratedValue);
+
+                // Register types
+                foreach (var type in types)
+                {
+                    var @class = type.Value.Class;
+
+                    // Skip incomplete types
+                    if (@class == null || !@class.IsEmitted)
+                        continue;
+
+                    // Skip if no RTTI initializer
+                    if (LLVM.GetInitializer(@class.GeneratedEETypeRuntimeLLVM) == ValueRef.Empty)
+                        continue;
+
+                    // Skip if interface (fake RTTI pointer)
+                    if (type.Value.TypeDefinitionCecil.IsInterface)
+                        continue;
+
+                    functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.ConstPointerCast(@class.GeneratedEETypeRuntimeLLVM, intPtrLLVM)));
+                    EmitCall(functionContext, registerTypeMethod.Signature, registerTypeMethod.GeneratedValue);
+                }
+
+                // Sort and remove duplicates after adding all our types
+                // TODO: Somehow sort everything before insertion at compile time?
+                EmitCall(functionContext, sortTypesMethod.Signature, sortTypesMethod.GeneratedValue);
+
+                LLVM.BuildRetVoid(builder);
+            }
+            else
+            {
+                LLVM.BuildRetVoid(builder);
+            }
+
+            // Prepare global ctors
+            {
+                var globalCtorType = LLVM.StructTypeInContext(context, new[] { int32LLVM, LLVM.PointerType(globalCtorFunctionType, 0) }, true);
+                var globalCtorsGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(globalCtorType, 1), "llvm.global_ctors");
+                LLVM.SetLinkage(globalCtorsGlobal, Linkage.AppendingLinkage);
+                LLVM.SetInitializer(globalCtorsGlobal,
+                    LLVM.ConstArray(globalCtorType, new [] {
+                        LLVM.ConstNamedStruct(globalCtorType, new[]
+                        {
+                            LLVM.ConstInt(int32LLVM, (ulong)65536, false),
+                            globalCtor,
+                        })}));
             }
 
             // Emit "main" which will call the assembly entry point (if any)
@@ -164,13 +292,6 @@ namespace SharpLang.CompilerServices
             LLVM.DIBuilderDispose(debugBuilder);
             LLVM.DisposeBuilder(builder);
 
-            // Verify module
-            string message;
-            if (LLVM.VerifyModule(module, VerifierFailureAction.PrintMessageAction, out message))
-            {
-                throw new InvalidOperationException(message);
-            }
-            
             return module;
         }
 

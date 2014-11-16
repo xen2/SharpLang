@@ -55,8 +55,18 @@ namespace SharpLang.CompilerServices
         /// </summary>
         /// <value>
         /// The generated RTTI global variable.
+        /// For interfaces, this will reuse object's one.
         /// </value>
-        public ValueRef GeneratedRuntimeTypeInfoGlobalLLVM { get; internal set; }
+        public ValueRef GeneratedEETypeRuntimeLLVM { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the RTTI global variable, which can be used for Ldtoken identity.
+        /// </summary>
+        /// <value>
+        /// The generated RTTI global variable.
+        /// Note that it might not be usable directly inside an object for non-concrete types, such as interfaces.
+        /// </value>
+        public ValueRef GeneratedEETypeTokenLLVM { get; internal set; }
 
         public TypeRef VTableTypeLLVM { get; internal set; }
 

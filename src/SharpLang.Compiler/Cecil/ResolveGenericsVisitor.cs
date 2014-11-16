@@ -9,13 +9,20 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     class ResolveGenericsVisitor : TypeReferenceVisitor
     {
-        private GenericInstanceMethod genericContextMethod;
-        private GenericInstanceType genericContextType;
+        private readonly GenericInstanceMethod genericContextMethod;
+        private readonly GenericInstanceType genericContextType;
+        private readonly bool resolveOnlyReferences;
 
-        public ResolveGenericsVisitor(MethodReference genericContext)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResolveGenericsVisitor"/> class.
+        /// </summary>
+        /// <param name="genericContext">The generic context.</param>
+        /// <param name="resolveOnlyReferences">if set to <c>true</c> replaces only GenericInstance of type !0 with their real definitions (T, U, etc...), otherwise replace them with real types.</param>
+        public ResolveGenericsVisitor(MethodReference genericContext, bool resolveOnlyReferences = false)
         {
             genericContextMethod = genericContext as GenericInstanceMethod;
             genericContextType = genericContext.DeclaringType as GenericInstanceType;
+            this.resolveOnlyReferences = resolveOnlyReferences;
         }
 
         public ResolveGenericsVisitor(TypeReference genericContext)
@@ -47,13 +54,7 @@ namespace SharpLang.CompilerServices.Cecil
             return result;
         }
 
-        /// <summary>
-        /// Replaces GenericInstance of type !0 with their real definitions (T, U, etc...)
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static TypeReference ProcessSignatureType(MethodReference context, TypeReference type)
+        public static TypeReference Process(MethodReference context, TypeReference type, bool resolveOnlyReferences = false)
         {
             if (type == null)
                 return null;
@@ -67,27 +68,7 @@ namespace SharpLang.CompilerServices.Cecil
             if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)
                 return type;
 
-            var visitor = new ResolveGenericsVisitor(context);
-            var result = visitor.VisitDynamic(type);
-
-            return result;
-        }
-
-        public static TypeReference Process(MethodReference context, TypeReference type)
-        {
-            if (type == null)
-                return null;
-
-            if (context == null)
-                return type;
-
-            // Visit recursively and replace generic parameters with generic arguments from context
-            var genericInstanceTypeContext = context.DeclaringType as GenericInstanceType;
-            var genericInstanceMethodContext = context as GenericInstanceMethod;
-            if (genericInstanceMethodContext == null && genericInstanceTypeContext == null)
-                return type;
-
-            var visitor = new ResolveGenericsVisitor(context);
+            var visitor = new ResolveGenericsVisitor(context, resolveOnlyReferences);
             var result = visitor.VisitDynamic(type);
 
             return result;
@@ -163,16 +144,24 @@ namespace SharpLang.CompilerServices.Cecil
                 if (genericContextMethod != null && type.Position < genericContextMethod.GenericArguments.Count)
                 {
                     // Look for generic parameter in both resolved and element method
-                    var genericContext1 = genericContextMethod.Resolve();
-                    var genericContext2 = genericContextMethod.ElementMethod;
+                    var genericContext1 = genericContextMethod.ElementMethod;
+                    var genericContext2 = genericContextMethod.Resolve();
+                    var genericParameter1 = genericContext1.GenericParameters[type.Position];
+                    var genericParameter2 = genericContext2.GenericParameters[type.Position];
 
-                    var genericParameter = genericContext1.GenericParameters[type.Position];
-                    if (genericParameter.Name == type.Name)
-                        return genericContextMethod.GenericArguments[type.Position];
+                    if (resolveOnlyReferences)
+                    {
+                        if (genericParameter1.Name == type.Name)
+                            return genericParameter2;
+                    }
+                    else
+                    {
+                        if (genericParameter1.Name == type.Name)
+                            return genericContextMethod.GenericArguments[type.Position];
 
-                    genericParameter = genericContext2.GenericParameters[type.Position];
-                    if (genericParameter.Name == type.Name)
-                        return genericContextMethod.GenericArguments[type.Position];
+                        if (genericParameter2.Name == type.Name)
+                            return genericContextMethod.GenericArguments[type.Position];
+                    }
                 }
             }
             else
@@ -180,16 +169,24 @@ namespace SharpLang.CompilerServices.Cecil
                 if (genericContextType != null && type.Position < genericContextType.GenericArguments.Count)
                 {
                     // Look for generic parameter in both resolved and element method
-                    var genericContext1 = genericContextType.Resolve();
-                    var genericContext2 = genericContextType.ElementType;
+                    var genericContext1 = genericContextType.ElementType;
+                    var genericContext2 = genericContextType.Resolve();
+                    var genericParameter1 = genericContext1.GenericParameters[type.Position];
+                    var genericParameter2 = genericContext2.GenericParameters[type.Position];
 
-                    var genericParameter = genericContext1.GenericParameters[type.Position];
-                    if (genericParameter.Name == type.Name)
-                        return genericContextType.GenericArguments[type.Position];
+                    if (resolveOnlyReferences)
+                    {
+                        if (genericParameter1.Name == type.Name)
+                            return genericParameter2;
+                    }
+                    else
+                    {
+                        if (genericParameter1.Name == type.Name)
+                            return genericContextType.GenericArguments[type.Position];
 
-                    genericParameter = genericContext2.GenericParameters[type.Position];
-                    if (genericParameter.Name == type.Name)
-                        return genericContextType.GenericArguments[type.Position];
+                        if (genericParameter2.Name == type.Name)
+                            return genericContextType.GenericArguments[type.Position];
+                    }
                 }
             }
 

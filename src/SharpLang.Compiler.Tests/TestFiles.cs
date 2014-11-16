@@ -15,12 +15,12 @@ namespace SharpLang.CompilerServices.Tests
         [ThreadStatic]
         public static CodeDomProvider codeDomProvider;
 
-        [Test]
-        public static void TestCorlib()
-        {
-            var testName = "WriteLine";
-            var sourceFile = Path.Combine(Utils.GetTestsDirectory(), testName + ".cs");
+        [System.Runtime.InteropServices.DllImport("kernel32")]
+        static extern bool AllocConsole();
 
+        [Test, TestCaseSource("TestCorlibCases")]
+        public static void TestCorlib(string sourceFile)
+        {
             // Compile assembly to IL
             var sourceAssembly = CompileAssembly(sourceFile);
 
@@ -62,16 +62,21 @@ namespace SharpLang.CompilerServices.Tests
                 if (assemblyExtension != ".exe" && assemblyExtension != ".dll")
                     continue;
 
+                Console.WriteLine("Converting assembly {0} to LLVM bitcode...", Path.GetFileName(assemblyFile));
+
                 var outputBitcode = Path.Combine(Path.GetDirectoryName(assemblyFile), Path.GetFileNameWithoutExtension(assemblyFile) + ".bc");
-                Driver.CompileAssembly(assemblyFile, outputBitcode, true);
+                Driver.CompileAssembly(assemblyFile, outputBitcode);
                 outputBitcodes.Add(outputBitcode);
             }
 
             var outputAssembly = assemblyBaseName + "-llvm.exe";
 
             // Link bitcodes
+            Console.WriteLine("Compiling to machine code and linking...");
             SetupLocalToolchain();
             Driver.LinkBitcodes(outputAssembly, outputBitcodes.ToArray());
+
+            Console.WriteLine("Done.");
 
             return outputAssembly;
         }
@@ -84,6 +89,8 @@ namespace SharpLang.CompilerServices.Tests
         [Test, TestCaseSource("TestCodegenNoCorlibCases")]
         public static void TestCodegenNoCorlib(string sourceFile)
         {
+            AllocConsole();
+
             var outputAssembly = CompileAssembly(sourceFile);
 
             var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
@@ -106,10 +113,10 @@ namespace SharpLang.CompilerServices.Tests
                 Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");
 
             // Compile MiniCorlib.cpp
-            Driver.ExecuteClang(string.Format("{0} -std=c++11 -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.cpp"), Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc")));
+            Driver.ExecuteClang(string.Format("{0} -std=c++11 -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.cpp"), Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc")));
 
             // Link bitcode and runtime
-            Driver.LinkBitcodes(outputFile, bitcodeFile, Path.Combine(Utils.GetTestsDirectory(), "MiniCorlib.bc"));
+            Driver.LinkBitcodes(outputFile, bitcodeFile, Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc"));
 
             // Execute original and ours
             var output1 = ExecuteAndCaptureOutput(outputAssembly);
@@ -266,14 +273,27 @@ namespace SharpLang.CompilerServices.Tests
         {
             get
             {
-                // Enumerate both .cs and .il files
-                var directory = Utils.GetTestsDirectory();
-                var files = Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories);
-                files = files.Concat(Directory.EnumerateFiles(directory, "*.il", SearchOption.AllDirectories));
-                foreach (var file in files)
-                {
-                    yield return file;
-                }
+                return EnumerateTestsInTestsDirectory("tests-codegen");
+            }
+        }
+
+        public static IEnumerable<string> TestCorlibCases
+        {
+            get
+            {
+                return EnumerateTestsInTestsDirectory("tests-corlib");
+            }
+        }
+
+        private static IEnumerable<string> EnumerateTestsInTestsDirectory(string subdir)
+        {
+            // Enumerate both .cs and .il files
+            var directory = Utils.GetTestsDirectory(subdir);
+            var files = Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories);
+            files = files.Concat(Directory.EnumerateFiles(directory, "*.il", SearchOption.AllDirectories));
+            foreach (var file in files)
+            {
+                yield return file;
             }
         }
     }

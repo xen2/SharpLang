@@ -230,3 +230,113 @@ solution "SharpLang"
           ["x32"] = "Any CPU",
           ["x64"] = "Any CPU"
       }
+    --[[external "System.Xml-net_4_5"
+      location (srcdir .. "/mcs/class/System.XML")
+      uuid "2951DEC2-4393-4A78-83F9-42EB39CB708F"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.Drawing-net_4_5"
+      location (srcdir .. "/mcs/class/System.Drawing")
+      uuid "CB1CB976-AA54-4553-B0E7-05665B199EC4"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "Accessibility-net_4_5"
+      location (srcdir .. "/mcs/class/Accessibility")
+      uuid "FACE8136-C95A-4788-90B2-DB0ECF7A020A"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.Transactions-net_4_5"
+      location (srcdir .. "/mcs/class/System.Transactions")
+      uuid "AF2BBF50-AB57-4CA1-8EF5-2B54C7418434"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.Data-net_4_5"
+      location (srcdir .. "/mcs/class/System.Data")
+      uuid "9A33954F-57A8-4D75-B1D8-0F81808A0DD4"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.EnterpriseServices-net_4_5"
+      location (srcdir .. "/mcs/class/System.EnterpriseServices")
+      uuid "773D8BA7-9A88-49AC-81C9-740436270588"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "Mono.Data.Tds-net_4_5"
+      location (srcdir .. "/mcs/class/Mono.Data.Tds")
+      uuid "CB7949AC-5FA7-4FAB-893A-8FAF436BF514"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "Mono.WebBrowser-net_4_5"
+      location (srcdir .. "/mcs/class/Mono.WebBrowser")
+      uuid "1D660912-8164-4499-A2D7-A3B2FE742E17"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.Runtime.Serialization.Formatters.Soap-net_4_5"
+      location (srcdir .. "/mcs/class/System.Runtime.Serialization.Formatters.Soap")
+      uuid "B12AABBC-30D1-4885-BF3F-A53B970F68FB"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }
+    external "System.Windows.Forms-net_4_5"
+      location (srcdir .. "/mcs/class/Managed.Windows.Forms")
+      uuid "B102F27C-1A07-487F-BA5B-D5155D201112"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "Any CPU",
+          ["x64"] = "Any CPU"
+      }]]

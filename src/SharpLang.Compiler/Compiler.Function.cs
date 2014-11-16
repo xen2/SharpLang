@@ -113,20 +113,54 @@ namespace SharpLang.CompilerServices
                     var parameter = method.Parameters[method.HasThis ? index - 1 : index];
                     parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
                 }
+
                 var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
                 if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
+
                 parameterTypes[index] = parameterType;
+
+                if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
+                {
+                    if (parameterTypeReference.FullName == typeof(string).FullName)
+                    {
+                        //if (!resolvedMethod.PInvokeInfo.IsCharSetUnicode)
+                        //    throw new NotImplementedException("Only Unicode string are supported in PInvoke");
+
+                        parameterType = GetType(new PointerType(@char.TypeDefinitionCecil), TypeState.StackComplete);
+                    }
+                }
+
                 parameterTypesLLVM[index] = parameterType.DefaultTypeLLVM;
             }
 
-
-            // Generate function global
-            var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
             var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
             var functionType = LLVM.FunctionType(returnType.DefaultTypeLLVM, parameterTypesLLVM, false);
 
+            // If we have an external with generic parameters, let's try to do some generic sharing (we can write only one in C++)
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
+            if (isInternal && resolvedMethod.HasGenericParameters && resolvedMethod.GenericParameters.All(x => x.HasReferenceTypeConstraint))
+            {
+                // Check if this isn't the shareable method (in which case we should do normal processing)
+                if (!((GenericInstanceMethod)method).GenericArguments.All(x => MemberEqualityComparer.Default.Equals(x, @object.TypeReferenceCecil)))
+                {
+                    // Let's share it with default method
+                    var sharedGenericInstance = new GenericInstanceMethod(resolvedMethod);
+                    foreach (var genericParameter in resolvedMethod.GenericParameters)
+                    {
+                        sharedGenericInstance.GenericArguments.Add(@object.TypeReferenceCecil);
+                    }
+
+                    var sharedMethod = GetFunction(sharedGenericInstance);
+
+                    // Cast shared function to appropriate pointer type
+                    var sharedFunctionGlobal = LLVM.ConstPointerCast(sharedMethod.GeneratedValue, LLVM.PointerType(functionType, 0));
+                    function = new Function(declaringType, method, functionType, sharedFunctionGlobal, new FunctionSignature(returnType, parameterTypes, sharedMethod.Signature.CallingConvention, sharedMethod.Signature.PInvokeInfo));
+                    functions.Add(method, function);
+
+                    return function;
+                }
+            }
 
             // Determine if type and function is local, and linkage type
             bool isLocal;
@@ -145,6 +179,8 @@ namespace SharpLang.CompilerServices
             bool isRuntime = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.Runtime) != 0);
             bool isInterfaceMethod = declaringType.TypeDefinitionCecil.IsInterface;
             var hasDefinition = resolvedMethod != null && (resolvedMethod.HasBody || isInternal || isRuntime);
+
+            var methodMangledName = Regex.Replace(method.MangledName(), @"(\W)", "_");
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
@@ -171,6 +207,10 @@ namespace SharpLang.CompilerServices
             if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
             {
                 pinvokeInfo = resolvedMethod.PInvokeInfo;
+                if (resolvedMethod.PInvokeInfo.IsCallConvStdCall || resolvedMethod.PInvokeInfo.IsCallConvWinapi)
+                    callingConvention = MethodCallingConvention.StdCall;
+                else if (resolvedMethod.PInvokeInfo.IsCallConvFastcall)
+                    callingConvention = MethodCallingConvention.FastCall;
             }
 
             function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes, callingConvention, pinvokeInfo));
@@ -245,6 +285,13 @@ namespace SharpLang.CompilerServices
             var functionContext = new FunctionCompilerContext(function);
             functionContext.BasicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
             LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
+
+            if (methodReference.DeclaringType.Name == "EncodingHelper" && methodReference.Name == "LoadGetStringPlatform")
+            {
+                body = new MethodBody(method);
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldnull));
+                body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            }
 
             if ((method.ImplAttributes & MethodImplAttributes.Runtime) != 0)
             {
@@ -567,7 +614,7 @@ namespace SharpLang.CompilerServices
                             var ehselectorValue = LLVM.BuildLoad(builder2, functionContext.ExceptionHandlerSelectorSlot, "sel");
 
                             var ehtypeIdFor = LLVM.IntrinsicGetDeclaration(module, (uint)Intrinsics.eh_typeid_for, new TypeRef[0]);
-                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] {LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM)}, string.Empty);
+                            var ehtypeid = LLVM.BuildCall(builder2, ehtypeIdFor, new[] {LLVM.ConstBitCast(catchClass.GeneratedEETypeRuntimeLLVM, intPtrLLVM)}, string.Empty);
 
                             // Jump to catch clause if type matches.
                             // Otherwise, go to next exception handler dispatch block (if any), or resume exception block (TODO)
@@ -648,7 +695,7 @@ namespace SharpLang.CompilerServices
                         if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Catch)
                         {
                             var catchClass = GetClass(ResolveGenericsVisitor.Process(methodReference, exceptionHandler.Source.CatchType));
-                            LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM));
+                            LLVM.AddClause(landingPad, LLVM.ConstBitCast(catchClass.GeneratedEETypeRuntimeLLVM, intPtrLLVM));
                         }
                         else if (exceptionHandler.Source.HandlerType == ExceptionHandlerType.Finally
                             || exceptionHandler.Source.HandlerType == ExceptionHandlerType.Fault)
@@ -860,7 +907,20 @@ namespace SharpLang.CompilerServices
 
                     if (token is TypeReference)
                     {
+                        var type = GetType(ResolveGenericsVisitor.Process(methodReference, (TypeReference)token), TypeState.VTableEmitted);
+
                         runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
+
+                        if (type != null && type.Class != null)
+                        {
+                            runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
+                            runtimeHandleValue = LLVM.BuildInsertValue(builder, runtimeHandleValue, LLVM.ConstPointerCast(type.Class.GeneratedEETypeTokenLLVM, intPtrLLVM), 0, string.Empty);
+                        }
+                        else
+                        {
+                            // TODO: Support generic open types and special types such as void
+                            // We should issue a warning
+                        }
                     }
                     else if (token is FieldReference)
                     {
@@ -1545,8 +1605,9 @@ namespace SharpLang.CompilerServices
                     LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.TypeInitialized, false),        // Type initialized flag
                 };
 
-                var classInitializedAddress = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
+                var classInitializedAddress = LLVM.BuildInBoundsGEP(builder, @class.GeneratedEETypeRuntimeLLVM, indices, string.Empty);
                 var classInitialized = LLVM.BuildLoad(builder, classInitializedAddress, string.Empty);
+                classInitialized = LLVM.BuildIntCast(builder, classInitialized, LLVM.Int1TypeInContext(context), string.Empty);
 
                 var typeNeedInitBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
                 var nextBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
@@ -1654,12 +1715,12 @@ namespace SharpLang.CompilerServices
                     var rttiPointer = LLVM.BuildInBoundsGEP(builder, thisObject.Value, indices, string.Empty);
                     rttiPointer = LLVM.BuildLoad(builder, rttiPointer, string.Empty);
 
-                    // Cast to expected RTTI type
-                    rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedRuntimeTypeInfoGlobalLLVM), string.Empty);
-
                     if (targetMethod.MethodReference.DeclaringType.Resolve().IsInterface)
                     {
                         // Interface call
+
+                        // Cast to object type (enough to have IMT)
+                        rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(GetClass(@object).GeneratedEETypeRuntimeLLVM), string.Empty);
 
                         // Get method stored in IMT slot
                         indices = new[]
@@ -1686,6 +1747,9 @@ namespace SharpLang.CompilerServices
                     }
                     else
                     {
+                        // Cast to expected RTTI type
+                        rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedEETypeRuntimeLLVM), string.Empty);
+
                         // Virtual table call
                         if (targetMethod.VirtualSlot == -1)
                         {
@@ -1719,7 +1783,7 @@ namespace SharpLang.CompilerServices
                     LLVM.ConstInt(int32LLVM, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
                 };
 
-                var vtable = LLVM.BuildInBoundsGEP(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, indices, string.Empty);
+                var vtable = LLVM.BuildInBoundsGEP(builder, @class.GeneratedEETypeRuntimeLLVM, indices, string.Empty);
                 resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
                 resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
             }
