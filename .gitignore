@@ -33,4 +33,5 @@ _ReSharper*/
 /build/gmake
 /deps/mingw32
 /tools/swig
-/src/SharpLang.Compiler.Tests/tests/output/
+/src/SharpLang.Compiler.Tests/tests-codegen/output/
+/src/SharpLang.Compiler.Tests/tests-codegen/*.bc

@@ -83,7 +83,7 @@ namespace SharpLang.CompilerServices.Cecil
                     }
 
                     // We are replacing GenericInstance of type !0 with their real definitions (T, U, etc...)
-                    var parameterType = ResolveGenericsVisitor.ProcessSignatureType(method, parameter.ParameterType);
+                    var parameterType = ResolveGenericsVisitor.Process(method, parameter.ParameterType, true);
                     builder.Append(parameterType.MangledName());
                 }
             }

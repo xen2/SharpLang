@@ -1,15 +1,164 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "RuntimeType.h"
+#include "ConvertUTF.h"
 #include "char-category-data.h"
 #include "char-conversions.h"
 #include "number-formatter.h"
 #include <windows.h>
 
+extern "C" void* System_SharpLangHelper__GetObjectPointer_System_Object_(Object* obj)
+{
+	return obj;
+}
+
+extern "C" Object* System_SharpLangHelper__GetObjectFromPointer_System_Void__(void* obj)
+{
+	return (Object*)obj;
+}
+
+extern "C" Object* System_Object__MemberwiseClone__(Object* obj)
+{
+	// Object size
+	auto length = obj->eeType->objectSize;
+
+	// Allocate new object of same size
+	auto objCopy = (Object*)malloc(length);
+
+	// Blindly copy data
+	// TODO: Improve this with write barrier?
+	memcpy(objCopy, obj, length);
+
+	return objCopy;
+}
+
+// TODO: Implement this C# side
+extern "C" Object* System_SharpLangModule__ResolveType_System_SharpLangEEType__(EEType* eeType);
+extern "C" Object* System_Object__GetType__(Object* obj)
+{
+	return System_SharpLangModule__ResolveType_System_SharpLangEEType__(obj->eeType);
+}
+
+extern "C" bool System_Type__EqualsInternal_System_Type_(RuntimeType* a, RuntimeType* b)
+{
+	return a == b;
+}
+
+extern "C" Object* System_Type__internal_from_handle_System_IntPtr_(EEType* eeType)
+{
+	return System_SharpLangModule__ResolveType_System_SharpLangEEType__(eeType);
+}
+
+extern "C" bool System_Type__type_is_subtype_of_System_Type_System_Type_System_Boolean_(RuntimeType* a, RuntimeType* b, bool checkInterfaces)
+{
+	assert(!checkInterfaces);
+
+	auto rttiA = a->runtimeEEType;
+	auto rttiB = b->runtimeEEType;
+	while (rttiA != NULL)
+	{
+		if (rttiA == rttiB)
+			return true;
+
+		rttiA = rttiA->base;
+	}
+
+	return false;
+}
+
+extern "C" bool System_Type__type_is_assignable_from_System_Type_System_Type_(RuntimeType* a, RuntimeType* b)
+{
+	// TODO: Check interfaces
+	return System_Type__type_is_subtype_of_System_Type_System_Type_System_Boolean_(b, a, false);
+}
+
+extern "C" int32_t System_Array__GetLength_System_Int32_(ArrayBase* arr, int32_t dimension)
+{
+	// Only support 1-dimensional arrays for now
+	// TODO: Need something better than assert (i.e. throw NotSupportedException, even on Release?)
+	assert(dimension == 0);
+
+	return arr->length;
+}
+
+extern "C" int32_t System_Array__GetRank__(ArrayBase* arr)
+{
+	// Only support 1-dimensional arrays for now
+	return 1;
+}
+
+extern "C" int32_t System_Array__GetLowerBound_System_Int32_(ArrayBase* arr)
+{
+	// Only support 1-dimensional arrays for now
+	return 0;
+}
+
+extern "C" void System_Array__ClearInternal_System_Array_System_Int32_System_Int32_(Array<uint8_t>* arr, int32_t index, int32_t length)
+{
+	int32_t elementSize = arr->eeType->elementSize;
+
+	memset((void*)(arr->value + index * elementSize), 0, elementSize * length);
+}
+
+extern "C" bool System_Array__FastCopy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* source, int32_t sourceIndex, Array<uint8_t>* dest, int32_t destIndex, int32_t length)
+{
+	// TODO: Temporary implementation.
+	// Later, we should perform additional checks (i.e. if element types are compatible, etc...)
+	//if (source->base.eeType != dest->base.eeType)
+	//	return false;
+
+	// Check bounds
+	if (sourceIndex + length > source->length
+		|| destIndex + length > dest->length)
+		return false;
+
+	// Get element size
+	int32_t elementSize = source->eeType->elementSize;
+
+	memcpy((void*)(dest->value + destIndex * elementSize), (const void*)(source->value + sourceIndex * elementSize), elementSize * length);
+
+	return true;
+}
+
 extern "C" int32_t System_Environment__get_Platform__()
 {
 	// Windows
 	return 2;
+}
+
+extern "C" int32_t System_Environment__get_ProcessorCount__()
+{
+	SYSTEM_INFO systemInfo;
+	GetSystemInfo(&systemInfo);
+
+	return systemInfo.dwNumberOfProcessors;
+}
+
+extern "C" String* System_Environment__GetOSVersionString__()
+{
+	OSVERSIONINFOEX versionInfo;
+	versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
+	if (!GetVersionEx((OSVERSIONINFO*)&versionInfo))
+		memset(&versionInfo, 0, sizeof(versionInfo));
+
+	// Reserve string with enough space
+	char buffer[64];
+	auto length = sprintf(buffer, "%i.%i.%i.%i",
+		(int32_t)versionInfo.dwMajorVersion, (int32_t)versionInfo.dwMinorVersion,
+		(int32_t)versionInfo.dwBuildNumber, (int32_t)(versionInfo.wServicePackMajor << 16));
+
+	assert(length < sizeof(buffer));
+
+	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
+	auto str = (String*)malloc(sizeof(String));
+	str->length = length;
+	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
+
+	auto strStart = str->value;
+	ConvertUTF8toUTF16((const UTF8**)&buffer, (UTF8*)buffer + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
+
+	return str;
 }
 
 extern "C" void System_Threading_Monitor__Enter_System_Object_(Object* object)
@@ -34,13 +183,19 @@ extern "C" String* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t
 	return NULL;
 }
 
-extern RuntimeTypeInfo System_String_rtti;
-
 extern "C" String* System_Environment__GetNewLine__()
 {
 	// TODO: String RTTI
 	static String newline = String(2, u"\r\n");
 	return &newline;
+}
+
+extern "C" void System_String___ctor_System_Char___(String* str, Array<char16_t>* value)
+{
+	auto length = value->length;
+	str->length = length;
+	str->value = (char16_t*) malloc(sizeof(char16_t) * length);
+	memcpy((void*)str->value, (void*)value->value, length * sizeof(char16_t));
 }
 
 extern "C" void System_String___ctor_System_Char___System_Int32_System_Int32_(String* str, Array<char16_t>* value, int startIndex, int length)
@@ -53,6 +208,7 @@ extern "C" void System_String___ctor_System_Char___System_Int32_System_Int32_(St
 extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t length)
 {
 	auto str = (String*)malloc(sizeof(String));
+	str->eeType = &System_String_rtti;
 	str->length = length;
 	str->value = (char16_t*)malloc(sizeof(char16_t) * length);    
 	return str;
@@ -115,38 +271,19 @@ extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToS
 
 extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_IntPtr_(Array<uint8_t>* arr, uint8_t* fieldHandle)
 {
-	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->runtimeTypeInfo->elementSize);
+	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->eeType->elementSize);
 }
 
-static Object* AllocateObject(RuntimeTypeInfo* rtti)
+static Object* AllocateObject(EEType* eeType)
 {
-	auto objectSize = rtti->objectSize;
+	auto objectSize = eeType->objectSize;
 	Object* object = (Object*)malloc(objectSize);
 
 	// TODO: Maybe we could avoid zero-ing memory in various cases?
 	memset(object, 0, objectSize);
 
-	object->runtimeTypeInfo = rtti;
+	object->eeType = eeType;
 	return object;
-}
-
-extern RuntimeTypeInfo System_AppDomain_rtti;
-
-static Object* InitializeAppDomain()
-{
-	Object* appDomain = AllocateObject(&System_AppDomain_rtti);
-	return appDomain;
-}
-
-extern "C" Object* System_AppDomain__getCurDomain__()
-{
-	static Object* appDomain = InitializeAppDomain();
-	return appDomain;
-}
-
-extern "C" Object* System_AppDomain__LoadAssembly_System_String_System_Security_Policy_Evidence_System_Boolean_(Object* appDomain, String* assemblyRef, Object* securityEvidence, bool refOnly)
-{
-	return NULL;
 }
 
 extern "C" void System_GC__SuppressFinalize_System_Object_(Object* obj)
@@ -212,4 +349,75 @@ extern "C" uint32_t System_IO_MonoIO__GetFileType_System_IntPtr_System_IO_MonoIO
 	}
 
 	return result;
+}
+
+extern "C" bool System_Security_SecurityManager__get_SecurityEnabled__()
+{
+	return false;
+}
+
+extern "C" String* System_Environment__internalGetEnvironmentVariable_System_String_(String* variable)
+{
+	// Query length first
+	auto valueLength = GetEnvironmentVariableW((LPCWSTR)variable->value, NULL, 0);
+	if (valueLength == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
+		return NULL;
+
+	// Allocate string
+	auto value = (String*)malloc(sizeof(String));
+	value->value = (char16_t*)malloc(sizeof(char16_t) * valueLength);
+	value->length = valueLength - 1; // GetEnvironmentVariable will add null-terminating character, but we shouldn't count this in length
+
+	// Read actual value
+	auto actualValueLength = GetEnvironmentVariableW((LPCWSTR) variable->value, (LPWSTR)value->value, valueLength);
+
+	// TODO: Check value didn't change behind our back? (actualValueLength changed)
+
+	return value;
+}
+
+extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object_T__T_T_(Object** location1, Object* value, Object* comparand)
+{
+	auto result = *location1;
+	if (*location1 == comparand)
+		*location1 = value;
+
+	return result;
+}
+
+extern "C" int32_t System_Runtime_InteropServices_Marshal__GetLastWin32Error__()
+{
+	return GetLastError();
+}
+
+extern "C" void System_Runtime_InteropServices_Marshal__copy_to_unmanaged_System_Array_System_Int32_System_IntPtr_System_Int32_(Array<uint8_t>* source, int32_t sourceIndex, uint8_t* dest, int32_t length)
+{
+	// TODO: Null checks
+	// Check bounds
+	if (sourceIndex + length > source->length)
+	{
+		// TODO: Throw exception
+		return;
+	}
+
+	// Get element size
+	int32_t elementSize = source->eeType->elementSize;
+
+	memcpy((void*)dest, (const void*)(source->value + sourceIndex), elementSize * length);
+}
+
+extern "C" void System_Runtime_InteropServices_Marshal__copy_from_unmanaged_System_IntPtr_System_Int32_System_Array_System_Int32_(uint8_t* source, int32_t destIndex, Array<uint8_t>* dest, int32_t length)
+{
+	// TODO: Null checks
+	// Check bounds
+	if (destIndex + length > dest->length)
+	{
+		// TODO: Throw exception
+		return;
+	}
+
+	// Get element size
+	int32_t elementSize = dest->eeType->elementSize;
+
+	memcpy((void*)(dest->value + destIndex), (const void*)source, elementSize * length);
 }

@@ -11,6 +11,9 @@
 			<method name="InternalSetContext" />
 		</type>
 
+		<type fullname="System.SharpLangModule" />
+		<type fullname="System.SharpLangType" />
+		<type fullname="System.SharpLangTypeDefinition" />
 		<type fullname="System.AppDomainSetup" preserve="fields" />
 		<type fullname="System.AppDomainUnloadedException" />
 		<type fullname="System.ApplicationException" />

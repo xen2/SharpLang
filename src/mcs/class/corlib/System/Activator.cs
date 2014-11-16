@@ -37,7 +37,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Security.Policy;
-using System.Configuration.Assemblies;
+using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 using System.Text;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Activation;

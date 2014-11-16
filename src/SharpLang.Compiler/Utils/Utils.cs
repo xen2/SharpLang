@@ -49,10 +49,10 @@ namespace SharpLang.Compiler.Utils
             return process;
         }
 
-        public static string GetTestsDirectory()
+        public static string GetTestsDirectory(string subdir)
         {
             var directory = Directory.GetParent(Directory.GetCurrentDirectory());
-            var testsSubPath = Path.Combine("src", "SharpLang.Compiler.Tests", "tests");
+            var testsSubPath = Path.Combine("src", "SharpLang.Compiler.Tests", subdir);
 
             while (directory != null)
             {

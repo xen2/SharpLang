@@ -40,7 +40,7 @@ namespace System {
 	[Serializable]
 	[ClassInterface (ClassInterfaceType.AutoDual)]
 	[ComVisible (true)]
-	public class Object {
+	public partial class Object {
 
 		// <summary>
 		//   Compares this object to the specified object.

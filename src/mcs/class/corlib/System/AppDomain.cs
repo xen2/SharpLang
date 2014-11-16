@@ -50,7 +50,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 using System.Security.Principal;
-using System.Configuration.Assemblies;
+using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
@@ -67,7 +67,7 @@ namespace System {
 #if MOBILE
 	public sealed class AppDomain : MarshalByRefObject {
 #else
-	public sealed class AppDomain : MarshalByRefObject, _AppDomain, IEvidenceFactory {
+	public sealed partial class AppDomain : MarshalByRefObject, _AppDomain, IEvidenceFactory {
 #endif
         #pragma warning disable 169
         #region Sync with object-internals.h
@@ -251,8 +251,10 @@ namespace System {
 		}
 #endif
 
+#if !SHARPLANG_RUNTIME
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		private static extern AppDomain getCurDomain ();
+#endif
 		
 		public static AppDomain CurrentDomain {
 			get {
@@ -682,8 +684,10 @@ namespace System {
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		private extern int ExecuteAssembly (Assembly a, string[] args);
 		
+#if !SHARPLANG_RUNTIME
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		private extern Assembly [] GetAssemblies (bool refOnly);
+#endif
 
 		public Assembly [] GetAssemblies ()
 		{
@@ -703,8 +707,10 @@ namespace System {
 			return null;
 		}
 
+#if !SHARPLANG_RUNTIME
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		internal extern Assembly LoadAssembly (string assemblyRef, Evidence securityEvidence, bool refOnly);
+#endif
 
 		public Assembly Load (AssemblyName assemblyRef)
 		{

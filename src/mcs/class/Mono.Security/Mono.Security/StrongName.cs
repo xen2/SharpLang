@@ -30,7 +30,7 @@
 //
 
 using System;
-using System.Configuration.Assemblies;
+using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 using System.Globalization;
 using System.IO;
 using System.Reflection;

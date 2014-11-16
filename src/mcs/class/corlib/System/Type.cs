@@ -53,7 +53,7 @@ namespace System {
 #if MOBILE
 	public abstract class Type : MemberInfo, IReflect {
 #else
-	public abstract class Type : MemberInfo, IReflect, _Type {
+	public abstract partial class Type : MemberInfo, IReflect, _Type {
 #endif
 
 		internal RuntimeTypeHandle _impl;
@@ -662,8 +662,10 @@ namespace System {
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		private static extern Type internal_from_handle (IntPtr handle);
 		
+#if !SHARPLANG_RUNTIME
 		[MethodImplAttribute(MethodImplOptions.InternalCall)]
 		private static extern Type internal_from_name (string name, bool throwOnError, bool ignoreCase);
+#endif
 
 		public static Type GetType(string typeName)
 		{
@@ -1016,12 +1018,12 @@ namespace System {
 
 		public abstract FieldInfo[] GetFields (BindingFlags bindingAttr);
 		
-		public override int GetHashCode()
+		public unsafe override int GetHashCode()
 		{
 			Type t = UnderlyingSystemType;
 			if (t != null && t != this)
 				return t.GetHashCode ();
-			return (int)_impl.Value;
+		    return (int)SharpLangHelper.GetObjectPointer(this);
 		}
 
 		public MemberInfo[] GetMember (string name)
@@ -1445,9 +1447,9 @@ namespace System {
 			return UnderlyingSystemType;
 		}
 
-		internal bool IsSystemType {
+		internal virtual bool IsSystemType {
 			get {
-				return _impl.Value != IntPtr.Zero;
+				return true;
 			}
 		}
 		

@@ -4,10 +4,10 @@
 
 #include "RuntimeType.h"
 
-extern "C" bool isInstInterface(const RuntimeTypeInfo* runtimeTypeInfo, const RuntimeTypeInfo* expectedInterface)
+extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface)
 {
-	auto currentInterface = runtimeTypeInfo->interfaceMap;
-	for (int i = 0; i < runtimeTypeInfo->interfacesCount; ++i)
+	auto currentInterface = eeType->interfaceMap;
+	for (int i = 0; i < eeType->interfacesCount; ++i)
 	{
 		if (*currentInterface == expectedInterface)
 			return true;

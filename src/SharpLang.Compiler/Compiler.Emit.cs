@@ -195,7 +195,12 @@ namespace SharpLang.CompilerServices
             };
 
             var vtablePointer = LLVM.BuildInBoundsGEP(builder, @object, indices, string.Empty);
-            LLVM.BuildStore(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, vtablePointer);
+            LLVM.BuildStore(builder, @class.GeneratedEETypeRuntimeLLVM, vtablePointer);
+        }
+
+        private ValueRef SetupVTableConstant(ValueRef @object, Class @class)
+        {
+            return LLVM.ConstInsertValue(@object, @class.GeneratedEETypeRuntimeLLVM, new [] { (uint)ObjectFields.RuntimeTypeInfo });
         }
 
         private void EmitRet(List<StackValue> stack, MethodReference method)
@@ -330,6 +335,29 @@ namespace SharpLang.CompilerServices
                 // TODO: Casting/implicit conversion?
                 var stackItem = stack[stack.Count - targetNumParams + index];
                 args[index] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index], stackItem);
+
+                if (targetMethod.PInvokeInfo != null)
+                {
+                    // Properly transfer strings to Win32 API format
+                    if (targetMethod.ParameterTypes[index].TypeReferenceCecil.FullName == typeof(string).FullName)
+                    {
+                        //if (!targetMethod.PInvokeInfo.IsCharSetUnicode)
+                        //    throw new NotImplementedException("Only Unicode string are supported in PInvoke");
+
+                        // Prepare indices
+                        var indices = new[]
+                        {
+                            LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
+                            LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
+                            LLVM.ConstInt(int32LLVM, 2, false),                         // Access string pointer
+                        };
+
+                        var charPointerLocation = LLVM.BuildInBoundsGEP(builder, args[index], indices, string.Empty);
+                        var firstCharacterPointer = LLVM.BuildLoad(builder, charPointerLocation, string.Empty);
+
+                        args[index] = firstCharacterPointer;
+                    }
+                }
             }
 
             // Remove arguments from stack
@@ -574,7 +602,7 @@ namespace SharpLang.CompilerServices
         {
             var value = stack.Pop();
 
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedEETypeRuntimeLLVM;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -594,7 +622,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
         {
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedEETypeRuntimeLLVM;
 
             // Get static field GEP indices
             var indices = BuildStaticFieldIndices(field);
@@ -617,7 +645,7 @@ namespace SharpLang.CompilerServices
 
         private void EmitLdsflda(List<StackValue> stack, Field field)
         {
-            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedRuntimeTypeInfoGlobalLLVM;
+            var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedEETypeRuntimeLLVM;
 
             var refType = GetType(field.Type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
 
@@ -899,7 +927,7 @@ namespace SharpLang.CompilerServices
                 var isInstInterfaceResult = LLVM.BuildCall(builder, isInstInterfaceFunctionLLVM, new[]
                 {
                     LLVM.BuildPointerCast(builder, rttiPointer, inlineRuntimeTypeInfoType, string.Empty),
-                    LLVM.BuildPointerCast(builder, @class.GeneratedRuntimeTypeInfoGlobalLLVM, inlineRuntimeTypeInfoType, string.Empty),
+                    LLVM.BuildPointerCast(builder, @class.GeneratedEETypeTokenLLVM, inlineRuntimeTypeInfoType, string.Empty),
                 }, string.Empty);
 
                 LLVM.BuildCondBr(builder, isInstInterfaceResult, typeCheckDoneBlock, typeNotMatchBlock);
@@ -951,7 +979,7 @@ namespace SharpLang.CompilerServices
                 castedPointerObject = LLVM.BuildPointerCast(builder, obj.Value, castedPointerType, string.Empty);
 
                 // Compare super type in array at given depth with expected one
-                var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedRuntimeTypeInfoGlobalLLVM, intPtrLLVM), string.Empty);
+                var typeCompareResult = LLVM.BuildICmp(builder, IntPredicate.IntEQ, superType, LLVM.ConstPointerCast(@class.GeneratedEETypeRuntimeLLVM, intPtrLLVM), string.Empty);
                 LLVM.BuildCondBr(builder, typeCompareResult, typeCheckDoneBlock, typeNotMatchBlock);
             }
 

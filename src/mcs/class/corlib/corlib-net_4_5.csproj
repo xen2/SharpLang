@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -19,13 +19,12 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <NoWarn>612,618,1699</NoWarn>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;INSIDE_CORLIB;LIBC;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;INSIDE_CORLIB;LIBC;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;SHARPLANG_RUNTIME</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -33,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <NoWarn>612,618,1699</NoWarn>
     <Optimize>true</Optimize>
-    <DefineConstants>INSIDE_CORLIB;LIBC;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5</DefineConstants>
+    <DefineConstants>INSIDE_CORLIB;LIBC;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;SHARPLANG_RUNTIME</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -1500,6 +1499,27 @@
     <Compile Include="System.Threading\WaitHandleCannotBeOpenedException.cs" />
     <Compile Include="System.Threading\WaitOrTimerCallback.cs" />
     <Compile Include="System.Threading\Watch.cs" />
+    <Compile Include="System\SharpLang\AppDomain.cs" />
+    <Compile Include="System\SharpLang\Assembly.cs" />
+    <Compile Include="System\SharpLang\ISharpLangGenericContext.cs" />
+    <Compile Include="System\SharpLang\Object.cs" />
+    <Compile Include="System\SharpLang\SharpLangAssembly.cs" />
+    <Compile Include="System\SharpLang\SharpLangEEType.cs" />
+    <Compile Include="System\SharpLang\SharpLangEETypeComparer.cs" />
+    <Compile Include="System\SharpLang\SharpLangEETypePtr.cs" />
+    <Compile Include="System\SharpLang\SharpLangModule.cs" />
+    <Compile Include="System\SharpLang\SharpLangHelper.cs" />
+    <Compile Include="System\SharpLang\SharpLangMethodInfo.cs" />
+    <Compile Include="System\SharpLang\SharpLangType.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeArray.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeByRef.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeDefinition.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeElement.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeGeneric.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypeGenericParameter.cs" />
+    <Compile Include="System\SharpLang\SharpLangTypePointer.cs" />
+    <Compile Include="System\SharpLang\SharpLangEETypeDefinition.cs" />
+    <Compile Include="System\SharpLang\Type.cs" />
     <Compile Include="System\__ComObject.cs" />
     <Compile Include="System\_AppDomain.cs" />
     <Compile Include="System\AccessViolationException.cs" />
@@ -1713,7 +1733,8 @@
     <Compile Include="System\Void.cs" />
     <Compile Include="System\WeakReference.cs" />
     <Compile Include="System\WeakReference_T.cs" />
-    <Compile Include="System\WindowsConsoleDriver.cs" />  </ItemGroup>
+    <Compile Include="System\WindowsConsoleDriver.cs" />
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -1737,6 +1758,10 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj">
+      <Project>{f3e433c8-352f-4944-bf7f-765ce435370d}</Project>
+      <Name>System.Reflection.Metadata</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

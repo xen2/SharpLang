@@ -38,7 +38,6 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using System.Configuration.Assemblies;
 
 using Mono.Security;
 
@@ -52,7 +51,7 @@ namespace System.Reflection {
 #if MOBILE
 	public partial class Assembly : ICustomAttributeProvider {
 #elif NET_4_0
-	public abstract class Assembly : ICustomAttributeProvider, _Assembly, IEvidenceFactory, ISerializable {
+	public abstract partial class Assembly : ICustomAttributeProvider, _Assembly, IEvidenceFactory, ISerializable {
 #else
 	public partial class Assembly : ICustomAttributeProvider, _Assembly, IEvidenceFactory, ISerializable {
 #endif
@@ -498,14 +497,14 @@ namespace System.Reflection {
 #endif
 		[MonoTODO("This overload is not currently implemented")]
 		// FIXME: What are we missing?
-		public static Assembly LoadFrom (String assemblyFile, Evidence securityEvidence, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
+		public static Assembly LoadFrom (String assemblyFile, Evidence securityEvidence, byte[] hashValue, Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm)
 		{
 			throw new NotImplementedException ();
 		}
 
 #if NET_4_0
 		[MonoTODO]
-		public static Assembly LoadFrom (String assemblyFile, byte [] hashValue, AssemblyHashAlgorithm hashAlgorithm)
+		public static Assembly LoadFrom (String assemblyFile, byte [] hashValue, Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm)
 		{
 			throw new NotImplementedException ();
 		}
@@ -711,11 +710,13 @@ namespace System.Reflection {
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		public extern virtual String[] GetManifestResourceNames ();
 
+#if !SHARPLANG_RUNTIME
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		public extern static Assembly GetExecutingAssembly ();
 
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		public extern static Assembly GetCallingAssembly ();
+#endif
 
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		internal static extern AssemblyName[] GetReferencedAssemblies (Assembly module);

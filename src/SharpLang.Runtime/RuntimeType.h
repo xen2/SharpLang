@@ -3,32 +3,54 @@
 
 #include <stdint.h>
 
-struct RuntimeTypeInfo
+struct Object;
+struct RuntimeType;
+
+struct TypeDefinition
 {
-	RuntimeTypeInfo* base;
+	Object* sharpLangModule;
+	uint32_t token;
+};
+
+struct EEType
+{
+	EEType* base;
+
+	uint8_t isConcreteType;
+
+	TypeDefinition typeDef;
+	EEType* elementType;
+	RuntimeType* runtimeType;
+	
 	uint32_t superTypeCount;
 	uint32_t interfacesCount;
-	RuntimeTypeInfo** superTypes;
-	RuntimeTypeInfo** interfaceMap;
+	EEType** superTypes;
+	EEType** interfaceMap;
 	uint8_t initialized;
 	uint32_t objectSize;
 	uint32_t elementSize;
 	void* interfaceMethodTable[19];
+	uint32_t virtualTableSize;
 	void* virtualTable[0];
 };
 
 struct Object
 {
-	Object(RuntimeTypeInfo* runtimeTypeInfo) : runtimeTypeInfo(runtimeTypeInfo) {}
+	Object(EEType* eeType) : eeType(eeType) {}
 
-	RuntimeTypeInfo* runtimeTypeInfo;
+	EEType* eeType;
+};
+
+struct RuntimeType : Object
+{
+	EEType* runtimeEEType;
 };
 
 struct Exception : Object
 {
 };
 
-extern RuntimeTypeInfo System_String_rtti;
+extern EEType System_String_rtti;
 
 struct String : Object
 {
@@ -46,7 +68,7 @@ struct ArrayBase : Object
 template <class T>
 struct Array : ArrayBase
 {
-	const T* value;
+	T* value;
 };
 
 #endif

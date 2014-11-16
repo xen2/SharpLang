@@ -46,6 +46,11 @@ namespace SharpLang.CompilerServices
         private ValueRef pinvokeLoadLibraryFunctionLLVM;
         private ValueRef pinvokeGetProcAddressFunctionLLVM;
 
+        // Types used for reflection
+        private TypeRef typeDefLLVM;
+        private Type sharpLangTypeType;
+        private Type sharpLangModuleType;
+
         public void InitializeCommonTypes()
         {
             // Initialize LLVM types
@@ -85,6 +90,22 @@ namespace SharpLang.CompilerServices
             // struct CaughtResultType { i8*, i32 }
             caughtResultLLVM = LLVM.StructCreateNamed(context, "CaughtResultType");
             LLVM.StructSetBody(caughtResultLLVM, new[] { intPtrLLVM, int32LLVM }, false);
+
+            // Prepare types used to emit metadata and reflection
+            if (!TestMode)
+            {
+                sharpLangTypeType = GetType(corlib.MainModule.GetType("System.SharpLangType"), TypeState.StackComplete);
+                sharpLangModuleType = GetType(corlib.MainModule.GetType("System.SharpLangModule"), TypeState.StackComplete);
+            }
+            else
+            {
+                sharpLangTypeType = intPtr;
+                sharpLangModuleType = intPtr;
+            }
+
+            // struct TypeDef { SharpLangModule*, i32 }
+            typeDefLLVM = LLVM.StructCreateNamed(context, "TypeDef");
+            LLVM.StructSetBody(typeDefLLVM, new[] { sharpLangModuleType.DefaultTypeLLVM, int32LLVM }, false);
 
             // Import runtime methods
             allocObjectFunctionLLVM = ImportRuntimeFunction(module, "allocObject");
