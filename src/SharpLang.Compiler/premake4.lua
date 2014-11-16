@@ -26,4 +26,5 @@ project "SharpLang.Compiler"
     "Mono.Cecil.Rocks",
     "Mono.Options",
     "Mono.Linker",
+    "System.Reflection.Metadata",
   }
