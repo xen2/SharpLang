@@ -29,10 +29,7 @@ namespace SharpLang.CompilerServices
         {
             unchecked
             {
-                // Sometimes, IsValueType is not properly set in type references, so let's map it to Class.
-                var metadataType = typeReference.MetadataType;
-                if (metadataType == MetadataType.ValueType)
-                    metadataType = MetadataType.Class;
+                var metadataType = GetUnifiedMetadataType(typeReference);
                 var result = ((byte)metadataType).GetHashCode();
 
                 var typeSpecification = typeReference as TypeSpecification;
@@ -250,7 +247,7 @@ namespace SharpLang.CompilerServices
             if (a == null || b == null)
                 return false;
 
-            if (a.MetadataType != b.MetadataType)
+            if (GetUnifiedMetadataType(a) != GetUnifiedMetadataType(b))
                 return false;
 
             if (a.IsGenericParameter)
@@ -272,6 +269,15 @@ namespace SharpLang.CompilerServices
                     return false;
 
             return true;
+        }
+
+        private static MetadataType GetUnifiedMetadataType(TypeReference typeReference)
+        {
+            // Sometimes, IsValueType is not properly set in type references, so let's map it to Class.
+            var metadataType = typeReference.MetadataType;
+            if (metadataType == MetadataType.ValueType)
+                metadataType = MetadataType.Class;
+            return metadataType;
         }
     }
 }
