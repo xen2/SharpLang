@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -284,6 +285,26 @@ namespace SharpLang.CompilerServices.Cecil
         {
             foreach (var genericParameter in genericParameters)
                 result.GenericParameters.Add(genericParameter);
+        }
+
+        public static MethodCallingConvention ToCecil(this CallingConvention callingConvention)
+        {
+            // Apply calling convention
+            switch (callingConvention)
+            {
+                case CallingConvention.Winapi:
+                    return MethodCallingConvention.Default;
+                case CallingConvention.Cdecl:
+                    return MethodCallingConvention.C;
+                case CallingConvention.StdCall:
+                    return MethodCallingConvention.StdCall;
+                case CallingConvention.ThisCall:
+                    return MethodCallingConvention.ThisCall;
+                case CallingConvention.FastCall:
+                    return MethodCallingConvention.FastCall;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

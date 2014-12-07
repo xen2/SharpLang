@@ -24,6 +24,9 @@ namespace SharpLang.CompilerServices.Tests
             // Compile assembly to IL
             var sourceAssembly = CompileAssembly(sourceFile);
 
+            // Run Mono.Linker
+            sourceAssembly = LinkAssembly(sourceAssembly);
+
             // Compile and link to LLVM
             var outputAssembly = CompileAndLinkToLLVM(sourceAssembly);
 
@@ -35,24 +38,33 @@ namespace SharpLang.CompilerServices.Tests
             Assert.That(output2, Is.EqualTo(output1));
         }
 
-        private static string CompileAndLinkToLLVM(string sourceAssembly)
+        [Test, TestCaseSource("TestPInvokeCases")]
+        public static void TestPInvoke(string sourceFile)
         {
-            // Link assembly
-            var assemblyBaseName = Path.GetFileNameWithoutExtension(sourceAssembly);
+            // Compile assembly to IL
+            var sourceAssembly = CompileAssembly(sourceFile, "System.dll", "System.Windows.Forms.dll");
 
-            // Prepare output directory (and clean it if already existing)
-            var outputDirectory = assemblyBaseName + "_linker_output";
-            try
-            {
-                Directory.Delete(outputDirectory, true);
-            }
-            catch (Exception)
-            {
-            }
+            // Run Mono.Linker
+            sourceAssembly = LinkAssembly(sourceAssembly);
 
-            // Use Mono.Linker to reduce IL code to process (tree-shaking)
-            sourceAssembly = LinkAssembly(sourceAssembly, outputDirectory);
+            // Compile and link to LLVM
+            var outputAssembly = CompileAndLinkToLLVM(sourceAssembly);
 
+            // Compile PInvokeTest.cpp
+            var pinvokeTestLibrary = Path.Combine(Path.GetDirectoryName(outputAssembly), "PInvokeTest.dll");
+            Driver.ExecuteClang(string.Format("{0} -std=c++11 -dynamiclib -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-pinvoke"), "PInvokeTest.cpp"), pinvokeTestLibrary));
+
+            // Execute original and ours
+            var output1 = ExecuteAndCaptureOutput(sourceAssembly);
+            var output2 = ExecuteAndCaptureOutput(outputAssembly);
+
+            // Compare output
+            Assert.That(output2, Is.EqualTo(output1));
+        }
+
+        private static string CompileAndLinkToLLVM(string sourceAssembly, string[] extraBytecodes = null)
+        {
+            var outputDirectory = Path.GetDirectoryName(sourceAssembly);
             var outputBitcodes = new List<string>();
 
             // Compile each assembly to LLVM bitcode
@@ -69,7 +81,10 @@ namespace SharpLang.CompilerServices.Tests
                 outputBitcodes.Add(outputBitcode);
             }
 
-            var outputAssembly = assemblyBaseName + "-llvm.exe";
+            var outputAssembly = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(sourceAssembly) + "-llvm.exe");
+
+            if (extraBytecodes != null)
+                outputBitcodes.AddRange(extraBytecodes);
 
             // Link bitcodes
             Console.WriteLine("Compiling to machine code and linking...");
@@ -141,6 +156,25 @@ namespace SharpLang.CompilerServices.Tests
             throw new NotImplementedException("Unknown source format.");
         }
 
+        public static string LinkAssembly(string sourceAssembly)
+        {
+            // Link assembly
+            var assemblyBaseName = Path.GetFileNameWithoutExtension(sourceAssembly);
+
+            // Prepare output directory (and clean it if already existing)
+            var outputDirectory = assemblyBaseName + "_linker_output";
+            try
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            catch (Exception)
+            {
+            }
+
+            // Use Mono.Linker to reduce IL code to process (tree-shaking)
+            return LinkAssembly(sourceAssembly, outputDirectory);
+        }
+        
         public static string LinkAssembly(string assemblyFile, string outputDirectory)
         {
             var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", @"..\..\..\..\src\mcs\class\lib\net_4_5", "-c", "link", "-b", "true" });
@@ -156,7 +190,7 @@ namespace SharpLang.CompilerServices.Tests
             // Locate ilasm
             var ilasmPath = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "ilasm.exe");
 
-            var ilasmArguments = string.Format("\"{0}\" /exe /out=\"{1}\"", sourceFile, outputAssembly);
+            var ilasmArguments = string.Format("\"{0}\" /exe /32bitpreferred /out=\"{1}\"", sourceFile, outputAssembly);
 
             var processStartInfo = new ProcessStartInfo(ilasmPath, ilasmArguments);
 
@@ -181,7 +215,7 @@ namespace SharpLang.CompilerServices.Tests
                 GenerateInMemory = false,
                 GenerateExecutable = true,
                 TreatWarningsAsErrors = false,
-                CompilerOptions = "/unsafe /debug+ /debug:full",
+                CompilerOptions = "/unsafe /debug+ /debug:full /platform:anycpu32bitpreferred",
                 OutputAssembly = outputAssembly,
             };
 
@@ -282,6 +316,14 @@ namespace SharpLang.CompilerServices.Tests
             get
             {
                 return EnumerateTestsInTestsDirectory("tests-corlib");
+            }
+        }
+
+        public static IEnumerable<string> TestPInvokeCases
+        {
+            get
+            {
+                return EnumerateTestsInTestsDirectory("tests-pinvoke");
             }
         }
 

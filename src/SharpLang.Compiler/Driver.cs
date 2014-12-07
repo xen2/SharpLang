@@ -7,6 +7,7 @@ using System.Text;
 using Mono.Cecil;
 using SharpLang.Compiler.Utils;
 using SharpLang.CompilerServices.Cecil;
+using SharpLang.CompilerServices.Marshalling;
 using SharpLang.Toolsets;
 using SharpLLVM;
 
@@ -41,6 +42,11 @@ namespace SharpLang.CompilerServices
         public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, bool verifyModule = true, System.Type[] additionalTypes = null)
         {
             var assemblyDefinition = LoadAssembly(inputFile);
+
+            // Generate marshalling code for PInvoke
+            var mcg = new MarshalCodeGenerator(assemblyDefinition);
+            mcg.Generate();
+            //mcg.AssemblyDefinition.Write(Path.Combine(Path.GetDirectoryName(inputFile), Path.GetFileNameWithoutExtension(inputFile) + ".Marshalled.dll"), new WriterParameters {  });
 
             var compiler = new Compiler();
             compiler.TestMode = additionalTypes != null;
