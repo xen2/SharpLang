@@ -1374,7 +1374,11 @@ namespace System.Runtime.InteropServices
 			if (d == null)
 				throw new ArgumentNullException ("d");
 			
+#if SHARPLANG_RUNTIME
+			return SharpLang.Marshalling.MarshalHelper.GetFunctionPointerForDelegate(d);
+#else
 			return GetFunctionPointerForDelegateInternal (d);
+#endif
 		}
 
 #if NET_4_5

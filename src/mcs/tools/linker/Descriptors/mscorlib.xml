@@ -366,5 +366,8 @@
 		<type fullname="Mono.Interop.IDispatch" feature="com" />
 		<type fullname="Mono.Interop.IUnknown" feature="com" />
 
+		<type fullname="SharpLang.Marshalling.MarshalHelper" />
+		<type fullname="SharpLang.Marshalling.MarshalFunctionAttribute" />
+
 	</assembly>
 </linker>

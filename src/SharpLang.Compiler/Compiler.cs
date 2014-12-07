@@ -194,6 +194,10 @@ namespace SharpLang.CompilerServices
             LLVM.SetLinkage(globalCtor, Linkage.PrivateLinkage);
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, globalCtor, string.Empty));
 
+            Function entryPoint = null;
+            if (assembly.EntryPoint != null)
+                functions.TryGetValue(assembly.EntryPoint, out entryPoint);
+
             if (!TestMode)
             {
                 // Emit metadata
@@ -252,6 +256,30 @@ namespace SharpLang.CompilerServices
                     EmitCall(functionContext, registerTypeMethod.Signature, registerTypeMethod.GeneratedValue);
                 }
 
+                // Register unmanaged delegate callbacks
+                var delegateWrappers = assembly.MainModule.GetType("DelegateWrappers");
+                if (delegateWrappers != null)
+                {
+                    var marshalHelper = GetType(corlib.MainModule.GetType("SharpLang.Marshalling.MarshalHelper"), TypeState.VTableEmitted);
+                    var marshalHelperRegisterDelegateWrapper = marshalHelper.Class.Functions.First(x => x.DeclaringType == marshalHelper && x.MethodReference.Name == "RegisterDelegateWrapper");
+
+                    foreach (var delegateWrapper in delegateWrappers.Methods)
+                    {
+                        var method = GetFunction(delegateWrapper);
+
+                        // Determine delegate type from MarshalFunctionAttribute
+                        var marshalFunctionAttribute = method.MethodDefinition.CustomAttributes.First(x => x.AttributeType.FullName == "SharpLang.Marshalling.MarshalFunctionAttribute");
+                        var delegateType = GetType((TypeReference)marshalFunctionAttribute.ConstructorArguments[0].Value, TypeState.VTableEmitted);
+
+                        // TODO: Rename those method, and set their linking to linkonce so that it can be merged?
+                        // Of course, we would also need to make sure it works when called from external assemblies
+
+                        functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.ConstPointerCast(delegateType.Class.GeneratedEETypeRuntimeLLVM, intPtrLLVM)));
+                        EmitLdftn(functionContext.Stack, method);
+                        EmitCall(functionContext, marshalHelperRegisterDelegateWrapper.Signature, marshalHelperRegisterDelegateWrapper.GeneratedValue);
+                    }
+                }
+
                 // Sort and remove duplicates after adding all our types
                 // TODO: Somehow sort everything before insertion at compile time?
                 EmitCall(functionContext, sortTypesMethod.Signature, sortTypesMethod.GeneratedValue);
@@ -277,9 +305,10 @@ namespace SharpLang.CompilerServices
                         })}));
             }
 
+
+
             // Emit "main" which will call the assembly entry point (if any)
-            Function entryPoint;
-	        if (assembly.EntryPoint != null && functions.TryGetValue(assembly.EntryPoint, out entryPoint))
+            if (entryPoint != null)
 	        {
                 var mainFunctionType = LLVM.FunctionType(int32LLVM, new TypeRef[0], false);
 	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
@@ -292,6 +321,9 @@ namespace SharpLang.CompilerServices
 
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);
                 LLVM.BuildRet(builder, LLVM.ConstInt(int32LLVM, 0, false));
+
+                // Emit PInvoke Thunks and Globals needed in entry point module
+                EmitPInvokeGlobals();
 	        }
 
             LLVM.DIBuilderFinalize(debugBuilder);

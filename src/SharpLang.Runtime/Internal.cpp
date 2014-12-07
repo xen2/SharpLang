@@ -365,3 +365,24 @@ extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object_T
 	return result;
 }
 
+
+// ThunkPointers is defined by LLVM
+extern void* ThunkPointers[4096];
+void* ThunkTargets[4096];
+
+thread_local uint32_t ThunkCurrentId;
+
+extern "C" void** SharpLang_Marshalling_MarshalHelper__GetThunkTargets__()
+{
+	return ThunkTargets;
+}
+
+extern "C" void** SharpLang_Marshalling_MarshalHelper__GetThunkPointers__()
+{
+	return ThunkPointers;
+}
+
+extern "C" uint32_t SharpLang_Marshalling_MarshalHelper__GetThunkCurrentId__()
+{
+	return ThunkCurrentId;
+}

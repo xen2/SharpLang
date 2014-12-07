@@ -1,8 +1,8 @@
 namespace System
 {
-    unsafe struct SharpLangEETypePtr
+    unsafe struct SharpLangEETypePtr : IEquatable<SharpLangEETypePtr>
     {
-        public SharpLangEEType* Value;
+        public readonly SharpLangEEType* Value;
 
         public SharpLangEETypePtr(SharpLangEEType* value)
         {
@@ -17,6 +17,22 @@ namespace System
         public static implicit operator SharpLangEEType*(SharpLangEETypePtr eeType)
         {
             return eeType.Value;
+        }
+
+        public bool Equals(SharpLangEETypePtr other)
+        {
+            return Value == other.Value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is SharpLangEETypePtr && Equals((SharpLangEETypePtr)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ((IntPtr)Value).GetHashCode();
         }
     }
 }

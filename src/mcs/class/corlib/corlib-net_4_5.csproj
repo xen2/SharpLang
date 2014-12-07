@@ -136,6 +136,8 @@
     <Compile Include="Mono.Xml\SmallXmlParser.cs" />
     <Compile Include="Mono\DataConverter.cs" />
     <Compile Include="Mono\Runtime.cs" />
+    <Compile Include="SharpLang.Marshalling\MarshalFunctionAttribute.cs" />
+    <Compile Include="SharpLang.Marshalling\MarshalHelper.cs" />
     <Compile Include="System.Collections.Concurrent.Partitioners\EnumerablePartitioner.cs" />
     <Compile Include="System.Collections.Concurrent.Partitioners\ListPartitioner.cs" />
     <Compile Include="System.Collections.Concurrent.Partitioners\UserRangePartitioner.cs" />
