@@ -221,10 +221,10 @@ namespace SharpLang.CompilerServices
                 switch (callingConvention)
                 {
                     case MethodCallingConvention.StdCall:
-                        LLVM.SetInstructionCallConv(functionGlobal, (uint)CallConv.X86StdcallCallConv);
+                        LLVM.SetFunctionCallConv(functionGlobal, (uint)CallConv.X86StdcallCallConv);
                         break;
                     case MethodCallingConvention.FastCall:
-                        LLVM.SetInstructionCallConv(functionGlobal, (uint)CallConv.X86FastcallCallConv);
+                        LLVM.SetFunctionCallConv(functionGlobal, (uint)CallConv.X86FastcallCallConv);
                         break;
                 }
 
