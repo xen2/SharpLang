@@ -29,6 +29,11 @@ namespace System
             get { return elementType.Module; }
         }
 
+        public override Assembly Assembly
+        {
+            get { return elementType.Assembly; }
+        }
+
         protected abstract string NameSuffix { get; }
 
         internal override string InternalAssemblyName

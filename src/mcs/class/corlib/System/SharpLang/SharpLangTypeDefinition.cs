@@ -70,6 +70,11 @@ namespace System
             get { return InternalModule; }
         }
 
+        public override Assembly Assembly
+        {
+            get { return InternalModule.Assembly; }
+        }
+
         protected override TypeAttributes GetAttributeFlagsImpl()
         {
             var typeDefinition = InternalModule.MetadataReader.GetTypeDefinition(InternalHandle);

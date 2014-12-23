@@ -53,6 +53,11 @@ namespace System
             get { return definition.Module; }
         }
 
+        public override Assembly Assembly
+        {
+            get { return definition.Assembly; }
+        }
+
         protected override TypeAttributes GetAttributeFlagsImpl()
         {
             return definition.Attributes;
