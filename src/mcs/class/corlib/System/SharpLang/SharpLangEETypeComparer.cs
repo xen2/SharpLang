@@ -143,7 +143,7 @@ namespace System
                 {
                     return middle;
                 }
-                if (compareResult > 0)
+                if (compareResult < 0)
                 {
                     start = middle + 1;
                 }
