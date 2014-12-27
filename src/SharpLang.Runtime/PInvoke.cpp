@@ -12,6 +12,10 @@ enum class PInvokeAttributes : uint16_t
 
 extern "C" void* PInvokeOpenLibrary(const char* moduleName)
 {
+	// Current module?
+	if (strcmp(moduleName, "__Internal") == 0)
+		return GetModuleHandle(NULL);
+
 	return LoadLibrary(moduleName);
 }
 
