@@ -112,6 +112,7 @@
 		<type fullname="System.StackOverflowException" />
 		<type fullname="System.STAThreadAttribute" />
 		<type fullname="System.String" preserve="fields">
+			<method name=".ctor" />
 			<method name="CreateString" />
 			<method name="InternalAllocateStr" />
 			<method name="memcpy" />
