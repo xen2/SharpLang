@@ -225,7 +225,7 @@ namespace SharpLang.CompilerServices
         {
             var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
-            var stringConstantDataGlobal = CreateStringConstant(operand, !CharUsesUTF8, false);
+            var stringConstantDataGlobal = CreateStringConstant(operand, !CharUsesUTF8, true);
 
             // Allocate object
             var allocatedObject = AllocateObject(stringClass.Type);
