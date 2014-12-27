@@ -251,21 +251,6 @@ namespace SharpLang.CompilerServices
             methodsToCompile.Enqueue(new KeyValuePair<MethodReference, Function>(function.MethodReference, function));
         }
 
-        private int UpdateOffsets(MethodBody body)
-        {
-            var offset = 0;
-            foreach (var instruction in body.Instructions)
-            {
-                instruction.Offset = offset;
-                offset += instruction.GetSize();
-            }
-
-            // TODO: Guess better
-            body.MaxStackSize = 8;
-
-            return offset;
-        }
-
         /// <summary>
         /// Compiles the given method definition.
         /// </summary>
@@ -305,7 +290,7 @@ namespace SharpLang.CompilerServices
                     if (body == null)
                         return;
 
-                    codeSize = UpdateOffsets(body);
+                    codeSize = body.UpdateInstructionOffsets();
                 }
 
                 // Reposition builder at end, in case it was used

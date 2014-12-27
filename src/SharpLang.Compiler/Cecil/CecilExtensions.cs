@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace SharpLang.CompilerServices.Cecil
 {
@@ -88,6 +88,24 @@ namespace SharpLang.CompilerServices.Cecil
                 }
             }
             builder.Append(")");
+        }
+
+        public static int UpdateInstructionOffsets(this MethodBody body)
+        {
+            // Ideally we would like to reuse CodeWriter.ComputeHeader() (unfortunately private)
+            var offset = 0;
+            foreach (var instruction in body.Instructions)
+            {
+                instruction.Offset = offset;
+                offset += instruction.GetSize();
+            }
+
+            // TODO: Guess better (we don't care so much as our codegen doesn't depend on it being valid)
+            body.MaxStackSize = 8;
+
+            body.CodeSize = offset;
+
+            return offset;
         }
 
         public static TypeReference MakeGenericType(this TypeReference self, params TypeReference[] arguments)
