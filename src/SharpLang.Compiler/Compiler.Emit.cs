@@ -1039,7 +1039,7 @@ namespace SharpLang.CompilerServices
             // TODO: check type?
             var objCast = LLVM.BuildPointerCast(builder, obj.Value, LLVM.PointerType(type.ObjectTypeLLVM, 0), string.Empty);
 
-            var dataPointer = GetDataPointer(objCast);
+            var dataPointer = GetDataPointer(builder, objCast);
 
             var expectedPointerType = LLVM.PointerType(type.DataTypeLLVM, 0);
             if (expectedPointerType != LLVM.TypeOf(dataPointer))

@@ -182,7 +182,7 @@ namespace SharpLang.CompilerServices
                     {
                         // Build vtable
                         @class.VTableTypeLLVM = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".vtable");
-                        LLVM.StructSetBody(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => LLVM.TypeOf(x.GeneratedValue)).ToArray(), false);
+                        LLVM.StructSetBody(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => LLVM.PointerType(x.VirtualFunctionType, 0)).ToArray(), false);
 
                         foreach (var @interface in typeDefinition.Interfaces)
                         {
@@ -499,7 +499,7 @@ namespace SharpLang.CompilerServices
                     {
                         // Single entry
                         var imtEntry = imtSlot.First.Value;
-                        return LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM);
+                        return LLVM.ConstPointerCast(GetVirtualMethod(imtEntry.Function), intPtrLLVM);
                     }
                     else
                     {
@@ -510,7 +510,7 @@ namespace SharpLang.CompilerServices
                             return LLVM.ConstNamedStruct(imtEntryLLVM, new[]
                             {
                                 imtEntry.MethodId,                                                      // i8* functionId
-                                LLVM.ConstPointerCast(imtEntry.Function.GeneratedValue, intPtrLLVM),    // i8* functionPtr
+                                LLVM.ConstPointerCast(GetVirtualMethod(imtEntry.Function), intPtrLLVM), // i8* functionPtr
                             });
                         })
                             .Concat(Enumerable.Repeat(LLVM.ConstNull(imtEntryLLVM), 1)).ToArray()); // Append { 0, 0 } terminator
@@ -559,7 +559,7 @@ namespace SharpLang.CompilerServices
                 var interfacesGlobal = LLVM.ConstInBoundsGEP(interfacesConstantGlobal, new[] {zero, zero});
 
                 // Build VTable
-                var vtableConstant = LLVM.ConstNamedStruct(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => x.GeneratedValue).ToArray());
+                var vtableConstant = LLVM.ConstNamedStruct(@class.VTableTypeLLVM, @class.VirtualTable.Select(x => GetVirtualMethod(x)).ToArray());
 
                 var staticFieldsInitializer = LLVM.ConstNamedStruct(runtimeTypeInfoTypeElements[(int)RuntimeTypeInfoFields.StaticFields], @class.StaticFields.Select(field =>
                 {
@@ -637,6 +637,68 @@ namespace SharpLang.CompilerServices
 
             // Mark RTTI as external
             LLVM.SetLinkage(runtimeTypeInfoGlobal, Linkage.ExternalLinkage);
+        }
+
+        /// <summary>
+        /// Gets a LLVM function suitable to be put in virtual table (which expect only reference types).
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns></returns>
+        private ValueRef GetVirtualMethod(Function function)
+        {
+            if (function.DeclaringType.TypeDefinitionCecil.IsValueType
+                && (function.MethodDefinition.Attributes & MethodAttributes.Virtual) != 0)
+            {
+                // If declaring type is a value type, needs to unbox "this"
+                // TODO: Currently emitted with LLVM bitcode, but depending on how it gets optimized (tailcall), module assembly might be useful
+                if (function.UnboxTrampoline == ValueRef.Empty)
+                {
+                    // Create function type with boxed "this"
+                    var argumentCount = LLVM.CountParamTypes(function.FunctionType);
+
+                    // Create unbox trampoline method
+                    function.UnboxTrampoline = LLVM.AddFunction(module, LLVM.GetValueName(function.GeneratedValue) + "_UnboxTrampoline", function.VirtualFunctionType);
+
+                    LLVM.SetLinkage(function.UnboxTrampoline, function.DeclaringType.Linkage);
+
+                    // Create main block
+                    var block = LLVM.AppendBasicBlockInContext(context, function.UnboxTrampoline, string.Empty);
+                    LLVM.PositionBuilderAtEnd(builder2, block);
+
+                    // Forward arguments
+                    var arguments = new ValueRef[argumentCount];
+                    for (int i = 0; i < argumentCount; ++i)
+                    {
+                        arguments[i] = LLVM.GetParam(function.UnboxTrampoline, (uint)i);
+                    }
+
+                    // First parameter (this) needs to be unboxed
+                    arguments[0] = GetDataPointer(builder2, arguments[0]);
+
+                    // In some cases, data type and value type are different (i.e. System.Int32.value = { i32 } vs i32)
+                    // Make sure to cast to data type
+                    // TODO: Maybe that should be part of GetDataPointer?
+                    if (function.DeclaringType.DataTypeLLVM != function.DeclaringType.ValueTypeLLVM)
+                    {
+                        arguments[0] = LLVM.BuildPointerCast(builder2, arguments[0], LLVM.PointerType(function.DeclaringType.DataTypeLLVM, 0), string.Empty);
+                    }
+
+                    // Call original function with same parameters
+                    var forwardCall = LLVM.BuildCall(builder2, function.GeneratedValue, arguments, string.Empty);
+                    LLVM.SetTailCall(forwardCall, true);
+
+                    // Forward return value
+                    var hasRetValue = LLVM.GetReturnType(function.FunctionType) != LLVM.VoidTypeInContext(context);
+                    if (hasRetValue)
+                        LLVM.BuildRet(builder2, forwardCall);
+                    else
+                        LLVM.BuildRetVoid(builder2);
+                }
+                return function.UnboxTrampoline;
+            }
+            
+            // Reference type, function is returned as is
+            return function.GeneratedValue;
         }
 
         private static uint GetMethodId(MethodReference resolvedInterfaceMethod)

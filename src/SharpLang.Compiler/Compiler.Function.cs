@@ -1805,7 +1805,7 @@ namespace SharpLang.CompilerServices
             // Allocate object
             var allocatedObject = AllocateObject(type, StackValueType.Object);
 
-            var dataPointer = GetDataPointer(allocatedObject);
+            var dataPointer = GetDataPointer(builder, allocatedObject);
 
             // Convert to local type
             var value = ConvertFromStackToLocal(type, valueType);
@@ -1853,7 +1853,7 @@ namespace SharpLang.CompilerServices
             EmitBr(basicBlocks[targetInstruction.Offset]);
         }
 
-        private ValueRef GetDataPointer(ValueRef obj)
+        private ValueRef GetDataPointer(BuilderRef builder, ValueRef obj)
         {
             // Get data pointer
             var indices = new[]
