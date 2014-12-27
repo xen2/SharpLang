@@ -308,6 +308,17 @@ extern "C" bool System_Buffer__BlockCopyInternal_System_Array_System_Int32_Syste
 	return true;
 }
 
+extern "C" double System_Math__Floor_System_Double_(double d)
+{
+	return floor(d);
+}
+
+extern "C" double System_Math__Round_System_Double_(double d)
+{
+	// TODO: Math.Round is different from C++ round, need to make a better implementation
+	return round(d);
+}
+
 extern "C" void* System_IO_MonoIO__get_ConsoleOutput__()
 {
 	return GetStdHandle(STD_OUTPUT_HANDLE);
