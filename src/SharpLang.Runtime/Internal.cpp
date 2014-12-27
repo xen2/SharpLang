@@ -214,8 +214,9 @@ extern "C" void System_String___ctor_System_Char___(String* str, Array<char16_t>
 {
 	auto length = value->length;
 	str->length = length;
-	str->value = (char16_t*) malloc(sizeof(char16_t) * length);
+	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
 	memcpy((void*)str->value, (void*)value->value, length * sizeof(char16_t));
+	const_cast<char16_t*>(str->value)[str->length] = 0;
 }
 
 extern "C" void System_String___ctor_System_Char___System_Int32_System_Int32_(String* str, Array<char16_t>* value, int startIndex, int length)
@@ -223,6 +224,7 @@ extern "C" void System_String___ctor_System_Char___System_Int32_System_Int32_(St
 	str->length = length;
 	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
 	memcpy((void*)str->value, (void*)(value->value + startIndex), length * sizeof(char16_t));
+	const_cast<char16_t*>(str->value)[str->length] = 0;
 }
 
 extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t length)
@@ -230,7 +232,8 @@ extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t leng
 	auto str = (String*)malloc(sizeof(String));
 	str->eeType = &System_String_rtti;
 	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);    
+	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
+	const_cast<char16_t*>(str->value)[str->length] = 0;
 	return str;
 }
 
