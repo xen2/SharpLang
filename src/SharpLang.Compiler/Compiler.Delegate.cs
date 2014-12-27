@@ -285,6 +285,7 @@ namespace SharpLang.CompilerServices
 
             // 2. Call method
             var methodPtrAuxCall = LLVM.BuildCall(builder2, methodPtrAux, helperArgs, string.Empty);
+            LLVM.SetTailCall(methodPtrAuxCall, true);
 
             // Return value
             if (LLVM.GetReturnType(invokeFunctionType) != LLVM.VoidTypeInContext(context))
