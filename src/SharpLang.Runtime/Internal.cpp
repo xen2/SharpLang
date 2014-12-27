@@ -263,6 +263,12 @@ extern "C" Object* System_Threading_Thread__CurrentInternalThread_internal__()
 	return NULL;
 }
 
+extern "C" int32_t System_Threading_Thread__GetDomainID__()
+{
+	// For now, we only support one AppDomain
+	return 1;
+}
+
 // int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
 extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
 {
