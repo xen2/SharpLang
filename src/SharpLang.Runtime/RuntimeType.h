@@ -43,6 +43,7 @@ struct Object
 
 struct RuntimeType : Object
 {
+	void* implObsolete; // Type._impl should be removed
 	EEType* runtimeEEType;
 };
 

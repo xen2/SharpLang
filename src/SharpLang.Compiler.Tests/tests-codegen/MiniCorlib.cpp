@@ -193,3 +193,9 @@ extern "C" Object* System_SharpLangModule__ResolveType_System_SharpLangEEType__(
 	// Needed by System_Object__GetType__
 	assert(false);
 }
+
+extern "C" ArrayBase* System_SharpLangType__MakeArrayType__(RuntimeType* elementType)
+{
+	// Needed by System_Array__CreateInstanceImpl_System_Type_System_Int32___System_Int32___
+	assert(false);
+}

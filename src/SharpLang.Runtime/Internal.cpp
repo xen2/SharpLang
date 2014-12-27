@@ -121,6 +121,26 @@ extern "C" bool System_Array__FastCopy_System_Array_System_Int32_System_Array_Sy
 	return true;
 }
 
+extern "C" RuntimeType* System_SharpLangType__MakeArrayType__(RuntimeType* elementType);
+extern EEType System_Object___rtti;
+
+extern "C" ArrayBase* System_Array__CreateInstanceImpl_System_Type_System_Int32___System_Int32___(RuntimeType* elementType, Array<int32_t>* lengths, Array<int32_t>* bounds)
+{
+	assert(lengths->length == 1);
+	assert(bounds == NULL);
+
+	auto length = lengths->value[0];
+
+	auto arrayType = System_SharpLangType__MakeArrayType__(elementType);
+
+	auto result = (Array<uint8_t>*)malloc(sizeof(Array<uint8_t>));
+	result->eeType = arrayType->runtimeEEType;
+	result->length = length;
+	result->value = (uint8_t*) malloc(result->eeType->elementSize * length);
+
+	return result;
+}
+
 extern "C" int32_t System_Environment__get_Platform__()
 {
 	// Windows
