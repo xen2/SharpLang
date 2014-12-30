@@ -254,7 +254,7 @@ namespace SharpLang.CompilerServices
         {
             // Probably inefficient, need to maybe add new LLVM bindings for that?
             var dataArray = data.Select(x => LLVM.ConstInt(LLVM.Int8TypeInContext(context), x, false));
-            var constantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), dataArray.ToArray());
+            var constantData = LLVM.ConstArray(LLVM.Int8TypeInContext(context), dataArray.ToArray());
 
             return constantData;
         }
