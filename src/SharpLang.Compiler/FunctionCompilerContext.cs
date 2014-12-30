@@ -54,6 +54,6 @@ namespace SharpLang.CompilerServices
         public BasicBlockRef LandingPadBlock { get; set; }
 
         // Debug info
-        public ValueRef DebugFile { get; set; }
+        public DIDescriptor DebugFile { get; set; }
     }
 }

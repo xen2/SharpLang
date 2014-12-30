@@ -439,6 +439,18 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ModuleCreateWithNameInContext(char * jarg1,
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_CloneModule(void * jarg1) {
+  void * jresult ;
+  LLVMModuleRef arg1 ;
+  LLVMModuleRef result;
+  
+  arg1 = (LLVMModuleRef)jarg1; 
+  result = LLVMCloneModule(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_DisposeModule(void * jarg1) {
   LLVMModuleRef arg1 ;
   
@@ -1478,30 +1490,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IsAInlineAsm(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_IsAMDNode(void * jarg1) {
-  void * jresult ;
-  LLVMValueRef arg1 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMValueRef)jarg1; 
-  result = LLVMIsAMDNode(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IsAMDString(void * jarg1) {
-  void * jresult ;
-  LLVMValueRef arg1 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMValueRef)jarg1; 
-  result = LLVMIsAMDString(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void * SWIGSTDCALL CSharp_IsAUser(void * jarg1) {
   void * jresult ;
   LLVMValueRef arg1 ;
@@ -2330,6 +2318,30 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IsAVAArgInst(void * jarg1) {
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_IsAMDNode(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMIsAMDNode(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_IsAMDString(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMIsAMDString(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_GetFirstUse(void * jarg1) {
   void * jresult ;
   LLVMValueRef arg1 ;
@@ -2618,6 +2630,21 @@ SWIGEXPORT long long SWIGSTDCALL CSharp_ConstIntGetSExtValue(void * jarg1) {
   
   arg1 = (LLVMValueRef)jarg1; 
   result = (long long)LLVMConstIntGetSExtValue(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_ConstRealGetDouble(void * jarg1, unsigned int * jarg2) {
+  double jresult ;
+  LLVMValueRef arg1 ;
+  LLVMBool *arg2 = (LLVMBool *) 0 ;
+  double result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  *jarg2 = 0; 
+  arg2 = (LLVMBool *)jarg2; 
+  result = (double)LLVMConstRealGetDouble(arg1,arg2);
   jresult = result; 
   return jresult;
 }
@@ -4772,6 +4799,30 @@ SWIGEXPORT int SWIGSTDCALL CSharp_GetICmpPredicate(void * jarg1) {
 }
 
 
+SWIGEXPORT int SWIGSTDCALL CSharp_GetFCmpPredicate(void * jarg1) {
+  int jresult ;
+  LLVMValueRef arg1 ;
+  LLVMRealPredicate result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = (LLVMRealPredicate)LLVMGetFCmpPredicate(arg1);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_InstructionClone(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMInstructionClone(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_SetInstructionCallConv(void * jarg1, unsigned int jarg2) {
   LLVMValueRef arg1 ;
   unsigned int arg2 ;
@@ -4849,6 +4900,78 @@ SWIGEXPORT void SWIGSTDCALL CSharp_SetTailCall(void * jarg1, unsigned int jarg2)
   arg1 = (LLVMValueRef)jarg1; 
   arg2 = jarg2 ? true : false; 
   LLVMSetTailCall(arg1,arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetNumSuccessors(void * jarg1) {
+  unsigned int jresult ;
+  LLVMValueRef arg1 ;
+  unsigned int result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = (unsigned int)LLVMGetNumSuccessors(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetSuccessor(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  unsigned int arg2 ;
+  LLVMBasicBlockRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  result = LLVMGetSuccessor(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_SetSuccessor(void * jarg1, unsigned int jarg2, void * jarg3) {
+  LLVMValueRef arg1 ;
+  unsigned int arg2 ;
+  LLVMBasicBlockRef arg3 ;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  arg3 = (LLVMBasicBlockRef)jarg3; 
+  LLVMSetSuccessor(arg1,arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IsConditional(void * jarg1) {
+  unsigned int jresult ;
+  LLVMValueRef arg1 ;
+  LLVMBool result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = (LLVMBool)LLVMIsConditional(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetCondition(void * jarg1) {
+  void * jresult ;
+  LLVMValueRef arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  result = LLVMGetCondition(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_SetCondition(void * jarg1, void * jarg2) {
+  LLVMValueRef arg1 ;
+  LLVMValueRef arg2 ;
+  
+  arg1 = (LLVMValueRef)jarg1; 
+  arg2 = (LLVMValueRef)jarg2; 
+  LLVMSetCondition(arg1,arg2);
 }
 
 
@@ -7123,6 +7246,18 @@ SWIGEXPORT int SWIGSTDCALL CSharp_WriteBitcodeToFileHandle(void * jarg1, int jar
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_WriteBitcodeToMemoryBuffer(void * jarg1) {
+  void * jresult ;
+  LLVMModuleRef arg1 ;
+  LLVMMemoryBufferRef result;
+  
+  arg1 = (LLVMModuleRef)jarg1; 
+  result = LLVMWriteBitcodeToMemoryBuffer(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_AddArgumentPromotionPass(void * jarg1) {
   LLVMPassManagerRef arg1 ;
   
@@ -7357,6 +7492,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddAggressiveDCEPass(void * jarg1) {
 }
 
 
+SWIGEXPORT void SWIGSTDCALL CSharp_AddAlignmentFromAssumptionsPass(void * jarg1) {
+  LLVMPassManagerRef arg1 ;
+  
+  arg1 = (LLVMPassManagerRef)jarg1; 
+  LLVMAddAlignmentFromAssumptionsPass(arg1);
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_AddCFGSimplificationPass(void * jarg1) {
   LLVMPassManagerRef arg1 ;
   
@@ -7490,6 +7633,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddPartiallyInlineLibCallsPass(void * jarg1) 
   
   arg1 = (LLVMPassManagerRef)jarg1; 
   LLVMAddPartiallyInlineLibCallsPass(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_AddLowerSwitchPass(void * jarg1) {
+  LLVMPassManagerRef arg1 ;
+  
+  arg1 = (LLVMPassManagerRef)jarg1; 
+  LLVMAddLowerSwitchPass(arg1);
 }
 
 
@@ -8423,7 +8574,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateFile(void * jarg1, char * ja
   LLVMDIBuilderRef arg1 ;
   char *arg2 = (char *) 0 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (char *)jarg2; 
@@ -8437,13 +8588,13 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateFile(void * jarg1, char * ja
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateSubroutineType(void * jarg1, void * jarg2, void * jarg3) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
-  LLVMValueRef arg3 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg2 ;
+  LLVMDIDescriptor arg3 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
+  arg3 = (LLVMDIDescriptor)jarg3; 
   result = LLVMDIBuilderCreateSubroutineType(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
@@ -8453,37 +8604,37 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateSubroutineType(void * jarg1,
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateFunction(void * jarg1, void * jarg2, char * jarg3, char * jarg4, void * jarg5, unsigned int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12, void * jarg13, void * jarg14, void * jarg15) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
   char *arg4 = (char *) 0 ;
-  LLVMValueRef arg5 ;
+  LLVMDIDescriptor arg5 ;
   unsigned int arg6 ;
-  LLVMValueRef arg7 ;
+  LLVMDIDescriptor arg7 ;
   bool arg8 ;
   bool arg9 ;
   unsigned int arg10 ;
   unsigned int arg11 ;
   bool arg12 ;
   LLVMValueRef arg13 ;
-  LLVMValueRef arg14 ;
-  LLVMValueRef arg15 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg14 ;
+  LLVMDIDescriptor arg15 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
   arg4 = (char *)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   arg6 = (unsigned int)jarg6; 
-  arg7 = (LLVMValueRef)jarg7; 
+  arg7 = (LLVMDIDescriptor)jarg7; 
   arg8 = jarg8 ? true : false; 
   arg9 = jarg9 ? true : false; 
   arg10 = (unsigned int)jarg10; 
   arg11 = (unsigned int)jarg11; 
   arg12 = jarg12 ? true : false; 
   arg13 = (LLVMValueRef)jarg13; 
-  arg14 = (LLVMValueRef)jarg14; 
-  arg15 = (LLVMValueRef)jarg15; 
+  arg14 = (LLVMDIDescriptor)jarg14; 
+  arg15 = (LLVMDIDescriptor)jarg15; 
   result = LLVMDIBuilderCreateFunction(arg1,arg2,(char const *)arg3,(char const *)arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
   jresult = result; 
   return jresult;
@@ -8497,7 +8648,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateBasicType(void * jarg1, char
   uint64_t arg3 ;
   uint64_t arg4 ;
   unsigned int arg5 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (char *)jarg2; 
@@ -8513,14 +8664,14 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateBasicType(void * jarg1, char
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreatePointerType(void * jarg1, void * jarg2, unsigned long long jarg3, unsigned long long jarg4, char * jarg5) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   uint64_t arg3 ;
   uint64_t arg4 ;
   char *arg5 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (uint64_t)jarg3; 
   arg4 = (uint64_t)jarg4; 
   arg5 = (char *)jarg5; 
@@ -8535,20 +8686,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateForwardDecl(void * jarg1, un
   LLVMDIBuilderRef arg1 ;
   unsigned int arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
-  LLVMValueRef arg5 ;
+  LLVMDIDescriptor arg4 ;
+  LLVMDIDescriptor arg5 ;
   unsigned int arg6 ;
   unsigned int arg7 ;
   uint64_t arg8 ;
   uint64_t arg9 ;
   char *arg10 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (unsigned int)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   arg6 = (unsigned int)jarg6; 
   arg7 = (unsigned int)jarg7; 
   arg8 = (uint64_t)jarg8; 
@@ -8563,32 +8714,32 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateForwardDecl(void * jarg1, un
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateStructType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, unsigned int jarg8, void * jarg9, void * jarg10, unsigned int jarg11, void * jarg12, char * jarg13) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
   uint64_t arg6 ;
   uint64_t arg7 ;
   unsigned int arg8 ;
-  LLVMValueRef arg9 ;
-  LLVMValueRef arg10 ;
+  LLVMDIDescriptor arg9 ;
+  LLVMDIDescriptor arg10 ;
   unsigned int arg11 ;
-  LLVMValueRef arg12 ;
+  LLVMDIDescriptor arg12 ;
   char *arg13 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (uint64_t)jarg6; 
   arg7 = (uint64_t)jarg7; 
   arg8 = (unsigned int)jarg8; 
-  arg9 = (LLVMValueRef)jarg9; 
-  arg10 = (LLVMValueRef)jarg10; 
+  arg9 = (LLVMDIDescriptor)jarg9; 
+  arg10 = (LLVMDIDescriptor)jarg10; 
   arg11 = (unsigned int)jarg11; 
-  arg12 = (LLVMValueRef)jarg12; 
+  arg12 = (LLVMDIDescriptor)jarg12; 
   arg13 = (char *)jarg13; 
   result = LLVMDIBuilderCreateStructType(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,(char const *)arg13);
   jresult = result; 
@@ -8599,34 +8750,34 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateStructType(void * jarg1, voi
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateClassType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, unsigned long long jarg8, unsigned int jarg9, void * jarg10, void * jarg11, void * jarg12, void * jarg13, char * jarg14) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
   uint64_t arg6 ;
   uint64_t arg7 ;
   uint64_t arg8 ;
   unsigned int arg9 ;
-  LLVMValueRef arg10 ;
-  LLVMValueRef arg11 ;
-  LLVMValueRef arg12 ;
-  LLVMValueRef arg13 ;
+  LLVMDIDescriptor arg10 ;
+  LLVMDIDescriptor arg11 ;
+  LLVMDIDescriptor arg12 ;
+  LLVMDIDescriptor arg13 ;
   char *arg14 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (uint64_t)jarg6; 
   arg7 = (uint64_t)jarg7; 
   arg8 = (uint64_t)jarg8; 
   arg9 = (unsigned int)jarg9; 
-  arg10 = (LLVMValueRef)jarg10; 
-  arg11 = (LLVMValueRef)jarg11; 
-  arg12 = (LLVMValueRef)jarg12; 
-  arg13 = (LLVMValueRef)jarg13; 
+  arg10 = (LLVMDIDescriptor)jarg10; 
+  arg11 = (LLVMDIDescriptor)jarg11; 
+  arg12 = (LLVMDIDescriptor)jarg12; 
+  arg13 = (LLVMDIDescriptor)jarg13; 
   arg14 = (char *)jarg14; 
   result = LLVMDIBuilderCreateClassType(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,(char const *)arg14);
   jresult = result; 
@@ -8637,27 +8788,27 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateClassType(void * jarg1, void
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateMemberType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, unsigned long long jarg8, unsigned int jarg9, void * jarg10) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
   uint64_t arg6 ;
   uint64_t arg7 ;
   uint64_t arg8 ;
   unsigned int arg9 ;
-  LLVMValueRef arg10 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg10 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (uint64_t)jarg6; 
   arg7 = (uint64_t)jarg7; 
   arg8 = (uint64_t)jarg8; 
   arg9 = (unsigned int)jarg9; 
-  arg10 = (LLVMValueRef)jarg10; 
+  arg10 = (LLVMDIDescriptor)jarg10; 
   result = LLVMDIBuilderCreateMemberType(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
   jresult = result; 
   return jresult;
@@ -8667,16 +8818,16 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateMemberType(void * jarg1, voi
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateLexicalBlock(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
-  LLVMValueRef arg3 ;
+  LLVMDIDescriptor arg2 ;
+  LLVMDIDescriptor arg3 ;
   unsigned int arg4 ;
   unsigned int arg5 ;
   unsigned int arg6 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
+  arg3 = (LLVMDIDescriptor)jarg3; 
   arg4 = (unsigned int)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (unsigned int)jarg6; 
@@ -8686,31 +8837,46 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateLexicalBlock(void * jarg1, v
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateStaticVariable(void * jarg1, void * jarg2, char * jarg3, char * jarg4, void * jarg5, unsigned int jarg6, void * jarg7, unsigned int jarg8, void * jarg9, void * jarg10) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateExpression(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
-  char *arg3 = (char *) 0 ;
-  char *arg4 = (char *) 0 ;
-  LLVMValueRef arg5 ;
-  unsigned int arg6 ;
-  LLVMValueRef arg7 ;
-  bool arg8 ;
-  LLVMValueRef arg9 ;
-  LLVMValueRef arg10 = (LLVMValueRef) NULL ;
-  LLVMValueRef result;
+  int64_t *arg2 = (int64_t *) 0 ;
+  unsigned int arg3 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (int64_t*)arg2_data; arg3 = jarg2;
+  result = LLVMDIBuilderCreateExpression(arg1,arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateGlobalVariable(void * jarg1, void * jarg2, char * jarg3, char * jarg4, void * jarg5, unsigned int jarg6, void * jarg7, unsigned int jarg8, void * jarg9, void * jarg10) {
+  void * jresult ;
+  LLVMDIBuilderRef arg1 ;
+  LLVMDIDescriptor arg2 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  LLVMDIDescriptor arg5 ;
+  unsigned int arg6 ;
+  LLVMDIDescriptor arg7 ;
+  bool arg8 ;
+  LLVMValueRef arg9 ;
+  LLVMDIDescriptor arg10 = (LLVMDIDescriptor) NULL ;
+  LLVMDIDescriptor result;
+  
+  arg1 = (LLVMDIBuilderRef)jarg1; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
   arg4 = (char *)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   arg6 = (unsigned int)jarg6; 
-  arg7 = (LLVMValueRef)jarg7; 
+  arg7 = (LLVMDIDescriptor)jarg7; 
   arg8 = jarg8 ? true : false; 
   arg9 = (LLVMValueRef)jarg9; 
-  arg10 = (LLVMValueRef)jarg10; 
-  result = LLVMDIBuilderCreateStaticVariable(arg1,arg2,(char const *)arg3,(char const *)arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+  arg10 = (LLVMDIDescriptor)jarg10; 
+  result = LLVMDIBuilderCreateGlobalVariable(arg1,arg2,(char const *)arg3,(char const *)arg4,arg5,arg6,arg7,arg8,arg9,arg10);
   jresult = result; 
   return jresult;
 }
@@ -8720,23 +8886,23 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateLocalVariable(void * jarg1, 
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
   unsigned int arg2 ;
-  LLVMValueRef arg3 ;
+  LLVMDIDescriptor arg3 ;
   char *arg4 = (char *) 0 ;
-  LLVMValueRef arg5 ;
+  LLVMDIDescriptor arg5 ;
   unsigned int arg6 ;
-  LLVMValueRef arg7 ;
+  LLVMDIDescriptor arg7 ;
   bool arg8 ;
   unsigned int arg9 ;
   unsigned int arg10 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (unsigned int)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
+  arg3 = (LLVMDIDescriptor)jarg3; 
   arg4 = (char *)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   arg6 = (unsigned int)jarg6; 
-  arg7 = (LLVMValueRef)jarg7; 
+  arg7 = (LLVMDIDescriptor)jarg7; 
   arg8 = jarg8 ? true : false; 
   arg9 = (unsigned int)jarg9; 
   arg10 = (unsigned int)jarg10; 
@@ -8751,15 +8917,15 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateArrayType(void * jarg1, unsi
   LLVMDIBuilderRef arg1 ;
   uint64_t arg2 ;
   uint64_t arg3 ;
-  LLVMValueRef arg4 ;
-  LLVMValueRef arg5 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg4 ;
+  LLVMDIDescriptor arg5 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (uint64_t)jarg2; 
   arg3 = (uint64_t)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   result = LLVMDIBuilderCreateArrayType(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
@@ -8771,15 +8937,15 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateVectorType(void * jarg1, uns
   LLVMDIBuilderRef arg1 ;
   uint64_t arg2 ;
   uint64_t arg3 ;
-  LLVMValueRef arg4 ;
-  LLVMValueRef arg5 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg4 ;
+  LLVMDIDescriptor arg5 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (uint64_t)jarg2; 
   arg3 = (uint64_t)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   result = LLVMDIBuilderCreateVectorType(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
@@ -8791,7 +8957,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderGetOrCreateSubrange(void * jarg1, 
   LLVMDIBuilderRef arg1 ;
   int64_t arg2 ;
   int64_t arg3 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (int64_t)jarg2; 
@@ -8805,49 +8971,53 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderGetOrCreateSubrange(void * jarg1, 
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderGetOrCreateArray(void * jarg1, void* arg2_data, unsigned int jarg2) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef *arg2 = (LLVMValueRef *) 0 ;
+  LLVMDIDescriptor *arg2 = (LLVMDIDescriptor *) 0 ;
   unsigned int arg3 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef*)arg2_data; arg3 = jarg2;
+  arg2 = (LLVMDIDescriptor*)arg2_data; arg3 = jarg2;
   result = LLVMDIBuilderGetOrCreateArray(arg1,arg2,arg3);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderInsertDeclareAtEnd(void * jarg1, void * jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderInsertDeclareAtEnd(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
   LLVMValueRef arg2 ;
-  LLVMValueRef arg3 ;
-  LLVMBasicBlockRef arg4 ;
+  LLVMDIDescriptor arg3 ;
+  LLVMDIDescriptor arg4 ;
+  LLVMBasicBlockRef arg5 ;
   LLVMValueRef result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
-  arg4 = (LLVMBasicBlockRef)jarg4; 
-  result = LLVMDIBuilderInsertDeclareAtEnd(arg1,arg2,arg3,arg4);
+  arg3 = (LLVMDIDescriptor)jarg3; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMBasicBlockRef)jarg5; 
+  result = LLVMDIBuilderInsertDeclareAtEnd(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderInsertDeclareBefore(void * jarg1, void * jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderInsertDeclareBefore(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
   LLVMValueRef arg2 ;
-  LLVMValueRef arg3 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg3 ;
+  LLVMDIDescriptor arg4 ;
+  LLVMValueRef arg5 ;
   LLVMValueRef result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (LLVMValueRef)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
-  result = LLVMDIBuilderInsertDeclareBefore(arg1,arg2,arg3,arg4);
+  arg3 = (LLVMDIDescriptor)jarg3; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMValueRef)jarg5; 
+  result = LLVMDIBuilderInsertDeclareBefore(arg1,arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
 }
@@ -8858,7 +9028,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateEnumerator(void * jarg1, cha
   LLVMDIBuilderRef arg1 ;
   char *arg2 = (char *) 0 ;
   uint64_t arg3 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
   arg2 = (char *)jarg2; 
@@ -8872,25 +9042,25 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateEnumerator(void * jarg1, cha
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateEnumerationType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, void * jarg8, void * jarg9) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
   uint64_t arg6 ;
   uint64_t arg7 ;
-  LLVMValueRef arg8 ;
-  LLVMValueRef arg9 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor arg8 ;
+  LLVMDIDescriptor arg9 ;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (uint64_t)jarg6; 
   arg7 = (uint64_t)jarg7; 
-  arg8 = (LLVMValueRef)jarg8; 
-  arg9 = (LLVMValueRef)jarg9; 
+  arg8 = (LLVMDIDescriptor)jarg8; 
+  arg9 = (LLVMDIDescriptor)jarg9; 
   result = LLVMDIBuilderCreateEnumerationType(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   jresult = result; 
   return jresult;
@@ -8900,27 +9070,27 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateEnumerationType(void * jarg1
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateUnionType(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5, unsigned long long jarg6, unsigned long long jarg7, unsigned int jarg8, void * jarg9, unsigned int jarg10, char * jarg11) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
   uint64_t arg6 ;
   uint64_t arg7 ;
   unsigned int arg8 ;
-  LLVMValueRef arg9 ;
+  LLVMDIDescriptor arg9 ;
   unsigned int arg10 ;
   char *arg11 = (char *) 0 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   arg6 = (uint64_t)jarg6; 
   arg7 = (uint64_t)jarg7; 
   arg8 = (unsigned int)jarg8; 
-  arg9 = (LLVMValueRef)jarg9; 
+  arg9 = (LLVMDIDescriptor)jarg9; 
   arg10 = (unsigned int)jarg10; 
   arg11 = (char *)jarg11; 
   result = LLVMDIBuilderCreateUnionType(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,(char const *)arg11);
@@ -8932,19 +9102,19 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateUnionType(void * jarg1, void
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateTemplateTypeParameter(void * jarg1, void * jarg2, char * jarg3, void * jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
-  LLVMValueRef arg5 ;
+  LLVMDIDescriptor arg4 ;
+  LLVMDIDescriptor arg5 ;
   unsigned int arg6 ;
   unsigned int arg7 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  arg5 = (LLVMDIDescriptor)jarg5; 
   arg6 = (unsigned int)jarg6; 
   arg7 = (unsigned int)jarg7; 
   result = LLVMDIBuilderCreateTemplateTypeParameter(arg1,arg2,(char const *)arg3,arg4,arg5,arg6,arg7);
@@ -8953,72 +9123,19 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateTemplateTypeParameter(void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateOpDeref(void * jarg1) {
-  void * jresult ;
-  LLVMTypeRef arg1 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMTypeRef)jarg1; 
-  result = LLVMDIBuilderCreateOpDeref(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateOpPlus(void * jarg1) {
-  void * jresult ;
-  LLVMTypeRef arg1 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMTypeRef)jarg1; 
-  result = LLVMDIBuilderCreateOpPlus(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateComplexVariable(void * jarg1, unsigned int jarg2, void * jarg3, char * jarg4, void * jarg5, unsigned int jarg6, void * jarg7, void* arg8_data, unsigned int jarg8, unsigned int jarg10) {
-  void * jresult ;
-  LLVMDIBuilderRef arg1 ;
-  unsigned int arg2 ;
-  LLVMValueRef arg3 ;
-  char *arg4 = (char *) 0 ;
-  LLVMValueRef arg5 ;
-  unsigned int arg6 ;
-  LLVMValueRef arg7 ;
-  LLVMValueRef *arg8 = (LLVMValueRef *) 0 ;
-  unsigned int arg9 ;
-  unsigned int arg10 ;
-  LLVMValueRef result;
-  
-  arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (unsigned int)jarg2; 
-  arg3 = (LLVMValueRef)jarg3; 
-  arg4 = (char *)jarg4; 
-  arg5 = (LLVMValueRef)jarg5; 
-  arg6 = (unsigned int)jarg6; 
-  arg7 = (LLVMValueRef)jarg7; 
-  arg8 = (LLVMValueRef*)arg8_data; arg9 = jarg8;
-  arg10 = (unsigned int)jarg10; 
-  result = LLVMDIBuilderCreateComplexVariable(arg1,arg2,arg3,(char const *)arg4,arg5,arg6,arg7,arg8,arg9,arg10);
-  jresult = result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateNameSpace(void * jarg1, void * jarg2, char * jarg3, void * jarg4, unsigned int jarg5) {
   void * jresult ;
   LLVMDIBuilderRef arg1 ;
-  LLVMValueRef arg2 ;
+  LLVMDIDescriptor arg2 ;
   char *arg3 = (char *) 0 ;
-  LLVMValueRef arg4 ;
+  LLVMDIDescriptor arg4 ;
   unsigned int arg5 ;
-  LLVMValueRef result;
+  LLVMDIDescriptor result;
   
   arg1 = (LLVMDIBuilderRef)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
+  arg2 = (LLVMDIDescriptor)jarg2; 
   arg3 = (char *)jarg3; 
-  arg4 = (LLVMValueRef)jarg4; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
   arg5 = (unsigned int)jarg5; 
   result = LLVMDIBuilderCreateNameSpace(arg1,arg2,(char const *)arg3,arg4,arg5);
   jresult = result; 
@@ -9026,13 +9143,15 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DIBuilderCreateNameSpace(void * jarg1, void
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DICompositeTypeSetTypeArray(void * jarg1, void * jarg2) {
-  LLVMValueRef *arg1 = (LLVMValueRef *) 0 ;
-  LLVMValueRef arg2 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_DICompositeTypeSetTypeArray(void * jarg1, void * jarg2, void * jarg3) {
+  LLVMDIBuilderRef arg1 ;
+  LLVMDIDescriptor *arg2 = (LLVMDIDescriptor *) 0 ;
+  LLVMDIDescriptor arg3 ;
   
-  arg1 = (LLVMValueRef *)jarg1; 
-  arg2 = (LLVMValueRef)jarg2; 
-  LLVMDICompositeTypeSetTypeArray(arg1,arg2);
+  arg1 = (LLVMDIBuilderRef)jarg1; 
+  arg2 = (LLVMDIDescriptor *)jarg2; 
+  arg3 = (LLVMDIDescriptor)jarg3; 
+  LLVMDICompositeTypeSetTypeArray(arg1,arg2,arg3);
 }
 
 
@@ -9045,6 +9164,58 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddModuleFlag(void * jarg1, char * jarg2, uns
   arg2 = (char *)jarg2; 
   arg3 = (uint32_t)jarg3; 
   LLVMAddModuleFlag(arg1,(char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DIMetadataAsValue(void * jarg1) {
+  void * jresult ;
+  LLVMDIDescriptor arg1 ;
+  LLVMValueRef result;
+  
+  arg1 = (LLVMDIDescriptor)jarg1; 
+  result = LLVMDIMetadataAsValue(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_DIPrintDescriptorToString(void * jarg1) {
+  char * jresult ;
+  LLVMDIDescriptor arg1 ;
+  char *result = 0 ;
+  
+  arg1 = (LLVMDIDescriptor)jarg1; 
+  result = (char *)LLVMDIPrintDescriptorToString(arg1);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DICreateDebugLocation(unsigned int jarg1, unsigned int jarg2, void * jarg3, void * jarg4) {
+  void * jresult ;
+  unsigned int arg1 ;
+  unsigned int arg2 ;
+  LLVMDIDescriptor arg3 ;
+  LLVMDIDescriptor arg4 ;
+  LLVMDIDescriptor result;
+  
+  arg1 = (unsigned int)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  arg3 = (LLVMDIDescriptor)jarg3; 
+  arg4 = (LLVMDIDescriptor)jarg4; 
+  result = LLVMDICreateDebugLocation(arg1,arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DIGetDebugMetadataVersion() {
+  unsigned int jresult ;
+  uint32_t result;
+  
+  result = (uint32_t)LLVMDIGetDebugMetadataVersion();
+  jresult = result; 
+  return jresult;
 }
 
 

@@ -97,6 +97,7 @@ function SetupLLVMLibs()
       "LLVMObjCARCOpts",
       "LLVMObject",
       "LLVMOption",
+      "LLVMProfileData",
       "LLVMScalarOpts",
       "LLVMSelectionDAG",
       "LLVMSupport",

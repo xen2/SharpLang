@@ -11,6 +11,6 @@ namespace SharpLang.CompilerServices
 
         public Mono.Cecil.Cil.Scope Source { get; private set; }
 
-        public ValueRef GeneratedScope { get; set; }
+        public DIDescriptor GeneratedScope { get; set; }
     }
 }

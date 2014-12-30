@@ -1,3 +1,5 @@
+%include "typemaps.i"
+
 %module LLVM
 %{
 
@@ -48,9 +50,11 @@ REF_CLASS(LLVMValueRef, ValueRef)
 REF_CLASS(LLVMUseRef, UseRef)
 REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 REF_CLASS(LLVMDIBuilderRef, DIBuilderRef)
+REF_CLASS(LLVMDIDescriptor, DIDescriptor)
 
 REF_ARRAY(unsigned,uint)
 REF_ARRAY(uint64_t,ulong)
+REF_ARRAY(int64_t,long)
 
 %apply (LLVMTypeRef *ARRAY) {(LLVMTypeRef *Dest)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
@@ -66,9 +70,12 @@ REF_ARRAY(uint64_t,ulong)
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *Ptr, unsigned Count)};
 %apply (LLVMValueRef *ARRAY, unsigned ARRAYSIZE) {(LLVMValueRef *AddrOps, unsigned AddrOpsCount)};
 %apply (LLVMValueRef *ARRAY) {(LLVMValueRef *IncomingValues)};
+%apply (LLVMDIDescriptor *ARRAY, unsigned ARRAYSIZE) {(LLVMDIDescriptor *Ptr, unsigned Count)};
 %apply (LLVMBasicBlockRef *ARRAY, unsigned ARRAYSIZE) {(LLVMBasicBlockRef *IncomingBlocks, unsigned Count)};
 %apply (unsigned *ARRAY, unsigned ARRAYSIZE) {(unsigned *IdxList, unsigned NumIdx)};
 %apply (unsigned ARRAYSIZE, const uint64_t ARRAY[]) {(unsigned NumWords, const uint64_t Words[])};
+%apply (int64_t *ARRAY, unsigned ARRAYSIZE) {(int64_t *Addresses, unsigned NumAddresses)};
+%apply LLVMBool *OUTPUT { LLVMBool *losesInfo };
 
 %include "llvm-c/Core.h"
 %include "llvm-c/BitReader.h"

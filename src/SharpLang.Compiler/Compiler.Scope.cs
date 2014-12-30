@@ -15,22 +15,31 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
-        private Dictionary<string, ValueRef> debugNamespaces = new Dictionary<string, ValueRef>();
-        private Dictionary<Class, ValueRef> debugClasses = new Dictionary<Class, ValueRef>();
-        private Dictionary<Type, ValueRef> debugTypeCache = new Dictionary<Type, ValueRef>();
-        private Queue<KeyValuePair<Class, ValueRef>> debugClassesToProcess = new Queue<KeyValuePair<Class, ValueRef>>();
-        
-        private ValueRef GetOrCreateDebugNamespace(string @namespace)
+        private DIBuilderRef debugBuilder;
+        private DIDescriptor debugEmptyExpression;
+
+        private Dictionary<string, DIDescriptor> debugNamespaces = new Dictionary<string, DIDescriptor>();
+        private Dictionary<Class, DIDescriptor> debugClasses = new Dictionary<Class, DIDescriptor>();
+        private Dictionary<Type, DIDescriptor> debugTypeCache = new Dictionary<Type, DIDescriptor>();
+        private Queue<KeyValuePair<Class, DIDescriptor>> debugClassesToProcess = new Queue<KeyValuePair<Class, DIDescriptor>>();
+
+        private void InitializeDebug()
+        {
+            debugBuilder = LLVM.DIBuilderCreate(module);
+            debugEmptyExpression = LLVM.DIBuilderCreateExpression(debugBuilder, new long[0]);
+        }
+
+        private DIDescriptor GetOrCreateDebugNamespace(string @namespace)
         {
             if (@namespace == string.Empty)
-                return ValueRef.Empty;
+                return DIDescriptor.Empty;
 
             // Already done before?
-            ValueRef debugNamespace;
+            DIDescriptor debugNamespace;
             if (debugNamespaces.TryGetValue(@namespace, out debugNamespace))
                 return debugNamespace;
 
-            var debugParentNamespace = ValueRef.Empty;
+            var debugParentNamespace = DIDescriptor.Empty;
 
             // Split between parent and current node (last element of the path)
             var splitIndex = @namespace.LastIndexOf('.');
@@ -42,7 +51,7 @@ namespace SharpLang.CompilerServices
             }
 
             // Create debug namespace for this node
-            debugNamespace = LLVM.DIBuilderCreateNameSpace(debugBuilder, debugParentNamespace, @namespace.Substring(splitIndex + 1), ValueRef.Empty, 0);
+            debugNamespace = LLVM.DIBuilderCreateNameSpace(debugBuilder, debugParentNamespace, @namespace.Substring(splitIndex + 1), DIDescriptor.Empty, 0);
 
             // Register
             debugNamespaces.Add(@namespace, debugNamespace);
@@ -79,7 +88,7 @@ namespace SharpLang.CompilerServices
             }
 
             functionContext.DebugFile = LLVM.DIBuilderCreateFile(debugBuilder, Path.GetFileName(url), Path.GetDirectoryName(url));
-            var functionParameterTypes = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
+            var functionParameterTypes = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new DIDescriptor[0]);
             var functionType = LLVM.DIBuilderCreateSubroutineType(debugBuilder, functionContext.DebugFile, functionParameterTypes);
 
             // Replace . with :: so that gdb properly understands it is namespaces.
@@ -87,7 +96,7 @@ namespace SharpLang.CompilerServices
 
             newScope.GeneratedScope = LLVM.DIBuilderCreateFunction(debugBuilder, debugClass, methodReference.Name, methodDebugName,
                 functionContext.DebugFile, (uint)line, functionType,
-                false, true, (uint)line, 0, false, function.GeneratedValue, ValueRef.Empty, ValueRef.Empty);
+                false, true, (uint)line, 0, false, function.GeneratedValue, DIDescriptor.Empty, DIDescriptor.Empty);
 
             SetupDebugLocation(body.Instructions[0].SequencePoint, newScope);
             if (body.Scope != null)
@@ -119,9 +128,9 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private ValueRef GetOrCreateDebugClass(Class @class)
+        private DIDescriptor GetOrCreateDebugClass(Class @class)
         {
-            ValueRef debugClass;
+            DIDescriptor debugClass;
             if (debugClasses.TryGetValue(@class, out debugClass))
                 return debugClass;
 
@@ -134,25 +143,25 @@ namespace SharpLang.CompilerServices
             var structType = type.StackType == StackValueType.Object ? type.ObjectTypeLLVM : type.ValueTypeLLVM;
             var size = LLVM.ABISizeOfType(targetData, structType) * 8;
             var align = LLVM.ABIAlignmentOfType(targetData, structType) * 8;
-            var emptyArray = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new ValueRef[0]);
+            var emptyArray = LLVM.DIBuilderGetOrCreateArray(debugBuilder, new DIDescriptor[0]);
 
             bool isLocal = type.IsLocal;
             if (isLocal)
             {
                 var parentClass = @class.BaseType;
-                var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : ValueRef.Empty;
-                debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, type.TypeReferenceCecil.Name, ValueRef.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, ValueRef.Empty, ValueRef.Empty, type.TypeReferenceCecil.FullName);
+                var parentDebugClass = parentClass != null ? GetOrCreateDebugClass(parentClass) : DIDescriptor.Empty;
+                debugClass = LLVM.DIBuilderCreateClassType(debugBuilder, debugNamespace, type.TypeReferenceCecil.Name, DIDescriptor.Empty, 0, size, align, 0, 0, parentDebugClass, emptyArray, DIDescriptor.Empty, DIDescriptor.Empty, type.TypeReferenceCecil.FullName);
             }
             else
             {
-                debugClass = LLVM.DIBuilderCreateForwardDecl(debugBuilder, (int)DW_TAG.class_type, type.TypeReferenceCecil.Name, debugNamespace, ValueRef.Empty, 0, 0, size, align, type.TypeReferenceCecil.FullName);
+                debugClass = LLVM.DIBuilderCreateForwardDecl(debugBuilder, (int)DW_TAG.class_type, type.TypeReferenceCecil.Name, debugNamespace, DIDescriptor.Empty, 0, 0, size, align, type.TypeReferenceCecil.FullName);
             }
 
             debugClasses.Add(@class, debugClass);
 
             if (isLocal)
             {
-                debugClassesToProcess.Enqueue(new KeyValuePair<Class, ValueRef>(@class, debugClass));
+                debugClassesToProcess.Enqueue(new KeyValuePair<Class, DIDescriptor>(@class, debugClass));
             }
 
             return debugClass;
@@ -203,12 +212,7 @@ namespace SharpLang.CompilerServices
         {
             var line = sequencePoint != null ? sequencePoint.StartLine : 0;
             var column = sequencePoint != null ? sequencePoint.StartColumn : 0;
-            var debugLoc = LLVM.MDNodeInContext(context,
-                new[]
-                {
-                    LLVM.ConstInt(int32LLVM, (ulong) line, true), LLVM.ConstInt(int32LLVM, (ulong) column, true),
-                    lastScope.GeneratedScope, ValueRef.Empty
-                });
+            var debugLoc = LLVM.DIMetadataAsValue(LLVM.DICreateDebugLocation((uint)line, (uint)column, lastScope.GeneratedScope, DIDescriptor.Empty));
             LLVM.SetCurrentDebugLocation(builder, debugLoc);
         }
 
@@ -244,7 +248,7 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private void EmitDebugVariable(FunctionCompilerContext functionContext, SequencePoint sequencePoint, ValueRef generatedScope, StackValue variable, DW_TAG dwarfType, string variableName, int argIndex = 0)
+        private void EmitDebugVariable(FunctionCompilerContext functionContext, SequencePoint sequencePoint, DIDescriptor generatedScope, StackValue variable, DW_TAG dwarfType, string variableName, int argIndex = 0)
         {
             var debugType = CreateDebugType(variable.Type);
 
@@ -260,7 +264,7 @@ namespace SharpLang.CompilerServices
                 generatedScope, variableName, functionContext.DebugFile, sequencePoint != null ? (uint)sequencePoint.StartLine : 0, debugType,
                 true, 0, (uint)argIndex);
 
-            var debugVariableDeclare = LLVM.DIBuilderInsertDeclareAtEnd(debugBuilder, variable.Value, debugLocalVariable,
+            var debugVariableDeclare = LLVM.DIBuilderInsertDeclareAtEnd(debugBuilder, variable.Value, debugLocalVariable, debugEmptyExpression,
                 LLVM.GetInsertBlock(builder));
             LLVM.SetInstDebugLocation(builder, debugVariableDeclare);
         }
@@ -280,7 +284,7 @@ namespace SharpLang.CompilerServices
                 if (type.Fields == null)
                     continue;
 
-                var memberTypes = new List<ValueRef>(type.Fields.Count);
+                var memberTypes = new List<DIDescriptor>(type.Fields.Count);
 
                 foreach (var field in type.Fields)
                 {
@@ -293,13 +297,13 @@ namespace SharpLang.CompilerServices
                     if (type.StackType == StackValueType.Object)
                         fieldOffset += LLVM.OffsetOfElement(targetData, type.ObjectTypeLLVM, (int)ObjectFields.Data)*8;
 
-                    memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, ValueRef.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
+                    memberTypes.Add(LLVM.DIBuilderCreateMemberType(debugBuilder, debugClass, field.Key.Name, DIDescriptor.Empty, 0, fieldSize, fieldAlign, fieldOffset, 0, fieldType));
                 }
 
                 // Update members (mutation)
                 // TODO: LLVM.DICompositeTypeSetTypeArray should take a ref, not out.
                 var oldDebugClass = debugClass;
-                LLVM.DICompositeTypeSetTypeArray(out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
+                LLVM.DICompositeTypeSetTypeArray(debugBuilder, out debugClass, LLVM.DIBuilderGetOrCreateArray(debugBuilder, memberTypes.ToArray()));
 
                 // debugClass being changed, set it again (old value is not valid anymore)
                 debugClasses[@class] = debugClass;
@@ -327,9 +331,9 @@ namespace SharpLang.CompilerServices
             Unsigned = 0x07,
         }
 
-        private ValueRef CreateDebugType(Type type)
+        private DIDescriptor CreateDebugType(Type type)
         {
-            ValueRef result;
+            DIDescriptor result;
             if (debugTypeCache.TryGetValue(type, out result))
                 return result;
 
