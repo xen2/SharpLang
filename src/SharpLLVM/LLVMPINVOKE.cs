@@ -234,6 +234,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ModuleCreateWithNameInContext")]
   public static extern System.IntPtr ModuleCreateWithNameInContext(string jarg1, System.IntPtr jarg2);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_CloneModule")]
+  public static extern System.IntPtr CloneModule(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DisposeModule")]
   public static extern void DisposeModule(System.IntPtr jarg1);
 
@@ -498,12 +501,6 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAInlineAsm")]
   public static extern System.IntPtr IsAInlineAsm(System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAMDNode")]
-  public static extern System.IntPtr IsAMDNode(System.IntPtr jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAMDString")]
-  public static extern System.IntPtr IsAMDString(System.IntPtr jarg1);
-
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAUser")]
   public static extern System.IntPtr IsAUser(System.IntPtr jarg1);
 
@@ -711,6 +708,12 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAVAArgInst")]
   public static extern System.IntPtr IsAVAArgInst(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAMDNode")]
+  public static extern System.IntPtr IsAMDNode(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsAMDString")]
+  public static extern System.IntPtr IsAMDString(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetFirstUse")]
   public static extern System.IntPtr GetFirstUse(System.IntPtr jarg1);
 
@@ -776,6 +779,9 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstIntGetSExtValue")]
   public static extern long ConstIntGetSExtValue(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstRealGetDouble")]
+  public static extern double ConstRealGetDouble(System.IntPtr jarg1, out bool jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstStringInContext")]
   public static extern System.IntPtr ConstStringInContext(System.IntPtr jarg1, string jarg2, uint jarg3, bool jarg4);
@@ -1278,6 +1284,12 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetICmpPredicate")]
   public static extern int GetICmpPredicate(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetFCmpPredicate")]
+  public static extern int GetFCmpPredicate(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_InstructionClone")]
+  public static extern System.IntPtr InstructionClone(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_SetInstructionCallConv")]
   public static extern void SetInstructionCallConv(System.IntPtr jarg1, uint jarg2);
 
@@ -1298,6 +1310,24 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_SetTailCall")]
   public static extern void SetTailCall(System.IntPtr jarg1, bool jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetNumSuccessors")]
+  public static extern uint GetNumSuccessors(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetSuccessor")]
+  public static extern System.IntPtr GetSuccessor(System.IntPtr jarg1, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_SetSuccessor")]
+  public static extern void SetSuccessor(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_IsConditional")]
+  public static extern bool IsConditional(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetCondition")]
+  public static extern System.IntPtr GetCondition(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_SetCondition")]
+  public static extern void SetCondition(System.IntPtr jarg1, System.IntPtr jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_GetSwitchDefaultDest")]
   public static extern System.IntPtr GetSwitchDefaultDest(System.IntPtr jarg1);
@@ -1731,6 +1761,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_WriteBitcodeToFileHandle")]
   public static extern int WriteBitcodeToFileHandle(System.IntPtr jarg1, int jarg2);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_WriteBitcodeToMemoryBuffer")]
+  public static extern System.IntPtr WriteBitcodeToMemoryBuffer(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddArgumentPromotionPass")]
   public static extern void AddArgumentPromotionPass(System.IntPtr jarg1);
 
@@ -1809,6 +1842,9 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddAggressiveDCEPass")]
   public static extern void AddAggressiveDCEPass(System.IntPtr jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddAlignmentFromAssumptionsPass")]
+  public static extern void AddAlignmentFromAssumptionsPass(System.IntPtr jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddCFGSimplificationPass")]
   public static extern void AddCFGSimplificationPass(System.IntPtr jarg1);
 
@@ -1859,6 +1895,9 @@ class LLVMPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddPartiallyInlineLibCallsPass")]
   public static extern void AddPartiallyInlineLibCallsPass(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddLowerSwitchPass")]
+  public static extern void AddLowerSwitchPass(System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddPromoteMemoryToRegisterPass")]
   public static extern void AddPromoteMemoryToRegisterPass(System.IntPtr jarg1);
@@ -2136,8 +2175,11 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateLexicalBlock")]
   public static extern System.IntPtr DIBuilderCreateLexicalBlock(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, uint jarg4, uint jarg5, uint jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateStaticVariable")]
-  public static extern System.IntPtr DIBuilderCreateStaticVariable(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, System.IntPtr jarg9, System.IntPtr jarg10);
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateExpression")]
+  public static extern System.IntPtr DIBuilderCreateExpression(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateGlobalVariable")]
+  public static extern System.IntPtr DIBuilderCreateGlobalVariable(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, System.IntPtr jarg9, System.IntPtr jarg10);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateLocalVariable")]
   public static extern System.IntPtr DIBuilderCreateLocalVariable(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, bool jarg8, uint jarg9, uint jarg10);
@@ -2155,10 +2197,10 @@ class LLVMPINVOKE {
   public static extern System.IntPtr DIBuilderGetOrCreateArray(System.IntPtr jarg1, System.IntPtr arg2_data, uint jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderInsertDeclareAtEnd")]
-  public static extern System.IntPtr DIBuilderInsertDeclareAtEnd(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4);
+  public static extern System.IntPtr DIBuilderInsertDeclareAtEnd(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4, System.IntPtr jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderInsertDeclareBefore")]
-  public static extern System.IntPtr DIBuilderInsertDeclareBefore(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4);
+  public static extern System.IntPtr DIBuilderInsertDeclareBefore(System.IntPtr jarg1, System.IntPtr jarg2, System.IntPtr jarg3, System.IntPtr jarg4, System.IntPtr jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateEnumerator")]
   public static extern System.IntPtr DIBuilderCreateEnumerator(System.IntPtr jarg1, string jarg2, ulong jarg3);
@@ -2172,23 +2214,26 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateTemplateTypeParameter")]
   public static extern System.IntPtr DIBuilderCreateTemplateTypeParameter(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, System.IntPtr jarg5, uint jarg6, uint jarg7);
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateOpDeref")]
-  public static extern System.IntPtr DIBuilderCreateOpDeref(System.IntPtr jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateOpPlus")]
-  public static extern System.IntPtr DIBuilderCreateOpPlus(System.IntPtr jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateComplexVariable")]
-  public static extern System.IntPtr DIBuilderCreateComplexVariable(System.IntPtr jarg1, uint jarg2, System.IntPtr jarg3, string jarg4, System.IntPtr jarg5, uint jarg6, System.IntPtr jarg7, System.IntPtr arg8_data, uint jarg8, uint jarg10);
-
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIBuilderCreateNameSpace")]
   public static extern System.IntPtr DIBuilderCreateNameSpace(System.IntPtr jarg1, System.IntPtr jarg2, string jarg3, System.IntPtr jarg4, uint jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DICompositeTypeSetTypeArray")]
-  public static extern void DICompositeTypeSetTypeArray(out System.IntPtr jarg1, System.IntPtr jarg2);
+  public static extern void DICompositeTypeSetTypeArray(System.IntPtr jarg1, out System.IntPtr jarg2, System.IntPtr jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_AddModuleFlag")]
   public static extern void AddModuleFlag(System.IntPtr jarg1, string jarg2, uint jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIMetadataAsValue")]
+  public static extern System.IntPtr DIMetadataAsValue(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIPrintDescriptorToString")]
+  public static extern string DIPrintDescriptorToString(System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DICreateDebugLocation")]
+  public static extern System.IntPtr DICreateDebugLocation(uint jarg1, uint jarg2, System.IntPtr jarg3, System.IntPtr jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_DIGetDebugMetadataVersion")]
+  public static extern uint DIGetDebugMetadataVersion();
 }
 
 }

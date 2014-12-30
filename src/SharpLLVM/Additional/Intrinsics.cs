@@ -1,14 +1,16 @@
 ﻿
 namespace SharpLLVM
 {
-	public enum Intrinsics
-	{
-	    not_intrinsic = 0,   // Must be zero
+    public enum Intrinsics
+    {
+        not_intrinsic = 0,   // Must be zero
+        AMDGPU_class,                              // llvm.AMDGPU.class
         AMDGPU_div_fixup,                          // llvm.AMDGPU.div.fixup
         AMDGPU_div_fmas,                           // llvm.AMDGPU.div.fmas
         AMDGPU_div_scale,                          // llvm.AMDGPU.div.scale
         AMDGPU_ldexp,                              // llvm.AMDGPU.ldexp
         AMDGPU_rcp,                                // llvm.AMDGPU.rcp
+        AMDGPU_read_workdim,                       // llvm.AMDGPU.read.workdim
         AMDGPU_rsq,                                // llvm.AMDGPU.rsq
         AMDGPU_rsq_clamped,                        // llvm.AMDGPU.rsq.clamped
         AMDGPU_trig_preop,                         // llvm.AMDGPU.trig.preop
@@ -250,8 +252,6 @@ namespace SharpLLVM
         arm_neon_vacgt,                            // llvm.arm.neon.vacgt
         arm_neon_vbsl,                             // llvm.arm.neon.vbsl
         arm_neon_vcls,                             // llvm.arm.neon.vcls
-        arm_neon_vclz,                             // llvm.arm.neon.vclz
-        arm_neon_vcnt,                             // llvm.arm.neon.vcnt
         arm_neon_vcvtas,                           // llvm.arm.neon.vcvtas
         arm_neon_vcvtau,                           // llvm.arm.neon.vcvtau
         arm_neon_vcvtfp2fxs,                       // llvm.arm.neon.vcvtfp2fxs
@@ -358,6 +358,7 @@ namespace SharpLLVM
         arm_qsub,                                  // llvm.arm.qsub
         arm_rbit,                                  // llvm.arm.rbit
         arm_set_fpscr,                             // llvm.arm.set.fpscr
+        arm_space,                                 // llvm.arm.space
         arm_ssat,                                  // llvm.arm.ssat
         arm_stlex,                                 // llvm.arm.stlex
         arm_stlexd,                                // llvm.arm.stlexd
@@ -406,6 +407,11 @@ namespace SharpLLVM
         exp,                                       // llvm.exp
         exp2,                                      // llvm.exp2
         expect,                                    // llvm.expect
+        experimental_gc_relocate,                  // llvm.experimental.gc.relocate
+        experimental_gc_result_float,              // llvm.experimental.gc.result.float
+        experimental_gc_result_int,                // llvm.experimental.gc.result.int
+        experimental_gc_result_ptr,                // llvm.experimental.gc.result.ptr
+        experimental_gc_statepoint,                // llvm.experimental.gc.statepoint
         experimental_patchpoint_i64,               // llvm.experimental.patchpoint.i64
         experimental_patchpoint_void,              // llvm.experimental.patchpoint.void
         experimental_stackmap,                     // llvm.experimental.stackmap
@@ -415,6 +421,8 @@ namespace SharpLLVM
         fma,                                       // llvm.fma
         fmuladd,                                   // llvm.fmuladd
         frameaddress,                              // llvm.frameaddress
+        frameallocate,                             // llvm.frameallocate
+        framerecover,                              // llvm.framerecover
         gcread,                                    // llvm.gcread
         gcroot,                                    // llvm.gcroot
         gcwrite,                                   // llvm.gcwrite
@@ -1272,6 +1280,7 @@ namespace SharpLLVM
         hexagon_SI_to_SXTHI_asrh,                  // llvm.hexagon.SI.to.SXTHI.asrh
         hexagon_circ_ldd,                          // llvm.hexagon.circ.ldd
         init_trampoline,                           // llvm.init.trampoline
+        instrprof_increment,                       // llvm.instrprof.increment
         invariant_end,                             // llvm.invariant.end
         invariant_start,                           // llvm.invariant.start
         lifetime_end,                              // llvm.lifetime.end
@@ -1280,9 +1289,13 @@ namespace SharpLLVM
         log10,                                     // llvm.log10
         log2,                                      // llvm.log2
         longjmp,                                   // llvm.longjmp
+        masked_load,                               // llvm.masked.load
+        masked_store,                              // llvm.masked.store
+        maxnum,                                    // llvm.maxnum
         memcpy,                                    // llvm.memcpy
         memmove,                                   // llvm.memmove
         memset,                                    // llvm.memset
+        minnum,                                    // llvm.minnum
         mips_absq_s_ph,                            // llvm.mips.absq.s.ph
         mips_absq_s_qb,                            // llvm.mips.absq.s.qb
         mips_absq_s_w,                             // llvm.mips.absq.s.w
@@ -2998,8 +3011,21 @@ namespace SharpLLVM
         ppc_dcbz,                                  // llvm.ppc.dcbz
         ppc_dcbzl,                                 // llvm.ppc.dcbzl
         ppc_is_decremented_ctr_nonzero,            // llvm.ppc.is.decremented.ctr.nonzero
+        ppc_lwsync,                                // llvm.ppc.lwsync
         ppc_mtctr,                                 // llvm.ppc.mtctr
         ppc_sync,                                  // llvm.ppc.sync
+        ppc_vsx_lxvd2x,                            // llvm.ppc.vsx.lxvd2x
+        ppc_vsx_lxvw4x,                            // llvm.ppc.vsx.lxvw4x
+        ppc_vsx_stxvd2x,                           // llvm.ppc.vsx.stxvd2x
+        ppc_vsx_stxvw4x,                           // llvm.ppc.vsx.stxvw4x
+        ppc_vsx_xsmaxdp,                           // llvm.ppc.vsx.xsmaxdp
+        ppc_vsx_xsmindp,                           // llvm.ppc.vsx.xsmindp
+        ppc_vsx_xvdivdp,                           // llvm.ppc.vsx.xvdivdp
+        ppc_vsx_xvdivsp,                           // llvm.ppc.vsx.xvdivsp
+        ppc_vsx_xvmaxdp,                           // llvm.ppc.vsx.xvmaxdp
+        ppc_vsx_xvmaxsp,                           // llvm.ppc.vsx.xvmaxsp
+        ppc_vsx_xvmindp,                           // llvm.ppc.vsx.xvmindp
+        ppc_vsx_xvminsp,                           // llvm.ppc.vsx.xvminsp
         prefetch,                                  // llvm.prefetch
         ptr_annotation,                            // llvm.ptr.annotation
         ptx_bar_sync,                              // llvm.ptx.bar.sync
@@ -3261,6 +3287,8 @@ namespace SharpLLVM
         x86_avx512_cvtusi2ss,                      // llvm.x86.avx512.cvtusi2ss
         x86_avx512_cvtusi642sd,                    // llvm.x86.avx512.cvtusi642sd
         x86_avx512_cvtusi642ss,                    // llvm.x86.avx512.cvtusi642ss
+        x86_avx512_exp2_pd,                        // llvm.x86.avx512.exp2.pd
+        x86_avx512_exp2_ps,                        // llvm.x86.avx512.exp2.ps
         x86_avx512_gather_dpd_512,                 // llvm.x86.avx512.gather.dpd.512
         x86_avx512_gather_dpi_512,                 // llvm.x86.avx512.gather.dpi.512
         x86_avx512_gather_dpq_512,                 // llvm.x86.avx512.gather.dpq.512
@@ -3282,12 +3310,62 @@ namespace SharpLLVM
         x86_avx512_kunpck_bw,                      // llvm.x86.avx512.kunpck.bw
         x86_avx512_kxnor_w,                        // llvm.x86.avx512.kxnor.w
         x86_avx512_kxor_w,                         // llvm.x86.avx512.kxor.w
+        x86_avx512_mask_blend_b_128,               // llvm.x86.avx512.mask.blend.b.128
+        x86_avx512_mask_blend_b_256,               // llvm.x86.avx512.mask.blend.b.256
+        x86_avx512_mask_blend_b_512,               // llvm.x86.avx512.mask.blend.b.512
+        x86_avx512_mask_blend_d_128,               // llvm.x86.avx512.mask.blend.d.128
+        x86_avx512_mask_blend_d_256,               // llvm.x86.avx512.mask.blend.d.256
         x86_avx512_mask_blend_d_512,               // llvm.x86.avx512.mask.blend.d.512
+        x86_avx512_mask_blend_pd_128,              // llvm.x86.avx512.mask.blend.pd.128
+        x86_avx512_mask_blend_pd_256,              // llvm.x86.avx512.mask.blend.pd.256
         x86_avx512_mask_blend_pd_512,              // llvm.x86.avx512.mask.blend.pd.512
+        x86_avx512_mask_blend_ps_128,              // llvm.x86.avx512.mask.blend.ps.128
+        x86_avx512_mask_blend_ps_256,              // llvm.x86.avx512.mask.blend.ps.256
         x86_avx512_mask_blend_ps_512,              // llvm.x86.avx512.mask.blend.ps.512
+        x86_avx512_mask_blend_q_128,               // llvm.x86.avx512.mask.blend.q.128
+        x86_avx512_mask_blend_q_256,               // llvm.x86.avx512.mask.blend.q.256
         x86_avx512_mask_blend_q_512,               // llvm.x86.avx512.mask.blend.q.512
+        x86_avx512_mask_blend_w_128,               // llvm.x86.avx512.mask.blend.w.128
+        x86_avx512_mask_blend_w_256,               // llvm.x86.avx512.mask.blend.w.256
+        x86_avx512_mask_blend_w_512,               // llvm.x86.avx512.mask.blend.w.512
+        x86_avx512_mask_cmp_b_128,                 // llvm.x86.avx512.mask.cmp.b.128
+        x86_avx512_mask_cmp_b_256,                 // llvm.x86.avx512.mask.cmp.b.256
+        x86_avx512_mask_cmp_b_512,                 // llvm.x86.avx512.mask.cmp.b.512
+        x86_avx512_mask_cmp_d_128,                 // llvm.x86.avx512.mask.cmp.d.128
+        x86_avx512_mask_cmp_d_256,                 // llvm.x86.avx512.mask.cmp.d.256
+        x86_avx512_mask_cmp_d_512,                 // llvm.x86.avx512.mask.cmp.d.512
         x86_avx512_mask_cmp_pd_512,                // llvm.x86.avx512.mask.cmp.pd.512
         x86_avx512_mask_cmp_ps_512,                // llvm.x86.avx512.mask.cmp.ps.512
+        x86_avx512_mask_cmp_q_128,                 // llvm.x86.avx512.mask.cmp.q.128
+        x86_avx512_mask_cmp_q_256,                 // llvm.x86.avx512.mask.cmp.q.256
+        x86_avx512_mask_cmp_q_512,                 // llvm.x86.avx512.mask.cmp.q.512
+        x86_avx512_mask_cmp_w_128,                 // llvm.x86.avx512.mask.cmp.w.128
+        x86_avx512_mask_cmp_w_256,                 // llvm.x86.avx512.mask.cmp.w.256
+        x86_avx512_mask_cmp_w_512,                 // llvm.x86.avx512.mask.cmp.w.512
+        x86_avx512_mask_compress_d_128,            // llvm.x86.avx512.mask.compress.d.128
+        x86_avx512_mask_compress_d_256,            // llvm.x86.avx512.mask.compress.d.256
+        x86_avx512_mask_compress_d_512,            // llvm.x86.avx512.mask.compress.d.512
+        x86_avx512_mask_compress_pd_128,           // llvm.x86.avx512.mask.compress.pd.128
+        x86_avx512_mask_compress_pd_256,           // llvm.x86.avx512.mask.compress.pd.256
+        x86_avx512_mask_compress_pd_512,           // llvm.x86.avx512.mask.compress.pd.512
+        x86_avx512_mask_compress_ps_128,           // llvm.x86.avx512.mask.compress.ps.128
+        x86_avx512_mask_compress_ps_256,           // llvm.x86.avx512.mask.compress.ps.256
+        x86_avx512_mask_compress_ps_512,           // llvm.x86.avx512.mask.compress.ps.512
+        x86_avx512_mask_compress_q_128,            // llvm.x86.avx512.mask.compress.q.128
+        x86_avx512_mask_compress_q_256,            // llvm.x86.avx512.mask.compress.q.256
+        x86_avx512_mask_compress_q_512,            // llvm.x86.avx512.mask.compress.q.512
+        x86_avx512_mask_compress_store_d_128,      // llvm.x86.avx512.mask.compress.store.d.128
+        x86_avx512_mask_compress_store_d_256,      // llvm.x86.avx512.mask.compress.store.d.256
+        x86_avx512_mask_compress_store_d_512,      // llvm.x86.avx512.mask.compress.store.d.512
+        x86_avx512_mask_compress_store_pd_128,     // llvm.x86.avx512.mask.compress.store.pd.128
+        x86_avx512_mask_compress_store_pd_256,     // llvm.x86.avx512.mask.compress.store.pd.256
+        x86_avx512_mask_compress_store_pd_512,     // llvm.x86.avx512.mask.compress.store.pd.512
+        x86_avx512_mask_compress_store_ps_128,     // llvm.x86.avx512.mask.compress.store.ps.128
+        x86_avx512_mask_compress_store_ps_256,     // llvm.x86.avx512.mask.compress.store.ps.256
+        x86_avx512_mask_compress_store_ps_512,     // llvm.x86.avx512.mask.compress.store.ps.512
+        x86_avx512_mask_compress_store_q_128,      // llvm.x86.avx512.mask.compress.store.q.128
+        x86_avx512_mask_compress_store_q_256,      // llvm.x86.avx512.mask.compress.store.q.256
+        x86_avx512_mask_compress_store_q_512,      // llvm.x86.avx512.mask.compress.store.q.512
         x86_avx512_mask_conflict_d_512,            // llvm.x86.avx512.mask.conflict.d.512
         x86_avx512_mask_conflict_q_512,            // llvm.x86.avx512.mask.conflict.q.512
         x86_avx512_mask_cvtdq2pd_512,              // llvm.x86.avx512.mask.cvtdq2pd.512
@@ -3303,6 +3381,30 @@ namespace SharpLLVM
         x86_avx512_mask_cvttps2udq_512,            // llvm.x86.avx512.mask.cvttps2udq.512
         x86_avx512_mask_cvtudq2pd_512,             // llvm.x86.avx512.mask.cvtudq2pd.512
         x86_avx512_mask_cvtudq2ps_512,             // llvm.x86.avx512.mask.cvtudq2ps.512
+        x86_avx512_mask_expand_d_128,              // llvm.x86.avx512.mask.expand.d.128
+        x86_avx512_mask_expand_d_256,              // llvm.x86.avx512.mask.expand.d.256
+        x86_avx512_mask_expand_d_512,              // llvm.x86.avx512.mask.expand.d.512
+        x86_avx512_mask_expand_load_d_128,         // llvm.x86.avx512.mask.expand.load.d.128
+        x86_avx512_mask_expand_load_d_256,         // llvm.x86.avx512.mask.expand.load.d.256
+        x86_avx512_mask_expand_load_d_512,         // llvm.x86.avx512.mask.expand.load.d.512
+        x86_avx512_mask_expand_load_pd_128,        // llvm.x86.avx512.mask.expand.load.pd.128
+        x86_avx512_mask_expand_load_pd_256,        // llvm.x86.avx512.mask.expand.load.pd.256
+        x86_avx512_mask_expand_load_pd_512,        // llvm.x86.avx512.mask.expand.load.pd.512
+        x86_avx512_mask_expand_load_ps_128,        // llvm.x86.avx512.mask.expand.load.ps.128
+        x86_avx512_mask_expand_load_ps_256,        // llvm.x86.avx512.mask.expand.load.ps.256
+        x86_avx512_mask_expand_load_ps_512,        // llvm.x86.avx512.mask.expand.load.ps.512
+        x86_avx512_mask_expand_load_q_128,         // llvm.x86.avx512.mask.expand.load.q.128
+        x86_avx512_mask_expand_load_q_256,         // llvm.x86.avx512.mask.expand.load.q.256
+        x86_avx512_mask_expand_load_q_512,         // llvm.x86.avx512.mask.expand.load.q.512
+        x86_avx512_mask_expand_pd_128,             // llvm.x86.avx512.mask.expand.pd.128
+        x86_avx512_mask_expand_pd_256,             // llvm.x86.avx512.mask.expand.pd.256
+        x86_avx512_mask_expand_pd_512,             // llvm.x86.avx512.mask.expand.pd.512
+        x86_avx512_mask_expand_ps_128,             // llvm.x86.avx512.mask.expand.ps.128
+        x86_avx512_mask_expand_ps_256,             // llvm.x86.avx512.mask.expand.ps.256
+        x86_avx512_mask_expand_ps_512,             // llvm.x86.avx512.mask.expand.ps.512
+        x86_avx512_mask_expand_q_128,              // llvm.x86.avx512.mask.expand.q.128
+        x86_avx512_mask_expand_q_256,              // llvm.x86.avx512.mask.expand.q.256
+        x86_avx512_mask_expand_q_512,              // llvm.x86.avx512.mask.expand.q.512
         x86_avx512_mask_loadu_d_512,               // llvm.x86.avx512.mask.loadu.d.512
         x86_avx512_mask_loadu_pd_512,              // llvm.x86.avx512.mask.loadu.pd.512
         x86_avx512_mask_loadu_ps_512,              // llvm.x86.avx512.mask.loadu.ps.512
@@ -3320,8 +3422,30 @@ namespace SharpLLVM
         x86_avx512_mask_pbroadcast_d_gpr_512,      // llvm.x86.avx512.mask.pbroadcast.d.gpr.512
         x86_avx512_mask_pbroadcast_q_gpr_512,      // llvm.x86.avx512.mask.pbroadcast.q.gpr.512
         x86_avx512_mask_pbroadcast_q_mem_512,      // llvm.x86.avx512.mask.pbroadcast.q.mem.512
+        x86_avx512_mask_pcmpeq_b_128,              // llvm.x86.avx512.mask.pcmpeq.b.128
+        x86_avx512_mask_pcmpeq_b_256,              // llvm.x86.avx512.mask.pcmpeq.b.256
+        x86_avx512_mask_pcmpeq_b_512,              // llvm.x86.avx512.mask.pcmpeq.b.512
+        x86_avx512_mask_pcmpeq_d_128,              // llvm.x86.avx512.mask.pcmpeq.d.128
+        x86_avx512_mask_pcmpeq_d_256,              // llvm.x86.avx512.mask.pcmpeq.d.256
         x86_avx512_mask_pcmpeq_d_512,              // llvm.x86.avx512.mask.pcmpeq.d.512
+        x86_avx512_mask_pcmpeq_q_128,              // llvm.x86.avx512.mask.pcmpeq.q.128
+        x86_avx512_mask_pcmpeq_q_256,              // llvm.x86.avx512.mask.pcmpeq.q.256
         x86_avx512_mask_pcmpeq_q_512,              // llvm.x86.avx512.mask.pcmpeq.q.512
+        x86_avx512_mask_pcmpeq_w_128,              // llvm.x86.avx512.mask.pcmpeq.w.128
+        x86_avx512_mask_pcmpeq_w_256,              // llvm.x86.avx512.mask.pcmpeq.w.256
+        x86_avx512_mask_pcmpeq_w_512,              // llvm.x86.avx512.mask.pcmpeq.w.512
+        x86_avx512_mask_pcmpgt_b_128,              // llvm.x86.avx512.mask.pcmpgt.b.128
+        x86_avx512_mask_pcmpgt_b_256,              // llvm.x86.avx512.mask.pcmpgt.b.256
+        x86_avx512_mask_pcmpgt_b_512,              // llvm.x86.avx512.mask.pcmpgt.b.512
+        x86_avx512_mask_pcmpgt_d_128,              // llvm.x86.avx512.mask.pcmpgt.d.128
+        x86_avx512_mask_pcmpgt_d_256,              // llvm.x86.avx512.mask.pcmpgt.d.256
+        x86_avx512_mask_pcmpgt_d_512,              // llvm.x86.avx512.mask.pcmpgt.d.512
+        x86_avx512_mask_pcmpgt_q_128,              // llvm.x86.avx512.mask.pcmpgt.q.128
+        x86_avx512_mask_pcmpgt_q_256,              // llvm.x86.avx512.mask.pcmpgt.q.256
+        x86_avx512_mask_pcmpgt_q_512,              // llvm.x86.avx512.mask.pcmpgt.q.512
+        x86_avx512_mask_pcmpgt_w_128,              // llvm.x86.avx512.mask.pcmpgt.w.128
+        x86_avx512_mask_pcmpgt_w_256,              // llvm.x86.avx512.mask.pcmpgt.w.256
+        x86_avx512_mask_pcmpgt_w_512,              // llvm.x86.avx512.mask.pcmpgt.w.512
         x86_avx512_mask_pmaxs_d_512,               // llvm.x86.avx512.mask.pmaxs.d.512
         x86_avx512_mask_pmaxs_q_512,               // llvm.x86.avx512.mask.pmaxs.q.512
         x86_avx512_mask_pmaxu_d_512,               // llvm.x86.avx512.mask.pmaxu.d.512
@@ -3332,6 +3456,24 @@ namespace SharpLLVM
         x86_avx512_mask_pminu_q_512,               // llvm.x86.avx512.mask.pminu.q.512
         x86_avx512_mask_pmul_dq_512,               // llvm.x86.avx512.mask.pmul.dq.512
         x86_avx512_mask_pmulu_dq_512,              // llvm.x86.avx512.mask.pmulu.dq.512
+        x86_avx512_mask_psll_d,                    // llvm.x86.avx512.mask.psll.d
+        x86_avx512_mask_psll_q,                    // llvm.x86.avx512.mask.psll.q
+        x86_avx512_mask_pslli_d,                   // llvm.x86.avx512.mask.pslli.d
+        x86_avx512_mask_pslli_q,                   // llvm.x86.avx512.mask.pslli.q
+        x86_avx512_mask_psllv_d,                   // llvm.x86.avx512.mask.psllv.d
+        x86_avx512_mask_psllv_q,                   // llvm.x86.avx512.mask.psllv.q
+        x86_avx512_mask_psra_d,                    // llvm.x86.avx512.mask.psra.d
+        x86_avx512_mask_psra_q,                    // llvm.x86.avx512.mask.psra.q
+        x86_avx512_mask_psrai_d,                   // llvm.x86.avx512.mask.psrai.d
+        x86_avx512_mask_psrai_q,                   // llvm.x86.avx512.mask.psrai.q
+        x86_avx512_mask_psrav_d,                   // llvm.x86.avx512.mask.psrav.d
+        x86_avx512_mask_psrav_q,                   // llvm.x86.avx512.mask.psrav.q
+        x86_avx512_mask_psrl_d,                    // llvm.x86.avx512.mask.psrl.d
+        x86_avx512_mask_psrl_q,                    // llvm.x86.avx512.mask.psrl.q
+        x86_avx512_mask_psrli_d,                   // llvm.x86.avx512.mask.psrli.d
+        x86_avx512_mask_psrli_q,                   // llvm.x86.avx512.mask.psrli.q
+        x86_avx512_mask_psrlv_d,                   // llvm.x86.avx512.mask.psrlv.d
+        x86_avx512_mask_psrlv_q,                   // llvm.x86.avx512.mask.psrlv.q
         x86_avx512_mask_ptestm_d_512,              // llvm.x86.avx512.mask.ptestm.d.512
         x86_avx512_mask_ptestm_q_512,              // llvm.x86.avx512.mask.ptestm.q.512
         x86_avx512_mask_rndscale_pd_512,           // llvm.x86.avx512.mask.rndscale.pd.512
@@ -3341,10 +3483,26 @@ namespace SharpLLVM
         x86_avx512_mask_storeu_pd_512,             // llvm.x86.avx512.mask.storeu.pd.512
         x86_avx512_mask_storeu_ps_512,             // llvm.x86.avx512.mask.storeu.ps.512
         x86_avx512_mask_storeu_q_512,              // llvm.x86.avx512.mask.storeu.q.512
+        x86_avx512_mask_ucmp_b_128,                // llvm.x86.avx512.mask.ucmp.b.128
+        x86_avx512_mask_ucmp_b_256,                // llvm.x86.avx512.mask.ucmp.b.256
+        x86_avx512_mask_ucmp_b_512,                // llvm.x86.avx512.mask.ucmp.b.512
+        x86_avx512_mask_ucmp_d_128,                // llvm.x86.avx512.mask.ucmp.d.128
+        x86_avx512_mask_ucmp_d_256,                // llvm.x86.avx512.mask.ucmp.d.256
+        x86_avx512_mask_ucmp_d_512,                // llvm.x86.avx512.mask.ucmp.d.512
+        x86_avx512_mask_ucmp_q_128,                // llvm.x86.avx512.mask.ucmp.q.128
+        x86_avx512_mask_ucmp_q_256,                // llvm.x86.avx512.mask.ucmp.q.256
+        x86_avx512_mask_ucmp_q_512,                // llvm.x86.avx512.mask.ucmp.q.512
+        x86_avx512_mask_ucmp_w_128,                // llvm.x86.avx512.mask.ucmp.w.128
+        x86_avx512_mask_ucmp_w_256,                // llvm.x86.avx512.mask.ucmp.w.256
+        x86_avx512_mask_ucmp_w_512,                // llvm.x86.avx512.mask.ucmp.w.512
         x86_avx512_mask_valign_d_512,              // llvm.x86.avx512.mask.valign.d.512
         x86_avx512_mask_valign_q_512,              // llvm.x86.avx512.mask.valign.q.512
         x86_avx512_mask_vcvtph2ps_512,             // llvm.x86.avx512.mask.vcvtph2ps.512
         x86_avx512_mask_vcvtps2ph_512,             // llvm.x86.avx512.mask.vcvtps2ph.512
+        x86_avx512_mask_vextractf32x4_512,         // llvm.x86.avx512.mask.vextractf32x4.512
+        x86_avx512_mask_vextractf64x4_512,         // llvm.x86.avx512.mask.vextractf64x4.512
+        x86_avx512_mask_vextracti32x4_512,         // llvm.x86.avx512.mask.vextracti32x4.512
+        x86_avx512_mask_vextracti64x4_512,         // llvm.x86.avx512.mask.vextracti64x4.512
         x86_avx512_mask_vpermt_d_512,              // llvm.x86.avx512.mask.vpermt.d.512
         x86_avx512_mask_vpermt_pd_512,             // llvm.x86.avx512.mask.vpermt.pd.512
         x86_avx512_mask_vpermt_ps_512,             // llvm.x86.avx512.mask.vpermt.ps.512
@@ -3486,17 +3644,41 @@ namespace SharpLLVM
         x86_bmi_pdep_64,                           // llvm.x86.bmi.pdep.64
         x86_bmi_pext_32,                           // llvm.x86.bmi.pext.32
         x86_bmi_pext_64,                           // llvm.x86.bmi.pext.64
+        x86_fma_mask_vfmadd_pd_128,                // llvm.x86.fma.mask.vfmadd.pd.128
+        x86_fma_mask_vfmadd_pd_256,                // llvm.x86.fma.mask.vfmadd.pd.256
         x86_fma_mask_vfmadd_pd_512,                // llvm.x86.fma.mask.vfmadd.pd.512
+        x86_fma_mask_vfmadd_ps_128,                // llvm.x86.fma.mask.vfmadd.ps.128
+        x86_fma_mask_vfmadd_ps_256,                // llvm.x86.fma.mask.vfmadd.ps.256
         x86_fma_mask_vfmadd_ps_512,                // llvm.x86.fma.mask.vfmadd.ps.512
+        x86_fma_mask_vfmaddsub_pd_128,             // llvm.x86.fma.mask.vfmaddsub.pd.128
+        x86_fma_mask_vfmaddsub_pd_256,             // llvm.x86.fma.mask.vfmaddsub.pd.256
         x86_fma_mask_vfmaddsub_pd_512,             // llvm.x86.fma.mask.vfmaddsub.pd.512
+        x86_fma_mask_vfmaddsub_ps_128,             // llvm.x86.fma.mask.vfmaddsub.ps.128
+        x86_fma_mask_vfmaddsub_ps_256,             // llvm.x86.fma.mask.vfmaddsub.ps.256
         x86_fma_mask_vfmaddsub_ps_512,             // llvm.x86.fma.mask.vfmaddsub.ps.512
+        x86_fma_mask_vfmsub_pd_128,                // llvm.x86.fma.mask.vfmsub.pd.128
+        x86_fma_mask_vfmsub_pd_256,                // llvm.x86.fma.mask.vfmsub.pd.256
         x86_fma_mask_vfmsub_pd_512,                // llvm.x86.fma.mask.vfmsub.pd.512
+        x86_fma_mask_vfmsub_ps_128,                // llvm.x86.fma.mask.vfmsub.ps.128
+        x86_fma_mask_vfmsub_ps_256,                // llvm.x86.fma.mask.vfmsub.ps.256
         x86_fma_mask_vfmsub_ps_512,                // llvm.x86.fma.mask.vfmsub.ps.512
+        x86_fma_mask_vfmsubadd_pd_128,             // llvm.x86.fma.mask.vfmsubadd.pd.128
+        x86_fma_mask_vfmsubadd_pd_256,             // llvm.x86.fma.mask.vfmsubadd.pd.256
         x86_fma_mask_vfmsubadd_pd_512,             // llvm.x86.fma.mask.vfmsubadd.pd.512
+        x86_fma_mask_vfmsubadd_ps_128,             // llvm.x86.fma.mask.vfmsubadd.ps.128
+        x86_fma_mask_vfmsubadd_ps_256,             // llvm.x86.fma.mask.vfmsubadd.ps.256
         x86_fma_mask_vfmsubadd_ps_512,             // llvm.x86.fma.mask.vfmsubadd.ps.512
+        x86_fma_mask_vfnmadd_pd_128,               // llvm.x86.fma.mask.vfnmadd.pd.128
+        x86_fma_mask_vfnmadd_pd_256,               // llvm.x86.fma.mask.vfnmadd.pd.256
         x86_fma_mask_vfnmadd_pd_512,               // llvm.x86.fma.mask.vfnmadd.pd.512
+        x86_fma_mask_vfnmadd_ps_128,               // llvm.x86.fma.mask.vfnmadd.ps.128
+        x86_fma_mask_vfnmadd_ps_256,               // llvm.x86.fma.mask.vfnmadd.ps.256
         x86_fma_mask_vfnmadd_ps_512,               // llvm.x86.fma.mask.vfnmadd.ps.512
+        x86_fma_mask_vfnmsub_pd_128,               // llvm.x86.fma.mask.vfnmsub.pd.128
+        x86_fma_mask_vfnmsub_pd_256,               // llvm.x86.fma.mask.vfnmsub.pd.256
         x86_fma_mask_vfnmsub_pd_512,               // llvm.x86.fma.mask.vfnmsub.pd.512
+        x86_fma_mask_vfnmsub_ps_128,               // llvm.x86.fma.mask.vfnmsub.ps.128
+        x86_fma_mask_vfnmsub_ps_256,               // llvm.x86.fma.mask.vfnmsub.ps.256
         x86_fma_mask_vfnmsub_ps_512,               // llvm.x86.fma.mask.vfnmsub.ps.512
         x86_fma_vfmadd_pd,                         // llvm.x86.fma.vfmadd.pd
         x86_fma_vfmadd_pd_256,                     // llvm.x86.fma.vfmadd.pd.256
@@ -4005,5 +4187,5 @@ namespace SharpLLVM
         xcore_testwct,                             // llvm.xcore.testwct
         xcore_waitevent,                           // llvm.xcore.waitevent
         xcore_zext                                 // llvm.xcore.zext
-	}
+    }
 }

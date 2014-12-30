@@ -229,11 +229,6 @@ namespace SharpLang.CompilerServices
             else
                 LLVM.BuildRetVoid(builder);
 
-            if (LLVM.VerifyFunction(invokeMethodHelper, VerifierFailureAction.PrintMessageAction))
-            {
-                throw new InvalidOperationException(string.Format("Verification failed for function {0}", invokeMethodHelper));
-            }
-
             return invokeMethodHelper;
         }
 

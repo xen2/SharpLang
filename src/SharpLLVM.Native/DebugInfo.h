@@ -4,6 +4,7 @@
 #include <llvm/IR/DIBuilder.h>
 
 typedef llvm::DIBuilder* LLVMDIBuilderRef;
+typedef llvm::MDNode* LLVMDIDescriptor;
 
 extern "C" LLVMDIBuilderRef LLVMDIBuilderCreate(LLVMModuleRef M);
 extern "C" void LLVMDIBuilderDispose(LLVMDIBuilderRef Builder);
@@ -18,210 +19,209 @@ extern "C" void LLVMDIBuilderCreateCompileUnit(
 	const char* Flags,
 	unsigned RuntimeVer,
 	const char* SplitName);
-extern "C" LLVMValueRef LLVMDIBuilderCreateFile(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateFile(
 	LLVMDIBuilderRef Builder,
 	const char* Filename,
 	const char* Directory);
-extern "C" LLVMValueRef LLVMDIBuilderCreateSubroutineType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateSubroutineType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef File,
-	LLVMValueRef ParameterTypes);
-extern "C" LLVMValueRef LLVMDIBuilderCreateFunction(
+	LLVMDIDescriptor File,
+	LLVMDIDescriptor ParameterTypes);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateFunction(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
 	const char* LinkageName,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNo,
-	LLVMValueRef Ty,
+	LLVMDIDescriptor Ty,
 	bool isLocalToUnit,
 	bool isDefinition,
 	unsigned ScopeLine,
 	unsigned Flags,
 	bool isOptimized,
 	LLVMValueRef Fn,
-	LLVMValueRef TParam,
-	LLVMValueRef Decl);
-extern "C" LLVMValueRef LLVMDIBuilderCreateBasicType(
+	LLVMDIDescriptor TParam,
+	LLVMDIDescriptor Decl);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateBasicType(
 	LLVMDIBuilderRef Builder,
 	const char* Name,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	unsigned Encoding);
-extern "C" LLVMValueRef LLVMDIBuilderCreatePointerType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreatePointerType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef PointeeTy,
+	LLVMDIDescriptor PointeeTy,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	const char* Name);
-extern "C" LLVMValueRef LLVMDIBuilderCreateForwardDecl(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateForwardDecl(
 	LLVMDIBuilderRef Builder,
 	unsigned Tag,
 	const char* Name,
-	LLVMValueRef Scope,
-	LLVMValueRef File,
+	LLVMDIDescriptor Scope,
+	LLVMDIDescriptor File,
 	unsigned Line,
 	unsigned RuntimeLang,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	const char* UniqueId);
-extern "C" LLVMValueRef LLVMDIBuilderCreateStructType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateStructType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNumber,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	unsigned Flags,
-	LLVMValueRef DerivedFrom,
-	LLVMValueRef Elements,
+	LLVMDIDescriptor DerivedFrom,
+	LLVMDIDescriptor Elements,
 	unsigned RunTimeLang,
-	LLVMValueRef VTableHolder,
+	LLVMDIDescriptor VTableHolder,
 	const char *UniqueId);
-extern "C" LLVMValueRef LLVMDIBuilderCreateClassType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateClassType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNumber,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	uint64_t OffsetInBits,
 	unsigned Flags,
-	LLVMValueRef DerivedFrom,
-	LLVMValueRef Elements,
-	LLVMValueRef VTableHolder,
-	LLVMValueRef TemplateParms,
+	LLVMDIDescriptor DerivedFrom,
+	LLVMDIDescriptor Elements,
+	LLVMDIDescriptor VTableHolder,
+	LLVMDIDescriptor TemplateParms,
 	const char *UniqueId);
-extern "C" LLVMValueRef LLVMDIBuilderCreateMemberType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateMemberType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNo,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	uint64_t OffsetInBits,
 	unsigned Flags,
-	LLVMValueRef Ty);
-extern "C" LLVMValueRef LLVMDIBuilderCreateLexicalBlock(
+	LLVMDIDescriptor Ty);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateLexicalBlock(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
-	LLVMValueRef File,
+	LLVMDIDescriptor Scope,
+	LLVMDIDescriptor File,
 	unsigned Line,
 	unsigned Col,
 	unsigned Discriminator);
-extern "C" LLVMValueRef LLVMDIBuilderCreateStaticVariable(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateExpression(LLVMDIBuilderRef Builder, int64_t* Addresses, unsigned NumAddresses);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateGlobalVariable(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Context,
+	LLVMDIDescriptor Context,
 	const char* Name,
 	const char* LinkageName,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNo,
-	LLVMValueRef Ty,
+	LLVMDIDescriptor Ty,
 	bool isLocalToUnit,
 	LLVMValueRef Val,
-	LLVMValueRef Decl = NULL);
-extern "C" LLVMValueRef LLVMDIBuilderCreateLocalVariable(
+	LLVMDIDescriptor Decl = NULL);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateLocalVariable(
 	LLVMDIBuilderRef Builder,
 	unsigned Tag,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNo,
-	LLVMValueRef Ty,
+	LLVMDIDescriptor Ty,
 	bool AlwaysPreserve,
 	unsigned Flags,
 	unsigned ArgNo);
-extern "C" LLVMValueRef LLVMDIBuilderCreateArrayType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateArrayType(
 	LLVMDIBuilderRef Builder,
 	uint64_t Size,
 	uint64_t AlignInBits,
-	LLVMValueRef Ty,
-	LLVMValueRef Subscripts);
-extern "C" LLVMValueRef LLVMDIBuilderCreateVectorType(
+	LLVMDIDescriptor Ty,
+	LLVMDIDescriptor Subscripts);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateVectorType(
 	LLVMDIBuilderRef Builder,
 	uint64_t Size,
 	uint64_t AlignInBits,
-	LLVMValueRef Ty,
-	LLVMValueRef Subscripts);
-extern "C" LLVMValueRef LLVMDIBuilderGetOrCreateSubrange(
+	LLVMDIDescriptor Ty,
+	LLVMDIDescriptor Subscripts);
+extern "C" LLVMDIDescriptor LLVMDIBuilderGetOrCreateSubrange(
 	LLVMDIBuilderRef Builder,
 	int64_t Lo,
 	int64_t Count);
-extern "C" LLVMValueRef LLVMDIBuilderGetOrCreateArray(
+extern "C" LLVMDIDescriptor LLVMDIBuilderGetOrCreateArray(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef* Ptr,
+	LLVMDIDescriptor* Ptr,
 	unsigned Count);
 extern "C" LLVMValueRef LLVMDIBuilderInsertDeclareAtEnd(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Val,
-	LLVMValueRef VarInfo,
+	LLVMDIDescriptor VarInfo,
+	LLVMDIDescriptor Expr,
 	LLVMBasicBlockRef InsertAtEnd);
 extern "C" LLVMValueRef LLVMDIBuilderInsertDeclareBefore(
 	LLVMDIBuilderRef Builder,
 	LLVMValueRef Val,
-	LLVMValueRef VarInfo,
+	LLVMDIDescriptor VarInfo,
+	LLVMDIDescriptor Expr,
 	LLVMValueRef InsertBefore);
-extern "C" LLVMValueRef LLVMDIBuilderCreateEnumerator(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateEnumerator(
 	LLVMDIBuilderRef Builder,
 	const char* Name,
 	uint64_t Val);
-extern "C" LLVMValueRef LLVMDIBuilderCreateEnumerationType(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateEnumerationType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNumber,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
-	LLVMValueRef Elements,
-	LLVMValueRef ClassType);
-extern "C" LLVMValueRef LLVMDIBuilderCreateUnionType(
+	LLVMDIDescriptor Elements,
+	LLVMDIDescriptor ClassType);
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateUnionType(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNumber,
 	uint64_t SizeInBits,
 	uint64_t AlignInBits,
 	unsigned Flags,
-	LLVMValueRef Elements,
+	LLVMDIDescriptor Elements,
 	unsigned RunTimeLang,
 	const char* UniqueId);
-extern "C" LLVMValueRef LLVMDIBuilderCreateTemplateTypeParameter(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateTemplateTypeParameter(
 	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef Ty,
-	LLVMValueRef File,
+	LLVMDIDescriptor Ty,
+	LLVMDIDescriptor File,
 	unsigned LineNo,
 	unsigned ColumnNo);
-extern "C" LLVMValueRef LLVMDIBuilderCreateOpDeref(LLVMTypeRef IntTy);
-extern "C" LLVMValueRef LLVMDIBuilderCreateOpPlus(LLVMTypeRef IntTy);
-extern "C" LLVMValueRef LLVMDIBuilderCreateComplexVariable(
+extern "C" LLVMDIDescriptor LLVMDIBuilderCreateNameSpace(
 	LLVMDIBuilderRef Builder,
-	unsigned Tag,
-	LLVMValueRef Scope,
-	const char *Name,
-	LLVMValueRef File,
-	unsigned LineNo,
-	LLVMValueRef Ty,
-	LLVMValueRef* AddrOps,
-	unsigned AddrOpsCount,
-	unsigned ArgNo);
-extern "C" LLVMValueRef LLVMDIBuilderCreateNameSpace(
-	LLVMDIBuilderRef Builder,
-	LLVMValueRef Scope,
+	LLVMDIDescriptor Scope,
 	const char* Name,
-	LLVMValueRef File,
+	LLVMDIDescriptor File,
 	unsigned LineNo);
 extern "C" void LLVMDICompositeTypeSetTypeArray(
-	LLVMValueRef* CompositeType,
-	LLVMValueRef TypeArray);
+	LLVMDIBuilderRef Builder,
+	LLVMDIDescriptor* CompositeType,
+	LLVMDIDescriptor TypeArray);
 extern "C" void LLVMAddModuleFlag(LLVMModuleRef M,
 	const char *name,
 	uint32_t value);
+
+extern "C" LLVMValueRef LLVMDIMetadataAsValue(LLVMDIDescriptor Value);
+
+extern "C" char* LLVMDIPrintDescriptorToString(LLVMDIDescriptor Value);
+
+extern "C" LLVMDIDescriptor LLVMDICreateDebugLocation(unsigned Line, unsigned Col, LLVMDIDescriptor Scope, LLVMDIDescriptor InlinedAt);
+
+extern "C" uint32_t LLVMDIGetDebugMetadataVersion();
 
 #endif

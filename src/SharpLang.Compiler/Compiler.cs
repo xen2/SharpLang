@@ -27,7 +27,6 @@ namespace SharpLang.CompilerServices
         // <summary> Extra builder used for method codegen. <summary>
         private BuilderRef builder2;
 
-        private DIBuilderRef debugBuilder;
         private TargetDataRef targetData;
 
         /// <summary> Currently compiled assembly. </summary>
@@ -81,7 +80,8 @@ namespace SharpLang.CompilerServices
             // Prepare LLVM builders
             builder = LLVM.CreateBuilderInContext(context);
             builder2 = LLVM.CreateBuilderInContext(context);
-            debugBuilder = LLVM.DIBuilderCreate(module);
+
+            InitializeDebug();
 
             if (!TestMode)
             {
@@ -168,7 +168,7 @@ namespace SharpLang.CompilerServices
                 "file", "directory", "SharpLang", false, string.Empty, 1, string.Empty);
 
             LLVM.AddModuleFlag(module, "Dwarf Version", 4);
-            LLVM.AddModuleFlag(module, "Debug Info Version", 1);
+            LLVM.AddModuleFlag(module, "Debug Info Version", LLVM.DIGetDebugMetadataVersion());
 
             // Process methods
             while (classesToGenerate.Count > 0)

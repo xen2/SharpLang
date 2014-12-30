@@ -69,6 +69,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Additional\DIDescriptor.cs" />
     <Compile Include="Additional\Intrinsics.cs" />
     <None Include="Additional\Intrinsics.tt" />
     <Compile Include="Additional\TypeRef.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="CodeModel.cs" />
     <Compile Include="ContextRef.cs" />
     <Compile Include="DIBuilderRef.cs" />
+    <Compile Include="DIDescriptor.cs" />
     <Compile Include="DLLStorageClass.cs" />
     <Compile Include="DiagnosticInfoRef.cs" />
     <Compile Include="DiagnosticSeverity.cs" />

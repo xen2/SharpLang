@@ -602,11 +602,6 @@ namespace SharpLang.CompilerServices
                 // Place eh.resume block at the very end
                 LLVM.MoveBasicBlockAfter(functionContext.ResumeExceptionBlock, LLVM.GetLastBasicBlock(functionGlobal));
             }
-
-            if (LLVM.VerifyFunction(functionGlobal, VerifierFailureAction.PrintMessageAction))
-            { 
-                throw new InvalidOperationException(string.Format("Verification failed for function {0}", function.MethodReference));
-            }
         }
 
         /// <summary>
