@@ -213,7 +213,7 @@ namespace SharpLang.CompilerServices
                 //   new SharpLangModule(moduleName, metadataStart, metadataLength)
                 var sharpLangModuleGlobal = metadataPerModule[assembly.MainModule];
                 var functionContext = new FunctionCompilerContext(globalCtor);
-                functionContext.Stack = new List<StackValue>();
+                functionContext.Stack = new FunctionStack();
                 functionContext.Stack.Add(new StackValue(StackValueType.Object, sharpLangModuleType, sharpLangModuleGlobal));
                 functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, metadataGlobal));
                 functionContext.Stack.Add(new StackValue(StackValueType.Int32, int32, LLVM.ConstInt(int32LLVM, (ulong)metadataBytes.Length, false)));

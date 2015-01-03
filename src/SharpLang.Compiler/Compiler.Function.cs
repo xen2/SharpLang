@@ -20,7 +20,7 @@ namespace SharpLang.CompilerServices
     {
         // Additional actions that can be added on Nop instructions
         // TODO: Need a better system for longer term (might need Cecil changes?)
-        private static readonly ConditionalWeakTable<Instruction, Action<List<StackValue>>> InstructionActions = new ConditionalWeakTable<Instruction, Action<List<StackValue>>>();
+        private static readonly ConditionalWeakTable<Instruction, Action<FunctionStack>> InstructionActions = new ConditionalWeakTable<Instruction, Action<FunctionStack>>();
 
         /// <summary>
         /// Gets the function.
@@ -320,7 +320,7 @@ namespace SharpLang.CompilerServices
             var numParams = method.Parameters.Count;
 
             // Create stack, locals and args
-            var stack = new List<StackValue>(body.MaxStackSize);
+            var stack = new FunctionStack(body.MaxStackSize);
             var locals = new List<StackValue>(body.Variables.Count);
             var args = new List<StackValue>(numParams);
             var exceptionHandlers = new List<ExceptionHandlerInfo>();
@@ -728,7 +728,7 @@ namespace SharpLang.CompilerServices
                     // TODO: Insert nop? Debugger step?
 
                     // Check if there is a custom action
-                    Action<List<StackValue>> instructionAction;
+                    Action<FunctionStack> instructionAction;
                     if (InstructionActions.TryGetValue(instruction, out instructionAction))
                     {
                         instructionAction(stack);
@@ -1912,7 +1912,7 @@ namespace SharpLang.CompilerServices
         /// <param name="sourceBasicBlock">The source basic block.</param>
         /// <param name="targetStack">The target stack.</param>
         /// <param name="targetBasicBlock">The target basic block.</param>
-        private void MergeStack(List<StackValue> sourceStack, BasicBlockRef sourceBasicBlock, ref StackValue[] targetStack, BasicBlockRef targetBasicBlock)
+        private void MergeStack(FunctionStack sourceStack, BasicBlockRef sourceBasicBlock, ref StackValue[] targetStack, BasicBlockRef targetBasicBlock)
         {
             // First time? Need to create stack and position builder
             if (targetStack == null)

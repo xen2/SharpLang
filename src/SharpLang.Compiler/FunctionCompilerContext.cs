@@ -24,7 +24,7 @@ namespace SharpLang.CompilerServices
         public MethodBody Body { get; set; }
         public ValueRef FunctionGlobal { get; set; }
         public BasicBlockRef BasicBlock { get; set; }
-        public List<StackValue> Stack { get; set; }
+        public FunctionStack Stack { get; set; }
         public List<StackValue> Locals { get; set; }
         public List<StackValue> Arguments { get; set; }
 

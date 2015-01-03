@@ -164,7 +164,7 @@ namespace SharpLang.CompilerServices
             var forCodeBlock = LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty);
             var exitBlock = LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty);
 
-            var stack = new List<StackValue>();
+            var stack = new FunctionStack();
 
             // Load first argument and cast as Delegate[]
             var @this = LLVM.GetParam(invokeMethodHelper, 0);
