@@ -393,6 +393,9 @@ namespace SharpLang.CompilerServices
                 // Add value to stack
                 stack.Add(new StackValue(targetMethod.ReturnType.StackType, targetMethod.ReturnType, returnValue));
             }
+
+            // Apply attributes to the call instruction
+            ApplyCallAttributes(callResult, targetMethod.ReturnType, targetMethod.ParameterTypes);
         }
 
         private void EmitBr(BasicBlockRef targetBasicBlock)
