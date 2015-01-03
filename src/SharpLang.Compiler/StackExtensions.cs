@@ -4,7 +4,7 @@ namespace SharpLang.CompilerServices
 {
     static class StackExtensions
     {
-        public static StackValue Pop(this List<StackValue> stack)
+        public static StackValue Pop(this FunctionStack stack)
         {
             int lastIndex = stack.Count - 1;
 

@@ -104,6 +104,7 @@
     <Compile Include="RuntimeInline\RuntimePINVOKE.cs" />
     <Compile Include="RuntimeTypeInfoFields.cs" />
     <Compile Include="Scope.cs" />
+    <Compile Include="FunctionStack.cs" />
     <Compile Include="StackExtensions.cs" />
     <Compile Include="StackValue.cs" />
     <Compile Include="StackValueType.cs" />

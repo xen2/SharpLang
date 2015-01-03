@@ -11,7 +11,7 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
-        private void EmitStloc(List<StackValue> stack, List<StackValue> locals, int localIndex)
+        private void EmitStloc(FunctionStack stack, List<StackValue> locals, int localIndex)
         {
             var value = stack.Pop();
             var local = locals[localIndex];
@@ -23,7 +23,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, stackValue, local.Value);
         }
 
-        private void EmitLdloc(List<StackValue> stack, List<StackValue> locals, int operandIndex)
+        private void EmitLdloc(FunctionStack stack, List<StackValue> locals, int operandIndex)
         {
             var local = locals[operandIndex];
 
@@ -37,7 +37,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(local.StackType, local.Type, value));
         }
 
-        private void EmitLdloca(List<StackValue> stack, List<StackValue> locals, int operandIndex)
+        private void EmitLdloca(FunctionStack stack, List<StackValue> locals, int operandIndex)
         {
             var local = locals[operandIndex];
 
@@ -51,7 +51,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Reference, refType, value));
         }
 
-        private void EmitLdarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
+        private void EmitLdarg(FunctionStack stack, List<StackValue> args, int operandIndex)
         {
             var arg = args[operandIndex];
 
@@ -65,7 +65,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(arg.StackType, arg.Type, value));
         }
 
-        private void EmitLdarga(List<StackValue> stack, List<StackValue> args, int operandIndex)
+        private void EmitLdarga(FunctionStack stack, List<StackValue> args, int operandIndex)
         {
             var arg = args[operandIndex];
 
@@ -79,7 +79,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Reference, refType, value));
         }
 
-        private void EmitStarg(List<StackValue> stack, List<StackValue> args, int operandIndex)
+        private void EmitStarg(FunctionStack stack, List<StackValue> args, int operandIndex)
         {
             var value = stack.Pop();
             var arg = args[operandIndex];
@@ -91,7 +91,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildStore(builder, stackValue, arg.Value);
         }
 
-        private void EmitLdobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        private void EmitLdobj(FunctionStack stack, Type type, InstructionFlags instructionFlags)
         {
             var address = stack.Pop();
 
@@ -107,7 +107,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(type.StackType, type, value));
         }
 
-        private void EmitStobj(List<StackValue> stack, Type type, InstructionFlags instructionFlags)
+        private void EmitStobj(FunctionStack stack, Type type, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
             var address = stack.Pop();
@@ -203,7 +203,7 @@ namespace SharpLang.CompilerServices
             return LLVM.ConstInsertValue(@object, @class.GeneratedEETypeRuntimeLLVM, new [] { (uint)ObjectFields.RuntimeTypeInfo });
         }
 
-        private void EmitRet(List<StackValue> stack, MethodReference method)
+        private void EmitRet(FunctionStack stack, MethodReference method)
         {
             if (method.ReturnType.MetadataType == MetadataType.Void)
             {
@@ -221,7 +221,7 @@ namespace SharpLang.CompilerServices
             }
         }
 
-        private void EmitLdstr(List<StackValue> stack, string operand)
+        private void EmitLdstr(FunctionStack stack, string operand)
         {
             var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
@@ -289,35 +289,35 @@ namespace SharpLang.CompilerServices
             return stringConstantDataGlobal;
         }
 
-        private void EmitI4(List<StackValue> stack, int operandIndex)
+        private void EmitI4(FunctionStack stack, int operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int32, int32,
                 LLVM.ConstInt(int32LLVM, (uint)operandIndex, true)));
         }
 
-        private void EmitI8(List<StackValue> stack, long operandIndex)
+        private void EmitI8(FunctionStack stack, long operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Int64, int64,
                 LLVM.ConstInt(int64LLVM, (ulong)operandIndex, true)));
         }
 
-        private void EmitR4(List<StackValue> stack, float operandIndex)
+        private void EmitR4(FunctionStack stack, float operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Float, @float,
                 LLVM.ConstReal(@float.DataTypeLLVM, operandIndex)));
         }
 
-        private void EmitR8(List<StackValue> stack, double operandIndex)
+        private void EmitR8(FunctionStack stack, double operandIndex)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Float, @double,
                 LLVM.ConstReal(@double.DataTypeLLVM, operandIndex)));
         }
 
-        private void EmitLdnull(List<StackValue> stack)
+        private void EmitLdnull(FunctionStack stack)
         {
             // Add constant integer value to stack
             stack.Add(new StackValue(StackValueType.Object, @object, LLVM.ConstNull(@object.DefaultTypeLLVM)));
@@ -416,19 +416,19 @@ namespace SharpLang.CompilerServices
             LLVM.BuildCondBr(builder, cmpInst, targetBasicBlock, nextBasicBlock);
         }
 
-        private void EmitBrfalse(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        private void EmitBrfalse(FunctionStack stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
             // Stack element should be equal to zero.
             EmitBrCommon(stack.Pop(), IntPredicate.IntEQ, targetBasicBlock, nextBasicBlock);
         }
 
-        private void EmitBrtrue(List<StackValue> stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
+        private void EmitBrtrue(FunctionStack stack, BasicBlockRef targetBasicBlock, BasicBlockRef nextBasicBlock)
         {
             // Stack element should be different from zero.
             EmitBrCommon(stack.Pop(), IntPredicate.IntNE, targetBasicBlock, nextBasicBlock);
         }
 
-        private void EmitStfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
+        private void EmitStfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
             var @object = stack.Pop();
@@ -446,7 +446,7 @@ namespace SharpLang.CompilerServices
             SetInstructionFlags(storeInst, instructionFlags);
         }
 
-        private void EmitLdfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
+        private void EmitLdfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
         {
             var @object = stack.Pop();
 
@@ -489,7 +489,7 @@ namespace SharpLang.CompilerServices
             return LLVM.BuildPointerCast(builder, value, expectedType, string.Empty);
         }
 
-        private void EmitLdflda(List<StackValue> stack, Field field)
+        private void EmitLdflda(FunctionStack stack, Field field)
         {
             var @object = stack.Pop();
 
@@ -578,7 +578,7 @@ namespace SharpLang.CompilerServices
                 LLVM.SetAlignment(instruction, 1);
         }
 
-        private void EmitStsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
+        private void EmitStsfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
         {
             var value = stack.Pop();
 
@@ -600,7 +600,7 @@ namespace SharpLang.CompilerServices
             SetInstructionFlags(storeInst, instructionFlags);
         }
 
-        private void EmitLdsfld(List<StackValue> stack, Field field, InstructionFlags instructionFlags)
+        private void EmitLdsfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
         {
             var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedEETypeRuntimeLLVM;
 
@@ -623,7 +623,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
         }
 
-        private void EmitLdsflda(List<StackValue> stack, Field field)
+        private void EmitLdsflda(FunctionStack stack, Field field)
         {
             var runtimeTypeInfoGlobal = GetClass(field.DeclaringType).GeneratedEETypeRuntimeLLVM;
 
@@ -651,7 +651,7 @@ namespace SharpLang.CompilerServices
             return indices;
         }
 
-        private void EmitNewarr(List<StackValue> stack, Type elementType)
+        private void EmitNewarr(FunctionStack stack, Type elementType)
         {
             var arrayType = GetType(new ArrayType(elementType.TypeReferenceCecil), TypeState.VTableEmitted);
 
@@ -693,7 +693,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Object, arrayType, allocatedObject));
         }
 
-        private void EmitLdlen(List<StackValue> stack)
+        private void EmitLdlen(FunctionStack stack)
         {
             var array = stack.Pop();
 
@@ -716,7 +716,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, arraySize));
         }
 
-        private void EmitLdelema(List<StackValue> stack, Type elementType)
+        private void EmitLdelema(FunctionStack stack, Type elementType)
         {
             var index = stack.Pop();
             var array = stack.Pop();
@@ -741,7 +741,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(refType.StackType, refType, arrayElementPointer));
         }
 
-        private void EmitLdelem(List<StackValue> stack)
+        private void EmitLdelem(FunctionStack stack)
         {
             var index = stack.Pop();
             var array = stack.Pop();
@@ -770,7 +770,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(elementType.StackType, elementType, element));
         }
 
-        private void EmitStelem(List<StackValue> stack)
+        private void EmitStelem(FunctionStack stack)
         {
             var value = stack.Pop();
             var index = stack.Pop();
@@ -855,7 +855,7 @@ namespace SharpLang.CompilerServices
             return index.Value;
         }
 
-        private void EmitIsOrCastclass(FunctionCompilerContext functionContext, List<StackValue> stack, Class @class, Code opcode, int instructionOffset)
+        private void EmitIsOrCastclass(FunctionCompilerContext functionContext, FunctionStack stack, Class @class, Code opcode, int instructionOffset)
         {
             var functionGlobal = functionContext.FunctionGlobal;
 
@@ -1002,7 +1002,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(obj.StackType, @class.Type, mergedVariable));
         }
 
-        private void EmitBoxValueType(List<StackValue> stack, Type type)
+        private void EmitBoxValueType(FunctionStack stack, Type type)
         {
             var valueType = stack.Pop();
 
@@ -1012,7 +1012,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.Object, type, allocatedObject));
         }
 
-        private void EmitUnboxAnyValueType(List<StackValue> stack, Type type)
+        private void EmitUnboxAnyValueType(FunctionStack stack, Type type)
         {
             var obj = stack.Pop();
 
@@ -1031,7 +1031,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(type.StackType, type, data));
         }
 
-        private void EmitUnaryOperation(List<StackValue> stack, Code opcode)
+        private void EmitUnaryOperation(FunctionStack stack, Code opcode)
         {
             var operand1 = stack.Pop();
 
@@ -1075,7 +1075,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(operand1.StackType, operand1.Type, value1));
         }
         
-        private void EmitBinaryOperation(FunctionCompilerContext functionContext, List<StackValue> stack, Code opcode)
+        private void EmitBinaryOperation(FunctionCompilerContext functionContext, FunctionStack stack, Code opcode)
         {
             var functionGlobal = functionContext.FunctionGlobal;
 
@@ -1399,7 +1399,7 @@ namespace SharpLang.CompilerServices
             throw new InvalidOperationException(string.Format("Binary operation {0} between {1} and {2} is not supported.", opcode, operand1.StackType, operand2.StackType));
         }
 
-        private void EmitComparison(List<StackValue> stack, Code opcode)
+        private void EmitComparison(FunctionStack stack, Code opcode)
         {
             var operand2 = stack.Pop();
             var operand1 = stack.Pop();
@@ -1484,7 +1484,7 @@ namespace SharpLang.CompilerServices
                 throw new InvalidOperationException(string.Format("Comparison between operands of different types, {0} and {1}.", operand1.Type, operand2.Type));
         }
 
-        private void EmitConditionalBranch(List<StackValue> stack, BasicBlockRef thenBlock, BasicBlockRef elseBlock, Code opcode)
+        private void EmitConditionalBranch(FunctionStack stack, BasicBlockRef thenBlock, BasicBlockRef elseBlock, Code opcode)
         {
             var operand2 = stack.Pop();
             var operand1 = stack.Pop();
@@ -1559,7 +1559,7 @@ namespace SharpLang.CompilerServices
             LLVM.BuildCondBr(builder, compareResult, thenBlock, elseBlock);
         }
 
-        private void EmitLocalloc(List<StackValue> stack)
+        private void EmitLocalloc(FunctionStack stack)
         {
             var numElements = stack.Pop();
 
@@ -1579,7 +1579,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(StackValueType.NativeInt, intPtr, alloca));
         }
 
-        private void EmitStind(FunctionCompilerContext functionContext, List<StackValue> stack, Code opcode)
+        private void EmitStind(FunctionCompilerContext functionContext, FunctionStack stack, Code opcode)
         {
             var value = stack.Pop();
             var address = stack.Pop();
@@ -1620,7 +1620,7 @@ namespace SharpLang.CompilerServices
             functionContext.InstructionFlags = InstructionFlags.None;
         }
 
-        private void EmitLdind(FunctionCompilerContext functionContext, List<StackValue> stack, Code opcode)
+        private void EmitLdind(FunctionCompilerContext functionContext, FunctionStack stack, Code opcode)
         {
             var address = stack.Pop();
 
@@ -1666,7 +1666,7 @@ namespace SharpLang.CompilerServices
             stack.Add(new StackValue(type.StackType, type, value));
         }
 
-        private void EmitConv(List<StackValue> stack, Code opcode)
+        private void EmitConv(FunctionStack stack, Code opcode)
         {
             var value = stack.Pop();
 
