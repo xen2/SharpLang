@@ -658,6 +658,7 @@ namespace SharpLang.CompilerServices
 
                     // Create unbox trampoline method
                     function.UnboxTrampoline = LLVM.AddFunction(module, LLVM.GetValueName(function.GeneratedValue) + "_UnboxTrampoline", function.VirtualFunctionType);
+                    ApplyFunctionAttributes(function.UnboxTrampoline, function.ReturnType, function.ParameterTypes);
 
                     LLVM.SetLinkage(function.UnboxTrampoline, function.DeclaringType.Linkage);
 

@@ -152,6 +152,7 @@ namespace SharpLang.CompilerServices
             var invokeMethod = declaringClass.Functions.Single(x => x.MethodReference.Name == "Invoke");
 
             var invokeMethodHelper = LLVM.AddFunction(module, LLVM.GetValueName(invokeMethod.GeneratedValue) + "_MulticastHelper", invokeMethod.FunctionType);
+            ApplyFunctionAttributes(invokeMethodHelper, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
             LLVM.SetLinkage(invokeMethodHelper, declaringClass.Type.Linkage);
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty));
 
@@ -199,6 +200,7 @@ namespace SharpLang.CompilerServices
                 helperArgs[i] = LLVM.GetParam(invokeMethodHelper, (uint)i);
             }
             var retValue = LLVM.BuildCall(builder, invokeMethod.GeneratedValue, helperArgs, string.Empty);
+            ApplyCallAttributes(retValue, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
 
             // i++
             EmitLdloc(stack, locals, 0);
@@ -249,6 +251,7 @@ namespace SharpLang.CompilerServices
 
             // Create method
             var invokeMethodHelper = LLVM.AddFunction(module, LLVM.GetValueName(invokeMethod.GeneratedValue) + nameSuffix, invokeMethod.FunctionType);
+            ApplyFunctionAttributes(invokeMethodHelper, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
             LLVM.PositionBuilderAtEnd(builder2, LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty));
 
             return invokeMethodHelper;

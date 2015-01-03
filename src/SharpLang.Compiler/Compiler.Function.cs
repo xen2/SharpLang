@@ -11,6 +11,7 @@ using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 using SharpLang.CompilerServices.Cecil;
 using SharpLLVM;
+using Attribute = SharpLLVM.Attribute;
 using CallSite = Mono.Cecil.CallSite;
 
 namespace SharpLang.CompilerServices
@@ -91,51 +92,25 @@ namespace SharpLang.CompilerServices
                 return function;
             }
 
-            var numParams = method.Parameters.Count;
+            var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
+            var parameterTypesBuilder = new List<Type>();
             if (method.HasThis)
-                numParams++;
-            var parameterTypes = new Type[numParams];
-            var parameterTypesLLVM = new TypeRef[numParams];
-
-            for (int index = 0; index < numParams; index++)
             {
-                TypeReference parameterTypeReference;
-                if (method.HasThis && index == 0)
-                {
-                    parameterTypeReference = declaringType.TypeReferenceCecil;
+                var parameterType = declaringType.TypeReferenceCecil;
 
-                    // Value type uses ByReference type for this
-                    if (declaringType.TypeDefinitionCecil.IsValueType)
-                        parameterTypeReference = parameterTypeReference.MakeByReferenceType();
-                }
-                else
-                {
-                    var parameter = method.Parameters[method.HasThis ? index - 1 : index];
-                    parameterTypeReference = ResolveGenericsVisitor.Process(method, parameter.ParameterType);
-                }
+                // Value type uses ByReference type for this
+                if (declaringType.TypeDefinitionCecil.IsValueType)
+                    parameterType = parameterType.MakeByReferenceType();
 
-                var parameterType = GetType(parameterTypeReference, TypeState.StackComplete);
-                if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
-                    throw new InvalidOperationException();
-
-                parameterTypes[index] = parameterType;
-
-                if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
-                {
-                    if (parameterTypeReference.FullName == typeof(string).FullName)
-                    {
-                        //if (!resolvedMethod.PInvokeInfo.IsCharSetUnicode)
-                        //    throw new NotImplementedException("Only Unicode string are supported in PInvoke");
-
-                        parameterType = GetType(new PointerType(@char.TypeDefinitionCecil), TypeState.StackComplete);
-                    }
-                }
-
-                parameterTypesLLVM[index] = parameterType.DefaultTypeLLVM;
+                parameterTypesBuilder.Add(GetType(parameterType, TypeState.StackComplete));
+            }
+            foreach (var parameter in method.Parameters)
+            {
+                parameterTypesBuilder.Add(GetType(ResolveGenericsVisitor.Process(method, parameter.ParameterType), TypeState.StackComplete));
             }
 
-            var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
-            var functionType = LLVM.FunctionType(returnType.DefaultTypeLLVM, parameterTypesLLVM, false);
+            var parameterTypes = parameterTypesBuilder.ToArray();
+            var functionType = CreateFunctionTypeLLVM(returnType, parameterTypes);
 
             // If we have an external with generic parameters, let's try to do some generic sharing (we can write only one in C++)
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
@@ -184,6 +159,11 @@ namespace SharpLang.CompilerServices
             var functionGlobal = hasDefinition
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
+
+            if (hasDefinition)
+            {
+                ApplyFunctionAttributes(functionGlobal, returnType, parameterTypes);
+            }
 
             // Interface method uses a global so that we can have a unique pointer to use as IMT key
             if (isInterfaceMethod)
@@ -239,6 +219,41 @@ namespace SharpLang.CompilerServices
             }
 
             return function;
+        }
+
+        private TypeRef CreateFunctionTypeLLVM(Type returnType, Type[] parameterTypes)
+        {
+            var numParams = parameterTypes.Length;
+            var parameterTypesLLVM = new TypeRef[numParams];
+
+            for (int index = 0; index < parameterTypesLLVM.Length; index++)
+            {
+                Type parameterType;
+                parameterType = parameterTypes[index];
+
+                if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
+                    throw new InvalidOperationException();
+
+                parameterTypesLLVM[index] = GetFunctionInputParameterTypeLLVM(parameterType);
+                parameterTypes[index] = parameterType;
+            }
+
+            return LLVM.FunctionType(returnType.DefaultTypeLLVM, parameterTypesLLVM, false);
+        }
+
+        private static TypeRef GetFunctionInputParameterTypeLLVM(Type parameterType)
+        {
+            return parameterType.DefaultTypeLLVM;
+        }
+
+        private static void ApplyFunctionAttributes(ValueRef functionGlobal, Type returnType, Type[] parameterTypes)
+        {
+            // Nothing to do for now, but will be useful later to apply parameter attributes (such as byval, inreg, etc...)
+        }
+
+        private static void ApplyCallAttributes(ValueRef callInstruction, Type returnType, Type[] parameterTypes)
+        {
+            // Nothing to do for now, but will be useful later to apply parameter attributes (such as byval, inreg, etc...)
         }
 
         private void EmitFunction(Function function)
@@ -766,14 +781,12 @@ namespace SharpLang.CompilerServices
                 {
                     var callSite = (CallSite)instruction.Operand;
 
-                    // TODO: Unify with CreateFunction code
-                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete).DefaultTypeLLVM;
-                    var parameterTypesLLVM = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete).DefaultTypeLLVM).ToArray();
-
                     // Generate function type
-                    var functionType = LLVM.FunctionType(returnType, parameterTypesLLVM, false);
+                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete);
+                    var parameterTypes = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete)).ToArray();
+                    var functionType = CreateFunctionTypeLLVM(returnType, parameterTypes);
 
-                    var methodPtr = stack[stack.Count - parameterTypesLLVM.Length - 1];
+                    var methodPtr = stack[stack.Count - parameterTypes.Length - 1];
 
                     var castedMethodPtr = LLVM.BuildPointerCast(builder, methodPtr.Value, LLVM.PointerType(functionType, 0), string.Empty);
 
@@ -943,7 +956,7 @@ namespace SharpLang.CompilerServices
                         runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
 
                     // TODO: Actually transform type to RTTI token.
-                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleClass.Type, runtimeHandleValue));
+                    stack.Add(new StackValue(runtimeHandleClass.Type.StackType, runtimeHandleClass.Type, runtimeHandleValue));
 
                     break;
                 }
@@ -1098,7 +1111,7 @@ namespace SharpLang.CompilerServices
                     // TODO: Implement this opcode
                     //var value = LLVM.BuildVAArg(builder, , , string.Empty);
                     var runtimeHandleType = GetType(corlib.MainModule.GetType(typeof(RuntimeArgumentHandle).FullName), TypeState.StackComplete);
-                    stack.Add(new StackValue(StackValueType.Value, runtimeHandleType, LLVM.ConstNull(runtimeHandleType.DataTypeLLVM)));
+                    stack.Add(new StackValue(runtimeHandleType.StackType, runtimeHandleType, LLVM.ConstNull(runtimeHandleType.DataTypeLLVM)));
                     break;
                 }
                 #endregion
