@@ -335,29 +335,6 @@ namespace SharpLang.CompilerServices
                 // TODO: Casting/implicit conversion?
                 var stackItem = stack[stack.Count - targetNumParams + index];
                 args[index] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index], stackItem);
-
-                if (targetMethod.PInvokeInfo != null)
-                {
-                    // Properly transfer strings to Win32 API format
-                    if (targetMethod.ParameterTypes[index].TypeReferenceCecil.FullName == typeof(string).FullName)
-                    {
-                        //if (!targetMethod.PInvokeInfo.IsCharSetUnicode)
-                        //    throw new NotImplementedException("Only Unicode string are supported in PInvoke");
-
-                        // Prepare indices
-                        var indices = new[]
-                        {
-                            LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
-                            LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
-                            LLVM.ConstInt(int32LLVM, 2, false),                         // Access string pointer
-                        };
-
-                        var charPointerLocation = LLVM.BuildInBoundsGEP(builder, args[index], indices, string.Empty);
-                        var firstCharacterPointer = LLVM.BuildLoad(builder, charPointerLocation, string.Empty);
-
-                        args[index] = firstCharacterPointer;
-                    }
-                }
             }
 
             // Remove arguments from stack
