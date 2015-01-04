@@ -786,7 +786,7 @@ namespace SharpLang.CompilerServices
                     var parameterTypes = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete)).ToArray();
                     var functionType = CreateFunctionTypeLLVM(returnType, parameterTypes);
 
-                    var methodPtr = stack[stack.Count - parameterTypes.Length - 1];
+                    var methodPtr = stack.Pop();
 
                     var castedMethodPtr = LLVM.BuildPointerCast(builder, methodPtr.Value, LLVM.PointerType(functionType, 0), string.Empty);
 
