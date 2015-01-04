@@ -843,16 +843,23 @@ namespace SharpLang.CompilerServices
 
         private ValueRef ConvertToNativeInt(StackValue index)
         {
+            return ConvertToInt(index.Value, nativeIntLLVM);
+        }
+
+        private ValueRef ConvertToInt(ValueRef value, TypeRef intTypeLLVM)
+        {
+            var valueType = LLVM.TypeOf(value);
+
             // NatveInt: cast to integer
-            if (index.StackType == StackValueType.NativeInt)
-                return LLVM.BuildPtrToInt(builder, index.Value, nativeIntLLVM, string.Empty);
+            if (LLVM.GetTypeKind(valueType) == TypeKind.PointerTypeKind)
+                return LLVM.BuildPtrToInt(builder, value, intTypeLLVM, string.Empty);
 
             // Integer of different size: cast
-            if (LLVM.GetIntTypeWidth(LLVM.TypeOf(index.Value)) != intPtrSize * 8)
-                return LLVM.BuildIntCast(builder, index.Value, nativeIntLLVM, string.Empty);
+            if (valueType != intTypeLLVM)
+                return LLVM.BuildIntCast(builder, value, intTypeLLVM, string.Empty);
 
             // Otherwise, return as is
-            return index.Value;
+            return value;
         }
 
         private void EmitIsOrCastclass(FunctionCompilerContext functionContext, FunctionStack stack, Class @class, Code opcode, int instructionOffset)

@@ -865,6 +865,38 @@ namespace SharpLang.CompilerServices
                 }
                 #endregion
 
+                case Code.Cpblk:
+                {
+                    var size = stack.Pop();
+                    var source = stack.Pop();
+                    var destination = stack.Pop();
+
+                    var destinationValue = destination.Value;
+                    var sourceValue = source.Value;
+                    var sizeValue = size.Value;
+
+                    // Adjust types
+                    if (LLVM.TypeOf(destinationValue) != intPtrLLVM)
+                        destinationValue = LLVM.BuildPointerCast(builder, destinationValue, intPtrLLVM, string.Empty);
+                    if (LLVM.TypeOf(sourceValue) != intPtrLLVM)
+                        sourceValue = LLVM.BuildPointerCast(builder, sourceValue, intPtrLLVM, string.Empty);
+                    sizeValue = ConvertToInt(sizeValue, int32LLVM);
+
+                    var intrinsic = LLVM.IntrinsicGetDeclaration(module, (uint)Intrinsics.memcpy, new[] { intPtrLLVM, intPtrLLVM, int32LLVM });
+                    LLVM.BuildCall(builder, intrinsic,
+                        new[]
+                        {
+                            destinationValue,
+                            sourceValue,
+                            sizeValue,
+                            LLVM.ConstInt(int32LLVM, (functionContext.InstructionFlags & InstructionFlags.Unaligned) != 0 ? 1 : (ulong)intPtrSize, false), // alignment
+                            LLVM.ConstInt(LLVM.Int1TypeInContext(context), (functionContext.InstructionFlags & InstructionFlags.Volatile) != 0 ? 1UL : 0, false) // volatile
+                        } , string.Empty);
+
+                    functionContext.InstructionFlags = InstructionFlags.None;
+                    break;
+                }
+
                 case Code.Sizeof:
                 {
                     var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
@@ -874,7 +906,7 @@ namespace SharpLang.CompilerServices
                     var objectSize = LLVM.SizeOf(type.DefaultTypeLLVM);
                     objectSize = LLVM.BuildIntCast(builder, objectSize, int32LLVM, string.Empty);
 
-                    stack.Add(new StackValue(StackValueType.Int32, int32.Class.Type, objectSize));
+                    stack.Add(new StackValue(StackValueType.Int32, int32, objectSize));
 
                     break;
                 }
