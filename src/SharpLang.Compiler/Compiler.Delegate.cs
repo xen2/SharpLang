@@ -111,11 +111,6 @@ namespace SharpLang.CompilerServices
                 // but probably not necessary if LLVM and sealed class are optimized/inlined well enough
 
                 // ldarg_0
-                // ldfld _methodPtr
-                il.Append(Instruction.Create(OpCodes.Ldarg_0));
-                il.Append(Instruction.Create(OpCodes.Ldfld, methodPtrField));
-
-                // ldarg_0
                 // ldfld _target
                 il.Append(Instruction.Create(OpCodes.Ldarg_0));
                 il.Append(Instruction.Create(OpCodes.Ldfld, targetField));
@@ -130,6 +125,11 @@ namespace SharpLang.CompilerServices
                     // ldarg
                     il.Append(Instruction.Create(OpCodes.Ldarg, parameter));
                 }
+
+                // ldarg_0
+                // ldfld _methodPtr
+                il.Append(Instruction.Create(OpCodes.Ldarg_0));
+                il.Append(Instruction.Create(OpCodes.Ldfld, methodPtrField));
 
                 // calli
                 il.Append(Instruction.Create(OpCodes.Calli, callsite));
