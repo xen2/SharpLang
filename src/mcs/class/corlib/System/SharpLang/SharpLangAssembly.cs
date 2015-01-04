@@ -21,6 +21,15 @@ namespace System.Reflection
             return base.GetTypes(exportedOnly);
         }
 
+        public override string ToString()
+        {
+            lock (SharpLangModule.SystemTypeLock)
+            {
+                var mainModule = Modules[0];
+                return mainModule.InternalAssemblyName;
+            }
+        }
+
         public override Type GetType(string name, bool throwOnError, bool ignoreCase)
         {
             throw new NotImplementedException();

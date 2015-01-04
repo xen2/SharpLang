@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace System
 {
@@ -47,6 +49,15 @@ namespace System
 
                     return metadataReader;
                 }
+            }
+        }
+
+        internal string InternalAssemblyName
+        {
+            get
+            {
+                var assemblyDefinition = MetadataReader.GetAssemblyDefinition();
+                return GetAssemblyQualifiedName(assemblyDefinition);
             }
         }
 
@@ -538,6 +549,70 @@ namespace System
 
                 throw new InvalidOperationException(string.Format("Unknown type kind: {0}", kind));
             }
+        }
+
+        string GetAssemblyQualifiedName(AssemblyDefinition assemblyDefinition)
+        {
+            // TODO: Should move that to future SharpLangAssembly type
+            var assemblyName = MetadataReader.GetString(assemblyDefinition.Name);
+            var assemblyVersion = assemblyDefinition.Version;
+            var assemblyCulture = MetadataReader.GetString(assemblyDefinition.Culture);
+            if (string.IsNullOrEmpty(assemblyCulture))
+                assemblyCulture = "neutral";
+
+            var assemblyPublicKeyBytes = MetadataReader.GetBlobBytes(assemblyDefinition.PublicKey);
+            var assemblyPublicKey = assemblyPublicKeyBytes.Length > 0 ? BytesToHexString(ComputePublicKeyToken(assemblyPublicKeyBytes, assemblyDefinition.HashAlgorithm)) : "null";
+
+            return assemblyName + ", Version=" + assemblyVersion + ", Culture=" + assemblyCulture + ", PublicKeyToken=" + assemblyPublicKey;
+        }
+
+        static byte[] ComputePublicKeyToken(byte[] publicKey, AssemblyHashAlgorithm hashAlgorithm)
+        {
+            var publicKeyHashed = HashPublicKey(publicKey, hashAlgorithm);
+
+            // Copy last 8 bytes, in reverse order
+            var result = new byte[8];
+            for (int i = 0; i < 8; ++i)
+                result[i] = publicKeyHashed[publicKeyHashed.Length - 1 - i];
+
+            return result;
+        }
+
+        static byte[] HashPublicKey(byte[] publicKey, AssemblyHashAlgorithm hashAlgorithm)
+        {
+            HashAlgorithm algorithm;
+
+            switch (hashAlgorithm)
+            {
+                case AssemblyHashAlgorithm.MD5:
+                    algorithm = new MD5CryptoServiceProvider();
+                    break;
+                case AssemblyHashAlgorithm.Sha1:
+                    // None default to SHA1
+                    algorithm = new SHA1Managed();
+                    break;
+                case AssemblyHashAlgorithm.Sha256:
+                    // None default to SHA1
+                    algorithm = new SHA256Managed();
+                    break;
+                case AssemblyHashAlgorithm.Sha512:
+                    // None default to SHA1
+                    algorithm = new SHA512Managed();
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            using (algorithm)
+                return algorithm.ComputeHash(publicKey);
+        }
+
+        static string BytesToHexString(byte[] bytes)
+        {
+            var result = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes)
+                result.Append(b.ToString("x2"));
+            return result.ToString();
         }
 
         struct GenericKey : IEquatable<GenericKey>
