@@ -55,7 +55,7 @@ namespace SharpLang.CompilerServices
                 parameterTypesLLVM[index] = parameterType.DefaultTypeLLVM;
             }
 
-            var returnType = GetType(ResolveGenericsVisitor.Process(context, context.ReturnType), TypeState.StackComplete);
+            var returnType = GetType(ResolveGenericsVisitor.Process(context, callSite.ReturnType), TypeState.StackComplete);
 
             return new FunctionSignature(returnType, parameterTypes, callSite.CallingConvention, null);
         }
