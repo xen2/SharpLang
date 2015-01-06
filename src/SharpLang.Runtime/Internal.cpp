@@ -425,39 +425,3 @@ extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object_T
 	return result;
 }
 
-extern "C" int32_t System_Runtime_InteropServices_Marshal__GetLastWin32Error__()
-{
-	return GetLastError();
-}
-
-extern "C" void System_Runtime_InteropServices_Marshal__copy_to_unmanaged_System_Array_System_Int32_System_IntPtr_System_Int32_(Array<uint8_t>* source, int32_t sourceIndex, uint8_t* dest, int32_t length)
-{
-	// TODO: Null checks
-	// Check bounds
-	if (sourceIndex + length > source->length)
-	{
-		// TODO: Throw exception
-		return;
-	}
-
-	// Get element size
-	int32_t elementSize = source->eeType->elementSize;
-
-	memcpy((void*)dest, (const void*)(source->value + sourceIndex), elementSize * length);
-}
-
-extern "C" void System_Runtime_InteropServices_Marshal__copy_from_unmanaged_System_IntPtr_System_Int32_System_Array_System_Int32_(uint8_t* source, int32_t destIndex, Array<uint8_t>* dest, int32_t length)
-{
-	// TODO: Null checks
-	// Check bounds
-	if (destIndex + length > dest->length)
-	{
-		// TODO: Throw exception
-		return;
-	}
-
-	// Get element size
-	int32_t elementSize = dest->eeType->elementSize;
-
-	memcpy((void*)(dest->value + destIndex), (const void*)source, elementSize * length);
-}
