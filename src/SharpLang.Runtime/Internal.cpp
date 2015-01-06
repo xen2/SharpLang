@@ -348,6 +348,26 @@ extern "C" double System_Math__Round_System_Double_(double d)
 	return round(d);
 }
 
+extern "C" char16_t System_IO_MonoIO__get_VolumeSeparatorChar__()
+{
+	return u':';
+}
+
+extern "C" char16_t System_IO_MonoIO__get_DirectorySeparatorChar__()
+{
+	return u'\\';
+}
+
+extern "C" char16_t System_IO_MonoIO__get_AltDirectorySeparatorChar__()
+{
+	return u'/';
+}
+
+extern "C" char16_t System_IO_MonoIO__get_PathSeparator__()
+{
+	return u';';
+}
+
 extern "C" void* System_IO_MonoIO__get_ConsoleOutput__()
 {
 	return GetStdHandle(STD_OUTPUT_HANDLE);
