@@ -22,6 +22,7 @@ namespace SharpLang.CompilerServices
         private Type @double;
         private Type @char;
         private Type @object;
+        private Type @void;
 
         // LLVM Types
         private TypeRef intPtrLLVM; // Native integer, pointer representation
@@ -53,19 +54,19 @@ namespace SharpLang.CompilerServices
 
         public void InitializeCommonTypes()
         {
-            // Initialize LLVM types
-            intPtrLLVM = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
-            int32LLVM = LLVM.Int32TypeInContext(context);
-            int64LLVM = LLVM.Int64TypeInContext(context);
-            intPtrSize = 4;            // Or 8?
-            nativeIntLLVM = int32LLVM; // Or int64LLVM?
-
             // Load runtime
             runtimeModule = LoadModule(context, @"SharpLang.Runtime.bc");
 
             // Load data layout from runtime
             var dataLayout = LLVM.GetDataLayout(runtimeModule);
             targetData = LLVM.CreateTargetData(dataLayout);
+
+            // Initialize LLVM types
+            intPtrLLVM = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+            int32LLVM = LLVM.Int32TypeInContext(context);
+            int64LLVM = LLVM.Int64TypeInContext(context);
+            intPtrSize = (int)LLVM.ABISizeOfType(targetData, intPtrLLVM);
+            nativeIntLLVM = LLVM.IntTypeInContext(context, (uint)intPtrSize * 8); // Or int64LLVM?
 
             // Prepare system types, for easier access
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName), TypeState.StackComplete);
@@ -82,6 +83,7 @@ namespace SharpLang.CompilerServices
             @double = GetType(corlib.MainModule.GetType(typeof(double).FullName), TypeState.StackComplete);
             @char = GetType(corlib.MainModule.GetType(typeof(char).FullName), TypeState.StackComplete);
             @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
+            @void = GetType(corlib.MainModule.GetType(typeof(void).FullName), TypeState.StackComplete);
 
             // struct IMTEntry { i8* interfaceFunctionPtr, i8* functionPtr }
             imtEntryLLVM = LLVM.StructCreateNamed(context, "IMTEntry");

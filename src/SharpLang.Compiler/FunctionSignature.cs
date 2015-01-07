@@ -1,13 +1,18 @@
+using System.Collections.Generic;
+using System.Linq;
 using Mono.Cecil;
 
 namespace SharpLang.CompilerServices
 {
     class FunctionSignature
     {
-        public FunctionSignature(Type returnType, Type[] parameterTypes, MethodCallingConvention callingConvention, PInvokeInfo pinvoke)
+        public FunctionSignature(IABI abi, Type returnType, Type[] parameterTypes, MethodCallingConvention callingConvention, PInvokeInfo pinvoke)
         {
-            ReturnType = returnType;
-            ParameterTypes = parameterTypes;
+            ReturnType = new FunctionParameterType(abi, returnType);
+            ParameterTypes = new FunctionParameterType[parameterTypes.Length];
+            for (int index = 0; index < parameterTypes.Length; index++)
+                ParameterTypes[index] = new FunctionParameterType(abi, parameterTypes[index]);
+
             CallingConvention = callingConvention;
             PInvokeInfo = pinvoke;
         }
@@ -18,7 +23,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The return type.
         /// </value>
-        public Type ReturnType { get; private set; }
+        public FunctionParameterType ReturnType { get; private set; }
 
         /// <summary>
         /// Gets the parameter types.
@@ -26,7 +31,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The parameter types.
         /// </value>
-        public Type[] ParameterTypes { get; private set; }
+        public FunctionParameterType[] ParameterTypes { get; private set; }
 
         /// <summary>
         /// Gets the calling convention.
@@ -37,5 +42,10 @@ namespace SharpLang.CompilerServices
         public MethodCallingConvention CallingConvention { get; private set; }
 
         public PInvokeInfo PInvokeInfo { get; private set; }
+
+        public int GetParameterIndexForThis()
+        {
+            return ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect ? 1 : 0;
+        }
     }
 }

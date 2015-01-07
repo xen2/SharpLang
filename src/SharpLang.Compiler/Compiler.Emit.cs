@@ -11,6 +11,42 @@ namespace SharpLang.CompilerServices
 {
     public partial class Compiler
     {
+        private ValueRef LoadValue(StackValueType stackType, ValueRef value, InstructionFlags instructionFlags)
+        {
+            // Load value from local (indirect values are kept as pointer)
+            if (stackType == StackValueType.Value)
+            {
+                // Option1: Make a copy
+                // TODO: Optimize stack allocation (reuse alloca slots, with help of FunctionStack)
+                var result = LLVM.BuildAlloca(builder, LLVM.GetElementType(LLVM.TypeOf(value)), string.Empty);
+                var valueCopy = LLVM.BuildLoad(builder, value, string.Empty);
+                LLVM.BuildStore(builder, valueCopy, result);
+
+                SetInstructionFlags(valueCopy, instructionFlags);
+                
+                return result;
+
+                // Option2: Return pointer as is
+                //return value;
+            }
+            else
+            {
+                var result = LLVM.BuildLoad(builder, value, string.Empty);
+                SetInstructionFlags(result, instructionFlags);
+
+                return result;
+            }
+        }
+
+        private void StoreValue(StackValueType stackType, ValueRef value, ValueRef dest, InstructionFlags instructionFlags)
+        {
+            if (stackType == StackValueType.Value)
+                value = LLVM.BuildLoad(builder, value, string.Empty);
+
+            var store = LLVM.BuildStore(builder, value, dest);
+            SetInstructionFlags(store, instructionFlags);
+        }
+
         private void EmitStloc(FunctionStack stack, List<StackValue> locals, int localIndex)
         {
             var value = stack.Pop();
@@ -20,7 +56,7 @@ namespace SharpLang.CompilerServices
             var stackValue = ConvertFromStackToLocal(local.Type, value);
 
             // Store value into local
-            LLVM.BuildStore(builder, stackValue, local.Value);
+            StoreValue(local.Type.StackType, stackValue, local.Value, InstructionFlags.None);
         }
 
         private void EmitLdloc(FunctionStack stack, List<StackValue> locals, int operandIndex)
@@ -28,7 +64,7 @@ namespace SharpLang.CompilerServices
             var local = locals[operandIndex];
 
             // Load value from local
-            var value = LLVM.BuildLoad(builder, local.Value, string.Empty);
+            var value = LoadValue(local.StackType, local.Value, InstructionFlags.None);
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(local.Type, value);
@@ -56,7 +92,7 @@ namespace SharpLang.CompilerServices
             var arg = args[operandIndex];
 
             // Load value from local argument
-            var value = LLVM.BuildLoad(builder, arg.Value, string.Empty);
+            var value = LoadValue(arg.StackType, arg.Value, InstructionFlags.None);
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(arg.Type, value);
@@ -88,7 +124,7 @@ namespace SharpLang.CompilerServices
             var stackValue = ConvertFromStackToLocal(arg.Type, value);
 
             // Store value into local argument
-            LLVM.BuildStore(builder, stackValue, arg.Value);
+            StoreValue(arg.Type.StackType, stackValue, arg.Value, InstructionFlags.None);
         }
 
         private void EmitLdobj(FunctionStack stack, Type type, InstructionFlags instructionFlags)
@@ -97,8 +133,7 @@ namespace SharpLang.CompilerServices
 
             // Load value at address
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
-            var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
-            SetInstructionFlags(loadInst, instructionFlags);
+            var loadInst = LoadValue(type.StackType, pointerCast, instructionFlags);
 
             // Convert to stack type
             var value = ConvertFromLocalToStack(type, loadInst);
@@ -117,8 +152,7 @@ namespace SharpLang.CompilerServices
 
             // Store value at address
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
-            var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
-            SetInstructionFlags(storeInst, instructionFlags);
+            StoreValue(type.StackType, sourceValue, pointerCast, instructionFlags);
         }
 
         private void EmitInitobj(StackValue address, Type type)
@@ -152,7 +186,7 @@ namespace SharpLang.CompilerServices
             // Invoke ctor
             EmitCall(functionContext, ctor.Signature, ctor.GeneratedValue);
 
-            if (type.StackType != StackValueType.Object)
+            if (type.StackType != StackValueType.Object && type.StackType != StackValueType.Value)
             {
                 allocatedObject = LLVM.BuildLoad(builder, allocatedObject, string.Empty);
             }
@@ -203,8 +237,10 @@ namespace SharpLang.CompilerServices
             return LLVM.ConstInsertValue(@object, @class.GeneratedEETypeRuntimeLLVM, new [] { (uint)ObjectFields.RuntimeTypeInfo });
         }
 
-        private void EmitRet(FunctionStack stack, MethodReference method)
+        private void EmitRet(FunctionCompilerContext functionContext)
         {
+            var method = functionContext.MethodReference;
+
             if (method.ReturnType.MetadataType == MetadataType.Void)
             {
                 // Emit ret void
@@ -213,11 +249,28 @@ namespace SharpLang.CompilerServices
             else
             {
                 // Get last item from stack
-                var stackItem = stack.Pop();
+                var stackItem = functionContext.Stack.Pop();
 
                 // Get return type
                 var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
-                LLVM.BuildRet(builder, ConvertFromStackToLocal(returnType, stackItem));
+                var returnValue = ConvertFromStackToLocal(returnType, stackItem);
+
+                switch (functionContext.Signature.ReturnType.ABIParameterInfo.Kind)
+                {
+                    case ABIParameterInfoKind.Coerced:
+                        returnValue = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(functionContext.Signature.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                        returnValue = LLVM.BuildLoad(builder, returnValue, string.Empty);
+                        goto case ABIParameterInfoKind.Direct;
+                    case ABIParameterInfoKind.Direct:
+                        LLVM.BuildRet(builder, returnValue);
+                        break;
+                    case ABIParameterInfoKind.Indirect:
+                        StoreValue(returnType.StackType, returnValue, LLVM.GetParam(functionContext.FunctionGlobal, 0), InstructionFlags.None);
+                        LLVM.BuildRetVoid(builder);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
@@ -327,18 +380,46 @@ namespace SharpLang.CompilerServices
         {
             var stack = functionContext.Stack;
 
+            bool hasStructValueReturn = targetMethod.ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect;
+
             // Build argument list
             var targetNumParams = targetMethod.ParameterTypes.Length;
-            var args = new ValueRef[targetNumParams];
+            var args = new ValueRef[targetNumParams + (hasStructValueReturn ? 1 : 0)];
             for (int index = 0; index < targetNumParams; index++)
             {
+                var llvmIndex = index + (hasStructValueReturn ? 1 : 0);
+
                 // TODO: Casting/implicit conversion?
                 var stackItem = stack[stack.Count - targetNumParams + index];
-                args[index] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index], stackItem);
+                args[llvmIndex] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index].Type, stackItem);
+
+                if (stackItem.StackType == StackValueType.Value)
+                {
+                    var structSize = LLVM.ABISizeOfType(targetData, stackItem.Type.DefaultTypeLLVM);
+                    if (structSize <= (ulong)intPtrSize)
+                    {
+                        var structCoercedType = LLVM.IntTypeInContext(context, (uint)structSize * 8);
+                        // Coerce to integer type
+                        args[llvmIndex] = LLVM.BuildPointerCast(builder, args[llvmIndex], LLVM.PointerType(structCoercedType, 0), string.Empty);
+                        args[llvmIndex] = LLVM.BuildLoad(builder, args[llvmIndex], string.Empty);
+                    }
+                    else
+                    {
+                        // Make a copy of indirect aggregate values
+                        args[llvmIndex] = LoadValue(stackItem.Type.StackType, args[llvmIndex], InstructionFlags.None);
+                    }
+                }
             }
 
             // Remove arguments from stack
             stack.RemoveRange(stack.Count - targetNumParams, targetNumParams);
+
+            // Prepare return value storage (in case of struct)
+            if (hasStructValueReturn)
+            {
+                // Allocate storage
+                args[0] = LLVM.BuildAlloca(builder, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
+            }
 
             // Invoke method
             ValueRef callResult;
@@ -362,17 +443,35 @@ namespace SharpLang.CompilerServices
             }
 
             // Push return result on stack
-            if (targetMethod.ReturnType.TypeReferenceCecil.MetadataType != MetadataType.Void)
+            if (targetMethod.ReturnType.Type.TypeReferenceCecil.MetadataType != MetadataType.Void)
             {
+                ValueRef returnValue;
+                switch (targetMethod.ReturnType.ABIParameterInfo.Kind)
+                {
+                    case ABIParameterInfoKind.Direct:
+                        returnValue = callResult;
+                        break;
+                    case ABIParameterInfoKind.Indirect:
+                        returnValue = args[0];
+                        break;
+                    case ABIParameterInfoKind.Coerced:
+                        returnValue = LLVM.BuildAlloca(builder, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
+                        var returnValueCasted = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(targetMethod.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                        LLVM.BuildStore(builder, callResult, returnValueCasted);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 // Convert return value from local to stack value
-                var returnValue = ConvertFromLocalToStack(targetMethod.ReturnType, callResult);
+                returnValue = ConvertFromLocalToStack(targetMethod.ReturnType.Type, returnValue);
 
                 // Add value to stack
-                stack.Add(new StackValue(targetMethod.ReturnType.StackType, targetMethod.ReturnType, returnValue));
+                stack.Add(new StackValue(targetMethod.ReturnType.Type.StackType, targetMethod.ReturnType.Type, returnValue));
             }
 
             // Apply attributes to the call instruction
-            ApplyCallAttributes(callResult, targetMethod.ReturnType, targetMethod.ParameterTypes);
+            ApplyCallAttributes(targetMethod, callResult);
         }
 
         private void EmitBr(BasicBlockRef targetBasicBlock)
@@ -440,35 +539,18 @@ namespace SharpLang.CompilerServices
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
 
             // Store value in field
-            var storeInst = LLVM.BuildStore(builder, fieldValue, fieldAddress);
-
-            // Set instruction flags
-            SetInstructionFlags(storeInst, instructionFlags);
+            StoreValue(field.Type.StackType, fieldValue, fieldAddress, instructionFlags);
         }
 
         private void EmitLdfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
         {
             var @object = stack.Pop();
 
-            ValueRef value;
-            if (@object.StackType == StackValueType.Value)
-            {
-                bool isCustomLayout = IsCustomLayout(field.DeclaringType.TypeDefinitionCecil);
-                if (isCustomLayout)
-                    throw new NotImplementedException("Ldfld on value types with custom layout is not supported yet.");
-                value = LLVM.BuildExtractValue(builder, @object.Value, (uint)field.StructIndex, string.Empty);
-            }
-            else
-            {
-                // Compute field address
-                var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value, ref instructionFlags);
+            // Compute field address
+            var fieldAddress = ComputeFieldAddress(builder, field, @object.StackType, @object.Value, ref instructionFlags);
 
-                // Load value from field and create "fake" local
-                value = LLVM.BuildLoad(builder, fieldAddress, string.Empty);
-
-                // Set instruction flags
-                SetInstructionFlags(value, instructionFlags);
-            }
+            // Load value from field and create "fake" local
+            var value = LoadValue(field.Type.StackType, fieldAddress, instructionFlags);
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(field.Type, value);
@@ -511,7 +593,7 @@ namespace SharpLang.CompilerServices
             // Build indices for GEP
             var indices = new List<ValueRef>(3);
 
-            if (objectStackType == StackValueType.Reference || objectStackType == StackValueType.Object || objectStackType == StackValueType.NativeInt)
+            if (objectStackType == StackValueType.Reference || objectStackType == StackValueType.Object || objectStackType == StackValueType.Value || objectStackType == StackValueType.NativeInt)
             {
                 // First pointer indirection
                 indices.Add(LLVM.ConstInt(int32LLVM, 0, false));
@@ -588,16 +670,13 @@ namespace SharpLang.CompilerServices
             var indices = BuildStaticFieldIndices(field);
 
             // Find static field address in runtime type info
-            var staticFieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
+            var fieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
 
             // Convert stack value to appropriate type
             var fieldValue = ConvertFromStackToLocal(field.Type, value);
 
             // Store value in static field
-            var storeInst = LLVM.BuildStore(builder, fieldValue, staticFieldAddress);
-
-            // Set instruction flags
-            SetInstructionFlags(storeInst, instructionFlags);
+            StoreValue(field.Type.StackType, fieldValue, fieldAddress, instructionFlags);
         }
 
         private void EmitLdsfld(FunctionStack stack, Field field, InstructionFlags instructionFlags)
@@ -611,13 +690,10 @@ namespace SharpLang.CompilerServices
             var staticFieldAddress = LLVM.BuildInBoundsGEP(builder, runtimeTypeInfoGlobal, indices, string.Empty);
 
             // Load value from field and create "fake" local
-            var value = LLVM.BuildLoad(builder, staticFieldAddress, string.Empty);
+            var value = LoadValue(field.Type.StackType, staticFieldAddress, instructionFlags);
 
             // Convert from local to stack value
             value = ConvertFromLocalToStack(field.Type, value);
-
-            // Set instruction flags
-            SetInstructionFlags(value, instructionFlags);
 
             // Add value to stack
             stack.Add(new StackValue(field.Type.StackType, field.Type, value));
@@ -761,7 +837,7 @@ namespace SharpLang.CompilerServices
             var arrayElementPointer = LLVM.BuildGEP(builder, arrayFirstElement, new[] { indexValue }, string.Empty);
 
             // Load element
-            var element = LLVM.BuildLoad(builder, arrayElementPointer, string.Empty);
+            var element = LoadValue(elementType.StackType, arrayElementPointer, InstructionFlags.None);
 
             // Convert
             element = ConvertFromLocalToStack(elementType, element);
@@ -794,7 +870,7 @@ namespace SharpLang.CompilerServices
             var convertedElement = ConvertFromStackToLocal(elementType, value);
 
             // Store element
-            LLVM.BuildStore(builder, convertedElement, arrayElementPointer);
+            StoreValue(elementType.StackType, convertedElement, arrayElementPointer, InstructionFlags.None);
         }
 
         private ValueRef LoadArrayDataPointer(StackValue array)
@@ -1031,7 +1107,8 @@ namespace SharpLang.CompilerServices
             var expectedPointerType = LLVM.PointerType(type.DataTypeLLVM, 0);
             if (expectedPointerType != LLVM.TypeOf(dataPointer))
                 dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
-            var data = LLVM.BuildLoad(builder, dataPointer, string.Empty);
+
+            var data = LoadValue(type.StackType, dataPointer, InstructionFlags.None);
 
             data = ConvertFromLocalToStack(type, data);
 
@@ -1622,8 +1699,7 @@ namespace SharpLang.CompilerServices
 
             // Store value at address
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(LLVM.TypeOf(sourceValue), 0), string.Empty);
-            var storeInst = LLVM.BuildStore(builder, sourceValue, pointerCast);
-            SetInstructionFlags(storeInst, functionContext.InstructionFlags);
+            StoreValue(type.StackType, sourceValue, pointerCast, functionContext.InstructionFlags);
             functionContext.InstructionFlags = InstructionFlags.None;
         }
 
@@ -1662,8 +1738,8 @@ namespace SharpLang.CompilerServices
 
             // Load value at address
             var pointerCast = LLVM.BuildPointerCast(builder, address.Value, LLVM.PointerType(type.DefaultTypeLLVM, 0), string.Empty);
-            var loadInst = LLVM.BuildLoad(builder, pointerCast, string.Empty);
-            SetInstructionFlags(loadInst, functionContext.InstructionFlags);
+
+            var loadInst = LoadValue(type.StackType, pointerCast, functionContext.InstructionFlags);
             functionContext.InstructionFlags = InstructionFlags.None;
 
             // Convert to stack type

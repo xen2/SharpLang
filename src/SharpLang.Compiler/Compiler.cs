@@ -50,6 +50,8 @@ namespace SharpLang.CompilerServices
 
         private Dictionary<Mono.Cecil.ModuleDefinition, ValueRef> metadataPerModule;
 
+        private IABI abi;
+
         /// <summary> True when running unit tests. This will try to avoid using real mscorlib for faster codegen, linking and testing. </summary>
         public bool TestMode { get; set; }
 
@@ -71,6 +73,9 @@ namespace SharpLang.CompilerServices
 
             // Prepare system types, for easier access
             InitializeCommonTypes();
+
+            // Initialize ABI
+            abi = new DefaultABI(context, targetData);
 
             // Prepare LLVM builders
             builder = LLVM.CreateBuilderInContext(context);
@@ -183,7 +188,8 @@ namespace SharpLang.CompilerServices
             }
 
             // Prepare global module constructor
-            var globalCtorFunctionType = LLVM.FunctionType(LLVM.VoidTypeInContext(context), new TypeRef[0], false);
+            var globalCtorSignature = new FunctionSignature(abi, @void, new Type[0], MethodCallingConvention.Default, null);
+            var globalCtorFunctionType = CreateFunctionTypeLLVM(globalCtorSignature);
             var globalCtor = LLVM.AddFunction(module, "initializeSharpLangModule", globalCtorFunctionType);
             LLVM.SetLinkage(globalCtor, Linkage.PrivateLinkage);
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, globalCtor, string.Empty));
@@ -212,7 +218,7 @@ namespace SharpLang.CompilerServices
                 // Initialize SharpLangModule instance:
                 //   new SharpLangModule(moduleName, metadataStart, metadataLength)
                 var sharpLangModuleGlobal = metadataPerModule[assembly.MainModule];
-                var functionContext = new FunctionCompilerContext(globalCtor);
+                var functionContext = new FunctionCompilerContext(globalCtor, globalCtorSignature);
                 functionContext.Stack = new FunctionStack();
                 functionContext.Stack.Add(new StackValue(StackValueType.Object, sharpLangModuleType, sharpLangModuleGlobal));
                 functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, metadataGlobal));

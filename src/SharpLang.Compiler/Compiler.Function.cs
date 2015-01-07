@@ -57,7 +57,7 @@ namespace SharpLang.CompilerServices
 
             var returnType = GetType(ResolveGenericsVisitor.Process(context, callSite.ReturnType), TypeState.StackComplete);
 
-            return new FunctionSignature(returnType, parameterTypes, callSite.CallingConvention, null);
+            return new FunctionSignature(abi, returnType, parameterTypes, callSite.CallingConvention, null);
         }
 
         /// <summary>
@@ -110,7 +110,21 @@ namespace SharpLang.CompilerServices
             }
 
             var parameterTypes = parameterTypesBuilder.ToArray();
-            var functionType = CreateFunctionTypeLLVM(returnType, parameterTypes);
+
+            // Find calling convention
+            var callingConvention = method.CallingConvention;
+            PInvokeInfo pinvokeInfo = null;
+            if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
+            {
+                pinvokeInfo = resolvedMethod.PInvokeInfo;
+                if (resolvedMethod.PInvokeInfo.IsCallConvStdCall || resolvedMethod.PInvokeInfo.IsCallConvWinapi)
+                    callingConvention = MethodCallingConvention.StdCall;
+                else if (resolvedMethod.PInvokeInfo.IsCallConvFastcall)
+                    callingConvention = MethodCallingConvention.FastCall;
+            }
+
+            var functionSignature = new FunctionSignature(abi, returnType, parameterTypes, callingConvention, pinvokeInfo);
+            var functionType = CreateFunctionTypeLLVM(functionSignature);
 
             // If we have an external with generic parameters, let's try to do some generic sharing (we can write only one in C++)
             bool isInternal = resolvedMethod != null && ((resolvedMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0);
@@ -130,7 +144,7 @@ namespace SharpLang.CompilerServices
 
                     // Cast shared function to appropriate pointer type
                     var sharedFunctionGlobal = LLVM.ConstPointerCast(sharedMethod.GeneratedValue, LLVM.PointerType(functionType, 0));
-                    function = new Function(declaringType, method, functionType, sharedFunctionGlobal, new FunctionSignature(returnType, parameterTypes, sharedMethod.Signature.CallingConvention, sharedMethod.Signature.PInvokeInfo));
+                    function = new Function(declaringType, method, functionType, sharedFunctionGlobal, functionSignature);
                     functions.Add(method, function);
 
                     return function;
@@ -160,11 +174,6 @@ namespace SharpLang.CompilerServices
                 ? LLVM.AddFunction(module, methodMangledName, functionType)
                 : LLVM.ConstPointerNull(LLVM.PointerType(functionType, 0));
 
-            if (hasDefinition)
-            {
-                ApplyFunctionAttributes(functionGlobal, returnType, parameterTypes);
-            }
-
             // Interface method uses a global so that we can have a unique pointer to use as IMT key
             if (isInterfaceMethod)
             {
@@ -181,19 +190,12 @@ namespace SharpLang.CompilerServices
                 LLVM.SetLinkage(functionGlobal, linkageType);
             }
 
-            // Find calling convention
-            var callingConvention = method.CallingConvention;
-            PInvokeInfo pinvokeInfo = null;
-            if (resolvedMethod != null && resolvedMethod.HasPInvokeInfo)
+            if (hasDefinition)
             {
-                pinvokeInfo = resolvedMethod.PInvokeInfo;
-                if (resolvedMethod.PInvokeInfo.IsCallConvStdCall || resolvedMethod.PInvokeInfo.IsCallConvWinapi)
-                    callingConvention = MethodCallingConvention.StdCall;
-                else if (resolvedMethod.PInvokeInfo.IsCallConvFastcall)
-                    callingConvention = MethodCallingConvention.FastCall;
+                ApplyFunctionAttributes(functionSignature, functionGlobal);
             }
 
-            function = new Function(declaringType, method, functionType, functionGlobal, new FunctionSignature(returnType, parameterTypes, callingConvention, pinvokeInfo));
+            function = new Function(declaringType, method, functionType, functionGlobal, functionSignature);
             functions.Add(method, function);
 
             if (hasDefinition)
@@ -221,39 +223,118 @@ namespace SharpLang.CompilerServices
             return function;
         }
 
-        private TypeRef CreateFunctionTypeLLVM(Type returnType, Type[] parameterTypes)
+        private bool FunctionHasStructValueReturn(Type returnType)
         {
-            var numParams = parameterTypes.Length;
-            var parameterTypesLLVM = new TypeRef[numParams];
+            if (returnType.StackType == StackValueType.Value)
+            {
+                var structSize = LLVM.ABISizeOfType(targetData, returnType.DefaultTypeLLVM);
+                if (structSize <= (ulong)intPtrSize)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private TypeRef CreateFunctionTypeLLVM(FunctionSignature functionSignature)
+        {
+            // Some extra arguments might be preprended:
+            //  - Return value pointer if struct returned by value
+            //  - "this" if a class
+            bool hasStructValueReturn = functionSignature.ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect;
+
+            var numParams = functionSignature.ParameterTypes.Length;
+            var firstArgumentIndex = 0;
+            if (hasStructValueReturn)
+                firstArgumentIndex++;
+
+            var parameterTypesLLVM = new TypeRef[numParams + (hasStructValueReturn ? 1 : 0)];
 
             for (int index = 0; index < parameterTypesLLVM.Length; index++)
             {
-                Type parameterType;
-                parameterType = parameterTypes[index];
+                FunctionParameterType parameterType;
+                if (hasStructValueReturn && index == 0)
+                {
+                    parameterType = functionSignature.ReturnType;
+                }
+                else
+                {
+                    parameterType = functionSignature.ParameterTypes[index - firstArgumentIndex];
+                }
 
-                if (parameterType.DefaultTypeLLVM.Value == IntPtr.Zero)
+                if (parameterType.Type.DefaultTypeLLVM.Value == IntPtr.Zero)
                     throw new InvalidOperationException();
 
                 parameterTypesLLVM[index] = GetFunctionInputParameterTypeLLVM(parameterType);
-                parameterTypes[index] = parameterType;
             }
 
-            return LLVM.FunctionType(returnType.DefaultTypeLLVM, parameterTypesLLVM, false);
+            return LLVM.FunctionType(hasStructValueReturn ? LLVM.VoidTypeInContext(context) : GetFunctionInputParameterTypeLLVM(functionSignature.ReturnType), parameterTypesLLVM, false);
         }
 
-        private static TypeRef GetFunctionInputParameterTypeLLVM(Type parameterType)
+        private TypeRef GetFunctionInputParameterTypeLLVM(FunctionParameterType parameterType)
         {
-            return parameterType.DefaultTypeLLVM;
+            switch (parameterType.ABIParameterInfo.Kind)
+            {
+                case ABIParameterInfoKind.Indirect:
+                    return LLVM.PointerType(parameterType.Type.DefaultTypeLLVM, 0);
+                case ABIParameterInfoKind.Coerced:
+                    return parameterType.ABIParameterInfo.CoerceType;
+                case ABIParameterInfoKind.Direct:
+                    return parameterType.Type.DefaultTypeLLVM;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        private static void ApplyFunctionAttributes(ValueRef functionGlobal, Type returnType, Type[] parameterTypes)
+        private void ApplyFunctionAttributes(FunctionSignature functionSignature, ValueRef functionGlobal)
         {
-            // Nothing to do for now, but will be useful later to apply parameter attributes (such as byval, inreg, etc...)
+            // Apply parameter attributes
+            var hasStructValueReturn = functionSignature.ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect;
+
+            // Detect whether it's a function global or a call instruction
+            var isCallInst = LLVM.IsACallInst(functionGlobal) != ValueRef.Empty || LLVM.IsAInvokeInst(functionGlobal) != ValueRef.Empty;
+
+            // Apply sret attribute on struct return value
+            if (hasStructValueReturn)
+            {
+                if (isCallInst)
+                {
+                    LLVM.AddInstrAttribute(functionGlobal, 1, Attribute.StructRetAttribute);
+                }
+                else
+                {
+                    var arg = LLVM.GetParam(functionGlobal, 0);
+                    LLVM.AddAttribute(arg, Attribute.StructRetAttribute);
+                }
+            }
+
+            // Apply byval attribute on struct value parameters
+            for (int index = 0; index < functionSignature.ParameterTypes.Length; index++)
+            {
+                var llvmIndex = index + (hasStructValueReturn ? 1 : 0);
+                var parameterType = functionSignature.ParameterTypes[index];
+                if (parameterType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect)
+                {
+                    if (isCallInst)
+                    {
+                        LLVM.AddInstrAttribute(functionGlobal, (uint)(llvmIndex + 1), Attribute.ByValAttribute);
+                    }
+                    else
+                    {
+                        var arg = LLVM.GetParam(functionGlobal, (uint)llvmIndex);
+                        LLVM.AddAttribute(arg, Attribute.ByValAttribute);
+                    }
+                }
+            }
         }
 
-        private static void ApplyCallAttributes(ValueRef callInstruction, Type returnType, Type[] parameterTypes)
+        private void ApplyCallAttributes(FunctionSignature functionSignature, ValueRef functionGlobal)
         {
-            // Nothing to do for now, but will be useful later to apply parameter attributes (such as byval, inreg, etc...)
+            // Internally, ApplyFunctionAttributes can also handle call/invoke (this might be split later)
+            ApplyFunctionAttributes(functionSignature, functionGlobal);
         }
 
         private void EmitFunction(Function function)
@@ -348,11 +429,14 @@ namespace SharpLang.CompilerServices
                     GetClass(type);
             }
 
+            bool hasStructValueReturn = function.Signature.ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect;
+
             // Process args
             for (int index = 0; index < function.ParameterTypes.Length; index++)
             {
                 var argType = function.ParameterTypes[index];
-                var arg = LLVM.GetParam(functionGlobal, (uint)index);
+                var llvmIndex = hasStructValueReturn ? index + 1 : index;
+                var arg = LLVM.GetParam(functionGlobal, (uint)llvmIndex);
 
                 // Force value types to be emitted right away
                 if (argType.TypeDefinitionCecil.IsValueType)
@@ -361,9 +445,30 @@ namespace SharpLang.CompilerServices
                 var parameterIndex = index - (functionContext.Method.HasThis ? 1 : 0);
                 var parameterName = parameterIndex == -1 ? "this" : method.Parameters[parameterIndex].Name;
 
-                // Copy argument on stack
-                var storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
-                LLVM.BuildStore(builder, arg, storage);
+                ValueRef storage;
+                if (argType.StackType == StackValueType.Value)
+                {
+                    var structSize = LLVM.ABISizeOfType(targetData, argType.DefaultTypeLLVM);
+                    if (structSize <= (ulong)intPtrSize)
+                    {
+                        var structCoercedType = LLVM.IntTypeInContext(context, (uint)structSize * 8);
+
+                        storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
+                        var castedStorage = LLVM.BuildPointerCast(builder, storage, LLVM.PointerType(structCoercedType, 0), string.Empty);
+                        LLVM.BuildStore(builder, arg, castedStorage);
+                    }
+                    else
+                    {
+                        // Directly use byval area as storage (caller made an allocation & copy for this parameter)
+                        storage = arg;
+                    }
+                }
+                else
+                {
+                    // Copy argument on stack
+                    storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
+                    LLVM.BuildStore(builder, arg, storage);
+                }
 
                 args.Add(new StackValue(argType.StackType, argType, storage));
             }
@@ -750,7 +855,7 @@ namespace SharpLang.CompilerServices
                 }
                 case Code.Ret:
                 {
-                    EmitRet(stack, methodReference);
+                    EmitRet(functionContext);
                     functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.None;
                     break;
                 }
@@ -782,17 +887,15 @@ namespace SharpLang.CompilerServices
                     var callSite = (CallSite)instruction.Operand;
 
                     // Generate function type
-                    var returnType = GetType(ResolveGenericsVisitor.Process(methodReference, callSite.ReturnType), TypeState.StackComplete);
-                    var parameterTypes = callSite.Parameters.Select(x => GetType(ResolveGenericsVisitor.Process(methodReference, x.ParameterType), TypeState.StackComplete)).ToArray();
-                    var functionType = CreateFunctionTypeLLVM(returnType, parameterTypes);
+                    var functionSignature = CreateFunctionSignature(methodReference, callSite);
+                    var functionType = CreateFunctionTypeLLVM(functionSignature);
 
                     var methodPtr = stack.Pop();
 
                     var castedMethodPtr = LLVM.BuildPointerCast(builder, methodPtr.Value, LLVM.PointerType(functionType, 0), string.Empty);
 
-                    var signature = CreateFunctionSignature(methodReference, callSite);
 
-                    EmitCall(functionContext, signature, castedMethodPtr);
+                    EmitCall(functionContext, functionSignature, castedMethodPtr);
 
                     break;
                 }
@@ -987,8 +1090,12 @@ namespace SharpLang.CompilerServices
                     if (runtimeHandleValue == ValueRef.Empty)
                         runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
 
+                    // Add indirection
+                    var runtimeHandleValueIndirect = LLVM.BuildAlloca(builder, runtimeHandleClass.Type.DataTypeLLVM, string.Empty);
+                    LLVM.BuildStore(builder, runtimeHandleValue, runtimeHandleValueIndirect);
+
                     // TODO: Actually transform type to RTTI token.
-                    stack.Add(new StackValue(runtimeHandleClass.Type.StackType, runtimeHandleClass.Type, runtimeHandleValue));
+                    stack.Add(new StackValue(runtimeHandleClass.Type.StackType, runtimeHandleClass.Type, runtimeHandleValueIndirect));
 
                     break;
                 }
@@ -1713,10 +1820,15 @@ namespace SharpLang.CompilerServices
                         }
                         else
                         {
-                            // If thisType is a value type and doesn't implement method, dereference, box and pass as this
-                            thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
-                                LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
-                                    constrainedClass.Type.DefaultTypeLLVM, string.Empty));
+                            // If thisType is a value type and doesn't implement method, dereference (note: already a pointer), box and pass as this
+                            if (constrainedClass.Type.StackType == StackValueType.Value)
+                                thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
+                                    LLVM.BuildPointerCast(builder, thisObject.Value,
+                                        LLVM.PointerType(constrainedClass.Type.DefaultTypeLLVM, 0), string.Empty));
+                            else
+                                thisObject = new StackValue(constrainedClass.Type.StackType, constrainedClass.Type,
+                                    LLVM.BuildPointerCast(builder, LLVM.BuildLoad(builder, thisObject.Value, string.Empty),
+                                        constrainedClass.Type.DefaultTypeLLVM, string.Empty));
 
                             thisObject = new StackValue(StackValueType.Object, constrainedClass.Type,
                                 BoxValueType(constrainedClass.Type, thisObject));
@@ -1856,10 +1968,12 @@ namespace SharpLang.CompilerServices
             var value = ConvertFromStackToLocal(type, valueType);
 
             // Copy data
-            var expectedPointerType = LLVM.PointerType(LLVM.TypeOf(value), 0);
+            var expectedPointerType = type.StackType == StackValueType.Value ? LLVM.TypeOf(value) : LLVM.PointerType(LLVM.TypeOf(value), 0);
             if (expectedPointerType != LLVM.TypeOf(dataPointer))
                 dataPointer = LLVM.BuildPointerCast(builder, dataPointer, expectedPointerType, string.Empty);
-            LLVM.BuildStore(builder, value, dataPointer);
+
+            StoreValue(type.StackType, value, dataPointer, InstructionFlags.None);
+
             return allocatedObject;
         }
 
