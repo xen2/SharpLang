@@ -7,16 +7,17 @@ namespace SharpLang.CompilerServices
 {
     class FunctionCompilerContext
     {
-        public FunctionCompilerContext(Function function) : this(function.GeneratedValue)
+        public FunctionCompilerContext(Function function) : this(function.GeneratedValue, function.Signature)
         {
             MethodReference = function.MethodReference;
             Method = MethodReference.Resolve();
         }
 
-        public FunctionCompilerContext(ValueRef functionGlobal)
+        public FunctionCompilerContext(ValueRef functionGlobal, FunctionSignature signature)
         {
             FunctionGlobal = functionGlobal;
             FlowingNextInstructionMode = FlowingNextInstructionMode.Implicit;
+            Signature = signature;
         }
 
         public MethodReference MethodReference { get; set; }
@@ -27,6 +28,7 @@ namespace SharpLang.CompilerServices
         public FunctionStack Stack { get; set; }
         public List<StackValue> Locals { get; set; }
         public List<StackValue> Arguments { get; set; }
+        public FunctionSignature Signature { get; set; }
 
         public List<Scope> Scopes { get; set; } 
 

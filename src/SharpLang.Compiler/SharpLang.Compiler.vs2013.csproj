@@ -70,6 +70,9 @@
     <Reference Include="Mono.Options" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultABI.cs" />
+    <Compile Include="ABIParameterInfoKind.cs" />
+    <Compile Include="ABIParameterInfo.cs" />
     <Compile Include="Cecil\CecilExtensions.TypeMap.cs" />
     <Compile Include="Cecil\CecilExtensions.cs" />
     <Compile Include="Cecil\CustomAssemblyResolver.cs" />
@@ -81,12 +84,12 @@
     <Compile Include="Compiler.Delegate.cs" />
     <Compile Include="Compiler.Emit.cs" />
     <Compile Include="Compiler.Function.cs" />
+    <Compile Include="Compiler.MarkExternals.cs" />
     <Compile Include="Compiler.Options.cs" />
     <Compile Include="Compiler.Scope.cs" />
     <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.Type.cs" />
     <Compile Include="Compiler.cs" />
-    <Compile Include="Compiler.MarkExternals.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="ExceptionHandlerInfo.cs" />
     <Compile Include="ExtraTypeKind.cs" />
@@ -94,7 +97,10 @@
     <Compile Include="FlowingNextInstructionMode.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="FunctionCompilerContext.cs" />
+    <Compile Include="FunctionParameterType.cs" />
     <Compile Include="FunctionSignature.cs" />
+    <Compile Include="FunctionStack.cs" />
+    <Compile Include="IABI.cs" />
     <Compile Include="InstructionFlags.cs" />
     <Compile Include="MemberEqualityComparer.cs" />
     <Compile Include="ObjectFields.cs" />
@@ -104,7 +110,6 @@
     <Compile Include="RuntimeInline\RuntimePINVOKE.cs" />
     <Compile Include="RuntimeTypeInfoFields.cs" />
     <Compile Include="Scope.cs" />
-    <Compile Include="FunctionStack.cs" />
     <Compile Include="StackExtensions.cs" />
     <Compile Include="StackValue.cs" />
     <Compile Include="StackValueType.cs" />

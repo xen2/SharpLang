@@ -152,7 +152,7 @@ namespace SharpLang.CompilerServices
             var invokeMethod = declaringClass.Functions.Single(x => x.MethodReference.Name == "Invoke");
 
             var invokeMethodHelper = LLVM.AddFunction(module, LLVM.GetValueName(invokeMethod.GeneratedValue) + "_MulticastHelper", invokeMethod.FunctionType);
-            ApplyFunctionAttributes(invokeMethodHelper, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
+            ApplyFunctionAttributes(invokeMethod.Signature, invokeMethodHelper);
             LLVM.SetLinkage(invokeMethodHelper, declaringClass.Type.Linkage);
             LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty));
 
@@ -194,13 +194,16 @@ namespace SharpLang.CompilerServices
 
             // Call
             var helperArgs = new ValueRef[LLVM.CountParams(invokeMethodHelper)];
-            helperArgs[0] = LLVM.BuildPointerCast(builder, stack.Pop().Value, declaringClass.Type.DefaultTypeLLVM, string.Empty);
-            for (int i = 1; i < helperArgs.Length; ++i)
+            var thisIndex = invokeMethod.Signature.GetParameterIndexForThis();
+            helperArgs[thisIndex] = LLVM.BuildPointerCast(builder, stack.Pop().Value, declaringClass.Type.DefaultTypeLLVM, string.Empty);
+            for (int i = 0; i < helperArgs.Length; ++i)
             {
+                if (i == thisIndex)
+                    continue;
                 helperArgs[i] = LLVM.GetParam(invokeMethodHelper, (uint)i);
             }
             var retValue = LLVM.BuildCall(builder, invokeMethod.GeneratedValue, helperArgs, string.Empty);
-            ApplyCallAttributes(retValue, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
+            ApplyCallAttributes(invokeMethod.Signature, retValue);
 
             // i++
             EmitLdloc(stack, locals, 0);
@@ -251,7 +254,7 @@ namespace SharpLang.CompilerServices
 
             // Create method
             var invokeMethodHelper = LLVM.AddFunction(module, LLVM.GetValueName(invokeMethod.GeneratedValue) + nameSuffix, invokeMethod.FunctionType);
-            ApplyFunctionAttributes(invokeMethodHelper, invokeMethod.ReturnType, invokeMethod.ParameterTypes);
+            ApplyFunctionAttributes(invokeMethod.Signature, invokeMethodHelper);
             LLVM.PositionBuilderAtEnd(builder2, LLVM.AppendBasicBlockInContext(context, invokeMethodHelper, string.Empty));
 
             return invokeMethodHelper;

@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using System.Linq;
+using Mono.Cecil;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -16,17 +17,22 @@ namespace SharpLang.CompilerServices
 
             MethodDefinition = methodReference.Resolve();
 
+            ParameterTypes = signature.ParameterTypes.Select(x => x.Type).ToArray();
+
             // Generate function type when being called from vtable/IMT (if it applies)
             // If declaring type is a value type, needs to unbox "this" for virtual method
             if (DeclaringType.TypeDefinitionCecil.IsValueType
                 && (MethodDefinition.Attributes & MethodAttributes.Virtual) != 0)
             {
+                bool hasStructValueReturn = signature.ReturnType.ABIParameterInfo.Kind == ABIParameterInfoKind.Indirect;
+
                 // Create function type with boxed "this"
                 var argumentCount = LLVM.CountParamTypes(FunctionType);
                 var argumentTypes = new TypeRef[argumentCount];
                 LLVM.GetParamTypes(FunctionType, argumentTypes);
                 // Change first type to boxed "this"
-                argumentTypes[0] = LLVM.PointerType(DeclaringType.ObjectTypeLLVM, 0);
+                var thisIndex = hasStructValueReturn ? 1 : 0;
+                argumentTypes[thisIndex] = LLVM.PointerType(DeclaringType.ObjectTypeLLVM, 0);
                 VirtualFunctionType = LLVM.FunctionType(LLVM.GetReturnType(FunctionType), argumentTypes, LLVM.IsFunctionVarArg(FunctionType));
             }
             else
@@ -85,7 +91,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The return type.
         /// </value>
-        public Type ReturnType { get { return Signature.ReturnType; } }
+        public Type ReturnType { get { return Signature.ReturnType.Type; } }
 
         /// <summary>
         /// Gets the parameter types.
@@ -93,7 +99,7 @@ namespace SharpLang.CompilerServices
         /// <value>
         /// The parameter types.
         /// </value>
-        public Type[] ParameterTypes { get { return Signature.ParameterTypes; } }
+        public Type[] ParameterTypes { get; private set; }
 
         public FunctionSignature Signature { get; private set; }
 

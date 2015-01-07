@@ -658,7 +658,7 @@ namespace SharpLang.CompilerServices
 
                     // Create unbox trampoline method
                     function.UnboxTrampoline = LLVM.AddFunction(module, LLVM.GetValueName(function.GeneratedValue) + "_UnboxTrampoline", function.VirtualFunctionType);
-                    ApplyFunctionAttributes(function.UnboxTrampoline, function.ReturnType, function.ParameterTypes);
+                    ApplyFunctionAttributes(function.Signature, function.UnboxTrampoline);
 
                     LLVM.SetLinkage(function.UnboxTrampoline, function.DeclaringType.Linkage);
 
@@ -674,14 +674,15 @@ namespace SharpLang.CompilerServices
                     }
 
                     // First parameter (this) needs to be unboxed
-                    arguments[0] = GetDataPointer(builder2, arguments[0]);
+                    var thisIndex = function.Signature.GetParameterIndexForThis();
+                    arguments[thisIndex] = GetDataPointer(builder2, arguments[thisIndex]);
 
                     // In some cases, data type and value type are different (i.e. System.Int32.value = { i32 } vs i32)
                     // Make sure to cast to data type
                     // TODO: Maybe that should be part of GetDataPointer?
                     if (function.DeclaringType.DataTypeLLVM != function.DeclaringType.ValueTypeLLVM)
                     {
-                        arguments[0] = LLVM.BuildPointerCast(builder2, arguments[0], LLVM.PointerType(function.DeclaringType.DataTypeLLVM, 0), string.Empty);
+                        arguments[thisIndex] = LLVM.BuildPointerCast(builder2, arguments[thisIndex], LLVM.PointerType(function.DeclaringType.DataTypeLLVM, 0), string.Empty);
                     }
 
                     // Call original function with same parameters
