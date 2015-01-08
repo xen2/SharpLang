@@ -223,22 +223,6 @@ namespace SharpLang.CompilerServices
             return function;
         }
 
-        private bool FunctionHasStructValueReturn(Type returnType)
-        {
-            if (returnType.StackType == StackValueType.Value)
-            {
-                var structSize = LLVM.ABISizeOfType(targetData, returnType.DefaultTypeLLVM);
-                if (structSize <= (ulong)intPtrSize)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
         private TypeRef CreateFunctionTypeLLVM(FunctionSignature functionSignature)
         {
             // Some extra arguments might be preprended:
