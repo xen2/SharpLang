@@ -70,9 +70,8 @@
     <Reference Include="Mono.Options" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultABI.cs" />
-    <Compile Include="ABIParameterInfoKind.cs" />
     <Compile Include="ABIParameterInfo.cs" />
+    <Compile Include="ABIParameterInfoKind.cs" />
     <Compile Include="Cecil\CecilExtensions.TypeMap.cs" />
     <Compile Include="Cecil\CecilExtensions.cs" />
     <Compile Include="Cecil\CustomAssemblyResolver.cs" />
@@ -90,6 +89,7 @@
     <Compile Include="Compiler.StackConversion.cs" />
     <Compile Include="Compiler.Type.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="DefaultABI.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="ExceptionHandlerInfo.cs" />
     <Compile Include="ExtraTypeKind.cs" />
@@ -119,10 +119,6 @@
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj">
-      <Project>{f3e433c8-352f-4944-bf7f-765ce435370d}</Project>
-      <Name>System.Reflection.Metadata</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SharpLLVM\SharpLLVM.vs2013.csproj">
       <Project>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</Project>
       <Name>SharpLLVM</Name>
@@ -142,6 +138,14 @@
     <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
       <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
       <Name>Mono.Linker</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj">
+      <Project>{F3E433C8-352F-4944-BF7F-765CE435370D}</Project>
+      <Name>System.Reflection.Metadata</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\build\vs2013\runtime\SharpLang.Runtime.vcxproj">
+      <Project>{F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01}</Project>
+      <Name>SharpLang.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

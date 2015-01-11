@@ -122,6 +122,10 @@
     <Compile Include="Visibility.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\build\vs2013\projects\SharpLLVM.Native.vcxproj">
+      <Project>{332B76CC-1F24-951E-4856-7AA334AE742A}</Project>
+      <Name>SharpLLVM.Native</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
