@@ -54,6 +54,7 @@ REF_CLASS(LLVMDiagnosticInfoRef, DiagnosticInfoRef)
 REF_CLASS(LLVMDIBuilderRef, DIBuilderRef)
 
 REF_ARRAY(unsigned,uint)
+REF_ARRAY(uint64_t,ulong)
 
 %apply (LLVMTypeRef *ARRAY) {(LLVMTypeRef *Dest)};
 %apply (LLVMTypeRef *ARRAY, unsigned ARRAYSIZE) {(LLVMTypeRef *ElementTypes, unsigned ElementCount)};
@@ -71,6 +72,7 @@ REF_ARRAY(unsigned,uint)
 %apply (LLVMValueRef *ARRAY) {(LLVMValueRef *IncomingValues)};
 %apply (LLVMBasicBlockRef *ARRAY, unsigned ARRAYSIZE) {(LLVMBasicBlockRef *IncomingBlocks, unsigned Count)};
 %apply (unsigned *ARRAY, unsigned ARRAYSIZE) {(unsigned *IdxList, unsigned NumIdx)};
+%apply (unsigned ARRAYSIZE, const uint64_t ARRAY[]) {(unsigned NumWords, const uint64_t Words[])};
 
 %include "llvm-c/Core.h"
 %include "llvm-c/BitReader.h"

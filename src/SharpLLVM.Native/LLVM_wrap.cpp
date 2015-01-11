@@ -2503,7 +2503,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstInt(void * jarg1, unsigned long long j
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ConstIntOfArbitraryPrecision(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ConstIntOfArbitraryPrecision(void * jarg1, unsigned int arg2_count, void* jarg2) {
   void * jresult ;
   LLVMTypeRef arg1 ;
   unsigned int arg2 ;
@@ -2511,8 +2511,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ConstIntOfArbitraryPrecision(void * jarg1, 
   LLVMValueRef result;
   
   arg1 = (LLVMTypeRef)jarg1; 
-  arg2 = (unsigned int)jarg2; 
-  arg3 = (uint64_t *)jarg3; 
+  arg2 = arg2_count; arg3 = (uint64_t*)jarg2;
   result = LLVMConstIntOfArbitraryPrecision(arg1,arg2,(unsigned long long const (*))arg3);
   jresult = result; 
   return jresult;

@@ -82,7 +82,6 @@
     <Compile Include="RelocMode.cs" />
     <Compile Include="SWIGTYPE_p_f_p_q_const__char__void.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
-    <Compile Include="SWIGTYPE_p_unsigned_long_long.cs" />
     <Compile Include="TargetDataRef.cs" />
     <Compile Include="TargetLibraryInfoRef.cs" />
     <Compile Include="TargetMachineRef.cs" />
