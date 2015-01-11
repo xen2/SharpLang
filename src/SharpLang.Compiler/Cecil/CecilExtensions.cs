@@ -14,7 +14,7 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     static partial class CecilExtensions
     {
-        private static readonly System.Reflection.FieldInfo methodBodyCodeSizeField = typeof(MethodBody).GetField("code_size", System.Reflection.BindingFlags.NonPublic);
+        private static readonly System.Reflection.FieldInfo methodBodyCodeSizeField = typeof(MethodBody).GetField("code_size", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         public static string MangledName(this TypeReference typeReference)
         {
