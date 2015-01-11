@@ -12,9 +12,8 @@ endif
 
 ifeq ($(config),debug_x32)
   CC = clang
-  CXX = clang
+  CXX = clang++
   AR = ar
-  RESCOMP = clang
   LLVM_LINK = llvm-link
   TARGETDIR = ../lib/debug_x32
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
@@ -23,13 +22,12 @@ ifeq ($(config),debug_x32)
   INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) $(FORCE_INCLUDE) 
-  PCH_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) 
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s -shared -Wl,--out-implib="../lib/debug_x32/SharpLang.Runtime.lib" -m32 -L/usr/lib32
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -shared -Wl,--out-implib="../lib/debug_x32/SharpLang.Runtime.lib" -m32
   LINKCMD = $(LLVM_LINK) -o $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -39,13 +37,13 @@ ifeq ($(config),debug_x32)
   endef
 all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
 	@:
+
 endif
 
 ifeq ($(config),debug_x64)
   CC = clang
-  CXX = clang
+  CXX = clang++
   AR = ar
-  RESCOMP = clang
   LLVM_LINK = llvm-link
   TARGETDIR = ../lib/debug_x64
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
@@ -54,13 +52,12 @@ ifeq ($(config),debug_x64)
   INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) $(FORCE_INCLUDE) 
-  PCH_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) 
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s -shared -Wl,--out-implib="../lib/debug_x64/SharpLang.Runtime.lib" -m64 -L/usr/lib64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -shared -Wl,--out-implib="../lib/debug_x64/SharpLang.Runtime.lib" -m64
   LINKCMD = $(LLVM_LINK) -o $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -70,13 +67,13 @@ ifeq ($(config),debug_x64)
   endef
 all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
 	@:
+
 endif
 
 ifeq ($(config),release_x32)
   CC = clang
-  CXX = clang
+  CXX = clang++
   AR = ar
-  RESCOMP = clang
   LLVM_LINK = llvm-link
   TARGETDIR = ../lib/release_x32
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
@@ -85,13 +82,12 @@ ifeq ($(config),release_x32)
   INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) $(FORCE_INCLUDE) 
-  PCH_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) 
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s -shared -Wl,--out-implib="../lib/release_x32/SharpLang.Runtime.lib" -m32 -L/usr/lib32
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -shared -Wl,--out-implib="../lib/release_x32/SharpLang.Runtime.lib" -m32
   LINKCMD = $(LLVM_LINK) -o $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -101,13 +97,13 @@ ifeq ($(config),release_x32)
   endef
 all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
 	@:
+
 endif
 
 ifeq ($(config),release_x64)
   CC = clang
-  CXX = clang
+  CXX = clang++
   AR = ar
-  RESCOMP = clang
   LLVM_LINK = llvm-link
   TARGETDIR = ../lib/release_x64
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
@@ -116,13 +112,12 @@ ifeq ($(config),release_x64)
   INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) $(FORCE_INCLUDE) 
-  PCH_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS) 
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s -shared -Wl,--out-implib="../lib/release_x64/SharpLang.Runtime.lib" -m64 -L/usr/lib64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -shared -Wl,--out-implib="../lib/release_x64/SharpLang.Runtime.lib" -m64
   LINKCMD = $(LLVM_LINK) -o $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -132,6 +127,7 @@ ifeq ($(config),release_x64)
   endef
 all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
 	@:
+
 endif
 
 OBJECTS := \
@@ -147,8 +143,7 @@ OBJECTS := \
 
 RESOURCES := \
 
-RESPONSE = $(OBJDIR)/SharpLang.Runtime.rsp
-LINKOBJECTS = @$(RESPONSE)
+CUSTOMFILES := \
 
 SHELLTYPE := msdos
 ifeq (,$(ComSpec)$(COMSPEC))
@@ -158,22 +153,10 @@ ifeq (/bin,$(findstring /bin,$(SHELL)))
   SHELLTYPE := posix
 endif
 
-$(TARGET): $(GCH) $(OBJECTS) $(LDDEPS) $(RESOURCES) $(RESPONSE)
+$(TARGET): $(GCH) $(OBJECTS) $(LDDEPS) $(RESOURCES) ${CUSTOMFILES}
 	@echo Linking SharpLang.Runtime
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
-
-$(RESPONSE): SharpLang.Runtime.make
-	@echo Generating response file
-ifeq (posix,$(SHELLTYPE))
-	$(SILENT) rm -f $(RESPONSE)
-	for f in $(OBJDIR)/*.o; do
-		$(SILENT) echo $(OBJDIR)/$$f >> $(RESPONSE)
-	done
-else
-	$(SILENT) if exist $(RESPONSE) del "$(OBJDIR)\SharpLang.Runtime.rsp"
-	for %%f in ($(OBJDIR)/*.o) do $(SILENT) echo $(OBJDIR)/%%f >> $(RESPONSE)
-endif
 
 $(TARGETDIR):
 	@echo Creating $(TARGETDIR)
@@ -208,9 +191,10 @@ prelink:
 	$(PRELINKCMDS)
 
 ifneq (,$(PCH))
+$(OBJECTS): $(GCH) $(PCH)
 $(GCH): $(PCH)
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) -x c++-header $(PCH_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
+	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
 endif
 
 $(OBJDIR)/mulodi4.o: ../../../deps/compiler-rt/lib/builtins/mulodi4.c

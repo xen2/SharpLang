@@ -115,10 +115,16 @@ solution "SharpLang"
 
   group "Class Libraries"
     external "jay"
-        location (srcdir .. "/mcs/jay")
-        uuid "5D485D32-3B9F-4287-AB24-C8DA5B89F537"
-        kind "ConsoleApp"
-        language "C++"
+      location (srcdir .. "/mcs/jay")
+      uuid "5D485D32-3B9F-4287-AB24-C8DA5B89F537"
+      kind "ConsoleApp"
+      language "C++"
+      removeplatforms "*"
+      platforms { "x32" }
+      configmap {
+          ["x32"] = "x32",
+          ["x64"] = "x32"
+      }
     external "corlib-net_4_5"
       location (srcdir .. "/mcs/class/corlib")
       uuid "33BF0182-AC5C-464C-995B-C9CFE74E1A95"
