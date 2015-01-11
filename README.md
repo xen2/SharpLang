@@ -4,6 +4,8 @@ SharpLang is a .NET (MSIL) compiler front-end for LLVM.
 
 It allows you to compile C# and other .NET languages code to any supported LLVM backend.
 
+Official twitter account: https://twitter.com/SharpLangDev
+
 ## Licence
 
 BSD 2-clause license.
@@ -38,14 +40,15 @@ It's still a early work in progress. Any help/feedback is welcome!
  * Delegate (no multicast delegate yet)
  * Boxing
  * Exceptions
- * Converts Mono mscorlib
+ * Converts huge libraries (i.e. Mono mscorlib, System, System.Core, System.Xml, etc...)
+ * Reflection (only types, no method/field yet)
 * Simple code linked against SharpLang-compiled Mono mscorlib is starting to work
 
 ### What's next
 
 * Driver/Linker
 * Runtime
- * Reflection
+ * Reflection (method, fields, custom attributes)
  * Threads, Locks, etc...
  * I/O
  * Marshalling
@@ -54,6 +57,7 @@ It's still a early work in progress. Any help/feedback is welcome!
 * Cross-platform
  * Enscripten HTML5 (javascript) support
  * Linux/MacOSX support
+ * Android, iOS
 * Code quality
 * Documentation
 
