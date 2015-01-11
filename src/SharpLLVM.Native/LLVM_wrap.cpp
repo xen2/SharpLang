@@ -273,6 +273,9 @@ SWIGEXPORT void SWIGSTDCALL SWIGRegisterStringCallback_LLVM(SWIG_CSharpStringHel
 
 
 
+#include <stdint.h>		// Use the C99 official header
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
