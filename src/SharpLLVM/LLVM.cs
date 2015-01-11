@@ -950,9 +950,12 @@ public class LLVM {
     return ret;
   }
 
-  public unsafe static ValueRef ConstIntOfArbitraryPrecision(TypeRef IntTy, uint NumWords, SWIGTYPE_p_unsigned_long_long Words) {
-    ValueRef ret = new ValueRef(LLVMPINVOKE.ConstIntOfArbitraryPrecision(IntTy.Value, NumWords, SWIGTYPE_p_unsigned_long_long.getCPtr(Words)));
-    return ret;
+  public unsafe static ValueRef ConstIntOfArbitraryPrecision(TypeRef IntTy, ulong[] NumWords) {
+    fixed (ulong* swig_ptrTo_NumWords = NumWords)
+    {
+      ValueRef ret = new ValueRef(LLVMPINVOKE.ConstIntOfArbitraryPrecision(IntTy.Value, (uint)NumWords.Length, (System.IntPtr)swig_ptrTo_NumWords));
+      return ret;
+    }
   }
 
   public unsafe static ValueRef ConstIntOfString(TypeRef IntTy, string Text, byte Radix) {

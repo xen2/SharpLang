@@ -12,6 +12,14 @@
                      (TYPE *ARRAY, unsigned ARRAYSIZE) "(System.IntPtr)swig_ptrTo_$csinput, (uint)$csinput.Length"
     %typemap(imtype) (TYPE *ARRAY, unsigned ARRAYSIZE) "System.IntPtr $1_data, uint"
     %typemap(cstype) (TYPE *ARRAY, unsigned ARRAYSIZE) "CSTYPE[]"
+
+	// Arrays (count + const array)
+    %typemap(in) (unsigned ARRAYSIZE, const TYPE ARRAY[]) "$1 = $1_count; $2 = (TYPE*)$input;"
+    %typemap(ctype) (unsigned ARRAYSIZE, const TYPE ARRAY[]) "unsigned int $1_count, void*"
+    %typemap(csin, pre="    fixed (CSTYPE* swig_ptrTo_$csinput = $csinput)")
+                     (unsigned ARRAYSIZE, const TYPE ARRAY[]) "(uint)$csinput.Length, (System.IntPtr)swig_ptrTo_$csinput"
+    %typemap(imtype) (unsigned ARRAYSIZE, const TYPE ARRAY[]) "uint $1_count, System.IntPtr"
+    %typemap(cstype) (unsigned ARRAYSIZE, const TYPE ARRAY[]) "CSTYPE[]"
 %enddef
 
 %define REF_CLASS(TYPE, CSTYPE)
