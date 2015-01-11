@@ -1089,7 +1089,7 @@ namespace SharpLang.CompilerServices
                     var targetMethodReference = ResolveGenericsVisitor.Process(methodReference, (MethodReference)instruction.Operand);
                     var targetMethod = GetFunction(targetMethodReference);
 
-                    stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrLLVM, string.Empty)));
+                    EmitLdftn(stack, targetMethod);
 
                     break;
                 }

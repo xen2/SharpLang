@@ -1998,6 +1998,11 @@ namespace SharpLang.CompilerServices
             functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.None;
         }
 
+        private void EmitLdftn(FunctionStack stack, Function targetMethod)
+        {
+            stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.BuildPointerCast(builder, targetMethod.GeneratedValue, intPtrLLVM, string.Empty)));
+        }
+
         private static bool CompareParameterTypes(Type[] a, Type[] b)
         {
             if (a.Length != b.Length)
