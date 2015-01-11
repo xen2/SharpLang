@@ -138,6 +138,7 @@ OBJECTS := \
 	$(OBJDIR)/Exception.o \
 	$(OBJDIR)/Internal.o \
 	$(OBJDIR)/Marshal.o \
+	$(OBJDIR)/MonoIO.o \
 	$(OBJDIR)/PInvoke.o \
 	$(OBJDIR)/RuntimeType.o \
 
@@ -216,6 +217,9 @@ $(OBJDIR)/Internal.o: ../../../src/SharpLang.Runtime/Internal.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -fno-exceptions -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Marshal.o: ../../../src/SharpLang.Runtime/Marshal.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -fno-exceptions -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/MonoIO.o: ../../../src/SharpLang.Runtime/MonoIO.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -fno-exceptions -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/PInvoke.o: ../../../src/SharpLang.Runtime/PInvoke.cpp
