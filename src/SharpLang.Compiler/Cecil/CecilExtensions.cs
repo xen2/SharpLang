@@ -14,6 +14,8 @@ namespace SharpLang.CompilerServices.Cecil
     /// </summary>
     static partial class CecilExtensions
     {
+        private static readonly System.Reflection.FieldInfo methodBodyCodeSizeField = typeof(MethodBody).GetField("code_size", System.Reflection.BindingFlags.NonPublic);
+
         public static string MangledName(this TypeReference typeReference)
         {
             var assembly = (typeReference.Resolve() ?? typeReference).Module.Assembly;
@@ -103,7 +105,9 @@ namespace SharpLang.CompilerServices.Cecil
             // TODO: Guess better (we don't care so much as our codegen doesn't depend on it being valid)
             body.MaxStackSize = 8;
 
-            body.CodeSize = offset;
+            // TODO: Get CodeSize public (or even better, this whole method available) in Cecil
+            // body.CodeSize = offset;
+            methodBodyCodeSizeField.SetValue(body, offset);
 
             return offset;
         }
