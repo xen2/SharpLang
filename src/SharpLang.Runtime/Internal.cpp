@@ -210,32 +210,6 @@ extern "C" String* System_Environment__GetNewLine__()
 	return &newline;
 }
 
-extern "C" void System_String___ctor_System_Char___(String* str, Array<char16_t>* value)
-{
-	auto length = value->length;
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
-	memcpy((void*)str->value, (void*)value->value, length * sizeof(char16_t));
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-}
-
-extern "C" void System_String___ctor_System_Char_System_Int32_(String* str, char16_t c, int32_t count)
-{
-	str->length = count;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * count);
-	for (int i = 0; i < count; ++i)
-		const_cast<char16_t*>(str->value)[i] = c;
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-}
-
-extern "C" void System_String___ctor_System_Char___System_Int32_System_Int32_(String* str, Array<char16_t>* value, int startIndex, int length)
-{
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
-	memcpy((void*)str->value, (void*)(value->value + startIndex), length * sizeof(char16_t));
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-}
-
 extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t length)
 {
 	auto str = (String*)malloc(sizeof(String));

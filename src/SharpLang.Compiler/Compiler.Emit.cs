@@ -177,6 +177,19 @@ namespace SharpLang.CompilerServices
             // Make sure .cctor has been called
             EnsureClassInitialized(functionContext, GetClass(type));
 
+            // String is a special case: we redirect to matching CreateString function,
+            // and InternalAllocateStr will do the actual allocation
+            if (type.TypeReferenceCecil.FullName == typeof(string).FullName)
+            {
+                var targetMethod = type.Class.Functions.First(x => x.MethodReference.Name == "CreateString" && CompareParameterTypes(x.ParameterTypes, ctor.ParameterTypes));
+
+                // Insert a null "this" pointer (note: CreateString would probably be better as static to avoid that)
+                functionContext.Stack.Insert(functionContext.Stack.Count - (targetMethod.ParameterTypes.Length - 1), new StackValue(type.StackType, type, LLVM.ConstNull(type.DefaultTypeLLVM)));
+
+                EmitCall(functionContext, targetMethod.Signature, targetMethod.GeneratedValue);
+                return;
+            }
+
             var allocatedObject = AllocateObject(type);
 
             // Add it to stack, right before arguments
@@ -1983,6 +1996,20 @@ namespace SharpLang.CompilerServices
 
             // Default is not to flow to next instruction, previous Leave instructions already tagged what was necessary
             functionContext.FlowingNextInstructionMode = FlowingNextInstructionMode.None;
+        }
+
+        private static bool CompareParameterTypes(Type[] a, Type[] b)
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            for (int i = 0; i < a.Length; ++i)
+            {
+                if (!MemberEqualityComparer.Default.Equals(a[i].TypeReferenceCecil, b[i].TypeReferenceCecil))
+                    return false;
+            }
+
+            return true;
         }
     }
 }
