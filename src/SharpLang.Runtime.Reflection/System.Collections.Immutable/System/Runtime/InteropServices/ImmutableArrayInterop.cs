@@ -9,7 +9,7 @@ namespace System.Runtime.InteropServices
     /// <summary>
     /// Provides tools for using <see cref="ImmutableArray{T}"/> in interop scenarios.
     /// </summary>
-    public static class ImmutableArrayInterop
+    static class ImmutableArrayInterop
     {
         /// <summary>
         /// Creates a new instance of <see cref="ImmutableArray{T}"/> using a given mutable array as the backing

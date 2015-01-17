@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public enum MetadataKind
+    enum MetadataKind
     {
         /// <summary>
         /// CLI metadata.

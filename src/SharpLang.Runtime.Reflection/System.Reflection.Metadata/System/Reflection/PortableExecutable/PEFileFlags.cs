@@ -3,7 +3,7 @@
 
 namespace System.Reflection.PortableExecutable
 {
-    public enum Characteristics : ushort
+    enum Characteristics : ushort
     {
         RelocsStripped = 0x0001,         // Relocation info stripped from file.
         ExecutableImage = 0x0002,        // File is executable  (i.e. no unresolved external references).
@@ -22,13 +22,13 @@ namespace System.Reflection.PortableExecutable
         BytesReversedHi = 0x8000,        // Bytes of machine word are reversed.
     }
 
-    public enum PEMagic : ushort
+    enum PEMagic : ushort
     {
         PE32 = 0x010B,
         PE32Plus = 0x020B,
     }
 
-    public enum Subsystem : ushort
+    enum Subsystem : ushort
     {
         Unknown = 0,                // Unknown subsystem.
         Native = 1,                 // Image doesn't require a subsystem.
@@ -46,7 +46,7 @@ namespace System.Reflection.PortableExecutable
     }
 
     [Flags]
-    public enum DllCharacteristics : ushort
+    enum DllCharacteristics : ushort
     {
         ProcessInit = 0x0001,   // Reserved.
         ProcessTerm = 0x0002,   // Reserved.
@@ -64,7 +64,7 @@ namespace System.Reflection.PortableExecutable
     }
 
     [Flags]
-    public enum SectionCharacteristics : uint
+    enum SectionCharacteristics : uint
     {
         TypeReg = 0x00000000,               // Reserved.
         TypeDSect = 0x00000001,             // Reserved.

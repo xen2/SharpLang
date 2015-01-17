@@ -42,7 +42,7 @@ namespace System.Reflection.Internal
 
         protected override void Dispose(bool disposing)
         {
-            Debug.Assert(disposing);
+            DebugCorlib.Assert(disposing);
 
             // we don't own the memory, just null out the pointer.
             memory = null;

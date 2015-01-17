@@ -7,7 +7,7 @@ using System.Text;
 
 namespace System.Reflection.PortableExecutable
 {
-    public struct SectionHeader
+    struct SectionHeader
     {
         private readonly int virtualSize;
         private readonly string name;

@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
+using System.Linq.Internal;
 using System.Text;
 using System.Threading.Tasks;
 using Validation;
@@ -19,7 +19,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="T">The type of element stored by the array.</typeparam>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IImmutableList<T>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable
+    partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IImmutableList<T>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable
     {
         /// <summary>
         /// An empty (initialized) instance of ImmutableArray{T}.
@@ -717,80 +717,7 @@ namespace System.Collections.Immutable
             Array.Copy(this.array, index + length, tmp, index, this.Length - index - length);
             return new ImmutableArray<T>(tmp);
         }
-
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
-        /// <param name="items">The items to remove if matches are found in this list.</param>
-        /// <returns>
-        /// A new list with the elements removed.
-        /// </returns>
-        [Pure]
-        public ImmutableArray<T> RemoveRange(IEnumerable<T> items)
-        {
-            return this.RemoveRange(items, EqualityComparer<T>.Default);
-        }
-
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
-        /// <param name="items">The items to remove if matches are found in this list.</param>
-        /// <param name="equalityComparer">
-        /// The equality comparer to use in the search.
-        /// </param>
-        /// <returns>
-        /// A new list with the elements removed.
-        /// </returns>
-        [Pure]
-        public ImmutableArray<T> RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer)
-        {
-            this.ThrowNullRefIfNotInitialized();
-            Requires.NotNull(items, "items");
-            Requires.NotNull(equalityComparer, "equalityComparer");
-
-            var indexesToRemove = new SortedSet<int>();
-            foreach (var item in items)
-            {
-                int index = this.IndexOf(item, equalityComparer);
-                while (index >= 0 && !indexesToRemove.Add(index) && index + 1 < this.Length)
-                {
-                    // This is a duplicate of one we've found. Try hard to find another instance in the list to remove.
-                    index = this.IndexOf(item, index + 1, equalityComparer);
-                }
-            }
-
-            return this.RemoveAtRange(indexesToRemove);
-        }
-
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
-        /// <param name="items">The items to remove if matches are found in this list.</param>
-        /// <returns>
-        /// A new list with the elements removed.
-        /// </returns>
-        [Pure]
-        public ImmutableArray<T> RemoveRange(ImmutableArray<T> items)
-        {
-            return this.RemoveRange(items.array);
-        }
-
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
-        /// <param name="items">The items to remove if matches are found in this list.</param>
-        /// <param name="equalityComparer">
-        /// The equality comparer to use in the search.
-        /// </param>
-        /// <returns>
-        /// A new list with the elements removed.
-        /// </returns>
-        [Pure]
-        public ImmutableArray<T> RemoveRange(ImmutableArray<T> items, IEqualityComparer<T> equalityComparer)
-        {
-            return this.RemoveRange(items.array, equalityComparer);
-        }
-
+        
         /// <summary>
         /// Removes all the elements that match the conditions defined by the specified
         /// predicate.
@@ -1136,8 +1063,9 @@ namespace System.Collections.Immutable
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer)
         {
-            this.ThrowInvalidOperationIfNotInitialized();
-            return this.RemoveRange(items, equalityComparer);
+            throw new NotImplementedException();
+            //this.ThrowInvalidOperationIfNotInitialized();
+            //return this.RemoveRange(items, equalityComparer);
         }
 
         /// <summary>
@@ -1524,7 +1452,8 @@ namespace System.Collections.Immutable
             foreach (var indexToRemove in indexesToRemove)
             {
                 int copyLength = lastIndexRemoved == -1 ? indexToRemove : (indexToRemove - lastIndexRemoved - 1);
-                Debug.Assert(indexToRemove > lastIndexRemoved); // We require that the input be a sorted set.
+                if (indexToRemove > lastIndexRemoved) // We require that the input be a sorted set.
+                    throw new Exception();
                 Array.Copy(this.array, copied + removed, newArray, copied, copyLength);
                 removed++;
                 copied += copyLength;

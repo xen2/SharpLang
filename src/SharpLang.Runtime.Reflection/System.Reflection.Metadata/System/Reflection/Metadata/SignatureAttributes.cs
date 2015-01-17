@@ -9,7 +9,7 @@ namespace System.Reflection.Metadata
     /// byte represented by <see cref="SignatureHeader"/>.
     /// </summary>
     [Flags]
-    public enum SignatureAttributes : byte
+    enum SignatureAttributes : byte
     {
         /// <summary>
         /// No flags.

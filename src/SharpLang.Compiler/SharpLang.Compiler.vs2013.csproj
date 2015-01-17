@@ -41,7 +41,12 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Mono.Options" />
+    <Reference Include="Mono.Options">
+      <HintPath>..\..\deps\Mono.Options\Mono.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reflection.Metadata">
+      <HintPath>..\..\deps\System.Reflection.Metadata\System.Reflection.Metadata.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ABIParameterInfo.cs" />
@@ -132,10 +137,6 @@
     <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
       <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
       <Name>Mono.Linker</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj">
-      <Project>{F3E433C8-352F-4944-BF7F-765CE435370D}</Project>
-      <Name>System.Reflection.Metadata</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\build\vs2013\runtime\SharpLang.Runtime.vcxproj">
       <Project>{F7E3A0E3-63FA-9E79-AC71-2A9B18C76F01}</Project>

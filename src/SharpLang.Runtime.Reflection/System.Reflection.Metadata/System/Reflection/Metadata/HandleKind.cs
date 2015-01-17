@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public enum HandleKind : byte
+    enum HandleKind : byte
     {
         ModuleDefinition = (byte)(TokenTypeIds.Module >> TokenTypeIds.RowIdBitCount),
         TypeReference = (byte)(TokenTypeIds.TypeRef >> TokenTypeIds.RowIdBitCount),

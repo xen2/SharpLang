@@ -7,13 +7,13 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct NamespaceDefinition
+    struct NamespaceDefinition
     {
         private NamespaceData data;
 
         internal NamespaceDefinition(NamespaceData data)
         {
-            Debug.Assert(data != null);
+            DebugCorlib.Assert(data != null);
             this.data = data;
         }
 

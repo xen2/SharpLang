@@ -25,7 +25,7 @@ namespace System.Reflection.PortableExecutable
 
         public PEBinaryReader(Stream stream, int size)
         {
-            Debug.Assert(size >= 0 && size <= (stream.Length - stream.Position));
+            DebugCorlib.Assert(size >= 0 && size <= (stream.Length - stream.Position));
 
             this.startOffset = stream.Position;
             this.maxOffset = this.startOffset + (uint)size;
@@ -123,8 +123,8 @@ namespace System.Reflection.PortableExecutable
 
         private void CheckBounds(uint count)
         {
-            Debug.Assert(count <= sizeof(Int64));  // Error message assumes we're trying to read constant small number of bytes.
-            Debug.Assert(reader.BaseStream.Position >= 0 && this.maxOffset >= 0);
+            DebugCorlib.Assert(count <= sizeof(Int64));  // Error message assumes we're trying to read constant small number of bytes.
+            DebugCorlib.Assert(reader.BaseStream.Position >= 0 && this.maxOffset >= 0);
 
             // Add cannot overflow because the worst case is (ulong)long.MaxValue + uint.MaxValue < ulong.MaxValue.
             if ((ulong)reader.BaseStream.Position + count > (ulong)this.maxOffset)
@@ -135,7 +135,7 @@ namespace System.Reflection.PortableExecutable
 
         private void CheckBounds(long startPosition, int count)
         {
-            Debug.Assert(startPosition >= 0 && this.maxOffset >= 0);
+            DebugCorlib.Assert(startPosition >= 0 && this.maxOffset >= 0);
 
             // Add cannot overflow because the worst case is (ulong)long.MaxValue + uint.MaxValue < ulong.MaxValue.
             // Negative count is handled by overflow to greater than maximum size = int.MaxValue.

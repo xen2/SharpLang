@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public struct ExceptionRegion
+    struct ExceptionRegion
     {
         private readonly ExceptionRegionKind kind;
         private readonly int tryOffset;

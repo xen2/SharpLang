@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class PEHeader
+    sealed class PEHeader
     {
         #region Standard fields
 
@@ -214,7 +214,7 @@ namespace System.Reflection.PortableExecutable
             }
             else
             {
-                Debug.Assert(magic == PEMagic.PE32);
+                DebugCorlib.Assert(magic == PEMagic.PE32);
                 BaseOfData = reader.ReadInt32();
             }
 

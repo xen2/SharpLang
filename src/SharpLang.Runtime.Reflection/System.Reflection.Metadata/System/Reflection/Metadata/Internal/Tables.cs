@@ -42,31 +42,31 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal ushort GetGeneration()
         {
-            Debug.Assert(NumberOfRows > 0);
+            DebugCorlib.Assert(NumberOfRows > 0);
             return this.Block.PeekUInt16(this.GenerationOffset);
         }
 
         internal StringHandle GetName()
         {
-            Debug.Assert(NumberOfRows > 0);
+            DebugCorlib.Assert(NumberOfRows > 0);
             return StringHandle.FromIndex(this.Block.PeekReference(this.NameOffset, this.IsStringHeapRefSizeSmall));
         }
 
         internal GuidHandle GetMvid()
         {
-            Debug.Assert(NumberOfRows > 0);
+            DebugCorlib.Assert(NumberOfRows > 0);
             return GuidHandle.FromIndex(this.Block.PeekReference(this.MVIdOffset, this.IsGUIDHeapRefSizeSmall));
         }
 
         internal GuidHandle GetEncId()
         {
-            Debug.Assert(NumberOfRows > 0);
+            DebugCorlib.Assert(NumberOfRows > 0);
             return GuidHandle.FromIndex(this.Block.PeekReference(this.EnCIdOffset, this.IsGUIDHeapRefSizeSmall));
         }
 
         internal GuidHandle GetEncBaseId()
         {
-            Debug.Assert(NumberOfRows > 0);
+            DebugCorlib.Assert(NumberOfRows > 0);
             return GuidHandle.FromIndex(this.Block.PeekReference(this.EnCBaseIdOffset, this.IsGUIDHeapRefSizeSmall));
         }
     }
@@ -1924,13 +1924,13 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal AssemblyHashAlgorithm GetHashAlgorithm()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return (AssemblyHashAlgorithm)this.Block.PeekUInt32(this.HashAlgIdOffset);
         }
 
         internal Version GetVersion()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return new Version(
                 this.Block.PeekUInt16(this.MajorVersionOffset),
                 this.Block.PeekUInt16(this.MinorVersionOffset),
@@ -1940,25 +1940,25 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal AssemblyFlags GetFlags()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return (AssemblyFlags)this.Block.PeekUInt32(this.FlagsOffset);
         }
 
         internal BlobHandle GetPublicKey()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return BlobHandle.FromIndex(this.Block.PeekReference(this.PublicKeyOffset, this.IsBlobHeapRefSizeSmall));
         }
 
         internal StringHandle GetName()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return StringHandle.FromIndex(this.Block.PeekReference(this.NameOffset, this.IsStringHeapRefSizeSmall));
         }
 
         internal StringHandle GetCulture()
         {
-            Debug.Assert(NumberOfRows == 1);
+            DebugCorlib.Assert(NumberOfRows == 1);
             return StringHandle.FromIndex(this.Block.PeekReference(this.CultureOffset, this.IsStringHeapRefSizeSmall));
         }
     }

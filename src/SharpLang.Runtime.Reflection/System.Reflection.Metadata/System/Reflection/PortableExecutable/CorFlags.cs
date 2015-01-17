@@ -7,7 +7,7 @@ namespace System.Reflection.PortableExecutable
     /// COR20Flags
     /// </summary>
     [Flags]
-    public enum CorFlags
+    enum CorFlags
     {
         ILOnly = 0x00000001,
         Requires32Bit = 0x00000002,

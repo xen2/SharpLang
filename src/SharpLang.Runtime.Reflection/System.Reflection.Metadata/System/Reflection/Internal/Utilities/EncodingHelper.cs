@@ -62,7 +62,7 @@ namespace System.Reflection.Internal
 
         public static string DecodeUtf8(byte* bytes, int byteCount, byte[] prefix, MetadataStringDecoder utf8Decoder)
         {
-            Debug.Assert(utf8Decoder != null);
+            DebugCorlib.Assert(utf8Decoder != null);
 
             if (prefix != null)
             {
@@ -79,7 +79,7 @@ namespace System.Reflection.Internal
 
         private static string DecodeUtf8Prefixed(byte* bytes, int byteCount, byte[] prefix, MetadataStringDecoder utf8Decoder)
         {
-            Debug.Assert(utf8Decoder != null);
+            DebugCorlib.Assert(utf8Decoder != null);
 
             int prefixedByteCount = byteCount + prefix.Length;
 
@@ -132,7 +132,7 @@ namespace System.Reflection.Internal
 
         public static string GetString(this Encoding encoding, byte* bytes, int byteCount)
         {
-            Debug.Assert(encoding != null);
+            DebugCorlib.Assert(encoding != null);
 
             if (getStringPlatform == null)
             {
@@ -147,7 +147,7 @@ namespace System.Reflection.Internal
             // This implementation can leak publicly (by design) to MetadataStringDecoder.GetString.
             // Therefore we implement the same validation.
 
-            Debug.Assert(encoding != null); // validated by MetadataStringDecoder constructor.
+            DebugCorlib.Assert(encoding != null); // validated by MetadataStringDecoder constructor.
 
             if (bytes == null)
             {
@@ -251,7 +251,7 @@ namespace System.Reflection.Internal
             // MetadataStringDecoder.GetString. Therefore, we implement the same validation
             // that Encoding.GetString would do if it were available directly.
 
-            Debug.Assert(encoding != null); // validated by MetadataStringDecoder constructor.
+            DebugCorlib.Assert(encoding != null); // validated by MetadataStringDecoder constructor.
 
             if (bytes == null)
             {

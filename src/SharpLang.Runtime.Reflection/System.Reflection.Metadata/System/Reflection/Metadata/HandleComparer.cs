@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public sealed class HandleComparer : IEqualityComparer<Handle>, IComparer<Handle>
+    sealed class HandleComparer : IEqualityComparer<Handle>, IComparer<Handle>
     {
         private static readonly HandleComparer _default = new HandleComparer();
 

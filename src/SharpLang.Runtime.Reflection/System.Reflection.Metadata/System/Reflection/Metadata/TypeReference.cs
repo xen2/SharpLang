@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct TypeReference
+    struct TypeReference
     {
         private readonly MetadataReader reader;
 
@@ -15,8 +15,8 @@ namespace System.Reflection.Metadata
 
         internal TypeReference(MetadataReader reader, uint treatmentAndRowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(treatmentAndRowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(treatmentAndRowId != 0);
 
             this.reader = reader;
             this.treatmentAndRowId = treatmentAndRowId;
@@ -109,7 +109,7 @@ namespace System.Reflection.Metadata
                     return MetadataReader.GetProjectedAssemblyRef((int)RowId);
             }
 
-            Debug.Assert(false, "Unknown TypeRef treatment");
+            DebugCorlib.Assert(false, "Unknown TypeRef treatment");
             return default(AssemblyReferenceHandle);
         }
 
@@ -137,7 +137,7 @@ namespace System.Reflection.Metadata
                     return MetadataReader.GetProjectedNamespace((int)RowId);
             }
 
-            Debug.Assert(false, "Unknown TypeRef treatment");
+            DebugCorlib.Assert(false, "Unknown TypeRef treatment");
             return default(StringHandle);
         }
         #endregion

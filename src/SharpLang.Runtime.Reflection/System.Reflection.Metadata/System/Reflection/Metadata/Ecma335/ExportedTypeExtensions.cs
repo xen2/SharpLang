@@ -6,7 +6,7 @@ namespace System.Reflection.Metadata.Ecma335
     /// <summary>
     /// Provides an extension method to access the TypeDefinitionId column of the ExportedType table.
     /// </summary>
-    public static class ExportedTypeExtensions
+    static class ExportedTypeExtensions
     {
         /// <summary>
         /// Gets a hint at the likely row number of the target type in the TypeDef table of its module. 

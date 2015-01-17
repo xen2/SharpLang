@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 
-namespace System.Reflection.Internal
+namespace System.Reflection
 {
     internal sealed class ImmutableMemoryStream : Stream
     {
@@ -15,7 +15,7 @@ namespace System.Reflection.Internal
 
         internal ImmutableMemoryStream(ImmutableArray<byte> array)
         {
-            Debug.Assert(!array.IsDefault);
+            DebugCorlib.Assert(!array.IsDefault);
             this.array = array;
         }
 

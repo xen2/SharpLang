@@ -48,7 +48,7 @@ namespace System.Reflection.Internal
 
         internal static SafeHandle GetSafeFileHandle(Stream stream)
         {
-            Debug.Assert(FileStreamType.IsValueCreated && FileStreamType.Value != null && IsFileStream(stream));
+            DebugCorlib.Assert(FileStreamType.IsValueCreated && FileStreamType.Value != null && IsFileStream(stream));
 
             if (safeFileHandleNotAvailable)
             {

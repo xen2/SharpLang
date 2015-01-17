@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class CoffHeader
+    sealed class CoffHeader
     {
         /// <summary>
         /// The type of target machine.

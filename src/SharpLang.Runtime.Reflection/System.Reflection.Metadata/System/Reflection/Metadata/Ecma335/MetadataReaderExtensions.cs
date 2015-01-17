@@ -10,7 +10,7 @@ namespace System.Reflection.Metadata.Ecma335
     /// <summary>
     /// Provides extension methods for working with certain raw elements of the Ecma 335 metadata tables and heaps.
     /// </summary>
-    public static class MetadataReaderExtensions
+    static class MetadataReaderExtensions
     {
         /// <summary>
         /// Returns the number of rows in the specified table.
@@ -114,7 +114,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         private static MemoryBlock GetTableMetadataBlock(this MetadataReader reader, TableIndex tableIndex)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
 
             switch (tableIndex)
             {
@@ -206,7 +206,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="heapIndex"/> is not a valid heap index.</exception>
         private static MemoryBlock GetMetadataBlock(this MetadataReader reader, HeapIndex heapIndex)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
 
             switch (heapIndex)
             {

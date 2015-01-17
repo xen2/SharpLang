@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    public struct GenericParameterConstraint
+    struct GenericParameterConstraint
     {
         private readonly MetadataReader reader;
 
@@ -14,8 +14,8 @@ namespace System.Reflection.Metadata
 
         internal GenericParameterConstraint(MetadataReader reader, GenericParameterConstraintHandle handle)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!handle.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!handle.IsNil);
 
             this.reader = reader;
             this.rowId = handle.RowId;

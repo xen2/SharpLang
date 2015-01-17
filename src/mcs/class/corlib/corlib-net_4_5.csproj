@@ -1760,12 +1760,6 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\corefx\System.Reflection.Metadata\System.Reflection.Metadata.csproj">
-      <Project>{f3e433c8-352f-4944-bf7f-765ce435370d}</Project>
-      <Name>System.Reflection.Metadata</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
@@ -1791,5 +1785,5 @@
       <LogicalName>collation.cjkKOlv2.bin</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  <Import Project="..\..\..\SharpLang.Runtime.Reflection\SharpLang.Runtime.Reflection.projitems" Label="Shared" />
 </Project>
-

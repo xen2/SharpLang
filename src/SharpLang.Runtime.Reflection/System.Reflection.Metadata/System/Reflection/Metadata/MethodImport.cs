@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public struct MethodImport
+    struct MethodImport
     {
         private readonly MethodImportAttributes attributes;
         private readonly StringHandle name;

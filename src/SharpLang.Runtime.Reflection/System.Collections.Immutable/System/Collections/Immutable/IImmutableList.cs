@@ -18,7 +18,7 @@ namespace System.Collections.Immutable
     /// while allowing garbage collection to clean up any unique list data that is no longer being referenced.
     /// </remarks>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Ignored")]
-    public interface IImmutableList<T> : IReadOnlyList<T>
+    interface IImmutableList<T> : IReadOnlyList<T>
     {
         /// <summary>
         /// Gets an empty list that retains the same sort or unordered semantics that this instance has.

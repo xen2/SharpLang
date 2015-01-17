@@ -12,7 +12,7 @@ namespace System.Reflection.Metadata
     /// This header byte is present in all method definition, method reference, standalone method, field, 
     /// property, and local variable signatures, but not in type specificiation signatures.
     /// </remarks>
-    public struct SignatureHeader : IEquatable<SignatureHeader>
+    struct SignatureHeader : IEquatable<SignatureHeader>
     {
         private byte rawValue;
         public const byte CallingConventionOrKindMask = 0x0F;

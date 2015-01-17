@@ -76,30 +76,6 @@ solution "SharpLang"
           ["x64"] = "Any CPU"
       }
 
-  group "corefx"
-    external "System.Collections.Immutable"
-      location (srcdir .. "/corefx/System.Collections.Immutable")
-      uuid "1DD0FF15-6234-4BD6-850A-317F05479554"
-      kind "SharedLib"
-      language "C#"
-      removeplatforms "*"
-      platforms { "Any CPU" }
-      configmap {
-          ["x32"] = "Any CPU",
-          ["x64"] = "Any CPU"
-      }
-    external "System.Reflection.Metadata"
-      location (srcdir .. "/corefx/System.Reflection.Metadata")
-      uuid "F3E433C8-352F-4944-BF7F-765CE435370D"
-      kind "SharedLib"
-      language "C#"
-      removeplatforms "*"
-      platforms { "Any CPU" }
-      configmap {
-          ["x32"] = "Any CPU",
-          ["x64"] = "Any CPU"
-      }
-
   group "Tools"
     external "Mono.Linker"
       location (srcdir .. "/mcs/tools/linker")

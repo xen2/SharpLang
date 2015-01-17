@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct FieldDefinition
+    struct FieldDefinition
     {
         private readonly MetadataReader reader;
 
@@ -15,8 +15,8 @@ namespace System.Reflection.Metadata
 
         internal FieldDefinition(MetadataReader reader, uint treatmentAndRowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(treatmentAndRowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(treatmentAndRowId != 0);
 
             this.reader = reader;
             this.treatmentAndRowId = treatmentAndRowId;

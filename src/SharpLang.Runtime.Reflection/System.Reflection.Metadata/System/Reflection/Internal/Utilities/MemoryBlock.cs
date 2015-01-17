@@ -20,7 +20,7 @@ namespace System.Reflection.Internal
 
         internal MemoryBlock(byte* buffer, int length)
         {
-            Debug.Assert(length >= 0 && (buffer != null || length == 0));
+            DebugCorlib.Assert(length >= 0 && (buffer != null || length == 0));
             this.Pointer = buffer;
             this.Length = length;
         }
@@ -209,7 +209,7 @@ namespace System.Reflection.Internal
         /// <returns>The decoded string.</returns>
         internal string PeekUtf8NullTerminated(int offset, byte[] prefix, MetadataStringDecoder utf8Decoder, out int numberOfBytesRead, char terminator = '\0')
         {
-            Debug.Assert(terminator <= 0x7F);
+            DebugCorlib.Assert(terminator <= 0x7F);
             CheckBounds(offset, 0);
             int length = GetUtf8NullTerminatedLength(offset, out numberOfBytesRead, terminator);
             return EncodingHelper.DecodeUtf8(Pointer + offset, length, prefix, utf8Decoder);
@@ -229,7 +229,7 @@ namespace System.Reflection.Internal
         {
             CheckBounds(offset, 0);
 
-            Debug.Assert(terminator <= 0x7f);
+            DebugCorlib.Assert(terminator <= 0x7f);
 
             byte* start = Pointer + offset;
             byte* end = Pointer + Length;
@@ -261,7 +261,7 @@ namespace System.Reflection.Internal
         {
             CheckBounds(startOffset, 0);
 
-            Debug.Assert(asciiChar != 0 && asciiChar <= 0x7f);
+            DebugCorlib.Assert(asciiChar != 0 && asciiChar <= 0x7f);
 
             for (int i = startOffset; i < Length; i++)
             {
@@ -293,7 +293,7 @@ namespace System.Reflection.Internal
         {
             CheckBounds(offset, 0);
 
-            Debug.Assert(terminator <= 0x7F);
+            DebugCorlib.Assert(terminator <= 0x7F);
 
             isPrefix = false;
             byte* startPointer = Pointer + offset;
@@ -433,7 +433,7 @@ namespace System.Reflection.Internal
 
             for (int i = 0; i < asciiPrefix.Length; i++)
             {
-                Debug.Assert((int)asciiPrefix[i] > 0 && (int)asciiPrefix[i] <= 0x7f);
+                DebugCorlib.Assert((int)asciiPrefix[i] > 0 && (int)asciiPrefix[i] <= 0x7f);
 
                 if (asciiPrefix[i] != *p)
                 {
@@ -457,7 +457,7 @@ namespace System.Reflection.Internal
 
             for (int i = 0; i < asciiString.Length; i++)
             {
-                Debug.Assert((int)asciiString[i] > 0 && (int)asciiString[i] <= 0x7f);
+                DebugCorlib.Assert((int)asciiString[i] > 0 && (int)asciiString[i] <= 0x7f);
 
                 if (i > limit)
                 {
@@ -826,7 +826,7 @@ namespace System.Reflection.Internal
                 i++;
             }
 
-            Debug.Assert(i == result.Length);
+            DebugCorlib.Assert(i == result.Length);
         }
 
         internal bool PeekHeapValueOffsetAndSize(int index, out int offset, out int size)

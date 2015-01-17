@@ -4,7 +4,7 @@
 namespace System.Reflection.Metadata
 {
     [Flags]
-    public enum MetadataReaderOptions
+    enum MetadataReaderOptions
     {
         /// <summary>
         /// All options are disabled.

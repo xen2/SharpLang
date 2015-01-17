@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct EditAndContinueLogEntry : IEquatable<EditAndContinueLogEntry>
+    struct EditAndContinueLogEntry : IEquatable<EditAndContinueLogEntry>
     {
         public readonly Handle Handle;
         public readonly EditAndContinueOperation Operation;

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Linq.Internal;
 
 namespace System.Reflection.Internal
 {
@@ -136,7 +137,7 @@ namespace System.Reflection.Internal
 
         internal static IDisposable CreateMemoryMap(Stream stream)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            DebugCorlib.Assert(lazyIsAvailable.GetValueOrDefault());
 
             try
             {
@@ -165,7 +166,7 @@ namespace System.Reflection.Internal
 
         internal static IDisposable CreateViewAccessor(object memoryMap, long start, int size)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            DebugCorlib.Assert(lazyIsAvailable.GetValueOrDefault());
             try
             {
                 return (IDisposable)lazyCreateViewAccessor.Invoke(memoryMap, new object[3]
@@ -189,7 +190,7 @@ namespace System.Reflection.Internal
 
         internal unsafe static byte* AcquirePointer(object accessor, out SafeBuffer safeBuffer)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            DebugCorlib.Assert(lazyIsAvailable.GetValueOrDefault());
 
             safeBuffer = (SafeBuffer)lazySafeMemoryMappedViewHandle.GetValue(accessor);
 

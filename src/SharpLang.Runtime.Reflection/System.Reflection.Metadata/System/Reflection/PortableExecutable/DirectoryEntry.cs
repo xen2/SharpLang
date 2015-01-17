@@ -5,7 +5,7 @@ using System.IO;
 
 namespace System.Reflection.PortableExecutable
 {
-    public struct DirectoryEntry
+    struct DirectoryEntry
     {
         public readonly int RelativeVirtualAddress;
         public readonly int Size;

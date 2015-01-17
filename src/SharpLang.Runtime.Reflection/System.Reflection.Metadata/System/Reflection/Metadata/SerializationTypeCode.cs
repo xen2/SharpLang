@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public enum SerializationTypeCode : byte
+    enum SerializationTypeCode : byte
     {
         /// <summary>
         /// Equivalent to <see cref="SignatureTypeCode.Invalid"/>.

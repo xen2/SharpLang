@@ -98,19 +98,19 @@ namespace System.Reflection.Metadata
 
         internal static AssemblyReferenceHandle GetProjectedAssemblyRef(int projectionIndex)
         {
-            Debug.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
+            DebugCorlib.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
             return AssemblyReferenceHandle.FromVirtualIndex(projectionInfos[projectionIndex].AssemblyRef);
         }
 
         internal static StringHandle GetProjectedName(int projectionIndex)
         {
-            Debug.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
+            DebugCorlib.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
             return StringHandle.FromVirtualIndex(projectionInfos[projectionIndex].ClrName);
         }
 
         internal static StringHandle GetProjectedNamespace(int projectionIndex)
         {
-            Debug.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
+            DebugCorlib.Assert(projectionInfos != null && projectionIndex >= 0 && projectionIndex < projectionInfos.Length);
             return StringHandle.FromVirtualIndex(projectionInfos[projectionIndex].ClrNamespace);
         }
 
@@ -183,7 +183,7 @@ namespace System.Reflection.Metadata
                 keys[k++] = "Vector3"; values[v++] = new ProjectionInfo("Windows.Foundation.Numerics", StringHandle.VirtualIndex.System_Numerics, StringHandle.VirtualIndex.Vector3, systemNumericsVectors);
                 keys[k++] = "Vector4"; values[v++] = new ProjectionInfo("Windows.Foundation.Numerics", StringHandle.VirtualIndex.System_Numerics, StringHandle.VirtualIndex.Vector4, systemNumericsVectors);
 
-                Debug.Assert(k == keys.Length && v == keys.Length && k == v);
+                DebugCorlib.Assert(k == keys.Length && v == keys.Length && k == v);
                 AssertSorted(keys);
 
                 projectedTypeNames = keys;
@@ -196,7 +196,7 @@ namespace System.Reflection.Metadata
         {
             for (int i = 0; i < keys.Length - 1; i++)
             {
-                Debug.Assert(String.CompareOrdinal(keys[i], keys[i + 1]) < 0);
+                DebugCorlib.Assert(String.CompareOrdinal(keys[i], keys[i + 1]) < 0);
             }
         }
 
@@ -219,7 +219,7 @@ namespace System.Reflection.Metadata
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
         internal uint CalculateTypeDefTreatmentAndRowId(TypeDefinitionHandle handle)
         {
-            Debug.Assert(metadataKind != MetadataKind.Ecma335);
+            DebugCorlib.Assert(metadataKind != MetadataKind.Ecma335);
 
             TypeDefTreatment treatment;
 
@@ -316,7 +316,7 @@ namespace System.Reflection.Metadata
 
         internal uint CalculateTypeRefTreatmentAndRowId(TypeReferenceHandle handle)
         {
-            Debug.Assert(metadataKind != MetadataKind.Ecma335);
+            DebugCorlib.Assert(metadataKind != MetadataKind.Ecma335);
 
             bool isIDisposable;
             int projectionIndex = GetProjectionIndexForTypeReference(handle, out isIDisposable);
@@ -516,7 +516,7 @@ namespace System.Reflection.Metadata
                     continue;
                 }
 
-                Debug.Assert(!namespaceHandle.IsVirtual && !nameHandle.IsVirtual);
+                DebugCorlib.Assert(!namespaceHandle.IsVirtual && !nameHandle.IsVirtual);
 
                 if (StringStream.EqualsRaw(namespaceHandle, "Windows.UI.Xaml"))
                 {
@@ -670,7 +670,7 @@ namespace System.Reflection.Metadata
 
         internal CustomAttributeValueTreatment CalculateCustomAttributeValueTreatment(CustomAttributeHandle handle)
         {
-            Debug.Assert(metadataKind != MetadataKind.Ecma335);
+            DebugCorlib.Assert(metadataKind != MetadataKind.Ecma335);
 
             var parent = CustomAttributeTable.GetParent(handle);
 

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Reflection.Metadata
 {
-    public struct ExportedType
+    struct ExportedType
     {
         internal readonly MetadataReader reader;
 
@@ -15,8 +15,8 @@ namespace System.Reflection.Metadata
 
         internal ExportedType(MetadataReader reader, uint rowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(rowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(rowId != 0);
 
             this.reader = reader;
             this.rowId = rowId;

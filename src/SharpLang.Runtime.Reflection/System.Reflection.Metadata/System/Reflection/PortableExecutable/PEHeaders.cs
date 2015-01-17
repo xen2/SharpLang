@@ -12,7 +12,7 @@ namespace System.Reflection.PortableExecutable
     /// <summary>
     /// An object used to read PE (Portable Executable) and COFF (Common Object File Format) headers from a stream.
     /// </summary>
-    public sealed class PEHeaders
+    sealed class PEHeaders
     {
         private readonly CoffHeader coffHeader;
         private readonly PEHeader peHeader;

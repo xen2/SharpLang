@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using Validation;
 
 namespace System.Collections.Immutable
@@ -78,7 +77,7 @@ namespace System.Collections.Immutable
                 // We cannot predict the length of the sequence. We must walk the entire sequence
                 // to find the count. But avoid our caller also having to enumerate by capturing
                 // the enumeration in a snapshot and passing that back to the caller.
-                var list = sequence.ToList();
+                var list = new List<T>(sequence);
                 count = list.Count;
                 sequence = list;
             }
@@ -241,180 +240,25 @@ namespace System.Collections.Immutable
 #endif
 
         /// <summary>
-        /// Provides a known wrapper around a sequence of elements that provides the number of elements
-        /// and an indexer into its contents.
+        /// Searches for the specified object and returns the zero-based index of the
+        /// first occurrence within the ImmutableList&lt;T&gt;
         /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="sequence">The collection.</param>
-        /// <returns>An ordered collection.  May not be thread-safe.  Never null.</returns>
-        internal static IOrderedCollection<T> AsOrderedCollection<T>(this IEnumerable<T> sequence)
+        /// <param name="list">The list to search.</param>
+        /// <param name="item">
+        /// The object to locate in the ImmutableList&lt;T&gt;. The value
+        /// can be null for reference types.
+        /// </param>
+        /// <param name="equalityComparer">The equality comparer to use in the search.</param>
+        /// <returns>
+        /// The zero-based index of the first occurrence of item within the range of
+        /// elements in the ImmutableList&lt;T&gt; that extends from index
+        /// to the last element, if found; otherwise, –1.
+        /// </returns>
+        [Pure]
+        public static int IndexOf<T>(this IImmutableList<T> list, T item, IEqualityComparer<T> equalityComparer)
         {
-            Requires.NotNull(sequence, "sequence");
-            Contract.Ensures(Contract.Result<IOrderedCollection<T>>() != null);
-
-            var orderedCollection = sequence as IOrderedCollection<T>;
-            if (orderedCollection != null)
-            {
-                return orderedCollection;
-            }
-
-            var listOfT = sequence as IList<T>;
-            if (listOfT != null)
-            {
-                return new ListOfTWrapper<T>(listOfT);
-            }
-
-            // It would be great if SortedSet<T> and SortedDictionary<T> provided indexers into their collections,
-            // but since they don't we have to clone them to an array.
-            return new FallbackWrapper<T>(sequence);
-        }
-
-        /// <summary>
-        /// Wraps a List{T} as an ordered collection.
-        /// </summary>
-        /// <typeparam name="T">The type of element in the collection.</typeparam>
-        private class ListOfTWrapper<T> : IOrderedCollection<T>
-        {
-            /// <summary>
-            /// The list being exposed.
-            /// </summary>
-            private readonly IList<T> collection;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ListOfTWrapper&lt;T&gt;"/> class.
-            /// </summary>
-            /// <param name="collection">The collection.</param>
-            internal ListOfTWrapper(IList<T> collection)
-            {
-                Requires.NotNull(collection, "collection");
-                this.collection = collection;
-            }
-
-            /// <summary>
-            /// Gets the count.
-            /// </summary>
-            public int Count
-            {
-                get { return this.collection.Count; }
-            }
-
-            /// <summary>
-            /// Gets the <typeparamref name="T"/> at the specified index.
-            /// </summary>
-            public T this[int index]
-            {
-                get { return this.collection[index]; }
-            }
-
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
-            /// <returns>
-            /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
-            /// </returns>
-            public IEnumerator<T> GetEnumerator()
-            {
-                return this.collection.GetEnumerator();
-            }
-
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
-            /// <returns>
-            /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-            /// </returns>
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
-        }
-
-        /// <summary>
-        /// Wraps any IEnumerable as an ordered, indexable list.
-        /// </summary>
-        /// <typeparam name="T">The type of element in the collection.</typeparam>
-        private class FallbackWrapper<T> : IOrderedCollection<T>
-        {
-            /// <summary>
-            /// The original sequence.
-            /// </summary>
-            private readonly IEnumerable<T> sequence;
-
-            /// <summary>
-            /// The list-ified sequence.
-            /// </summary>
-            private IList<T> collection;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="FallbackWrapper&lt;T&gt;"/> class.
-            /// </summary>
-            /// <param name="sequence">The sequence.</param>
-            internal FallbackWrapper(IEnumerable<T> sequence)
-            {
-                Requires.NotNull(sequence, "sequence");
-                this.sequence = sequence;
-            }
-
-            /// <summary>
-            /// Gets the count.
-            /// </summary>
-            public int Count
-            {
-                get
-                {
-                    if (this.collection == null)
-                    {
-                        int count;
-                        if (this.sequence.TryGetCount(out count))
-                        {
-                            return count;
-                        }
-
-                        this.collection = this.sequence.ToArray();
-                    }
-
-                    return this.collection.Count;
-                }
-            }
-
-            /// <summary>
-            /// Gets the <typeparamref name="T"/> at the specified index.
-            /// </summary>
-            public T this[int index]
-            {
-                get
-                {
-                    if (this.collection == null)
-                    {
-                        this.collection = this.sequence.ToArray();
-                    }
-
-                    return this.collection[index];
-                }
-            }
-
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
-            /// <returns>
-            /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
-            /// </returns>
-            public IEnumerator<T> GetEnumerator()
-            {
-                return this.sequence.GetEnumerator();
-            }
-
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
-            /// <returns>
-            /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-            /// </returns>
-            [ExcludeFromCodeCoverage]
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
+            Requires.NotNull(list, "list");
+            return list.IndexOf(item, 0, list.Count, equalityComparer);
         }
     }
 }
