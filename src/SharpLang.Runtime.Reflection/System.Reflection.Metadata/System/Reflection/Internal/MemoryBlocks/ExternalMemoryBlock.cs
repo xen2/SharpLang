@@ -28,7 +28,7 @@ namespace System.Reflection.Internal
 
         protected override void Dispose(bool disposing)
         {
-            Debug.Assert(disposing);
+            DebugCorlib.Assert(disposing);
             this.buffer = null;
             this.size = 0;
         }

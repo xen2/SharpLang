@@ -3,7 +3,7 @@
 
 namespace System.Reflection.PortableExecutable
 {
-    public enum Machine : ushort
+    enum Machine : ushort
     {
         /// <summary>
         /// The target CPU is unknown or not specified.

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
+using System.Linq.Internal;
 using System.Runtime.InteropServices;
 using Validation;
 
@@ -13,7 +13,7 @@ namespace System.Collections.Immutable
     /// <summary>
     /// A set of initialization methods for instances of <see cref="ImmutableArray{T}" />.
     /// </summary>
-    public static class ImmutableArray
+    static class ImmutableArray
     {
         /// <summary>
         /// A two element array useful for throwing exceptions the way LINQ does.

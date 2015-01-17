@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public sealed class MetadataAggregator
+    sealed class MetadataAggregator
     {
         // For each heap handle and each delta contains aggregate heap lengths.
         // heapSizes[heap kind][reader index] == Sum { 0..index | reader[i].XxxHeapLength }
@@ -264,7 +264,7 @@ namespace System.Reflection.Metadata.Ecma335
                 generation = sizes.BinarySearch(rowId);
                 if (generation >= 0)
                 {
-                    Debug.Assert(sizes[generation] == rowId);
+                    DebugCorlib.Assert(sizes[generation] == rowId);
 
                     // the index points to the start of the next generation that added data to the heap:
                     do
@@ -293,7 +293,7 @@ namespace System.Reflection.Metadata.Ecma335
                 generation = sizes.BinarySearch(new RowCounts { AggregateInserts = rowId });
                 if (generation >= 0)
                 {
-                    Debug.Assert(sizes[generation].AggregateInserts == rowId);
+                    DebugCorlib.Assert(sizes[generation].AggregateInserts == rowId);
 
                     // the row is in a generation that inserted exactly one row -- the one that we are looking for;
                     // or it's in a preceeding generation if the current one didn't insert any rows of the kind:

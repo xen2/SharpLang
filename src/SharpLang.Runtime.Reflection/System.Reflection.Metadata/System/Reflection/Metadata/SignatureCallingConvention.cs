@@ -8,7 +8,7 @@ namespace System.Reflection.Metadata
     /// Underlying values correspond to the representation in the leading signature byte 
     /// represented by <see cref="SignatureHeader"/>.
     /// </summary>
-    public enum SignatureCallingConvention : byte
+    enum SignatureCallingConvention : byte
     {
         /// <summary>
         /// Managed calling convention with fixed-length argument list.

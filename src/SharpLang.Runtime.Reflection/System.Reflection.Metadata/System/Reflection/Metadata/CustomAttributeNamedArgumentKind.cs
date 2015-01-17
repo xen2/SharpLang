@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public enum CustomAttributeNamedArgumentKind : byte
+    enum CustomAttributeNamedArgumentKind : byte
     {
         Field = 0x53,
         Property = 0x54,

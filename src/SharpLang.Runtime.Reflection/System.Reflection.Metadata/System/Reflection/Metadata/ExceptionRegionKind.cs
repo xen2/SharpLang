@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public enum ExceptionRegionKind : ushort
+    enum ExceptionRegionKind : ushort
     {
         Catch = 0,
         Filter = 1,

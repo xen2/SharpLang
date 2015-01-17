@@ -4,7 +4,7 @@
 namespace System.Reflection.PortableExecutable
 {
     [Flags]
-    public enum PEStreamOptions
+    enum PEStreamOptions
     {
         /// <summary>
         /// By default the stream is disposed when <see cref="PEReader"/> is disposed and sections of the PE image are read lazily.

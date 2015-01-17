@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public enum TableIndex : byte
+    enum TableIndex : byte
     {
         Module = 0x00,
         TypeRef = 0x01,

@@ -15,7 +15,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Reads metadata as defined byte the ECMA 335 CLI specification.
     /// </summary>
-    public sealed partial class MetadataReader
+    sealed partial class MetadataReader
     {
         private readonly MetadataReaderOptions options;
         internal readonly MetadataStringDecoder utf8Decoder;
@@ -109,7 +109,7 @@ namespace System.Reflection.Metadata
 
             // This previously could occur in obfuscated assemblies but a check was added to prevent 
             // it getting to this point
-            Debug.Assert(this.AssemblyTable.NumberOfRows <= 1);
+            DebugCorlib.Assert(this.AssemblyTable.NumberOfRows <= 1);
 
             // Although the specification states that the module table will have exactly one row,
             // the native metadata reader would successfully read files containing more than one row.
@@ -1032,7 +1032,7 @@ namespace System.Reflection.Metadata
 
         public CustomAttributeHandleCollection GetCustomAttributes(Handle handle)
         {
-            Debug.Assert(!handle.IsNil);
+            DebugCorlib.Assert(!handle.IsNil);
             return new CustomAttributeHandleCollection(this, handle);
         }
 
@@ -1226,7 +1226,7 @@ namespace System.Reflection.Metadata
             {
                 TypeDefinitionHandle enclosignClass = NestedClassTable.GetEnclosingClass(i);
 
-                Debug.Assert(!enclosignClass.IsNil);
+                DebugCorlib.Assert(!enclosignClass.IsNil);
 
                 if (enclosignClass != previousEnclosingClass)
                 {
@@ -1240,7 +1240,7 @@ namespace System.Reflection.Metadata
                 }
                 else
                 {
-                    Debug.Assert(builder == groupedNestedTypes[enclosignClass]);
+                    DebugCorlib.Assert(builder == groupedNestedTypes[enclosignClass]);
                 }
 
                 builder.Add(NestedClassTable.GetNestedClass(i));

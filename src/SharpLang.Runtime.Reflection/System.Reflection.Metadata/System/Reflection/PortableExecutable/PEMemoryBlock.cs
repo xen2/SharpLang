@@ -7,15 +7,15 @@ using System.Reflection.Internal;
 
 namespace System.Reflection.PortableExecutable
 {
-    public struct PEMemoryBlock
+    struct PEMemoryBlock
     {
         private readonly AbstractMemoryBlock block;
         private readonly int offset;
 
         internal PEMemoryBlock(AbstractMemoryBlock block, int offset = 0)
         {
-            Debug.Assert(block != null);
-            Debug.Assert(offset >= 0 && offset < block.Size);
+            DebugCorlib.Assert(block != null);
+            DebugCorlib.Assert(offset >= 0 && offset < block.Size);
 
             this.block = block;
             this.offset = offset;

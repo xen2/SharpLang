@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public enum HeapIndex
+    enum HeapIndex
     {
         UserString,
         String,

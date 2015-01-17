@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.Metadata
 {
-    public sealed class MethodBodyBlock
+    sealed class MethodBodyBlock
     {
         private readonly MemoryBlock il;
         private readonly int size;
@@ -26,7 +26,7 @@ namespace System.Reflection.Metadata
             ImmutableArray<ExceptionRegion> exceptionRegions,
             int size)
         {
-            Debug.Assert(!exceptionRegions.IsDefault);
+            DebugCorlib.Assert(!exceptionRegions.IsDefault);
 
             this.localVariablesInitialized = localVariablesInitialized;
             this.maxStack = maxStack;

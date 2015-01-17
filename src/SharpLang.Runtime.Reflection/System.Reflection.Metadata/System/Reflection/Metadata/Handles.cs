@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Reflection.Metadata
 {
-    public struct Handle : IEquatable<Handle>
+    struct Handle : IEquatable<Handle>
     {
         internal readonly uint value;
 
@@ -42,7 +42,7 @@ namespace System.Reflection.Metadata
                 if (tokenType > TokenTypeIds.String)
                 {
                     tokenType &= ~TokenTypeIds.StringOrNamespaceKindMask;
-                    Debug.Assert(tokenType == TokenTypeIds.String || tokenType == TokenTypeIds.Namespace);
+                    DebugCorlib.Assert(tokenType == TokenTypeIds.String || tokenType == TokenTypeIds.Namespace);
                 }
 
                 return (HandleKind)(tokenType >> TokenTypeIds.RowIdBitCount);
@@ -98,14 +98,14 @@ namespace System.Reflection.Metadata
         public static readonly AssemblyDefinitionHandle AssemblyDefinition = new AssemblyDefinitionHandle(1);
     }
 
-    public struct ModuleDefinitionHandle : IEquatable<ModuleDefinitionHandle>
+    struct ModuleDefinitionHandle : IEquatable<ModuleDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.Module;
         private readonly uint rowId;
 
         internal ModuleDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -165,14 +165,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct AssemblyDefinitionHandle : IEquatable<AssemblyDefinitionHandle>
+    struct AssemblyDefinitionHandle : IEquatable<AssemblyDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.Assembly;
         private readonly uint rowId;
 
         internal AssemblyDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -232,14 +232,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct InterfaceImplementationHandle : IEquatable<InterfaceImplementationHandle>
+    struct InterfaceImplementationHandle : IEquatable<InterfaceImplementationHandle>
     {
         private const uint tokenType = TokenTypeIds.InterfaceImpl;
         private readonly uint rowId;
 
         internal InterfaceImplementationHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -299,14 +299,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MethodDefinitionHandle : IEquatable<MethodDefinitionHandle>
+    struct MethodDefinitionHandle : IEquatable<MethodDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.MethodDef;
         private readonly uint rowId;
 
         private MethodDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -366,14 +366,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MethodImplementationHandle : IEquatable<MethodImplementationHandle>
+    struct MethodImplementationHandle : IEquatable<MethodImplementationHandle>
     {
         private const uint tokenType = TokenTypeIds.MethodImpl;
         private readonly uint rowId;
 
         private MethodImplementationHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -433,14 +433,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MethodSpecificationHandle : IEquatable<MethodSpecificationHandle>
+    struct MethodSpecificationHandle : IEquatable<MethodSpecificationHandle>
     {
         private const uint tokenType = TokenTypeIds.MethodSpec;
         private readonly uint rowId;
 
         private MethodSpecificationHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -500,14 +500,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct TypeDefinitionHandle : IEquatable<TypeDefinitionHandle>
+    struct TypeDefinitionHandle : IEquatable<TypeDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.TypeDef;
         private readonly uint rowId;
 
         private TypeDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -567,14 +567,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct ExportedTypeHandle : IEquatable<ExportedTypeHandle>
+    struct ExportedTypeHandle : IEquatable<ExportedTypeHandle>
     {
         private const uint tokenType = TokenTypeIds.ExportedType;
         private readonly uint rowId;
 
         private ExportedTypeHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -634,14 +634,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct TypeReferenceHandle : IEquatable<TypeReferenceHandle>
+    struct TypeReferenceHandle : IEquatable<TypeReferenceHandle>
     {
         private const uint tokenType = TokenTypeIds.TypeRef;
         private readonly uint rowId;
 
         private TypeReferenceHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -701,14 +701,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct TypeSpecificationHandle : IEquatable<TypeSpecificationHandle>
+    struct TypeSpecificationHandle : IEquatable<TypeSpecificationHandle>
     {
         private const uint tokenType = TokenTypeIds.TypeSpec;
         private readonly uint rowId;
 
         private TypeSpecificationHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -768,14 +768,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MemberReferenceHandle : IEquatable<MemberReferenceHandle>
+    struct MemberReferenceHandle : IEquatable<MemberReferenceHandle>
     {
         private const uint tokenType = TokenTypeIds.MemberRef;
         private readonly uint rowId;
 
         private MemberReferenceHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -835,14 +835,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct FieldDefinitionHandle : IEquatable<FieldDefinitionHandle>
+    struct FieldDefinitionHandle : IEquatable<FieldDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.FieldDef;
         private readonly uint rowId;
 
         private FieldDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -902,14 +902,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct EventDefinitionHandle : IEquatable<EventDefinitionHandle>
+    struct EventDefinitionHandle : IEquatable<EventDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.Event;
         private readonly uint rowId;
 
         private EventDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -969,14 +969,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct PropertyDefinitionHandle : IEquatable<PropertyDefinitionHandle>
+    struct PropertyDefinitionHandle : IEquatable<PropertyDefinitionHandle>
     {
         private const uint tokenType = TokenTypeIds.Property;
         private readonly uint rowId;
 
         private PropertyDefinitionHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1036,14 +1036,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct StandaloneSignatureHandle : IEquatable<StandaloneSignatureHandle>
+    struct StandaloneSignatureHandle : IEquatable<StandaloneSignatureHandle>
     {
         private const uint tokenType = TokenTypeIds.Signature;
         private readonly uint rowId;
 
         private StandaloneSignatureHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1103,14 +1103,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct ParameterHandle : IEquatable<ParameterHandle>
+    struct ParameterHandle : IEquatable<ParameterHandle>
     {
         private const uint tokenType = TokenTypeIds.ParamDef;
         private readonly uint rowId;
 
         private ParameterHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1170,14 +1170,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct GenericParameterHandle : IEquatable<GenericParameterHandle>
+    struct GenericParameterHandle : IEquatable<GenericParameterHandle>
     {
         private const uint tokenType = TokenTypeIds.GenericParam;
         private readonly uint rowId;
 
         private GenericParameterHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1237,14 +1237,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct GenericParameterConstraintHandle : IEquatable<GenericParameterConstraintHandle>
+    struct GenericParameterConstraintHandle : IEquatable<GenericParameterConstraintHandle>
     {
         private const uint tokenType = TokenTypeIds.GenericParamConstraint;
         private readonly uint rowId;
 
         private GenericParameterConstraintHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1304,14 +1304,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct ModuleReferenceHandle : IEquatable<ModuleReferenceHandle>
+    struct ModuleReferenceHandle : IEquatable<ModuleReferenceHandle>
     {
         private const uint tokenType = TokenTypeIds.ModuleRef;
         private readonly uint rowId;
 
         private ModuleReferenceHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1371,7 +1371,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct AssemblyReferenceHandle : IEquatable<AssemblyReferenceHandle>
+    struct AssemblyReferenceHandle : IEquatable<AssemblyReferenceHandle>
     {
         private const uint tokenType = TokenTypeIds.AssemblyRef;
 
@@ -1400,13 +1400,13 @@ namespace System.Reflection.Metadata
 
         internal static AssemblyReferenceHandle FromRowId(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             return new AssemblyReferenceHandle(tokenType | rowId);
         }
 
         internal static AssemblyReferenceHandle FromVirtualIndex(VirtualIndex virtualIndex)
         {
-            Debug.Assert(virtualIndex < VirtualIndex.Count);
+            DebugCorlib.Assert(virtualIndex < VirtualIndex.Count);
             return new AssemblyReferenceHandle(TokenTypeIds.VirtualTokenMask | tokenType | (uint)virtualIndex);
         }
 
@@ -1468,14 +1468,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct CustomAttributeHandle : IEquatable<CustomAttributeHandle>
+    struct CustomAttributeHandle : IEquatable<CustomAttributeHandle>
     {
         private const uint tokenType = TokenTypeIds.CustomAttribute;
         private readonly uint rowId;
 
         private CustomAttributeHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1535,14 +1535,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct DeclarativeSecurityAttributeHandle : IEquatable<DeclarativeSecurityAttributeHandle>
+    struct DeclarativeSecurityAttributeHandle : IEquatable<DeclarativeSecurityAttributeHandle>
     {
         private const uint tokenType = TokenTypeIds.DeclSecurity;
         private readonly uint rowId;
 
         private DeclarativeSecurityAttributeHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1602,14 +1602,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct ConstantHandle : IEquatable<ConstantHandle>
+    struct ConstantHandle : IEquatable<ConstantHandle>
     {
         private const uint tokenType = TokenTypeIds.Constant;
         private readonly uint rowId;
 
         private ConstantHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1669,14 +1669,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct ManifestResourceHandle : IEquatable<ManifestResourceHandle>
+    struct ManifestResourceHandle : IEquatable<ManifestResourceHandle>
     {
         private const uint tokenType = TokenTypeIds.ManifestResource;
         private readonly uint rowId;
 
         private ManifestResourceHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1736,14 +1736,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct AssemblyFileHandle : IEquatable<AssemblyFileHandle>
+    struct AssemblyFileHandle : IEquatable<AssemblyFileHandle>
     {
         private const uint tokenType = TokenTypeIds.File;
         private readonly uint rowId;
 
         private AssemblyFileHandle(uint rowId)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(rowId));
             this.rowId = rowId;
         }
 
@@ -1804,14 +1804,14 @@ namespace System.Reflection.Metadata
     }
 
     // #UserString heap handle
-    public struct UserStringHandle : IEquatable<UserStringHandle>
+    struct UserStringHandle : IEquatable<UserStringHandle>
     {
         private const uint tokenType = TokenTypeIds.UserString;
         private readonly uint token;
 
         private UserStringHandle(uint token)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
+            DebugCorlib.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
             this.token = token;
         }
 
@@ -1878,7 +1878,7 @@ namespace System.Reflection.Metadata
     }
 
     // #String heap handle
-    public struct StringHandle : IEquatable<StringHandle>
+    struct StringHandle : IEquatable<StringHandle>
     {
         // bits:
         //  0..24: Heap index or Virtual index
@@ -1967,7 +1967,7 @@ namespace System.Reflection.Metadata
 
         private StringHandle(uint token)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.String ||
+            DebugCorlib.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.String ||
                          (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.WinRTPrefixedString ||
                          (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.DotTerminatedString);
             this.token = token;
@@ -1975,31 +1975,31 @@ namespace System.Reflection.Metadata
 
         internal static StringHandle FromIndex(uint heapIndex)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(heapIndex));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(heapIndex));
             return new StringHandle(TokenTypeIds.String | heapIndex);
         }
 
         internal static StringHandle FromVirtualIndex(VirtualIndex virtualIndex)
         {
-            Debug.Assert(virtualIndex < VirtualIndex.Count);
+            DebugCorlib.Assert(virtualIndex < VirtualIndex.Count);
             return new StringHandle(TokenTypeIds.VirtualTokenMask | TokenTypeIds.String | (uint)virtualIndex);
         }
 
         internal StringHandle WithWinRTPrefix()
         {
-            Debug.Assert(!IsVirtual);
+            DebugCorlib.Assert(!IsVirtual);
             return new StringHandle(TokenTypeIds.VirtualTokenMask | TokenTypeIds.WinRTPrefixedString | (uint)Index);
         }
 
         internal StringHandle WithDotTermination()
         {
-            Debug.Assert(!IsVirtual);
+            DebugCorlib.Assert(!IsVirtual);
             return new StringHandle(TokenTypeIds.DotTerminatedString | (uint)Index);
         }
 
         internal StringHandle SuffixRaw(int prefixByteLength)
         {
-            Debug.Assert(!IsVirtual);
+            DebugCorlib.Assert(!IsVirtual);
             return new StringHandle(TokenTypeIds.String | (uint)(Index + prefixByteLength));
         }
 
@@ -2076,7 +2076,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// A handle that represents a namespace definition. 
     /// </summary>
-    public struct NamespaceDefinitionHandle : IEquatable<NamespaceDefinitionHandle>
+    struct NamespaceDefinitionHandle : IEquatable<NamespaceDefinitionHandle>
     {
         //
         // bits:
@@ -2098,7 +2098,7 @@ namespace System.Reflection.Metadata
 
         private NamespaceDefinitionHandle(uint token)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.Namespace ||
+            DebugCorlib.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.Namespace ||
                          (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.SyntheticNamespace);
 
             this.token = token;
@@ -2106,13 +2106,13 @@ namespace System.Reflection.Metadata
 
         internal static NamespaceDefinitionHandle FromIndexOfFullName(uint stringHeapIndex)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
             return new NamespaceDefinitionHandle(TokenTypeIds.Namespace | stringHeapIndex);
         }
 
         internal static NamespaceDefinitionHandle FromIndexOfSimpleName(uint stringHeapIndex)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
             return new NamespaceDefinitionHandle(TokenTypeIds.SyntheticNamespace | stringHeapIndex);
         }
 
@@ -2173,8 +2173,8 @@ namespace System.Reflection.Metadata
 
         internal StringHandle GetFullName()
         {
-            Debug.Assert(!IsVirtual);
-            Debug.Assert(HasFullName);
+            DebugCorlib.Assert(!IsVirtual);
+            DebugCorlib.Assert(HasFullName);
             return StringHandle.FromIndex((uint)Index);
         }
 
@@ -2210,7 +2210,7 @@ namespace System.Reflection.Metadata
     }
 
     // #Blob heap handle
-    public struct BlobHandle : IEquatable<BlobHandle>
+    struct BlobHandle : IEquatable<BlobHandle>
     {
         private const uint tokenType = TokenTypeIds.Blob;
 
@@ -2241,19 +2241,19 @@ namespace System.Reflection.Metadata
 
         private BlobHandle(uint token)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
+            DebugCorlib.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
             this.token = token;
         }
 
         internal static BlobHandle FromIndex(uint heapIndex)
         {
-            Debug.Assert(TokenTypeIds.IsValidRowId(heapIndex));
+            DebugCorlib.Assert(TokenTypeIds.IsValidRowId(heapIndex));
             return new BlobHandle(heapIndex | tokenType);
         }
 
         internal static BlobHandle FromVirtualIndex(VirtualIndex virtualIndex, ushort virtualValue)
         {
-            Debug.Assert(virtualIndex < VirtualIndex.Count);
+            DebugCorlib.Assert(virtualIndex < VirtualIndex.Count);
             return new BlobHandle(TokenTypeIds.VirtualTokenMask | tokenType | (uint)(virtualValue << 8) | (uint)virtualIndex);
         }
 
@@ -2261,7 +2261,7 @@ namespace System.Reflection.Metadata
 
         internal unsafe void SubstituteTemplateParameters(byte[] blob)
         {
-            Debug.Assert(blob.Length >= TemplateParameterOffset_AttributeUsageTarget + 4);
+            DebugCorlib.Assert(blob.Length >= TemplateParameterOffset_AttributeUsageTarget + 4);
 
             fixed (byte* ptr = &blob[TemplateParameterOffset_AttributeUsageTarget])
             {
@@ -2296,7 +2296,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                Debug.Assert(!IsVirtual);
+                DebugCorlib.Assert(!IsVirtual);
                 return (int)(token & TokenTypeIds.RIDMask);
             }
         }
@@ -2311,7 +2311,7 @@ namespace System.Reflection.Metadata
 
         internal VirtualIndex GetVirtualIndex()
         {
-            Debug.Assert(IsVirtual);
+            DebugCorlib.Assert(IsVirtual);
             return (VirtualIndex)(token & 0xff);
         }
 
@@ -2347,14 +2347,14 @@ namespace System.Reflection.Metadata
     }
 
     // #Guid heap handle
-    public struct GuidHandle : IEquatable<GuidHandle>
+    struct GuidHandle : IEquatable<GuidHandle>
     {
         private const uint tokenType = TokenTypeIds.Guid;
         private readonly uint token;
 
         private GuidHandle(uint token)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
+            DebugCorlib.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
             this.token = token;
         }
 

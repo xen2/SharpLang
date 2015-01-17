@@ -12,7 +12,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents generic type parameters of a method or type.
     /// </summary>
-    public struct GenericParameterHandleCollection : IReadOnlyList<GenericParameterHandle>
+    struct GenericParameterHandleCollection : IReadOnlyList<GenericParameterHandle>
     {
         private readonly int firstRowId;
         private readonly ushort count;
@@ -126,7 +126,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents constraints of a generic type parameter.
     /// </summary>
-    public struct GenericParameterConstraintHandleCollection : IReadOnlyList<GenericParameterConstraintHandle>
+    struct GenericParameterConstraintHandleCollection : IReadOnlyList<GenericParameterConstraintHandle>
     {
         private readonly int firstRowId;
         private readonly ushort count;
@@ -237,7 +237,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct CustomAttributeHandleCollection : IReadOnlyCollection<CustomAttributeHandle>
+    struct CustomAttributeHandleCollection : IReadOnlyCollection<CustomAttributeHandle>
     {
         private readonly MetadataReader reader;
 
@@ -246,7 +246,7 @@ namespace System.Reflection.Metadata
 
         internal CustomAttributeHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.CustomAttributeTable.NumberOfRows;
@@ -254,8 +254,8 @@ namespace System.Reflection.Metadata
 
         internal CustomAttributeHandleCollection(MetadataReader reader, Handle handle)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!handle.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!handle.IsNil);
 
             this.reader = reader;
             reader.CustomAttributeTable.GetAttributeRange(handle, out firstRowId, out lastRowId);
@@ -358,7 +358,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct DeclarativeSecurityAttributeHandleCollection : IReadOnlyCollection<DeclarativeSecurityAttributeHandle>
+    struct DeclarativeSecurityAttributeHandleCollection : IReadOnlyCollection<DeclarativeSecurityAttributeHandle>
     {
         private readonly MetadataReader reader;
 
@@ -367,7 +367,7 @@ namespace System.Reflection.Metadata
 
         internal DeclarativeSecurityAttributeHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.DeclSecurityTable.NumberOfRows;
@@ -375,8 +375,8 @@ namespace System.Reflection.Metadata
 
         internal DeclarativeSecurityAttributeHandleCollection(MetadataReader reader, Handle handle)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!handle.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!handle.IsNil);
 
             this.reader = reader;
             reader.DeclSecurityTable.GetAttributeRange(handle, out firstRowId, out lastRowId);
@@ -465,7 +465,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MethodDefinitionHandleCollection : IReadOnlyCollection<MethodDefinitionHandle>
+    struct MethodDefinitionHandleCollection : IReadOnlyCollection<MethodDefinitionHandle>
     {
         private readonly MetadataReader reader;
 
@@ -474,7 +474,7 @@ namespace System.Reflection.Metadata
 
         internal MethodDefinitionHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.MethodDefTable.NumberOfRows;
@@ -482,8 +482,8 @@ namespace System.Reflection.Metadata
 
         internal MethodDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!containingType.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!containingType.IsNil);
 
             this.reader = reader;
             reader.GetMethodRange(containingType, out firstRowId, out lastRowId);
@@ -585,7 +585,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct FieldDefinitionHandleCollection : IReadOnlyCollection<FieldDefinitionHandle>
+    struct FieldDefinitionHandleCollection : IReadOnlyCollection<FieldDefinitionHandle>
     {
         private readonly MetadataReader reader;
 
@@ -594,7 +594,7 @@ namespace System.Reflection.Metadata
 
         internal FieldDefinitionHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.FieldTable.NumberOfRows;
@@ -602,8 +602,8 @@ namespace System.Reflection.Metadata
 
         internal FieldDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!containingType.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!containingType.IsNil);
 
             this.reader = reader;
             reader.GetFieldRange(containingType, out firstRowId, out lastRowId);
@@ -705,7 +705,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct PropertyDefinitionHandleCollection : IReadOnlyCollection<PropertyDefinitionHandle>
+    struct PropertyDefinitionHandleCollection : IReadOnlyCollection<PropertyDefinitionHandle>
     {
         private readonly MetadataReader reader;
 
@@ -714,7 +714,7 @@ namespace System.Reflection.Metadata
 
         internal PropertyDefinitionHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.PropertyTable.NumberOfRows;
@@ -722,8 +722,8 @@ namespace System.Reflection.Metadata
 
         internal PropertyDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!containingType.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!containingType.IsNil);
 
             this.reader = reader;
             reader.GetPropertyRange(containingType, out firstRowId, out lastRowId);
@@ -825,7 +825,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct EventDefinitionHandleCollection : IReadOnlyCollection<EventDefinitionHandle>
+    struct EventDefinitionHandleCollection : IReadOnlyCollection<EventDefinitionHandle>
     {
         private readonly MetadataReader reader;
 
@@ -834,7 +834,7 @@ namespace System.Reflection.Metadata
 
         internal EventDefinitionHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
             this.firstRowId = 1;
             this.lastRowId = (int)reader.EventTable.NumberOfRows;
@@ -842,8 +842,8 @@ namespace System.Reflection.Metadata
 
         internal EventDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!containingType.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!containingType.IsNil);
 
             this.reader = reader;
             reader.GetEventRange(containingType, out firstRowId, out lastRowId);
@@ -945,14 +945,14 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct MethodImplementationHandleCollection : IReadOnlyCollection<MethodImplementationHandle>
+    struct MethodImplementationHandleCollection : IReadOnlyCollection<MethodImplementationHandle>
     {
         private readonly int firstRowId;
         private readonly int lastRowId;
 
         internal MethodImplementationHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
 
             if (containingType.IsNil)
             {
@@ -1048,7 +1048,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Collection of parameters of a specified method.
     /// </summary>
-    public struct ParameterHandleCollection : IReadOnlyCollection<ParameterHandle>
+    struct ParameterHandleCollection : IReadOnlyCollection<ParameterHandle>
     {
         private readonly MetadataReader reader;
 
@@ -1057,8 +1057,8 @@ namespace System.Reflection.Metadata
 
         internal ParameterHandleCollection(MetadataReader reader, MethodDefinitionHandle containingMethod)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!containingMethod.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!containingMethod.IsNil);
             this.reader = reader;
 
             reader.GetParameterRange(containingMethod, out firstRowId, out lastRowId);
@@ -1160,7 +1160,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct InterfaceImplementationHandleCollection : IReadOnlyCollection<InterfaceImplementationHandle>
+    struct InterfaceImplementationHandleCollection : IReadOnlyCollection<InterfaceImplementationHandle>
     {
         private readonly MetadataReader reader;
 
@@ -1169,8 +1169,8 @@ namespace System.Reflection.Metadata
 
         internal InterfaceImplementationHandleCollection(MetadataReader reader, TypeDefinitionHandle implementingType)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(!implementingType.IsNil);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(!implementingType.IsNil);
             this.reader = reader;
 
             reader.InterfaceImplTable.GetInterfaceImplRange(implementingType, out firstRowId, out lastRowId);
@@ -1261,7 +1261,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="TypeDefinitionHandle"/>.
     /// </summary>
-    public struct TypeDefinitionHandleCollection : IReadOnlyCollection<TypeDefinitionHandle>
+    struct TypeDefinitionHandleCollection : IReadOnlyCollection<TypeDefinitionHandle>
     {
         private readonly int lastRowId;
 
@@ -1351,7 +1351,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="TypeReferenceHandle"/>.
     /// </summary>
-    public struct TypeReferenceHandleCollection : IReadOnlyCollection<TypeReferenceHandle>
+    struct TypeReferenceHandleCollection : IReadOnlyCollection<TypeReferenceHandle>
     {
         private readonly int lastRowId;
 
@@ -1441,7 +1441,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="TypeReferenceHandle"/>.
     /// </summary>
-    public struct ExportedTypeHandleCollection : IReadOnlyCollection<ExportedTypeHandle>
+    struct ExportedTypeHandleCollection : IReadOnlyCollection<ExportedTypeHandle>
     {
         private readonly int lastRowId;
 
@@ -1531,7 +1531,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="MemberReferenceHandle"/>.
     /// </summary>
-    public struct MemberReferenceHandleCollection : IReadOnlyCollection<MemberReferenceHandle>
+    struct MemberReferenceHandleCollection : IReadOnlyCollection<MemberReferenceHandle>
     {
         private readonly int lastRowId;
 
@@ -1618,7 +1618,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct PropertyAccessors
+    struct PropertyAccessors
     {
         // Workaround: JIT doesn't generate good code for nested structures, so use uints.
 
@@ -1635,7 +1635,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    public struct EventAccessors
+    struct EventAccessors
     {
         // Workaround: JIT doesn't generate good code for nested structures, so use uints.
 
@@ -1658,13 +1658,13 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Collection of assembly references.
     /// </summary>
-    public struct AssemblyReferenceHandleCollection : IReadOnlyCollection<AssemblyReferenceHandle>
+    struct AssemblyReferenceHandleCollection : IReadOnlyCollection<AssemblyReferenceHandle>
     {
         private readonly MetadataReader reader;
 
         internal AssemblyReferenceHandleCollection(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
         }
 
@@ -1769,7 +1769,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="ManifestResourceHandle"/>.
     /// </summary>
-    public struct ManifestResourceHandleCollection : IReadOnlyCollection<ManifestResourceHandle>
+    struct ManifestResourceHandleCollection : IReadOnlyCollection<ManifestResourceHandle>
     {
         private readonly int lastRowId;
 
@@ -1859,7 +1859,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a collection of <see cref="AssemblyFileHandle"/>.
     /// </summary>
-    public struct AssemblyFileHandleCollection : IReadOnlyCollection<AssemblyFileHandle>
+    struct AssemblyFileHandleCollection : IReadOnlyCollection<AssemblyFileHandle>
     {
         private readonly int lastRowId;
 

@@ -112,7 +112,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             for (int i = 0; i < virtualValues.Length; i++)
             {
-                Debug.Assert(virtualValues[i] != null, "Missing virtual value for StringHandle.VirtualIndex." + (StringHandle.VirtualIndex)i);
+                DebugCorlib.Assert(virtualValues[i] != null, "Missing virtual value for StringHandle.VirtualIndex." + (StringHandle.VirtualIndex)i);
             }
         }
 
@@ -166,7 +166,7 @@ namespace System.Reflection.Metadata.Ecma335
                         break;
 
                     default:
-                        Debug.Assert(false, "We should not get here");
+                        DebugCorlib.Assert(false, "We should not get here");
                         return null;
                 }
             }
@@ -198,7 +198,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal bool Equals(StringHandle handle, string value, MetadataStringDecoder utf8Decoder)
         {
-            Debug.Assert(value != null);
+            DebugCorlib.Assert(value != null);
 
             if (handle.IsVirtual)
             {
@@ -219,7 +219,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal bool StartsWith(StringHandle handle, string value, MetadataStringDecoder utf8Decoder)
         {
-            Debug.Assert(value != null);
+            DebugCorlib.Assert(value != null);
 
             if (handle.IsVirtual)
             {
@@ -243,8 +243,8 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal bool EqualsRaw(StringHandle rawHandle, string asciiString)
         {
-            Debug.Assert(!rawHandle.IsVirtual);
-            Debug.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
+            DebugCorlib.Assert(!rawHandle.IsVirtual);
+            DebugCorlib.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
             return this.Block.CompareUtf8NullTerminatedStringWithAsciiString(rawHandle.Index, asciiString) == 0;
         }
 
@@ -253,7 +253,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal int IndexOfRaw(int startIndex, char asciiChar)
         {
-            Debug.Assert(asciiChar != 0 && asciiChar <= 0x7f);
+            DebugCorlib.Assert(asciiChar != 0 && asciiChar <= 0x7f);
             return this.Block.Utf8NullTerminatedOffsetOfAsciiChar(startIndex, asciiChar);
         }
 
@@ -262,8 +262,8 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal bool StartsWithRaw(StringHandle rawHandle, string asciiPrefix)
         {
-            Debug.Assert(!rawHandle.IsVirtual);
-            Debug.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
+            DebugCorlib.Assert(!rawHandle.IsVirtual);
+            DebugCorlib.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
             return this.Block.Utf8NullTermintatedStringStartsWithAsciiPrefix(rawHandle.Index, asciiPrefix);
         }
 
@@ -272,8 +272,8 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal int BinarySearchRaw(string[] asciiKeys, StringHandle rawHandle)
         {
-            Debug.Assert(!rawHandle.IsVirtual);
-            Debug.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
+            DebugCorlib.Assert(!rawHandle.IsVirtual);
+            DebugCorlib.Assert(rawHandle.StringKind != StringKind.DotTerminated, "Not supported");
             return this.Block.BinarySearch(asciiKeys, rawHandle.Index);
         }
     }
@@ -408,7 +408,7 @@ namespace System.Reflection.Metadata.Ecma335
             int numberOfBytes = this.Block.PeekCompressedInteger(offset, out bytesRead);
             if (numberOfBytes == BlobReader.InvalidCompressedInteger)
             {
-                return EmptyArray<byte>.Instance;
+                return Internal.EmptyArray<byte>.Instance;
             }
 
             return this.Block.PeekBytes(offset + bytesRead, numberOfBytes);

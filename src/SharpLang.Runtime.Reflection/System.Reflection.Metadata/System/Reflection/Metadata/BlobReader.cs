@@ -12,7 +12,7 @@ using System.Text;
 namespace System.Reflection.Metadata
 {
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
-    public unsafe struct BlobReader
+    unsafe struct BlobReader
     {
         /// <summary>An array containing the '\0' character.</summary>
         private static readonly char[] _nullCharArray = new char[1] { '\0' };
@@ -49,7 +49,7 @@ namespace System.Reflection.Metadata
 
         internal BlobReader(MemoryBlock block)
         {
-            Debug.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.Pointer != null || block.Length == 0));
+            DebugCorlib.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.Pointer != null || block.Length == 0));
             this.block = block;
             this.currentPointer = block.Pointer;
             this.endPointer = block.Pointer + block.Length;
@@ -139,8 +139,8 @@ namespace System.Reflection.Metadata
         {
             int remainder = this.Offset & (alignment - 1);
 
-            Debug.Assert((alignment & (alignment - 1)) == 0, "Alignment must be a power of two.");
-            Debug.Assert(remainder >= 0 && remainder < alignment);
+            DebugCorlib.Assert((alignment & (alignment - 1)) == 0, "Alignment must be a power of two.");
+            DebugCorlib.Assert(remainder >= 0 && remainder < alignment);
 
             if (remainder != 0)
             {
@@ -397,7 +397,7 @@ namespace System.Reflection.Metadata
                         value |= unchecked((int)0xffffe000);
                         break;
                     default:
-                        Debug.Assert(bytesRead == 4);
+                        DebugCorlib.Assert(bytesRead == 4);
                         value |= unchecked((int)0xf0000000);
                         break;
                 }

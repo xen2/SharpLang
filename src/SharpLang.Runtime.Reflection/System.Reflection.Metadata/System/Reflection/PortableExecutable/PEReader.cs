@@ -18,7 +18,7 @@ namespace System.Reflection.PortableExecutable
     /// The implementation is thread-safe, that is multiple threads can read data from the reader in parallel.
     /// Disposal of the reader is not thread-safe (see <see cref="Dispose"/>).
     /// </remarks>
-    public sealed class PEReader : IDisposable
+    sealed class PEReader : IDisposable
     {
         // May be null in the event that the entire image is not
         // deemed necessary and we have been instructed to read
@@ -278,7 +278,7 @@ namespace System.Reflection.PortableExecutable
 
         private void InitializePEHeaders()
         {
-            Debug.Assert(peImage != null);
+            DebugCorlib.Assert(peImage != null);
 
             StreamConstraints constraints;
             Stream stream = peImage.GetStream(out constraints);
@@ -301,7 +301,7 @@ namespace System.Reflection.PortableExecutable
 
         private static PEHeaders ReadPEHeadersNoLock(Stream stream, long imageStartPosition, int imageSize)
         {
-            Debug.Assert(imageStartPosition >= 0 && imageStartPosition <= stream.Length);
+            DebugCorlib.Assert(imageStartPosition >= 0 && imageStartPosition <= stream.Length);
             stream.Seek(imageStartPosition, SeekOrigin.Begin);
             return new PEHeaders(stream, imageSize);
         }
@@ -339,7 +339,7 @@ namespace System.Reflection.PortableExecutable
 
             if (lazyMetadataBlock == null)
             {
-                Debug.Assert(peImage != null, "We always have metadata if peImage is not available.");
+                DebugCorlib.Assert(peImage != null, "We always have metadata if peImage is not available.");
 
                 var newBlock = peImage.GetMemoryBlock(PEHeaders.MetadataStartOffset, PEHeaders.MetadataSize);
                 if (Interlocked.CompareExchange(ref lazyMetadataBlock, newBlock, null) != null)
@@ -354,8 +354,8 @@ namespace System.Reflection.PortableExecutable
 
         private AbstractMemoryBlock GetPESectionBlock(int index)
         {
-            Debug.Assert(index >= 0 && index < PEHeaders.SectionHeaders.Length);
-            Debug.Assert(peImage != null);
+            DebugCorlib.Assert(index >= 0 && index < PEHeaders.SectionHeaders.Length);
+            DebugCorlib.Assert(peImage != null);
 
             if (lazyPESectionBlocks == null)
             {

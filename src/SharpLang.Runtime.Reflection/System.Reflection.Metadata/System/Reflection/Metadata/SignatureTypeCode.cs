@@ -8,7 +8,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents the type codes that are used in signature encoding.
     /// </summary>
-    public enum SignatureTypeCode : byte
+    enum SignatureTypeCode : byte
     {
         /// <summary>
         /// Represents an invalid or uninitialized type code. It will not appear in valid signatures.

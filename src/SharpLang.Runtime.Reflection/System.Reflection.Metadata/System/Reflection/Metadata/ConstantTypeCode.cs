@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public enum ConstantTypeCode : byte
+    enum ConstantTypeCode : byte
     {
         // II.22.9 Constant : 0x0B
         // Type shall be exactly one of: ELEMENT_TYPE_BOOLEAN, ELEMENT_TYPE_CHAR,

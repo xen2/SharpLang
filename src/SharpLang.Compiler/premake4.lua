@@ -9,11 +9,6 @@ project "SharpLang.Compiler"
   files { "**.cs" }
   excludes { "obj/**" }
 
-  libdirs 
-  {
-    depsdir .. "/Mono.Options",
-  }
-
   dependson { "SharpLang.Runtime" }
 
   links
@@ -24,7 +19,7 @@ project "SharpLang.Compiler"
     "Mono.Cecil",
     "Mono.Cecil.Pdb",
     "Mono.Cecil.Rocks",
-    "Mono.Options",
     "Mono.Linker",
-    "System.Reflection.Metadata",
+    depsdir .. "/Mono.Options/Mono.Options",
+    depsdir .. "/System.Reflection.Metadata/System.Reflection.Metadata",
   }

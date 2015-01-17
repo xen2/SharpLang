@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.ComponentModel;
 using System.Reflection.PortableExecutable;
 
 namespace System.Reflection.Metadata
@@ -9,8 +8,7 @@ namespace System.Reflection.Metadata
     // EditorBrowsable(Never) so that we don't clutter completion list with this type because a user that only has System.Reflection.Metadata 
     // imported and has type PE is likely looking to resolve PEReader from the System.Reflection.PortableExecutable and not looking to invoke
     // these extensions as regular statics.
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class PEReaderExtensions
+    static class PEReaderExtensions
     {
         /// <summary>
         /// Returns a body block of a method with specified Relative Virtual Address (RVA);

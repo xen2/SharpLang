@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct AssemblyReference
+    struct AssemblyReference
     {
         private readonly MetadataReader reader;
 
@@ -18,11 +18,11 @@ namespace System.Reflection.Metadata
 
         internal AssemblyReference(MetadataReader reader, uint treatmentAndRowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(treatmentAndRowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(treatmentAndRowId != 0);
 
             // only virtual bit can be set in highest byte:
-            Debug.Assert((treatmentAndRowId & ~(TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0);
+            DebugCorlib.Assert((treatmentAndRowId & ~(TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0);
 
             this.reader = reader;
             this.treatmentAndRowId = treatmentAndRowId;
@@ -178,7 +178,7 @@ namespace System.Reflection.Metadata
                     return StringHandle.VirtualIndex.System_Numerics_Vectors;
             }
 
-            Debug.Assert(false, "Unexpected virtual index value");
+            DebugCorlib.Assert(false, "Unexpected virtual index value");
             return 0;
         }
 

@@ -46,13 +46,13 @@ namespace System.Reflection.Metadata
     ///
     /// The choice between them is therefore one of style and not performance.
     /// </remarks>
-    public struct MetadataStringComparer
+    struct MetadataStringComparer
     {
         private readonly MetadataReader reader;
 
         internal MetadataStringComparer(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
         }
 

@@ -6,7 +6,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Indicates whether a MemberReference references a method or field.
     /// </summary>
-    public enum MemberReferenceKind
+    enum MemberReferenceKind
     {
         /// <summary>
         /// The MemberReference references a method.

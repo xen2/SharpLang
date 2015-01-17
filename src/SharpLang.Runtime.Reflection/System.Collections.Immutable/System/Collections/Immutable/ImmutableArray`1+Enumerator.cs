@@ -10,7 +10,7 @@ using Validation;
 
 namespace System.Collections.Immutable
 {
-    public partial struct ImmutableArray<T>
+    partial struct ImmutableArray<T>
     {
         /// <summary>
         /// An array enumerator.

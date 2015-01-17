@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    public struct Constant
+    struct Constant
     {
         private readonly MetadataReader reader;
 
@@ -14,8 +14,8 @@ namespace System.Reflection.Metadata
 
         internal Constant(MetadataReader reader, uint rowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(rowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(rowId != 0);
 
             this.reader = reader;
             this.rowId = rowId;

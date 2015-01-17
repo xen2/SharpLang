@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public enum EditAndContinueOperation
+    enum EditAndContinueOperation
     {
         Default = 0,
         AddMethod = 1,

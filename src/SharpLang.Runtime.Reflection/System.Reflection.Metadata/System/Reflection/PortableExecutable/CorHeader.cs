@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class CorHeader
+    sealed class CorHeader
     {
         public ushort MajorRuntimeVersion { get; private set; }
         public ushort MinorRuntimeVersion { get; private set; }

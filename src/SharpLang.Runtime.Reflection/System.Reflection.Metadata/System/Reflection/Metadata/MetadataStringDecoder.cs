@@ -21,7 +21,7 @@ namespace System.Reflection.Metadata
     /// 2) To reuse existing strings instead of allocating a new one for each decoding
     ///    operation.
     /// </remarks>
-    public class MetadataStringDecoder
+    class MetadataStringDecoder
     {
         private static readonly MetadataStringDecoder defaultUTF8 = new MetadataStringDecoder(Encoding.UTF8);
         private readonly Encoding encoding;
@@ -81,7 +81,7 @@ namespace System.Reflection.Metadata
         /// <returns>The decoded string.</returns>
         public unsafe virtual String GetString(byte* bytes, int byteCount)
         {
-            Debug.Assert(this.encoding != null);
+            DebugCorlib.Assert(this.encoding != null);
 
             // Note that this call is currently wired to the light-up extension in EncodingHelper
             // for portability.

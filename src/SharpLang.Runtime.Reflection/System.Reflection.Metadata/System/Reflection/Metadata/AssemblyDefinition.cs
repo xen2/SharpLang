@@ -5,13 +5,13 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    public struct AssemblyDefinition
+    struct AssemblyDefinition
     {
         private readonly MetadataReader reader;
 
         internal AssemblyDefinition(MetadataReader reader)
         {
-            Debug.Assert(reader != null);
+            DebugCorlib.Assert(reader != null);
             this.reader = reader;
         }
 

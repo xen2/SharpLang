@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public static class MetadataTokens
+    static class MetadataTokens
     {
         /// <summary>
         /// Maximum number of tables that can be present in Ecma335 metadata.

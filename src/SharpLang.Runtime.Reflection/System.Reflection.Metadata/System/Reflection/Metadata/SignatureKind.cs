@@ -7,7 +7,7 @@ namespace System.Reflection.Metadata
     /// Specifies the signature kind. Underlying values correspond to the representation 
     /// in the leading signature byte represented by <see cref="SignatureHeader"/>.
     /// </summary>
-    public enum SignatureKind : byte
+    enum SignatureKind : byte
     {
         /// <summary>
         /// Method reference, method definition, or standalone method signature.

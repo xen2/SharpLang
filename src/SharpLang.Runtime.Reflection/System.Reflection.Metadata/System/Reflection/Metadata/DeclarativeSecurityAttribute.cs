@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct DeclarativeSecurityAttribute
+    struct DeclarativeSecurityAttribute
     {
         private readonly MetadataReader reader;
 
@@ -15,8 +15,8 @@ namespace System.Reflection.Metadata
 
         internal DeclarativeSecurityAttribute(MetadataReader reader, uint rowId)
         {
-            Debug.Assert(reader != null);
-            Debug.Assert(rowId != 0);
+            DebugCorlib.Assert(reader != null);
+            DebugCorlib.Assert(rowId != 0);
 
             this.reader = reader;
             this.rowId = rowId;

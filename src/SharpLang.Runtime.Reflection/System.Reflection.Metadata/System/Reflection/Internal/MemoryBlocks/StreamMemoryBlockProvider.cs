@@ -38,7 +38,7 @@ namespace System.Reflection.Internal
 
         public StreamMemoryBlockProvider(Stream stream, long imageStart, int imageSize, bool isFileStream, bool leaveOpen)
         {
-            Debug.Assert(stream.CanSeek && stream.CanRead);
+            DebugCorlib.Assert(stream.CanSeek && stream.CanRead);
             this.stream = stream;
             this.streamGuard = new object();
             this.imageStart = imageStart;
@@ -50,7 +50,7 @@ namespace System.Reflection.Internal
 
         protected override void Dispose(bool disposing)
         {
-            Debug.Assert(disposing);
+            DebugCorlib.Assert(disposing);
 
             if (!leaveOpen && stream != null)
             {
