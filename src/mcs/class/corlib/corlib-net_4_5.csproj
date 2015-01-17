@@ -1521,7 +1521,6 @@
     <Compile Include="System\SharpLang\SharpLangTypeGenericParameter.cs" />
     <Compile Include="System\SharpLang\SharpLangTypePointer.cs" />
     <Compile Include="System\SharpLang\SharpLangEETypeDefinition.cs" />
-    <Compile Include="System\SharpLang\Type.cs" />
     <Compile Include="System\__ComObject.cs" />
     <Compile Include="System\_AppDomain.cs" />
     <Compile Include="System\AccessViolationException.cs" />
