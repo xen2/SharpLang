@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F6BED8B-3B90-3C0C-64DB-219C505F3B2A}</ProjectGuid>
+    <ProjectGuid>{BFCA4392-2B56-B156-3467-344BA0710D57}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpLang.Compiler.Tests</RootNamespace>
-    <AssemblyName>SharpLang.Compiler.Tests</AssemblyName>
+    <RootNamespace>SharpLLVM.Tests</RootNamespace>
+    <AssemblyName>SharpLLVM.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -18,7 +18,20 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\build\vs2013\lib\Debug_x32\</OutputPath>
-    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Debug\SharpLang.Compiler.Tests\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Debug\SharpLLVM.Tests\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Debug_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Debug\SharpLLVM.Tests\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
     <DefineConstants>WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -31,7 +44,20 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\build\vs2013\lib\Release_x32\</OutputPath>
-    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Release\SharpLang.Compiler.Tests\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x32\Release\SharpLLVM.Tests\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\vs2013\lib\Release_x64\</OutputPath>
+    <BaseIntermediateOutputPath>..\..\build\vs2013\obj\x64\Release\SharpLLVM.Tests\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
     <DefineConstants>WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -41,32 +67,16 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="nunit.framework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestFiles.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestLLVM.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpLang.Compiler\SharpLang.Compiler.vs2013.csproj">
-      <Project>{AEEE66AF-9AD2-2705-0333-2258EF351287}</Project>
-      <Name>SharpLang.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharpLLVM\SharpLLVM.vs2013.csproj">
+    <ProjectReference Include="..\SharpLLVM\SharpLLVM.csproj">
       <Project>{1E7A06EE-8AE4-BA64-D322-6C0A3FCC98B9}</Project>
       <Name>SharpLLVM</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
-      <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
-      <Name>Mono.Linker</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mcs\class\corlib\corlib-net_4_5.csproj">
-      <Project>{33BF0182-AC5C-464C-995B-C9CFE74E1A95}</Project>
-      <Name>corlib-net_4_5</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

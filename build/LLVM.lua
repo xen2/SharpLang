@@ -15,7 +15,8 @@ if _OPTIONS['llvm'] ~= nil then
   LLVMRootDir = _OPTIONS['llvm']
 end
 
-LLVMBuildDir = path.join(LLVMRootDir, "build")
+LLVMBuild32Dir = path.join(LLVMRootDir, "build_x32")
+LLVMBuild64Dir = path.join(LLVMRootDir, "build_x64")
 
 function SetupLLVMIncludes()
   local c = configuration()
@@ -25,24 +26,43 @@ function SetupLLVMIncludes()
     path.join(LLVMRootDir, "include"),
     path.join(LLVMRootDir, "tools/clang/include"),    
     path.join(LLVMRootDir, "tools/clang/lib"),    
-    path.join(LLVMBuildDir, "include"),
-    path.join(LLVMBuildDir, "tools/clang/include"),
   }
+  
+  configuration { "x32" }
+    includedirs
+    {
+      path.join(LLVMBuild32Dir, "include"),
+      path.join(LLVMBuild32Dir, "tools/clang/include"),
+	}
 
+  configuration { "x64" }
+    includedirs
+    {
+      path.join(LLVMBuild64Dir, "include"),
+      path.join(LLVMBuild64Dir, "tools/clang/include"),
+	}
+	
   configuration(c)
 end
 
 function SetupLLVMLibDirs()
   local c = configuration()
 
-  libdirs { path.join(LLVMBuildDir, "lib") }
+  configuration { "x32" }
+    libdirs { path.join(LLVMBuild32Dir, "lib") }
+  configuration { "x64" }
+    libdirs { path.join(LLVMBuild64Dir, "lib") }
+	
+  configuration { "x32", "Debug", "vs*" }
+    libdirs { path.join(LLVMBuild32Dir, "Debug/lib") }
+  configuration { "x64", "Debug", "vs*" }
+    libdirs { path.join(LLVMBuild64Dir, "Debug/lib") }
 
-  configuration { "Debug", "vs*" }
-    libdirs { path.join(LLVMBuildDir, "Debug/lib") }
-
-  configuration { "Release", "vs*" }
-    libdirs { path.join(LLVMBuildDir, "RelWithDebInfo/lib") }
-
+  configuration { "x32", "Release", "vs*" }
+    libdirs { path.join(LLVMBuild32Dir, "RelWithDebInfo/lib") }
+  configuration { "x64", "Release", "vs*" }
+    libdirs { path.join(LLVMBuild64Dir, "RelWithDebInfo/lib") }
+	  
   configuration "not vs*"
     defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS" }
 

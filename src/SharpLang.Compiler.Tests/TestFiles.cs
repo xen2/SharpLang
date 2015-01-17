@@ -241,20 +241,20 @@ namespace SharpLang.CompilerServices.Tests
         private static void SetupLocalToolchain()
         {
             // Try to use locally compiled llc and clang (if they exist)
-            var llcLocal = @"../../../../deps/llvm/build/RelWithDebInfo/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+            var llcLocal = @"../../../../deps/llvm/build_x32/RelWithDebInfo/bin/llc".Replace('/', Path.DirectorySeparatorChar);
             if (File.Exists(llcLocal) || File.Exists(llcLocal + ".exe"))
                 Driver.LLC = llcLocal;
 
-            var clangLocal = @"../../../../deps/llvm/build/RelWithDebInfo/bin/clang".Replace('/', Path.DirectorySeparatorChar);
+            var clangLocal = @"../../../../deps/llvm/build_x32/RelWithDebInfo/bin/clang".Replace('/', Path.DirectorySeparatorChar);
             if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
                 Driver.Clang = clangLocal;
 
             // Probe again for local Ninja builds
-            llcLocal = @"../../../../deps/llvm/build/bin/llc".Replace('/', Path.DirectorySeparatorChar);
+            llcLocal = @"../../../../deps/llvm/build_x32/bin/llc".Replace('/', Path.DirectorySeparatorChar);
             if (File.Exists(llcLocal) || File.Exists(llcLocal + ".exe"))
                 Driver.LLC = llcLocal;
 
-            clangLocal = @"../../../../deps/llvm/build/bin/clang".Replace('/', Path.DirectorySeparatorChar);
+            clangLocal = @"../../../../deps/llvm/build_x32/bin/clang".Replace('/', Path.DirectorySeparatorChar);
             if (File.Exists(clangLocal) || File.Exists(clangLocal + ".exe"))
                 Driver.Clang = clangLocal;
         }
