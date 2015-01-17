@@ -51,5 +51,14 @@ solution "SharpLang.Runtime"
 	targetextension ".bc"
 	
 	defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS", "LIBCXXABI_HAS_NO_THREADS" }
-	includedirs { "../deps/llvm/build/include", "../deps/llvm/include", "../deps/mingw32/i686-w64-mingw32/include", "../deps/mingw32/i686-w64-mingw32/include/c++", "../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32" }
-    buildoptions { "--target=i686-pc-mingw32 -emit-llvm -O3" }
+
+	includedirs { "../deps/llvm/include" }
+    buildoptions { "-emit-llvm -O3" }
+
+	configuration { "x32" }
+		buildoptions { "--target=i686-pc-mingw32" }
+		includedirs { "../deps/llvm/build_x32/include", "../deps/mingw32/i686-w64-mingw32/include", "../deps/mingw32/i686-w64-mingw32/include/c++", "../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32" }
+
+	configuration { "x64" }
+		buildoptions { "--target=x86_64-pc-mingw32" }
+		includedirs { "../deps/llvm/build_x64/include", "../deps/mingw32/x86_64-w64-mingw32/include", "../deps/mingw32/x86_64-w64-mingw32/include/c++", "../deps/mingw32/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32" }

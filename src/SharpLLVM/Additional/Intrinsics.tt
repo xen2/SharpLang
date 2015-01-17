@@ -12,7 +12,7 @@ namespace SharpLLVM
 	{
 	    not_intrinsic = 0,   // Must be zero
 <#
-var intrinsicsFile = File.ReadAllLines(Host.ResolvePath(@"..\..\..\deps\llvm\build\include\llvm\IR\Intrinsics.gen"));
+var intrinsicsFile = File.ReadAllLines(Host.ResolvePath(@"..\..\..\deps\llvm\build_x32\include\llvm\IR\Intrinsics.gen"));
 var intrinsics = intrinsicsFile.SkipWhile(x => !x.Contains("GET_INTRINSIC_ENUM_VALUES")).Skip(1).TakeWhile(x => !x.StartsWith("#endif"));
 foreach (var intrinsic in intrinsics)
 {#>

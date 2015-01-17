@@ -19,10 +19,10 @@ ifeq ($(config),debug_x32)
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = obj/x32/debug
   DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS
-  INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
+  INCLUDES += -I../../../deps/llvm/include -I../../../deps/llvm/build_x32/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -emit-llvm -O3 --target=i686-pc-mingw32
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
@@ -49,10 +49,10 @@ ifeq ($(config),debug_x64)
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = obj/x64/debug
   DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS
-  INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
+  INCLUDES += -I../../../deps/llvm/include -I../../../deps/llvm/build_x64/include -I../../../deps/mingw32/x86_64-w64-mingw32/include -I../../../deps/mingw32/x86_64-w64-mingw32/include/c++ -I../../../deps/mingw32/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -emit-llvm -O3 --target=x86_64-pc-mingw32
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
@@ -79,10 +79,10 @@ ifeq ($(config),release_x32)
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = obj/x32/release
   DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS
-  INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
+  INCLUDES += -I../../../deps/llvm/include -I../../../deps/llvm/build_x32/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -emit-llvm -O3 --target=i686-pc-mingw32
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
@@ -109,10 +109,10 @@ ifeq ($(config),release_x64)
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = obj/x64/release
   DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS
-  INCLUDES += -I../../../deps/llvm/build/include -I../../../deps/llvm/include -I../../../deps/mingw32/i686-w64-mingw32/include -I../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32
+  INCLUDES += -I../../../deps/llvm/include -I../../../deps/llvm/build_x64/include -I../../../deps/mingw32/x86_64-w64-mingw32/include -I../../../deps/mingw32/x86_64-w64-mingw32/include/c++ -I../../../deps/mingw32/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 --target=i686-pc-mingw32 -emit-llvm -O3
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -emit-llvm -O3 --target=x86_64-pc-mingw32
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=

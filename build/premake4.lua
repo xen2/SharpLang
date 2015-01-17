@@ -11,7 +11,7 @@ dofile "LLVM.lua"
 solution "SharpLang"
 
   configurations { "Debug", "Release" }
-  platforms { "x32" }
+  platforms { "x32", "x64" }
   flags { common_flags }
 
   location (builddir)

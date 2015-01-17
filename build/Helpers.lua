@@ -62,7 +62,6 @@ function SetupManagedProject()
   if not os.is("macosx") then
     local c = configuration { "vs*" }
       location "."
-      filename (project().name .. ".%{_ACTION}")
     configuration(c)
   end
 end
