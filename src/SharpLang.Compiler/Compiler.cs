@@ -68,11 +68,12 @@ namespace SharpLang.CompilerServices
             context = LLVM.GetGlobalContext();
             module = LLVM.ModuleCreateWithName(assembly.Name.Name);
 
-            // TODO: Choose appropriate triple depending on target
-            LLVM.SetTarget(module, "i686-pc-mingw32");
-
             // Prepare system types, for easier access
             InitializeCommonTypes();
+
+            // TODO: Choose appropriate triple depending on target
+            var target = LLVM.GetTarget(runtimeModule);
+            LLVM.SetTarget(module, target);
 
             // Initialize ABI
             abi = new DefaultABI(context, targetData);
