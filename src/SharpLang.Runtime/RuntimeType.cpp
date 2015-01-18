@@ -17,7 +17,7 @@ extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInte
 	return false;
 }
 
-extern "C" void* allocObject(uint32_t size)
+extern "C" void* allocObject(size_t size)
 {
     return memset(malloc(size), 0, size);
 }

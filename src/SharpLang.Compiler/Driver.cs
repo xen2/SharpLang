@@ -148,10 +148,14 @@ namespace SharpLang.CompilerServices
             else
             {
                 // Add mingw32 paths
-                arguments.AppendFormat("--target=i686-w64-mingw32 -g");
-                arguments.AppendFormat(" -I../../../../deps/llvm/build_x32/include -I../../../../deps/llvm/include");
-                arguments.AppendFormat(" -I../../../../deps/mingw32/i686-w64-mingw32/include -I../../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS");
-                processStartInfo.EnvironmentVariables["PATH"] += @";..\..\..\..\deps\mingw32\bin";
+                int archSize = IntPtr.Size * 8;
+                var cpu = archSize == 64 ? "x86_64" : "i686";
+                var triplet = string.Format("{0}-w64-mingw32", cpu);
+                var mingwFolder = string.Format("../../../../deps/mingw{0}/{1}", archSize, triplet);
+                arguments.AppendFormat("--target={0} -g", triplet);
+                arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", archSize);
+                arguments.AppendFormat(" -I{0}/include -I{0}/include/c++ -I{0}/include/c++/{1} -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", mingwFolder, triplet);
+                processStartInfo.EnvironmentVariables["PATH"] += string.Format(@";..\..\..\..\deps\mingw{0}\bin", archSize);
             }
 
             arguments.Append(' ').Append(args);

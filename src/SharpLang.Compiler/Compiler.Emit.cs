@@ -224,7 +224,7 @@ namespace SharpLang.CompilerServices
 
             // TODO: Improve performance (better inlining, etc...)
             // Invoke malloc
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectTypeLLVM), int32LLVM, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(type.ObjectTypeLLVM), nativeIntLLVM, string.Empty);
             var allocatedData = LLVM.BuildCall(builder, allocObjectFunctionLLVM, new[] { typeSize }, string.Empty);
             var allocatedObject = LLVM.BuildPointerCast(builder, allocatedData, LLVM.PointerType(type.ObjectTypeLLVM, 0), string.Empty);
 
@@ -747,7 +747,7 @@ namespace SharpLang.CompilerServices
             var numElements = stack.Pop();
 
             // Compute object size
-            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultTypeLLVM), int32LLVM, string.Empty);
+            var typeSize = LLVM.BuildIntCast(builder, LLVM.SizeOf(elementType.DefaultTypeLLVM), nativeIntLLVM, string.Empty);
 
             // Compute array size (object size * num elements)
             var numElementsCasted = ConvertToNativeInt(numElements);
@@ -1265,11 +1265,13 @@ namespace SharpLang.CompilerServices
             else if (operand1.StackType == StackValueType.NativeInt && operand2.StackType == StackValueType.Int32)
             {
                 value1 = LLVM.BuildPtrToInt(builder, value1, nativeIntLLVM, string.Empty);
+                value2 = LLVM.BuildIntCast(builder, value2, nativeIntLLVM, string.Empty);
                 outputOperandType = operand1;
             }
             else if (operand1.StackType == StackValueType.Int32 && operand2.StackType == StackValueType.NativeInt)
             {
                 value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
+                value1 = LLVM.BuildIntCast(builder, value1, nativeIntLLVM, string.Empty);
                 outputOperandType = operand2;
             }
             else if (!isIntegerOperation
