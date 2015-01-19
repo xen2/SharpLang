@@ -215,7 +215,7 @@ extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t leng
 	auto str = (String*)malloc(sizeof(String));
 	str->eeType = &System_String_rtti;
 	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
+	str->value = (char16_t*)malloc(sizeof(char16_t) * (length + 1));
 	const_cast<char16_t*>(str->value)[str->length] = 0;
 	return str;
 }
