@@ -348,7 +348,17 @@ namespace SharpLang.CompilerServices
             var functionGlobal = function.GeneratedValue;
 
             var functionContext = new FunctionCompilerContext(function);
+
+            // Create default blocks (alloca one, and entry one)
+            var allocaBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
             functionContext.BasicBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, string.Empty);
+
+            {
+                LLVM.PositionBuilderAtEnd(builderAlloca, allocaBlock);
+                var allocaExitJump = LLVM.BuildBr(builderAlloca, functionContext.BasicBlock);
+                LLVM.PositionBuilderBefore(builderAlloca, allocaExitJump);
+            }
+
             LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
 
             if (methodReference.DeclaringType.Name == "EncodingHelper" && methodReference.Name == "LoadGetStringPlatform")
@@ -406,7 +416,7 @@ namespace SharpLang.CompilerServices
                 //    throw new NotSupportedException();
 
                 var type = GetType(ResolveGenericsVisitor.Process(methodReference, local.VariableType), TypeState.StackComplete);
-                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builder, type.DefaultTypeLLVM, local.Name)));
+                locals.Add(new StackValue(type.StackType, type, LLVM.BuildAlloca(builderAlloca, type.DefaultTypeLLVM, local.Name)));
 
                 // Force value types to be emitted right away
                 if (type.TypeDefinitionCecil.IsValueType)
@@ -432,26 +442,33 @@ namespace SharpLang.CompilerServices
                 ValueRef storage;
                 if (argType.StackType == StackValueType.Value)
                 {
-                    var structSize = LLVM.ABISizeOfType(targetData, argType.DefaultTypeLLVM);
-                    if (structSize <= (ulong)intPtrSize)
+                    var parameterType = function.Signature.ParameterTypes[index];
+                    switch (parameterType.ABIParameterInfo.Kind)
                     {
-                        var structCoercedType = LLVM.IntTypeInContext(context, (uint)structSize * 8);
-
-                        storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
-                        var castedStorage = LLVM.BuildPointerCast(builder, storage, LLVM.PointerType(structCoercedType, 0), string.Empty);
-                        LLVM.BuildStore(builder, arg, castedStorage);
-                    }
-                    else
-                    {
-                        // Directly use byval area as storage (caller made an allocation & copy for this parameter)
-                        storage = arg;
+                        case ABIParameterInfoKind.Direct:
+                            storage = LLVM.BuildAlloca(builderAlloca, argType.DefaultTypeLLVM, parameterName);
+                            LLVM.BuildStore(builder, arg, storage);
+                            break;
+                        case ABIParameterInfoKind.Indirect:
+                            // Directly use byval area as storage (caller made an allocation & copy for this parameter)
+                            storage = arg;
+                            LLVM.SetValueName(arg, parameterName);
+                            break;
+                        case ABIParameterInfoKind.Coerced:
+                            // Coerce to integer type
+                            storage = LLVM.BuildAlloca(builderAlloca, argType.DefaultTypeLLVM, parameterName);
+                            var castedStorage = LLVM.BuildPointerCast(builderAlloca, storage, LLVM.PointerType(parameterType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                            LLVM.BuildStore(builderAlloca, arg, castedStorage);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
                 else
                 {
                     // Copy argument on stack
-                    storage = LLVM.BuildAlloca(builder, argType.DefaultTypeLLVM, parameterName);
-                    LLVM.BuildStore(builder, arg, storage);
+                    storage = LLVM.BuildAlloca(builderAlloca, argType.DefaultTypeLLVM, parameterName);
+                    LLVM.BuildStore(builderAlloca, arg, storage);
                 }
 
                 args.Add(new StackValue(argType.StackType, argType, storage));
@@ -499,9 +516,9 @@ namespace SharpLang.CompilerServices
             if (body.HasExceptionHandlers)
             {
                 // Add an "ehselector.slot" i32 local, and a "exn.slot" Object reference local
-                functionContext.ExceptionHandlerSelectorSlot = LLVM.BuildAlloca(builder, int32LLVM, "ehselector.slot");
-                functionContext.ExceptionSlot = LLVM.BuildAlloca(builder, @object.DefaultTypeLLVM, "exn.slot");
-                functionContext.EndfinallyJumpTarget = LLVM.BuildAlloca(builder, int32LLVM, "endfinally.jumptarget");
+                functionContext.ExceptionHandlerSelectorSlot = LLVM.BuildAlloca(builderAlloca, int32LLVM, "ehselector.slot");
+                functionContext.ExceptionSlot = LLVM.BuildAlloca(builderAlloca, @object.DefaultTypeLLVM, "exn.slot");
+                functionContext.EndfinallyJumpTarget = LLVM.BuildAlloca(builderAlloca, int32LLVM, "endfinally.jumptarget");
 
                 // Create resume exception block
                 functionContext.ResumeExceptionBlock = LLVM.AppendBasicBlockInContext(context, functionGlobal, "eh.resume");
@@ -1070,7 +1087,7 @@ namespace SharpLang.CompilerServices
                         runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
 
                     // Add indirection
-                    var runtimeHandleValueIndirect = LLVM.BuildAlloca(builder, runtimeHandleClass.Type.DataTypeLLVM, string.Empty);
+                    var runtimeHandleValueIndirect = LLVM.BuildAlloca(builderAlloca, runtimeHandleClass.Type.DataTypeLLVM, string.Empty);
                     LLVM.BuildStore(builder, runtimeHandleValue, runtimeHandleValueIndirect);
 
                     // TODO: Actually transform type to RTTI token.

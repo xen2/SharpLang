@@ -18,7 +18,7 @@ namespace SharpLang.CompilerServices
             {
                 // Option1: Make a copy
                 // TODO: Optimize stack allocation (reuse alloca slots, with help of FunctionStack)
-                var result = LLVM.BuildAlloca(builder, LLVM.GetElementType(LLVM.TypeOf(value)), string.Empty);
+                var result = LLVM.BuildAlloca(builderAlloca, LLVM.GetElementType(LLVM.TypeOf(value)), string.Empty);
                 var valueCopy = LLVM.BuildLoad(builder, value, string.Empty);
                 LLVM.BuildStore(builder, valueCopy, result);
 
@@ -219,7 +219,7 @@ namespace SharpLang.CompilerServices
             if (stackValueType != StackValueType.Object)
             {
                 // Value types are allocated on the stack
-                return LLVM.BuildAlloca(builder, type.DataTypeLLVM, string.Empty);
+                return LLVM.BuildAlloca(builderAlloca, type.DataTypeLLVM, string.Empty);
             }
 
             // TODO: Improve performance (better inlining, etc...)
@@ -268,21 +268,30 @@ namespace SharpLang.CompilerServices
                 var returnType = GetType(ResolveGenericsVisitor.Process(method, method.ReturnType), TypeState.StackComplete);
                 var returnValue = ConvertFromStackToLocal(returnType, stackItem);
 
-                switch (functionContext.Signature.ReturnType.ABIParameterInfo.Kind)
+                if (returnType.StackType == StackValueType.Value)
                 {
-                    case ABIParameterInfoKind.Coerced:
-                        returnValue = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(functionContext.Signature.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
-                        returnValue = LLVM.BuildLoad(builder, returnValue, string.Empty);
-                        goto case ABIParameterInfoKind.Direct;
-                    case ABIParameterInfoKind.Direct:
-                        LLVM.BuildRet(builder, returnValue);
-                        break;
-                    case ABIParameterInfoKind.Indirect:
-                        StoreValue(returnType.StackType, returnValue, LLVM.GetParam(functionContext.FunctionGlobal, 0), InstructionFlags.None);
-                        LLVM.BuildRetVoid(builder);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (functionContext.Signature.ReturnType.ABIParameterInfo.Kind)
+                    {
+                        case ABIParameterInfoKind.Coerced:
+                            returnValue = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(functionContext.Signature.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                            returnValue = LLVM.BuildLoad(builder, returnValue, string.Empty);
+                            LLVM.BuildRet(builder, returnValue);
+                            break;
+                        case ABIParameterInfoKind.Direct:
+                            returnValue = LLVM.BuildLoad(builder, returnValue, string.Empty);
+                            LLVM.BuildRet(builder, returnValue);
+                            break;
+                        case ABIParameterInfoKind.Indirect:
+                            StoreValue(returnType.StackType, returnValue, LLVM.GetParam(functionContext.FunctionGlobal, 0), InstructionFlags.None);
+                            LLVM.BuildRetVoid(builder);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                else
+                {
+                    LLVM.BuildRet(builder, returnValue);
                 }
             }
         }
@@ -401,25 +410,30 @@ namespace SharpLang.CompilerServices
             for (int index = 0; index < targetNumParams; index++)
             {
                 var llvmIndex = index + (hasStructValueReturn ? 1 : 0);
+                var parameterType = targetMethod.ParameterTypes[index];
 
                 // TODO: Casting/implicit conversion?
                 var stackItem = stack[stack.Count - targetNumParams + index];
-                args[llvmIndex] = ConvertFromStackToLocal(targetMethod.ParameterTypes[index].Type, stackItem);
+                args[llvmIndex] = ConvertFromStackToLocal(parameterType.Type, stackItem);
 
                 if (stackItem.StackType == StackValueType.Value)
                 {
-                    var structSize = LLVM.ABISizeOfType(targetData, stackItem.Type.DefaultTypeLLVM);
-                    if (structSize <= (ulong)intPtrSize)
+                    switch (parameterType.ABIParameterInfo.Kind)
                     {
-                        var structCoercedType = LLVM.IntTypeInContext(context, (uint)structSize * 8);
-                        // Coerce to integer type
-                        args[llvmIndex] = LLVM.BuildPointerCast(builder, args[llvmIndex], LLVM.PointerType(structCoercedType, 0), string.Empty);
-                        args[llvmIndex] = LLVM.BuildLoad(builder, args[llvmIndex], string.Empty);
-                    }
-                    else
-                    {
-                        // Make a copy of indirect aggregate values
-                        args[llvmIndex] = LoadValue(stackItem.Type.StackType, args[llvmIndex], InstructionFlags.None);
+                        case ABIParameterInfoKind.Direct:
+                            args[llvmIndex] = LLVM.BuildLoad(builder, args[llvmIndex], string.Empty);
+                            break;
+                        case ABIParameterInfoKind.Indirect:
+                            // Make a copy of indirect aggregate values
+                            args[llvmIndex] = LoadValue(stackItem.Type.StackType, args[llvmIndex], InstructionFlags.None);
+                            break;
+                        case ABIParameterInfoKind.Coerced:
+                            // Coerce to integer type
+                            args[llvmIndex] = LLVM.BuildPointerCast(builder, args[llvmIndex], LLVM.PointerType(parameterType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                            args[llvmIndex] = LLVM.BuildLoad(builder, args[llvmIndex], string.Empty);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
             }
@@ -431,7 +445,7 @@ namespace SharpLang.CompilerServices
             if (hasStructValueReturn)
             {
                 // Allocate storage
-                args[0] = LLVM.BuildAlloca(builder, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
+                args[0] = LLVM.BuildAlloca(builderAlloca, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
             }
 
             // Invoke method
@@ -459,21 +473,29 @@ namespace SharpLang.CompilerServices
             if (targetMethod.ReturnType.Type.TypeReferenceCecil.MetadataType != MetadataType.Void)
             {
                 ValueRef returnValue;
-                switch (targetMethod.ReturnType.ABIParameterInfo.Kind)
+                if (targetMethod.ReturnType.Type.StackType == StackValueType.Value)
                 {
-                    case ABIParameterInfoKind.Direct:
-                        returnValue = callResult;
-                        break;
-                    case ABIParameterInfoKind.Indirect:
-                        returnValue = args[0];
-                        break;
-                    case ABIParameterInfoKind.Coerced:
-                        returnValue = LLVM.BuildAlloca(builder, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
-                        var returnValueCasted = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(targetMethod.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
-                        LLVM.BuildStore(builder, callResult, returnValueCasted);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (targetMethod.ReturnType.ABIParameterInfo.Kind)
+                    {
+                        case ABIParameterInfoKind.Direct:
+                            returnValue = LLVM.BuildAlloca(builderAlloca, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
+                            LLVM.BuildStore(builder, callResult, returnValue);
+                            break;
+                        case ABIParameterInfoKind.Indirect:
+                            returnValue = args[0];
+                            break;
+                        case ABIParameterInfoKind.Coerced:
+                            returnValue = LLVM.BuildAlloca(builderAlloca, targetMethod.ReturnType.Type.DefaultTypeLLVM, string.Empty);
+                            var returnValueCasted = LLVM.BuildPointerCast(builder, returnValue, LLVM.PointerType(targetMethod.ReturnType.ABIParameterInfo.CoerceType, 0), string.Empty);
+                            LLVM.BuildStore(builder, callResult, returnValueCasted);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                else
+                {
+                    returnValue = callResult;
                 }
 
                 // Convert return value from local to stack value
