@@ -26,6 +26,7 @@ namespace SharpLang.CompilerServices
         private BuilderRef builder;
         // <summary> Extra builder used for method codegen. <summary>
         private BuilderRef builder2;
+        private BuilderRef builderAlloca;
 
         private TargetDataRef targetData;
 
@@ -80,6 +81,7 @@ namespace SharpLang.CompilerServices
             // Prepare LLVM builders
             builder = LLVM.CreateBuilderInContext(context);
             builder2 = LLVM.CreateBuilderInContext(context);
+            builderAlloca = LLVM.CreateBuilderInContext(context);
 
             InitializeDebug();
 
