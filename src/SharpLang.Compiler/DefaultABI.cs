@@ -28,11 +28,13 @@ namespace SharpLang.CompilerServices
                     return new ABIParameterInfo(ABIParameterInfoKind.Coerced, LLVM.IntTypeInContext(context, (uint)structSize * 8));
                 }
 
-                // Otherwise, fallback to passing by pointer + byval
+                // Otherwise, fallback to passing by pointer + byval (x86) or direct (x64)
+                if (intPtrSize == 8)
+                    return new ABIParameterInfo(ABIParameterInfoKind.Direct);
                 return new ABIParameterInfo(ABIParameterInfoKind.Indirect);
             }
 
-            // Other types are passed by value
+            // Other types are passed by value (pointers, int32, int64, float, etc...)
             return new ABIParameterInfo(ABIParameterInfoKind.Direct);
         }
     }
