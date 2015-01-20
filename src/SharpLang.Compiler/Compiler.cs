@@ -326,7 +326,7 @@ namespace SharpLang.CompilerServices
                 LLVM.BuildRet(builder, LLVM.ConstInt(int32LLVM, 0, false));
 
                 // Emit PInvoke Thunks and Globals needed in entry point module
-                EmitPInvokeGlobals();
+                PInvokeEmitGlobals();
 	        }
 
             LLVM.DIBuilderFinalize(debugBuilder);
