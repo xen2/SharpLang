@@ -1,3 +1,7 @@
+#ifdef __SEH__
+#include <Windows.h>
+#endif
+
 #include <cstdint>
 #include <cstdlib>
 #include <unwind.h>
@@ -8,10 +12,18 @@
 
 #include "RuntimeType.h"
 
+// TODO: Improve and unify code so that SEH and DWARF shares most of the code
+// TODO: cleanupException is not called
+// TODO: Investigate why ExceptionInfo needs aligned (x86) and alloc padding (x64)
+
 struct ExceptionInfo
 {
 	Object* exceptionObject;
 	struct _Unwind_Exception unwindException;
+#ifdef __SEH__
+	// TODO: Investigate why this is needed (otherwise crash)
+	int padding[8];
+#endif
 } __attribute__((__aligned__));
 
 int64_t exceptionBaseFromUnwindOffset = ((uintptr_t) (((ExceptionInfo*) (NULL)))) - ((uintptr_t) &(((ExceptionInfo*) (NULL))->unwindException));
@@ -178,7 +190,6 @@ static bool handleActionValue(int64_t *resultAction,
 	uint8_t TTypeEncoding,
 	const uint8_t *classInfo,
 	uintptr_t actionEntry,
-	uint64_t exceptionClass,
     struct ExceptionInfo* exceptionInfo)
 {
 	const uint8_t *actionPos = (uint8_t*)actionEntry;
@@ -211,7 +222,7 @@ static bool handleActionValue(int64_t *resultAction,
 			{
 				if (exceptionType == expectedExceptionType)
 				{
-					*resultAction = typeOffset;
+					*resultAction = typeOffset; // or should it be i + 1?
 					return true;
 				}
 
@@ -229,6 +240,144 @@ static bool handleActionValue(int64_t *resultAction,
 	return false;
 }
 
+void ParseLSDA(const uint8_t *lsda, uint8_t *ttypeEncoding, uint8_t *callSiteEncoding, const uint8_t **callSiteTableStart, const uint8_t **callSiteTableEnd, const uint8_t **classInfo)
+{
+	// Note: See JITDwarfEmitter::EmitExceptionTable(...) for corresponding
+	//       dwarf emission
+
+	// Parse LSDA header.
+	uint8_t lpStartEncoding = *lsda++;
+
+	if (lpStartEncoding != llvm::dwarf::DW_EH_PE_omit) {
+		readEncodedPointer(&lsda, lpStartEncoding);
+	}
+
+	*ttypeEncoding = *lsda++;
+	uintptr_t classInfoOffset;
+
+	if (*ttypeEncoding != llvm::dwarf::DW_EH_PE_omit) {
+		// Calculate type info locations in emitted dwarf code which
+		// were flagged by type info arguments to llvm.eh.selector
+		// intrinsic
+		classInfoOffset = readULEB128(&lsda);
+		*classInfo = lsda + classInfoOffset;
+	}
+
+	// Walk call-site table looking for range that
+	// includes current PC.
+
+	*callSiteEncoding = *lsda++;
+	uint32_t callSiteTableLength = readULEB128(&lsda);
+	*callSiteTableStart = lsda;
+	*callSiteTableEnd = *callSiteTableStart + callSiteTableLength;
+}
+
+#ifdef __SEH__
+// TODO: Reorganize method so as to share most of it with its DWARF counterpart (by adding our own interface to query/set IP, GR, unwind, etc...)
+extern "C" EXCEPTION_DISPOSITION sharpPersonality(EXCEPTION_RECORD *record,
+                                void *frame,
+                                CONTEXT *context,
+                                DISPATCHER_CONTEXT *dispatch)
+{
+	if (record->ExceptionFlags & EXCEPTION_TARGET_UNWIND)
+	{
+		// Restore rdx (stored in exception information)
+		context->Rdx = record->ExceptionInformation[1];
+		return ExceptionContinueSearch;
+	}
+
+	EXCEPTION_DISPOSITION ret = ExceptionContinueSearch;
+	struct _Unwind_Exception* exceptionObject = (struct _Unwind_Exception*)record->ExceptionInformation[0];
+
+	const uint8_t* lsda = (const uint8_t*)dispatch->HandlerData;
+
+	uintptr_t pc = dispatch->ControlPc - 1;
+
+	uintptr_t funcStart = (uintptr_t)dispatch->ImageBase + (uintptr_t)dispatch->FunctionEntry->BeginAddress;
+	uintptr_t pcOffset = pc - funcStart;
+	const uint8_t *classInfo = NULL;
+
+	uint8_t ttypeEncoding;
+	uint8_t callSiteEncoding;
+	const uint8_t *callSiteTableStart;
+	const uint8_t *callSiteTableEnd;
+	ParseLSDA(lsda, &ttypeEncoding, &callSiteEncoding, &callSiteTableStart, &callSiteTableEnd, &classInfo);
+	const uint8_t *actionTableStart = callSiteTableEnd;
+	const uint8_t *callSitePtr = callSiteTableStart;
+
+	while (callSitePtr < callSiteTableEnd) {
+		uintptr_t start = readEncodedPointer(&callSitePtr, callSiteEncoding);
+		uintptr_t length = readEncodedPointer(&callSitePtr, callSiteEncoding);
+		uintptr_t landingPad = readEncodedPointer(&callSitePtr, callSiteEncoding);
+
+		// Note: Action value
+		uintptr_t actionEntry = readULEB128(&callSitePtr);
+
+		if (landingPad == 0) {
+			continue; // no landing pad for this entry
+		}
+
+		if (actionEntry) {
+			actionEntry += ((uintptr_t) actionTableStart) - 1;
+		}
+
+		bool exceptionMatched = false;
+
+		if ((start <= pcOffset) && (pcOffset < (start + length))) {
+			int64_t actionValue = 0;
+
+			struct ExceptionInfo* exceptionInfo = (struct ExceptionInfo*)((char*)exceptionObject + exceptionBaseFromUnwindOffset);
+
+			if (actionEntry) {
+				exceptionMatched = handleActionValue(&actionValue,
+					ttypeEncoding,
+					classInfo,
+					actionEntry,
+					exceptionInfo);
+			}
+
+			//if (record->ExceptionFlags & (EXCEPTION_UNWINDING | EXCEPTION_EXIT_UNWIND)) {
+			{
+				// Found landing pad for the PC.
+				// Set Instruction Pointer to so we re-enter function
+				// at landing pad. The landing pad is created by the
+				// compiler to take two parameters in registers.
+				record->NumberParameters = 2;
+
+				// Note: this virtual register directly corresponds
+				//       to the return of the llvm.eh.selector intrinsic
+				if (!actionEntry || !exceptionMatched) {
+					// We indicate cleanup only
+					record->ExceptionInformation[1] = 0;
+				}
+				else {
+					// Matched type info index of llvm.eh.selector intrinsic
+					// passed here.
+					record->ExceptionInformation[1] = actionValue;
+				}
+
+				// To execute landing pad set here
+				RtlUnwindEx(frame, (PVOID)(funcStart + landingPad), record, exceptionInfo->exceptionObject, context, dispatch->HistoryTable);
+				__builtin_unreachable();
+			}
+			//else if (exceptionMatched) {
+			//	RtlUnwindEx(frame, (PVOID)(funcStart + landingPad), record, exceptionInfo->exceptionObject, context, dispatch->HistoryTable);
+			//	ret = ExceptionContinueSearch;
+			//}
+			//else {
+				// Note: Only non-clean up handlers are marked as
+				//       found. Otherwise the clean up handlers will be
+				//       re-found and executed during the clean up
+				//       phase.
+			//}
+
+			break;
+		}
+	}
+
+	return(ret);
+}
+#else
 extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action actions, uint64_t exceptionClass, struct _Unwind_Exception* exceptionObject, struct _Unwind_Context* context)
 {
 	const uint8_t *lsda = (const uint8_t*)_Unwind_GetLanguageSpecificData(context);
@@ -242,45 +391,18 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 	uintptr_t pcOffset = pc - funcStart;
 	const uint8_t *classInfo = NULL;
 
-	// Note: See JITDwarfEmitter::EmitExceptionTable(...) for corresponding
-	//       dwarf emission
-
-	// Parse LSDA header.
-	uint8_t lpStartEncoding = *lsda++;
-
-	if (lpStartEncoding != llvm::dwarf::DW_EH_PE_omit) {
-		readEncodedPointer(&lsda, lpStartEncoding);
-	}
-
-	uint8_t ttypeEncoding = *lsda++;
-	uintptr_t classInfoOffset;
-
-	if (ttypeEncoding != llvm::dwarf::DW_EH_PE_omit) {
-		// Calculate type info locations in emitted dwarf code which
-		// were flagged by type info arguments to llvm.eh.selector
-		// intrinsic
-		classInfoOffset = readULEB128(&lsda);
-		classInfo = lsda + classInfoOffset;
-	}
-
-	// Walk call-site table looking for range that
-	// includes current PC.
-
-	uint8_t         callSiteEncoding = *lsda++;
-	uint32_t        callSiteTableLength = readULEB128(&lsda);
-	const uint8_t   *callSiteTableStart = lsda;
-	const uint8_t   *callSiteTableEnd = callSiteTableStart +
-		callSiteTableLength;
-	const uint8_t   *actionTableStart = callSiteTableEnd;
-	const uint8_t   *callSitePtr = callSiteTableStart;
+	uint8_t ttypeEncoding;
+	uint8_t callSiteEncoding;
+	const uint8_t *callSiteTableStart;
+	const uint8_t *callSiteTableEnd;
+	ParseLSDA(lsda, &ttypeEncoding, &callSiteEncoding, &callSiteTableStart, &callSiteTableEnd, &classInfo);
+	const uint8_t *actionTableStart = callSiteTableEnd;
+	const uint8_t *callSitePtr = callSiteTableStart;
 
 	while (callSitePtr < callSiteTableEnd) {
-		uintptr_t start = readEncodedPointer(&callSitePtr,
-			callSiteEncoding);
-		uintptr_t length = readEncodedPointer(&callSitePtr,
-			callSiteEncoding);
-		uintptr_t landingPad = readEncodedPointer(&callSitePtr,
-			callSiteEncoding);
+		uintptr_t start = readEncodedPointer(&callSitePtr, callSiteEncoding);
+		uintptr_t length = readEncodedPointer(&callSitePtr, callSiteEncoding);
+		uintptr_t landingPad = readEncodedPointer(&callSitePtr, callSiteEncoding);
 
 		// Note: Action value
 		uintptr_t actionEntry = readULEB128(&callSitePtr);
@@ -311,7 +433,6 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 					ttypeEncoding,
 					classInfo,
 					actionEntry,
-					exceptionClass,
 					exceptionInfo);
 			}
 
@@ -360,13 +481,14 @@ extern "C" _Unwind_Reason_Code sharpPersonality(int version, _Unwind_Action acti
 
 	return(ret);
 }
+#endif
 
 void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
 {
 	if (ex != NULL)
 	{
 		// TODO: Check exception class
-		free((char*) ex + exceptionBaseFromUnwindOffset);
+		free((char*)ex + exceptionBaseFromUnwindOffset);
 	}
 }
 
@@ -378,10 +500,53 @@ extern "C" void throwException(Object* obj)
 	ex->unwindException.exception_class = 0; // TODO
 	ex->unwindException.exception_cleanup = cleanupException;
 	_Unwind_RaiseException(&ex->unwindException);
-	__builtin_unreachable();
+	__builtin_unreachable(); 
 }
 
+#ifdef __SEH__
+extern "C" uint32_t System_Reflection_Assembly__GetCallStack_System_IntPtr___(Array<uintptr_t>* result)
+{
+	UNWIND_HISTORY_TABLE history;
+	CONTEXT context;
+	DISPATCHER_CONTEXT dispatch;
 
+	memset(&history, 0, sizeof(history));
+	memset(&dispatch, 0, sizeof(dispatch));
+
+	context.ContextFlags = CONTEXT_ALL;
+	RtlCaptureContext(&context);
+
+	int entryCount = 0;
+
+	while (true)
+	{
+		// Find function start
+		ULONGLONG imageBase;
+		auto functionEntry = RtlLookupFunctionEntry(context.Rip, &imageBase, &history);
+
+		if (!functionEntry)
+			break;
+
+		// Add result
+		result->value[entryCount++] = imageBase + functionEntry->BeginAddress;
+
+		// Too many entries?
+		if (entryCount == result->length)
+			break;
+
+		// Unwind next frame
+		PVOID handlerData;
+		ULONG64 establisherFrame;
+		RtlVirtualUnwind(0, imageBase, context.Rip, functionEntry, &context, &handlerData, &establisherFrame, NULL);
+
+		if (context.Rip == 0)
+			break;
+	}
+
+	return entryCount;
+}
+
+#else
 struct CallstackData
 {
 	CallstackData(Array<uintptr_t>* callback) : callstack(callback), entries(0) {}
@@ -412,3 +577,4 @@ extern "C" uint32_t System_Reflection_Assembly__GetCallStack_System_IntPtr___(Ar
 	_Unwind_Backtrace(&trace_func, &data);
 	return data.entries;
 }
+#endif
