@@ -39,10 +39,11 @@ It's still a early work in progress. Any help/feedback is welcome!
  * PInvoke (simple, no marshalling)
  * Delegate (no multicast delegate yet)
  * Boxing
- * Exceptions
+ * Exceptions (DWARF and SEH)
  * Converts huge libraries (i.e. Mono mscorlib, System, System.Core, System.Xml, etc...)
  * Reflection (only types, no method/field yet)
-* Simple code linked against SharpLang-compiled Mono mscorlib is starting to work
+ * x86 and x64
+* Simple code linked against SharpLang-compiled Mono mscorlib is starting to work (i.e. WinForms+SharpDX)
 
 ### What's next
 
