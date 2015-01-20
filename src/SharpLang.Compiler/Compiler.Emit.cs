@@ -1209,6 +1209,7 @@ namespace SharpLang.CompilerServices
                 switch (operand2.StackType)
                 {
                     case StackValueType.Int32:
+                        break;
                     case StackValueType.NativeInt:
                         value2 = LLVM.BuildPtrToInt(builder, value2, nativeIntLLVM, string.Empty);
                         break;
