@@ -155,7 +155,7 @@ namespace SharpLang.CompilerServices
                 arguments.AppendFormat("--target={0} -g", triplet);
                 arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", archSize);
                 arguments.AppendFormat(" -I{0}/include -I{0}/include/c++ -I{0}/include/c++/{1} -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", mingwFolder, triplet);
-                processStartInfo.EnvironmentVariables["PATH"] += string.Format(@";..\..\..\..\deps\mingw{0}\bin", archSize);
+                processStartInfo.EnvironmentVariables["PATH"] = string.Format(@"..\..\..\..\deps\mingw{0}\bin;", archSize) + processStartInfo.EnvironmentVariables["PATH"];
             }
 
             arguments.Append(' ').Append(args);
