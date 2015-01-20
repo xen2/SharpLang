@@ -129,5 +129,5 @@ extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringUni_System
 extern "C" int32_t System_Runtime_InteropServices_Marshal__SizeOf_System_Type_(RuntimeType* type)
 {
 	// TODO: Ugly hack, this is not a valid implementation, but should work out temporarily for simplest cases.
-	return type->runtimeEEType->objectSize - 4;
+	return type->runtimeEEType->objectSize - sizeof(Object);
 }
