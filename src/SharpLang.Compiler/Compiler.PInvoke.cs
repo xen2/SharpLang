@@ -54,12 +54,16 @@ namespace SharpLang.CompilerServices
 
         private void PInvokeEmitThunk(PInvokeTarget target, StringBuilder pinvokeThunks, int i)
         {
-            if (target == PInvokeTarget.WindowsX86)
+            if (target == PInvokeTarget.WindowsX86 || target == PInvokeTarget.WindowsX64)
             {
                 // Set eax to thunk id
                 pinvokeThunks.AppendFormat("    movl ${0}, %eax\n", i);
                 // Call thunkHelper dispatch function
-                pinvokeThunks.AppendFormat("    jmp _thunkHelper\n", i*intPtrSize);
+                pinvokeThunks.AppendFormat("    jmp {0}\n", AssemblySymbolName(target, "thunkHelper"));
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -86,6 +90,27 @@ namespace SharpLang.CompilerServices
                 pinvokeThunks.AppendLine("    popl %edx");
                 // Jump to eax = ThunkTargets[index]
                 pinvokeThunks.AppendLine("    jmp *%eax");
+            }
+            else if (target == PInvokeTarget.WindowsX64)
+            {
+                // Save registers
+                pinvokeThunks.AppendLine("    pushq %rcx");
+                // ThunkCurrentId = index (note: ThunkCurrentId is a TLS variable)
+                pinvokeThunks.AppendLine("    movl _tls_index(%rip), %r11d");
+                pinvokeThunks.AppendLine("    movq %gs:58h, %r10");
+                pinvokeThunks.AppendLine("    movq (%r10,%r11,8), %rcx");
+                pinvokeThunks.AppendLine("    movq %rax, ThunkCurrentId@SECREL32(%rcx)");
+                // Load ThunkTargets[index] in rax
+                pinvokeThunks.AppendLine("    leaq ThunkTargets, %rcx");
+                pinvokeThunks.AppendLine("    movq (%rcx,%rax,8), %rax");
+                // Restore registers
+                pinvokeThunks.AppendLine("    popq %rcx");
+                // Jump to eax = ThunkTargets[index]
+                pinvokeThunks.AppendLine("    jmp *%rax");
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 
