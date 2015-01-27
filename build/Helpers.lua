@@ -21,6 +21,8 @@ msvc_buildflags = { }
 
 msvc_cpp_defines = { }
 
+gcc_linkflags = { "-Wl,--no-undefined" }
+
 function SetupNativeProject()
   location (path.join(builddir, "projects"))
 
@@ -39,7 +41,8 @@ function SetupNativeProject()
 
   configuration { "gmake" }
     buildoptions { gcc_buildflags }
-    
+    linkoptions { gcc_linkflags }
+
   local lang = premake.api.scope.project.language
   if lang == "C++" then
     configuration { "macosx" }
