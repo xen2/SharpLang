@@ -66,9 +66,6 @@ function SetupLLVMLibDirs()
   configuration "not vs*"
     defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS" }
 
-  configuration "macosx"
-    links { "c++", "curses", "pthread", "z" }
-
   configuration(c)
 end
 
@@ -76,44 +73,50 @@ function SetupLLVMLibs()
   configuration "*"
     links
     {
-      "LLVMAnalysis",
-      "LLVMAsmParser",
-      "LLVMAsmPrinter",
-      "LLVMBitReader",
-      "LLVMBitWriter",
-      "LLVMCodeGen",
-      "LLVMCore",
-      "LLVMDebugInfo",
-      "LLVMExecutionEngine",
-      "LLVMipa",
-      "LLVMipo",
-      "LLVMInstCombine",
-      "LLVMInstrumentation",
-      "LLVMIRReader",
-      "LLVMLinker",
-      "LLVMMC",
-      "LLVMMCDisassembler",
-      "LLVMMCParser",
+      -- llvm-config --libs core debuginfo codegen all-targets ipo linker irreader bitwriter option linker instrumentation executionengine objcarcopts
       "LLVMObjCARCOpts",
-      "LLVMObject",
+      "LLVMExecutionEngine",
+      "LLVMInstrumentation",
       "LLVMOption",
-      "LLVMProfileData",
-      "LLVMScalarOpts",
-      "LLVMSelectionDAG",
-      "LLVMSupport",
-      "LLVMTarget",
-      "LLVMTransformUtils",
+      "LLVMBitWriter",
+      "LLVMIRReader",
+      "LLVMAsmParser",
+      "LLVMLinker",
+      "LLVMipo",
       "LLVMVectorize",
-      "LLVMX86AsmParser",
-      "LLVMX86AsmPrinter",
-      "LLVMX86CodeGen",
-      "LLVMX86Desc",
-      "LLVMX86Disassembler",
-      "LLVMX86Info",
-      "LLVMX86Utils",
       "LLVMCppBackendCodeGen",
       "LLVMCppBackendInfo",
+      "LLVMX86Disassembler",
+      "LLVMX86AsmParser",
+      "LLVMX86CodeGen",
+      "LLVMSelectionDAG",
+      "LLVMAsmPrinter",
+      "LLVMX86Desc",
+      "LLVMMCDisassembler",
+      "LLVMX86Info",
+      "LLVMX86AsmPrinter",
+      "LLVMX86Utils",
+      "LLVMCodeGen",
+      "LLVMScalarOpts",
+      "LLVMProfileData",
+      "LLVMInstCombine",
+      "LLVMTransformUtils",
+      "LLVMipa",
+      "LLVMAnalysis",
+      "LLVMTarget",
+      "LLVMDebugInfo",
+      "LLVMObject",
+      "LLVMMCParser",
+      "LLVMMC",
+      "LLVMBitReader",
+      "LLVMCore",
+      "LLVMSupport",
     }
+
+  configuration "gmake"
+    links { "curses", "pthread", "z", "dl" }
+  configuration "macosx"
+    links { "c++" }
     
   configuration(c)
 end
