@@ -2,6 +2,7 @@
 #define SHARPLANG_RUNTIME_TYPE_H
 
 #include <stdint.h>
+#include <string.h>
 
 struct Object;
 struct RuntimeType;
