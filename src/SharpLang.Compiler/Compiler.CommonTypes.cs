@@ -53,9 +53,21 @@ namespace SharpLang.CompilerServices
         private Type sharpLangTypeType;
         private Type sharpLangModuleType;
 
-        public static string LocateRuntimeModule(string triple)
+        static string LocateRuntimeModuleHelper(string triple)
         {
             return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple).Replace('\\', Path.DirectorySeparatorChar);
+        }
+
+        public static string LocateRuntimeModule(string triple)
+        {
+            // Locate runtime
+            var runtimeLocation = LocateRuntimeModuleHelper(triple);
+            if (!File.Exists(runtimeLocation))
+                runtimeLocation = LocateRuntimeModuleHelper(triple.Replace("-unknown", string.Empty));
+            if (!File.Exists(runtimeLocation))
+                throw new InvalidOperationException(string.Format("Can't locate runtime for target {0}", triple));
+
+            return runtimeLocation;
         }
 
         public void InitializeCommonTypes()
