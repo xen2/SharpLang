@@ -494,7 +494,11 @@ void cleanupException(_Unwind_Reason_Code reason, struct _Unwind_Exception* ex)
 
 extern "C" void throwException(Object* obj)
 {
+#if _WIN32
 	struct ExceptionInfo* ex = (struct ExceptionInfo*)_aligned_malloc(sizeof(struct ExceptionInfo), 16);
+#else
+	struct ExceptionInfo* ex = (struct ExceptionInfo*)aligned_alloc(16, sizeof(struct ExceptionInfo));
+#endif
 	memset(ex, 0, sizeof(*ex));
 	ex->exceptionObject = obj;
 	ex->unwindException.exception_class = 0; // TODO

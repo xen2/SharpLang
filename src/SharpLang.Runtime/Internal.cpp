@@ -6,7 +6,12 @@
 #include "char-category-data.h"
 #include "char-conversions.h"
 #include "number-formatter.h"
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <thread>
+#include <sys/utsname.h>
+#endif
 
 extern "C" void* System_SharpLangHelper__GetObjectPointer_System_Object_(Object* obj)
 {
@@ -149,14 +154,34 @@ extern "C" int32_t System_Environment__get_Platform__()
 
 extern "C" int32_t System_Environment__get_ProcessorCount__()
 {
+#ifdef _WIN32
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
-
 	return systemInfo.dwNumberOfProcessors;
+#else
+	return std::thread::hardware_concurrency();
+#endif
+}
+
+String* createString(const char* str, int length = -1)
+{
+	if (length == -1)
+		length = strlen(str);
+
+	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
+	auto result = (String*)malloc(sizeof(String));
+	result->length = length;
+	result->value = (char16_t*)malloc(sizeof(char16_t) * (length + 1));
+
+	auto strStart = result->value;
+	ConvertUTF8toUTF16((const UTF8**)&str, (UTF8*)str + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
+
+	return result;
 }
 
 extern "C" String* System_Environment__GetOSVersionString__()
 {
+#ifdef _WIN32
 	OSVERSIONINFOEX versionInfo;
 	versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
 	if (!GetVersionEx((OSVERSIONINFO*)&versionInfo))
@@ -171,14 +196,13 @@ extern "C" String* System_Environment__GetOSVersionString__()
 	assert(length < sizeof(buffer));
 
 	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
-	auto str = (String*)malloc(sizeof(String));
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
-
-	auto strStart = str->value;
-	ConvertUTF8toUTF16((const UTF8**)&buffer, (UTF8*)buffer + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
-
-	return str;
+	return createString(buffer, length);
+#else
+	struct utsname name;
+	if (uname(&name) == 0)
+		return createString(name.release);
+	return createString("0.0.0.1");
+#endif
 }
 
 extern "C" void System_Threading_Monitor__Enter_System_Object_(Object* object)
@@ -338,6 +362,7 @@ extern "C" bool System_Security_SecurityManager__get_SecurityEnabled__()
 
 extern "C" String* System_Environment__internalGetEnvironmentVariable_System_String_(String* variable)
 {
+#if _WIN32
 	// Query length first
 	auto valueLength = GetEnvironmentVariableW((LPCWSTR)variable->value, NULL, 0);
 	if (valueLength == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
@@ -354,6 +379,9 @@ extern "C" String* System_Environment__internalGetEnvironmentVariable_System_Str
 	// TODO: Check value didn't change behind our back? (actualValueLength changed)
 
 	return value;
+#else
+	assert(false);
+#endif
 }
 
 extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object_T__T_T_(Object** location1, Object* value, Object* comparand)
