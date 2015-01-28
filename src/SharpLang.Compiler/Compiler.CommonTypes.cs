@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2014 SharpLang - Virgile Bello
 
 using System;
+using System.IO;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -54,7 +55,7 @@ namespace SharpLang.CompilerServices
 
         public static string LocateRuntimeModule(string triple)
         {
-            return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple);
+            return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple).Replace('\\', Path.DirectorySeparatorChar);
         }
 
         public void InitializeCommonTypes()
