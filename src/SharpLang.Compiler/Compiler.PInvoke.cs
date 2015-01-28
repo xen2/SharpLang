@@ -16,11 +16,11 @@ namespace SharpLang.CompilerServices
             var pinvokeThunks = new StringBuilder();
 
             PInvokeTarget target;
-            if (LLVM.GetTarget(runtimeModule).StartsWith("i686-w64-"))
+            if (triple.StartsWith("i686-pc-windows-"))
             {
                 target = PInvokeTarget.WindowsX86;
             }
-            else if (LLVM.GetTarget(runtimeModule).StartsWith("x86_64-w64-"))
+            else if (triple.StartsWith("x86_64-pc-windows-"))
             {
                 target = PInvokeTarget.WindowsX64;
             }
