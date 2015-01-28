@@ -412,30 +412,33 @@ namespace SharpLang.CompilerServices
                         function.VirtualSlot = (int)(GetMethodId(methodReference) % InterfaceMethodTableSize);
                         function.InterfaceSlot = function.GeneratedValue;
                     }
-                    else if (method.IsNewSlot)
-                    {
-                        // New slot
-                        function.VirtualSlot = @class.VirtualTable.Count;
-                        @class.VirtualTable.Add(function);
-                    }
                     else
                     {
-                        // Find slot in base types
-                        var baseType = @class.BaseType;
                         Function matchedMethod = null;
-                        while (baseType != null)
+                        if (!method.IsNewSlot)
                         {
-                            matchedMethod = CecilExtensions.TryMatchMethod(baseType, methodReference);
-                            if (matchedMethod != null)
-                                break;
-                            baseType = baseType.BaseType;
+                            // Find slot in base types
+                            var baseType = @class.BaseType;
+                            while (baseType != null)
+                            {
+                                matchedMethod = CecilExtensions.TryMatchMethod(baseType, methodReference);
+                                if (matchedMethod != null)
+                                    break;
+                                baseType = baseType.BaseType;
+                            }
                         }
 
                         if (matchedMethod == null)
-                            throw new InvalidOperationException(string.Format("Could not find a slot for virtual function {0} in parents of class {1}", method, @class.Type.TypeReferenceCecil));
-
-                        function.VirtualSlot = matchedMethod.VirtualSlot;
-                        @class.VirtualTable[function.VirtualSlot] = function;
+                        {
+                            // New slot
+                            function.VirtualSlot = @class.VirtualTable.Count;
+                            @class.VirtualTable.Add(function);
+                        }
+                        else
+                        {
+                            function.VirtualSlot = matchedMethod.VirtualSlot;
+                            @class.VirtualTable[function.VirtualSlot] = function;
+                        }
                     }
                 }
                 else
