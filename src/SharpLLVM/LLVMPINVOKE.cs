@@ -756,9 +756,6 @@ class LLVMPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstInt")]
   public static extern System.IntPtr ConstInt(System.IntPtr jarg1, ulong jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstIntOfArbitraryPrecision")]
-  public static extern System.IntPtr ConstIntOfArbitraryPrecision(System.IntPtr jarg1, uint arg2_count, System.IntPtr jarg2);
-
   [global::System.Runtime.InteropServices.DllImport("SharpLLVM.Native.dll", EntryPoint="CSharp_ConstIntOfString")]
   public static extern System.IntPtr ConstIntOfString(System.IntPtr jarg1, string jarg2, byte jarg3);
 

@@ -28,6 +28,7 @@
 
 %ignore LLVMContextSetDiagnosticHandler;
 %ignore LLVMContextSetYieldCallback;
+%ignore LLVMConstIntOfArbitraryPrecision;
 
 typedef bool LLVMBool;
 
