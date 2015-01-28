@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdint.h>
 #include <string.h>
 
@@ -12,15 +14,20 @@ enum class PInvokeAttributes : uint16_t
 
 extern "C" void* PInvokeOpenLibrary(const char* moduleName)
 {
+#ifdef _WIN32
 	// Current module?
 	if (strcmp(moduleName, "__Internal") == 0)
 		return GetModuleHandle(NULL);
 
 	return LoadLibrary(moduleName);
+#else
+	return NULL;
+#endif
 }
 
 extern "C" void* PInvokeGetProcAddress(void* module, const char* procName, PInvokeAttributes pinvokeAttributes)
 {
+#ifdef _WIN32
 	// Try to load with exact name first
 	auto result = (void*)GetProcAddress((HMODULE)module, procName);
 	if (result != NULL)
@@ -44,4 +51,7 @@ extern "C" void* PInvokeGetProcAddress(void* module, const char* procName, PInvo
 	result = (void*)GetProcAddress((HMODULE)module, charsetProcName);
 	free(charsetProcName);
 	return result;
+#else
+	return NULL;
+#endif
 }

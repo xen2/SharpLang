@@ -1,5 +1,7 @@
 #include "RuntimeType.h"
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 extern "C" char16_t System_IO_MonoIO__get_VolumeSeparatorChar__()
 {
@@ -21,6 +23,7 @@ extern "C" char16_t System_IO_MonoIO__get_PathSeparator__()
 	return u';';
 }
 
+#ifdef _WIN32
 extern "C" void* System_IO_MonoIO__get_ConsoleOutput__()
 {
 	return GetStdHandle(STD_OUTPUT_HANDLE);
@@ -77,3 +80,4 @@ extern "C" uint32_t System_IO_MonoIO__GetFileType_System_IntPtr_System_IO_MonoIO
 
 	return result;
 }
+#endif

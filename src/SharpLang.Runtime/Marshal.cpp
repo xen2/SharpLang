@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdint.h>
 #include <string.h>
 #include "RuntimeType.h"
@@ -6,7 +8,11 @@
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__GetLastWin32Error__()
 {
+#ifdef _WIN32
 	return GetLastError();
+#else
+	assert(false);
+#endif
 }
 
 extern "C" void System_Runtime_InteropServices_Marshal__copy_to_unmanaged_System_Array_System_Int32_System_IntPtr_System_Int32_(Array<uint8_t>* source, int32_t sourceIndex, uint8_t* dest, int32_t length)
@@ -43,27 +49,45 @@ extern "C" void System_Runtime_InteropServices_Marshal__copy_from_unmanaged_Syst
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__AddRefInternal_System_IntPtr_(void* pUnk)
 {
+#ifdef _WIN32
 	return ((IUnknown*)pUnk)->AddRef();
+#else
+	assert(false);
+#endif
 }
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__ReleaseInternal_System_IntPtr_(void* pUnk)
 {
+#ifdef _WIN32
 	return ((IUnknown*)pUnk)->Release();
+#else
+	assert(false);
+#endif
 }
 
+#ifdef _WIN32
 extern "C" int32_t System_Runtime_InteropServices_Marshal__QueryInterfaceInternal_System_IntPtr_System_Guid__System_IntPtr__(void* pUnk, IID iid, void** ppv)
 {
 	return ((IUnknown*)pUnk)->QueryInterface(iid, ppv);
 }
+#endif
 
 extern "C" void* System_Runtime_InteropServices_Marshal__AllocHGlobal_System_IntPtr_(size_t size)
 {
+#ifdef _WIN32
 	return GlobalAlloc(GMEM_FIXED, size);
+#else
+	return malloc(size);
+#endif
 }
 
 extern "C" void System_Runtime_InteropServices_Marshal__FreeHGlobal_System_IntPtr_(void* hglobal)
 {
+#ifdef _WIN32
 	GlobalFree(hglobal);
+#else
+	free(hglobal);
+#endif
 }
 
 extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalAnsi_System_String_(String* str)
