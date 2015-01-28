@@ -1,0 +1,13 @@
+<Project DefaultTargets="PrintTargetPath" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="PrintTargetPath">
+    <MSBuild
+        Projects="$(ProjectFile)"
+        Targets="GetTargetPath"
+        Properties="Platform=$(Platform);Configuration=$(Configuration)">
+
+      <Output TaskParameter="TargetOutputs" ItemName="TargetPath" />
+
+    </MSBuild>
+    <Message Importance="High" Text="TargetPath: @(TargetPath)"/>
+  </Target>
+</Project>
