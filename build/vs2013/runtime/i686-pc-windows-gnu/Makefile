@@ -3,24 +3,18 @@
 .NOTPARALLEL:
 
 ifndef config
-  config=debug_x32
+  config=debug
 endif
 
 ifndef verbose
   SILENT = @
 endif
 
-ifeq ($(config),debug_x32)
-  SharpLang.Runtime_config = debug_x32
+ifeq ($(config),debug)
+  SharpLang.Runtime_config = debug
 endif
-ifeq ($(config),debug_x64)
-  SharpLang.Runtime_config = debug_x64
-endif
-ifeq ($(config),release_x32)
-  SharpLang.Runtime_config = release_x32
-endif
-ifeq ($(config),release_x64)
-  SharpLang.Runtime_config = release_x64
+ifeq ($(config),release)
+  SharpLang.Runtime_config = release
 endif
 
 PROJECTS := SharpLang.Runtime
@@ -42,10 +36,8 @@ help:
 	@echo "Usage: make [config=name] [target]"
 	@echo ""
 	@echo "CONFIGURATIONS:"
-	@echo "  debug_x32"
-	@echo "  debug_x64"
-	@echo "  release_x32"
-	@echo "  release_x64"
+	@echo "  debug"
+	@echo "  release"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"

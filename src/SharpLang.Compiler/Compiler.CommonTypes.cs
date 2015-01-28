@@ -52,10 +52,15 @@ namespace SharpLang.CompilerServices
         private Type sharpLangTypeType;
         private Type sharpLangModuleType;
 
+        public static string LocateRuntimeModule(string triple)
+        {
+            return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple);
+        }
+
         public void InitializeCommonTypes()
         {
             // Load runtime
-            runtimeModule = LoadModule(context, @"SharpLang.Runtime.bc");
+            runtimeModule = LoadModule(context, LocateRuntimeModule(triple));
 
             // Load data layout from runtime
             var dataLayout = LLVM.GetDataLayout(runtimeModule);
@@ -66,7 +71,7 @@ namespace SharpLang.CompilerServices
             int32LLVM = LLVM.Int32TypeInContext(context);
             int64LLVM = LLVM.Int64TypeInContext(context);
             intPtrSize = (int)LLVM.ABISizeOfType(targetData, intPtrLLVM);
-            nativeIntLLVM = LLVM.IntTypeInContext(context, (uint)intPtrSize * 8); // Or int64LLVM?
+            nativeIntLLVM = LLVM.IntTypeInContext(context, (uint)intPtrSize * 8);
 
             // Prepare system types, for easier access
             intPtr = GetType(corlib.MainModule.GetType(typeof(IntPtr).FullName), TypeState.StackComplete);

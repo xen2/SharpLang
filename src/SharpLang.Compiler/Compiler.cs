@@ -18,6 +18,8 @@ namespace SharpLang.CompilerServices
     /// </summary>
     public sealed partial class Compiler
     {
+        private string triple;
+
         /// <summary> Current module being generated. </summary>
         private ModuleRef module;
         private ContextRef context;
@@ -55,6 +57,11 @@ namespace SharpLang.CompilerServices
         /// <summary> True when running unit tests. This will try to avoid using real mscorlib for faster codegen, linking and testing. </summary>
         public bool TestMode { get; set; }
 
+        public Compiler(string triple)
+        {
+            this.triple = triple;
+        }
+
         public void PrepareAssembly(AssemblyDefinition assembly)
         {
             this.assembly = assembly;
@@ -72,8 +79,7 @@ namespace SharpLang.CompilerServices
             InitializeCommonTypes();
 
             // TODO: Choose appropriate triple depending on target
-            var target = LLVM.GetTarget(runtimeModule);
-            LLVM.SetTarget(module, target);
+            LLVM.SetTarget(module, triple);
 
             // Initialize ABI
             abi = new DefaultABI(context, targetData);
