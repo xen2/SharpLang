@@ -3,6 +3,7 @@ Thumbs.db
 #Ignore files build by Visual Studio
 *.obj
 *.exe
+*.bc
 *.pdb
 *.user
 *.aps
@@ -32,6 +33,6 @@ _ReSharper*/
 /build/vs2013/gen
 /build/gmake
 /deps/mingw32
+/deps/mingw64
 /tools/swig
 /src/SharpLang.Compiler.Tests/tests-codegen/output/
-/src/SharpLang.Compiler.Tests/tests-codegen/*.bc
