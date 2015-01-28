@@ -12,10 +12,9 @@ Note: There are manual steps that should be automated/simplified at some point.
 4. Download and install [python](https://www.python.org/downloads/). Alternatively, set `PYTHON_EXECUTABLE:FILEPATH` variable in `<SharpLang>\deps\llvm\build\CMakeCache.txt` to `<SharpLang>/deps/mingw32/opt/bin/python.exe`.
 5. Download [SWIG](http://swig.org/download.html) and extract it in `<SharpLang>\tools\swig`.
 6. Run `<SharpLang>\deps\build_llvm_clang_vs2013_x32.bat`. This will build LLVM and Clang both in RelWithDebInfo and Debug mode with VS2013.
-7. Run `<SharpLang>\deps\SharpLang.Build.Tasks\build.cmd`. This will build necessary SharpLang build tasks.
-8. Open `<SharpLang>\build\vs2013\SharpLang.sln`.
-9. Switch Active solution platform to *x86* in Build > Configuration Manager.
-10. Build and play with tests. [NUnit Test Adapter](http://visualstudiogallery.msdn.microsoft.com/6ab922d0-21c0-4f06-ab5f-4ecd1fe7175d) extension or [Resharper](http://www.jetbrains.com/resharper/) has to be installed in order to get test cases listed in *Test Explorer*.
+7. Open `<SharpLang>\build\vs2013\SharpLang.sln`.
+8. Switch Active solution platform to *x86* in Build > Configuration Manager.
+9. Build and play with tests. [NUnit Test Adapter](http://visualstudiogallery.msdn.microsoft.com/6ab922d0-21c0-4f06-ab5f-4ecd1fe7175d) extension or [Resharper](http://www.jetbrains.com/resharper/) has to be installed in order to get test cases listed in *Test Explorer*.
 
 *Note: In default mode (Debug and RelWithDebInfo) the build artefacts require about 14 GB of disk space.*
 
