@@ -39,7 +39,12 @@ namespace SharpLang.CompilerServices
         /// </value>
         public static string Clang { get; set; }
 
-        public static void CompileAssembly(string inputFile, string outputFile, bool generateIR = false, bool verifyModule = true, System.Type[] additionalTypes = null)
+        public static string GetDefaultTriple()
+        {
+            return LLVM.GetDefaultTargetTriple().Replace("msvc", "gnu");
+        }
+
+        public static void CompileAssembly(string inputFile, string outputFile, string triple, bool generateIR = false, bool verifyModule = true, System.Type[] additionalTypes = null)
         {
             var assemblyDefinition = LoadAssembly(inputFile);
 
@@ -48,7 +53,7 @@ namespace SharpLang.CompilerServices
             mcg.Generate();
             //mcg.AssemblyDefinition.Write(Path.Combine(Path.GetDirectoryName(inputFile), Path.GetFileNameWithoutExtension(inputFile) + ".Marshalled.dll"), new WriterParameters {  });
 
-            var compiler = new Compiler();
+            var compiler = new Compiler(triple);
             compiler.TestMode = additionalTypes != null;
             compiler.PrepareAssembly(assemblyDefinition);
 
@@ -124,8 +129,11 @@ namespace SharpLang.CompilerServices
 
         private static readonly bool UseMSVCToolChain = Environment.OSVersion.Platform == PlatformID.Win32NT && false;
 
-        public static void ExecuteClang(string args)
+        public static void ExecuteClang(string triple, string args)
         {
+            if (triple == null)
+                triple = GetDefaultTriple();
+
             var arguments = new StringBuilder();
 
             // On Windows, we need to have vcvars32 called before clang (so that it can find linker)
@@ -148,14 +156,19 @@ namespace SharpLang.CompilerServices
             else
             {
                 // Add mingw32 paths
-                int archSize = IntPtr.Size * 8;
-                var cpu = archSize == 64 ? "x86_64" : "i686";
-                var triplet = string.Format("{0}-w64-mingw32", cpu);
-                var mingwFolder = string.Format("../../../../deps/mingw{0}/{1}", archSize, triplet);
-                arguments.AppendFormat("--target={0} -g", triplet);
+                var cpu = triple.Split('-').First();
+                var archSize = cpu == "x86_64" ? 64 : 32;
+                arguments.AppendFormat("--target={0} -g -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", triple);
                 arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", archSize);
-                arguments.AppendFormat(" -I{0}/include -I{0}/include/c++ -I{0}/include/c++/{1} -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", mingwFolder, triplet);
-                processStartInfo.EnvironmentVariables["PATH"] = string.Format(@"..\..\..\..\deps\mingw{0}\bin;", archSize) + processStartInfo.EnvironmentVariables["PATH"];
+
+                if (triple.Contains("windows-gnu") || triple.Contains("mingw"))
+                {
+                    var mingwTriple = string.Format("{0}-w64-mingw32", cpu);
+
+                    var mingwFolder = string.Format("../../../../deps/mingw{0}/{1}", archSize, mingwTriple);
+                    arguments.AppendFormat(" -I{0}/include -I{0}/include/c++ -I{0}/include/c++/{1}", mingwFolder, mingwTriple);
+                    processStartInfo.EnvironmentVariables["PATH"] = string.Format(@"..\..\..\..\deps\mingw{0}\bin;", archSize) + processStartInfo.EnvironmentVariables["PATH"];
+                }
             }
 
             arguments.Append(' ').Append(args);
@@ -171,10 +184,13 @@ namespace SharpLang.CompilerServices
                     processLinkerOutput));
         }
 
-        public static void LinkBitcodes(string outputFile, params string[] bitcodeFiles)
+        public static void LinkBitcodes(string triple, string outputFile, params string[] bitcodeFiles)
         {
+            if (triple == null)
+                triple = GetDefaultTriple();
+
             var filesToLink = new List<string>();
-            filesToLink.Add(@"SharpLang.Runtime.bc");
+            filesToLink.Add(Compiler.LocateRuntimeModule(triple));
 
             var arguments = new StringBuilder();
             
@@ -191,7 +207,7 @@ namespace SharpLang.CompilerServices
             //arguments.Append(" --driver-mode=g++ -std=c++11");
             arguments.AppendFormat(" {0} -o {1}", string.Join(" ", filesToLink), outputFile);
 
-            ExecuteClang(arguments.ToString());
+            ExecuteClang(triple, arguments.ToString());
         }
 
         private static void CreateCompilerWrapper()

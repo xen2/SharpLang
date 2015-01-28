@@ -52,7 +52,7 @@ namespace SharpLang.CompilerServices.Tests
 
             // Compile PInvokeTest.cpp
             var pinvokeTestLibrary = Path.Combine(Path.GetDirectoryName(outputAssembly), "PInvokeTest.dll");
-            Driver.ExecuteClang(string.Format("{0} -std=c++11 -dynamiclib -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-pinvoke"), "PInvokeTest.cpp"), pinvokeTestLibrary));
+            Driver.ExecuteClang(Driver.GetDefaultTriple(), string.Format("{0} -std=c++11 -dynamiclib -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-pinvoke"), "PInvokeTest.cpp"), pinvokeTestLibrary));
 
             // Execute original and ours
             var output1 = ExecuteAndCaptureOutput(sourceAssembly);
@@ -77,7 +77,7 @@ namespace SharpLang.CompilerServices.Tests
                 Console.WriteLine("Converting assembly {0} to LLVM bitcode...", Path.GetFileName(assemblyFile));
 
                 var outputBitcode = Path.Combine(Path.GetDirectoryName(assemblyFile), Path.GetFileNameWithoutExtension(assemblyFile) + ".bc");
-                Driver.CompileAssembly(assemblyFile, outputBitcode);
+                Driver.CompileAssembly(assemblyFile, outputBitcode, Driver.GetDefaultTriple());
                 outputBitcodes.Add(outputBitcode);
             }
 
@@ -89,7 +89,7 @@ namespace SharpLang.CompilerServices.Tests
             // Link bitcodes
             Console.WriteLine("Compiling to machine code and linking...");
             SetupLocalToolchain();
-            Driver.LinkBitcodes(outputAssembly, outputBitcodes.ToArray());
+            Driver.LinkBitcodes(Driver.GetDefaultTriple(), outputAssembly, outputBitcodes.ToArray());
 
             Console.WriteLine("Done.");
 
@@ -113,7 +113,7 @@ namespace SharpLang.CompilerServices.Tests
             SetupLocalToolchain();
 
             // Compile with a few additional corlib types useful for normal execution
-            Driver.CompileAssembly(outputAssembly, bitcodeFile, verifyModule: true, additionalTypes: new[]
+            Driver.CompileAssembly(outputAssembly, bitcodeFile, Driver.GetDefaultTriple(), verifyModule: true, additionalTypes: new[]
             {
                 typeof(Exception),
                 typeof(OverflowException),
@@ -128,10 +128,10 @@ namespace SharpLang.CompilerServices.Tests
                 Path.GetFileNameWithoutExtension(outputAssembly) + "-llvm.exe");
 
             // Compile MiniCorlib.cpp
-            Driver.ExecuteClang(string.Format("{0} -std=c++11 -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.cpp"), Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc")));
+            Driver.ExecuteClang(Driver.GetDefaultTriple(), string.Format("{0} -std=c++11 -emit-llvm -c -o {1}", Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.cpp"), Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc")));
 
             // Link bitcode and runtime
-            Driver.LinkBitcodes(outputFile, bitcodeFile, Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc"));
+            Driver.LinkBitcodes(Driver.GetDefaultTriple(), outputFile, bitcodeFile, Path.Combine(Utils.GetTestsDirectory("tests-codegen"), "MiniCorlib.bc"));
 
             // Execute original and ours
             var output1 = ExecuteAndCaptureOutput(outputAssembly);

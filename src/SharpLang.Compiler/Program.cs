@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using Mono.Options;
+using SharpLLVM;
 
 namespace SharpLang.CompilerServices
 {
@@ -14,6 +15,7 @@ namespace SharpLang.CompilerServices
             var generateIR = false;
             int exitCode = 0;
             string outputFile = null;
+            string target = Driver.GetDefaultTriple();
 
             var p = new OptionSet
                 {
@@ -31,6 +33,7 @@ namespace SharpLang.CompilerServices
                     { "h|help", "Show this message and exit", v => showHelp = v != null },
                     { "o|output=", "Output filename. Default to [inputfilename].bc", v => outputFile = v },
                     { "d", "Generate debug LLVM IR assembly output", v => generateIR = true },
+                    { "target", "Choose target triple", v => target = v },
                 };
 
             try
@@ -59,7 +62,7 @@ namespace SharpLang.CompilerServices
                     outputFile = Path.ChangeExtension(inputFile, "bc");
                 }
 
-                Driver.CompileAssembly(inputFile, outputFile, generateIR);
+                Driver.CompileAssembly(inputFile, outputFile, target, generateIR);
             }
             catch (OptionException e)
             {

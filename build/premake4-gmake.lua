@@ -29,18 +29,24 @@ newoption {
 
 dofile "Helpers.lua"
 
+if #_ARGS ~= 1 then
+  error("** Usage: premake5 premake4-gmake.lua [triple]", 0)
+end
+
+-- TODO: ARM, etc...
+is64 = string.find(_ARGS[1], "x86_64") ~= nil
+
 builddir = path.getabsolute("./" .. _OPTIONS["outdir"]);
-libdir = path.join(builddir, "lib", "%{cfg.buildcfg}_%{cfg.platform}");
+libdir = path.join(builddir, "lib", "runtime", _ARGS[1]);
 
 solution "SharpLang.Runtime"
-  configurations { "debug", "release" }
-  platforms { "x32", "x64" }
-  location (path.join(builddir, "runtime"))
-  objdir (path.join(builddir, "runtime/obj"))
+  configurations { "Debug", "Release" }
+  location (path.join(builddir, "runtime", _ARGS[1]))
+  objdir (path.join(builddir, "runtime/obj", _ARGS[1]))
   targetdir (libdir)
   toolset "clang"
   project "SharpLang.Runtime"
-	
+	targetprefix ""
     kind "SharedLib"
     language "C++"
     flags { "Unsafe"}
@@ -53,12 +59,10 @@ solution "SharpLang.Runtime"
 	defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS", "LIBCXXABI_HAS_NO_THREADS" }
 
 	includedirs { "../deps/llvm/include" }
-    buildoptions { "-emit-llvm -O3 -g1" }
+	buildoptions { "-emit-llvm -O3 -g1" }
 
-	configuration { "x32" }
-		buildoptions { "--target=i686-w64-mingw32" }
-		includedirs { "../deps/llvm/build_x32/include", "../deps/mingw32/i686-w64-mingw32/include", "../deps/mingw32/i686-w64-mingw32/include/c++", "../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32" }
-
-	configuration { "x64" }
-		buildoptions { "--target=x86_64-w64-mingw32" }
-		includedirs { "../deps/llvm/build_x64/include", "../deps/mingw64/x86_64-w64-mingw32/include", "../deps/mingw64/x86_64-w64-mingw32/include/c++", "../deps/mingw64/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32" }
+	if is64 then
+		includedirs { "../deps/llvm/build_x64/include" }
+	else
+		includedirs { "../deps/llvm/build_x32/include" }
+	end
