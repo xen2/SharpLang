@@ -1,6 +1,0 @@
-/src/bin
-/src/obj
-/src/packages
-*.dll
-*.pdb
-*.xml
