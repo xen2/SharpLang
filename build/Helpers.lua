@@ -45,8 +45,10 @@ function SetupNativeProject()
 
   local lang = premake.api.scope.project.language
   if lang == "C++" then
+    configuration { "not vs*" }
+      buildoptions { "-std=c++11" }
     configuration { "macosx" }
-      buildoptions { "-std=c++11", "-stdlib=libc++" }
+      buildoptions { "-stdlib=libc++" }
       links { "c++" }
   end
   

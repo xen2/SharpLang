@@ -8,6 +8,10 @@ dofile "Helpers.lua"
 --dofile "Tests.lua"
 dofile "LLVM.lua"
 
+if not os.is("windows") then
+  target_triplet = os.capture("gcc -dumpmachine"):gsub("[\r\n]+", "")
+end
+
 solution "SharpLang"
 
   configurations { "Debug", "Release" }
@@ -29,7 +33,17 @@ solution "SharpLang"
   group "Libraries"
     include (srcdir .. "/SharpLang.Compiler")
     include (srcdir .. "/SharpLang.Compiler.Tests")
-    include (srcdir .. "/SharpLang.Runtime")
+
+    if os.is("windows") then
+      -- Windows: Fake .vcxproj that will execute make on runtime
+      configuration "windows"
+        include (srcdir .. "/SharpLang.Runtime")
+    else
+      -- Linux: call make recursively on runtime
+      external "SharpLang.Runtime"
+        location ("gmake/runtime/" .. target_triplet)
+        kind "SharedLib"
+    end
 
     include (srcdir .. "/SharpLLVM")
     include (srcdir .. "/SharpLLVM.Native")
