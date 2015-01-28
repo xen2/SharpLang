@@ -158,8 +158,9 @@ namespace SharpLang.CompilerServices
                 // Add mingw32 paths
                 var cpu = triple.Split('-').First();
                 var archSize = cpu == "x86_64" ? 64 : 32;
+                var hostArchSize = IntPtr.Size * 8;
                 arguments.AppendFormat("--target={0} -g -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", triple);
-                arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", archSize);
+                arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", hostArchSize);
 
                 if (triple.Contains("windows-gnu") || triple.Contains("mingw"))
                 {
