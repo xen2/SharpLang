@@ -14,6 +14,6 @@ project "SharpLang.Runtime"
     rebuildcommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C i686-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean all " .. defaultMakeOptions32 }
     cleancommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C i686-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean " .. defaultMakeOptions32 }
   configuration { "x64" }
-    buildcommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} all " .. defaultMakeOptions64 }
-    rebuildcommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean all " .. defaultMakeOptions64 }
-    cleancommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean " .. defaultMakeOptions64 }
+    buildcommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} all " .. defaultMakeOptions64 }
+    rebuildcommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean all " .. defaultMakeOptions64 }
+    cleancommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean " .. defaultMakeOptions64 }
