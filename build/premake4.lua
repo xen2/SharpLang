@@ -43,6 +43,13 @@ solution "SharpLang"
       external "SharpLang.Runtime"
         location ("gmake/runtime/" .. target_triplet)
         kind "SharedLib"
+        removeplatforms "*"
+        configmap {
+          ["Release"] = "Release",
+          ["Debug"] = "Debug",
+          ["x32"] = "",
+          ["x64"] = "",
+        }
     end
 
     include (srcdir .. "/SharpLLVM")
