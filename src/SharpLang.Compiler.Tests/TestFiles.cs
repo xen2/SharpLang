@@ -104,8 +104,6 @@ namespace SharpLang.CompilerServices.Tests
         [Test, TestCaseSource("TestCodegenNoCorlibCases")]
         public static void TestCodegenNoCorlib(string sourceFile)
         {
-            AllocConsole();
-
             var outputAssembly = CompileAssembly(sourceFile);
 
             var bitcodeFile = Path.ChangeExtension(outputAssembly, "bc");
