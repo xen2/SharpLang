@@ -11,8 +11,8 @@ public static class Program
         string str1 = "abcd";
         string str2 = "efgh";
 
-        fixed (char* c1 = (string)str1)
-        fixed (char* c2 = (string)str2)
+        fixed (char* c1 = str1)
+        fixed (char* c2 = str2)
         {
             memcpy((IntPtr)c1, (IntPtr)c2, (UIntPtr)(sizeof(char) * str1.Length));
         }
