@@ -22,7 +22,7 @@ ifeq ($(config),debug)
   INCLUDES += -I../../../../deps/llvm/include -I../../../../deps/llvm/build_x32/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g1
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g1 --target=i686-pc-windows-gnu
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
@@ -52,7 +52,7 @@ ifeq ($(config),release)
   INCLUDES += -I../../../../deps/llvm/include -I../../../../deps/llvm/build_x32/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g1
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g1 --target=i686-pc-windows-gnu
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
