@@ -59,7 +59,7 @@ solution "SharpLang.Runtime"
 	defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS", "LIBCXXABI_HAS_NO_THREADS" }
 
 	includedirs { "../deps/llvm/include" }
-	buildoptions { "-emit-llvm -O3 -g1" }
+	buildoptions { "-emit-llvm -O3 -g1 --target=" .. _ARGS[1] }
 
 	if is64 then
 		includedirs { "../deps/llvm/build_x64/include" }
