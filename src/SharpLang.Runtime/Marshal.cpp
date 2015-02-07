@@ -94,7 +94,7 @@ extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalAnsi_Sys
 {
 	uint32_t bufferLength = (str->length + 1) * UNI_MAX_UTF8_BYTES_PER_CODE_POINT;
 	uint8_t* buffer = (uint8_t*) System_Runtime_InteropServices_Marshal__AllocHGlobal_System_IntPtr_(bufferLength);
-	const uint16_t* src = (const uint16_t*)str->value;
+	const uint16_t* src = (const uint16_t*)&str->firstChar;
 	uint8_t* dest = buffer;
 	ConvertUTF16toUTF8(&src, src + str->length, &dest, dest + bufferLength, strictConversion);
 	buffer[str->length] = '\0';
@@ -106,7 +106,7 @@ extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalUni_Syst
 {
 	uint32_t bufferLength = (str->length + 1) * sizeof(char16_t);
 	uint8_t* buffer = (uint8_t*)System_Runtime_InteropServices_Marshal__AllocHGlobal_System_IntPtr_(bufferLength);
-	const uint16_t* src = (const uint16_t*)str->value;
+	const uint16_t* src = (const uint16_t*)&str->firstChar;
 	memcpy(buffer, src, bufferLength);
 
 	return buffer;
@@ -117,17 +117,7 @@ extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringAnsi_Syste
 	if (ptr == NULL)
 		return NULL;
 
-	auto length = strlen((char*) ptr);
-
-	auto str = (String*)malloc(sizeof(String));
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-
-	auto strStart = str->value;
-	ConvertUTF8toUTF16((const UTF8**)&ptr, (UTF8*)ptr + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
-
-	return str;
+	return String::Create((char*)ptr);
 }
 
 extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringUni_System_IntPtr_(void* ptr)
@@ -135,19 +125,7 @@ extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringUni_System
 	if (ptr == NULL)
 		return NULL;
 
-	auto length = 0;
-	char16_t* lastChar = (char16_t*)ptr;
-	while (*lastChar++)
-		length++;
-
-	auto str = (String*)malloc(sizeof(String));
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * length);
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-
-	memcpy((void*)str->value, ptr, sizeof(char16_t) * length);
-
-	return str;
+	return String::Create((char16_t*)ptr);
 }
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__SizeOf_System_Type_(RuntimeType* type)

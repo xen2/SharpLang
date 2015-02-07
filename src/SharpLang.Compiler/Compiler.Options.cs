@@ -3,7 +3,7 @@
     public sealed partial class Compiler
     {
         private bool charUsesUtf8 = false;
-        private bool stringSliceable = true;
+        private bool stringSliceable = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether char and string types uses UTF8 or UTF16.

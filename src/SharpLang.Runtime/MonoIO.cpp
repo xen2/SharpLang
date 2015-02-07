@@ -43,7 +43,7 @@ extern "C" int32_t System_IO_MonoIO__GetFileAttributes_System_String_System_IO_M
 {
 	*error = ERROR_SUCCESS;
 
-	auto result = GetFileAttributesW((LPCWSTR)path->value);
+	auto result = GetFileAttributesW((LPCWSTR)&path->firstChar);
 
 	if (result == -1)
 		*error = GetLastError();
