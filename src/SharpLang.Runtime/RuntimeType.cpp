@@ -3,6 +3,38 @@
 #include <string.h>
 
 #include "RuntimeType.h"
+#include "ConvertUTF.h"
+
+String* String::Create(uint32_t length)
+{
+	void* allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
+	return new(allocatedMemory)String(length);
+}
+
+String* String::Create(uint32_t length, const char16_t* str)
+{
+	void* allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
+	return new(allocatedMemory)String(length, str);
+}
+
+String::String(uint32_t length, const char* str) : Object(&System_String_rtti), length(length)
+{
+	auto strStart = &firstChar;
+	ConvertUTF8toUTF16((const UTF8**)&str, (UTF8*)str + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
+	(&firstChar)[length] = 0;
+}
+
+String* String::Create(uint32_t length, const char* str)
+{
+	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
+	auto allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
+	return new(allocatedMemory) String(length, str);
+}
+
+String* String::Create(const char16_t* str)
+{
+	return Create(std::char_traits<char16_t>::length(str), str);
+}
 
 extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface)
 {

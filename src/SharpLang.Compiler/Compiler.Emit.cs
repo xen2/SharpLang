@@ -300,29 +300,24 @@ namespace SharpLang.CompilerServices
         {
             var stringClass = GetClass(corlib.MainModule.GetType(typeof(string).FullName));
 
-            var stringConstantDataGlobal = CreateStringConstant(operand, !CharUsesUTF8, true);
+            var utf16String = operand.Select(x => LLVM.ConstInt(LLVM.Int16TypeInContext(context), x, false)); // string
+            utf16String = utf16String.Concat(new[] { LLVM.ConstNull(LLVM.Int16TypeInContext(context)) }); // null-terminate
 
-            // Allocate object
-            var allocatedObject = AllocateObject(stringClass.Type);
+            var stringConstantData = LLVM.ConstArray(LLVM.Int16TypeInContext(context), utf16String.ToArray());
 
-            // Prepare indices
-            var indices = new[]
+            var stringConstant = LLVM.ConstStructInContext(context, new[]
             {
-                LLVM.ConstInt(int32LLVM, 0, false),                         // Pointer indirection
-                LLVM.ConstInt(int32LLVM, (int)ObjectFields.Data, false),    // Data
-                LLVM.ConstInt(int32LLVM, 1, false),                         // Access length
-            };
+                stringClass.GeneratedEETypeRuntimeLLVM,
+                LLVM.ConstInt(int32LLVM, (ulong)operand.Length, false),
+                stringConstantData
+            }, false);
 
-            // Update array with size and 0 data
-            var sizeLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-            LLVM.BuildStore(builder, LLVM.ConstInt(int32LLVM, (ulong)operand.Length, false), sizeLocation);
-
-            indices[2] = LLVM.ConstInt(int32LLVM, 2, false);                // Access data pointer
-            var dataPointerLocation = LLVM.BuildInBoundsGEP(builder, allocatedObject, indices, string.Empty);
-            LLVM.BuildStore(builder, stringConstantDataGlobal, dataPointerLocation);
+            var stringConstantGlobal = LLVM.AddGlobal(module, LLVM.TypeOf(stringConstant), ".string");
+            LLVM.SetInitializer(stringConstantGlobal, stringConstant);
+            LLVM.SetLinkage(stringConstantGlobal, Linkage.PrivateLinkage);
 
             // Push on stack
-            stack.Add(new StackValue(StackValueType.Object, stringClass.Type, allocatedObject));
+            stack.Add(new StackValue(StackValueType.Object, stringClass.Type, LLVM.ConstPointerCast(stringConstantGlobal, stringClass.Type.DefaultTypeLLVM)));
         }
 
         private ValueRef CreateDataConstant(byte[] data)

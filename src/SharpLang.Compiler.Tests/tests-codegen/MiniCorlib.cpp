@@ -76,10 +76,10 @@ extern "C" void System_Console__WriteLine_System_String_(String* str)
 		printf("\n");
 	else
 	{
-		//printf("%.*s\n", str->length, str->value);
+		//printf("%.*s\n", str->length, &str->firstChar);
 		uint32_t bufferLength = str->length * UNI_MAX_UTF8_BYTES_PER_CODE_POINT;
 		uint8_t* buffer = (uint8_t*)malloc(bufferLength);
-		const uint16_t* src = (const uint16_t*)str->value;
+		const uint16_t* src = (const uint16_t*)&str->firstChar;
 		uint8_t* dest = buffer;
 		ConvertUTF16toUTF8(&src, src + str->length, &dest, dest + bufferLength, strictConversion);
 		printf("%.*s\n", dest - buffer, buffer);

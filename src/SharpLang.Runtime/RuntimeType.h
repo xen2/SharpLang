@@ -56,10 +56,32 @@ extern EEType System_String_rtti;
 
 struct String : Object
 {
-	String(uint32_t length, const char16_t* value) : Object(&System_String_rtti), length(length), value(value) {}
+	String(uint32_t length) : Object(&System_String_rtti), length(length)
+	{
+		(&firstChar)[length] = 0;
+	}
+
+	String(uint32_t length, const char16_t* str) : Object(&System_String_rtti), length(length)
+	{
+		memcpy(&firstChar, str, sizeof(char16_t) * length);
+		(&firstChar)[length] = 0;
+	}
+
+	String(uint32_t length, const char* str);
+
+	static String* Create(uint32_t length);
+	static String* Create(uint32_t length, const char16_t* str);
+	static String* Create(uint32_t length, const char* str);
+
+	static String* Create(const char* str)
+	{
+		return Create(strlen(str), str);
+	}
+
+	static String* Create(const char16_t* str);
 
 	uint32_t length;
-	const char16_t* value;
+	char16_t firstChar;
 };
 
 struct ArrayBase : Object

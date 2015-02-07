@@ -163,22 +163,6 @@ extern "C" int32_t System_Environment__get_ProcessorCount__()
 #endif
 }
 
-String* createString(const char* str, int length = -1)
-{
-	if (length == -1)
-		length = strlen(str);
-
-	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
-	auto result = (String*)malloc(sizeof(String));
-	result->length = length;
-	result->value = (char16_t*)malloc(sizeof(char16_t) * (length + 1));
-
-	auto strStart = result->value;
-	ConvertUTF8toUTF16((const UTF8**)&str, (UTF8*)str + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
-
-	return result;
-}
-
 extern "C" String* System_Environment__GetOSVersionString__()
 {
 #ifdef _WIN32
@@ -196,12 +180,12 @@ extern "C" String* System_Environment__GetOSVersionString__()
 	assert(length < sizeof(buffer));
 
 	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
-	return createString(buffer, length);
+	return String::Create(length, buffer);
 #else
 	struct utsname name;
 	if (uname(&name) == 0)
-		return createString(name.release);
-	return createString("0.0.0.1");
+		return String::Create(name.release);
+	return String::Create("0.0.0.1");
 #endif
 }
 
@@ -230,18 +214,13 @@ extern "C" String* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t
 extern "C" String* System_Environment__GetNewLine__()
 {
 	// TODO: String RTTI
-	static String newline = String(2, u"\r\n");
-	return &newline;
+	static String* newline = String::Create(u"\r\n");
+	return newline;
 }
 
 extern "C" String* System_String__InternalAllocateStr_System_Int32_(int32_t length)
 {
-	auto str = (String*)malloc(sizeof(String));
-	str->eeType = &System_String_rtti;
-	str->length = length;
-	str->value = (char16_t*)malloc(sizeof(char16_t) * (length + 1));
-	const_cast<char16_t*>(str->value)[str->length] = 0;
-	return str;
+	return String::Create(length);
 }
 
 extern "C" int32_t System_String__GetLOSLimit__()
@@ -284,8 +263,8 @@ extern "C" String* System_Globalization_CultureInfo__get_current_locale_name__()
 {
 	// Redirect to invariant culture by using an empty string ("")
 	// TODO: mechanism to setup VTable
-	static String locale = String(0, u"");
-	return &locale;
+	static String* locale = String::Create(u"");
+	return locale;
 }
 
 extern "C" Object* System_Threading_Thread__CurrentInternalThread_internal__()
@@ -302,7 +281,7 @@ extern "C" int32_t System_Threading_Thread__GetDomainID__()
 // int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
 extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
 {
-	return 0;
+	return offsetof(String, firstChar);
 }
 
 extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_IntPtr_(Array<uint8_t>* arr, uint8_t* fieldHandle)
@@ -364,17 +343,16 @@ extern "C" String* System_Environment__internalGetEnvironmentVariable_System_Str
 {
 #if _WIN32
 	// Query length first
-	auto valueLength = GetEnvironmentVariableW((LPCWSTR)variable->value, NULL, 0);
+	auto valueLength = GetEnvironmentVariableW((LPCWSTR) variable->firstChar, NULL, 0);
 	if (valueLength == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)
 		return NULL;
 
 	// Allocate string
-	auto value = (String*)malloc(sizeof(String));
-	value->value = (char16_t*)malloc(sizeof(char16_t) * valueLength);
-	value->length = valueLength - 1; // GetEnvironmentVariable will add null-terminating character, but we shouldn't count this in length
+	// GetEnvironmentVariable will add null-terminating character, but we shouldn't count this in length
+	auto value = String::Create(valueLength - 1);
 
 	// Read actual value
-	auto actualValueLength = GetEnvironmentVariableW((LPCWSTR) variable->value, (LPWSTR)value->value, valueLength);
+	auto actualValueLength = GetEnvironmentVariableW((LPCWSTR)variable->firstChar, (LPWSTR)&value->firstChar, valueLength);
 
 	// TODO: Check value didn't change behind our back? (actualValueLength changed)
 
