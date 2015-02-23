@@ -99,6 +99,29 @@ namespace SharpLang.CompilerServices
 
                 var fieldTypes = new List<TypeRef>(typeDefinition.Fields.Count);
 
+                // First of all, Generate EEType globals so that they can be reused in case parent class is generics recursive (we will need EEType of generic arguments)
+                // Example: class NameInfo : ConcurrentSetItem<KeyValuePair<string, EventTags>, NameInfo>
+                
+                // Create runtime type (still opaque struct)
+                var runtimeTypeInfoType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".rtti_type");
+
+                // Remove invalid characters so that we can easily link against it from C++
+                var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
+                var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
+
+                if (typeDefinition.IsInterface)
+                {
+                    // Interface use object as execution engine type
+                    @class.GeneratedEETypeRuntimeLLVM = GetClass(@object).GeneratedEETypeTokenLLVM;
+                }
+                else
+                {
+                    @class.GeneratedEETypeRuntimeLLVM = runtimeTypeInfoGlobal;
+                }
+
+                @class.GeneratedEETypeTokenLLVM = runtimeTypeInfoGlobal;
+
+                // Process parent class
                 var parentClass = baseType != null ? GetClass(ResolveGenericsVisitor.Process(typeReference, baseType)) : null;
 
                 // Add parent class
@@ -158,26 +181,6 @@ namespace SharpLang.CompilerServices
                     };
 
                     bool isConcreteType = IsConcreteType(@class.Type);
-
-                    // Create runtime type (still opaque struct)
-                    var runtimeTypeInfoType = LLVM.StructCreateNamed(context, typeReference.MangledName() + ".rtti_type");
-
-                    // Remove invalid characters so that we can easily link against it from C++
-                    var mangledRttiName = Regex.Replace(typeReference.MangledName() + ".rtti", @"(\W)", "_");
-                    var runtimeTypeInfoGlobal = LLVM.AddGlobal(module, runtimeTypeInfoType, mangledRttiName);
-
-                    if (typeDefinition.IsInterface)
-                    {
-                        // Interface use object as execution engine type
-                        @class.GeneratedEETypeRuntimeLLVM = GetClass(@object).GeneratedEETypeTokenLLVM;
-                    }
-                    else
-                    {
-                        @class.GeneratedEETypeRuntimeLLVM = runtimeTypeInfoGlobal;
-                    }
-
-                    @class.GeneratedEETypeTokenLLVM = runtimeTypeInfoGlobal;
-
                     if (isConcreteType)
                     {
                         // Build vtable
