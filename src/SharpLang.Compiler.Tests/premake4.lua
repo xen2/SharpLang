@@ -14,8 +14,6 @@ project "SharpLang.Compiler.Tests"
     depsdir .. "/NUnit",
   }
 
-  dependson { "corlib-net_4_5" }
-  
   links
   {
     "System",
