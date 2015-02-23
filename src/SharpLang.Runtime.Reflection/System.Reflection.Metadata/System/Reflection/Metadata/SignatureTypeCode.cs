@@ -5,6 +5,8 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
+    using CorElementType = System.Reflection.Metadata.Ecma335.CorElementType;
+
     /// <summary>
     /// Represents the type codes that are used in signature encoding.
     /// </summary>

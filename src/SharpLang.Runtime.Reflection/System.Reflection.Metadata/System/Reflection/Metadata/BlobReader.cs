@@ -11,6 +11,8 @@ using System.Text;
 
 namespace System.Reflection.Metadata
 {
+    using CorElementType = System.Reflection.Metadata.Ecma335.CorElementType;
+
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
     unsafe struct BlobReader
     {

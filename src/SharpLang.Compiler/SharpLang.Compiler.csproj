@@ -160,7 +160,7 @@
       <Project>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</Project>
       <Name>Mono.Cecil.Rocks</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mcs\tools\linker\Mono.Linker.csproj">
+    <ProjectReference Include="..\linker\Mono.Linker.csproj">
       <Project>{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}</Project>
       <Name>Mono.Linker</Name>
     </ProjectReference>

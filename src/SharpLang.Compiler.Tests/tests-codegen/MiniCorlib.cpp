@@ -47,7 +47,7 @@ extern "C" void System_OverflowException___ctor__(void* exception)
 }
 
 // System.NotSupportedException..ctor(string)
-extern "C" void System_NotSupportedException___ctor_System_String_(void* exception, String* str)
+extern "C" void System_NotSupportedException___ctor_System_String_(void* exception, StringObject* str)
 {
 }
 
@@ -64,13 +64,13 @@ extern "C" void* System_UIntPtr__op_Explicit_System_UInt64(uint64_t p)
 }
 
 // int System.String.get_Length()
-extern "C" int32_t System_String__get_Length__(String* str)
+extern "C" int32_t System_String__get_Length__(StringObject* str)
 {
 	return str->length;
 }
 
 // void System.Console.WriteLine(string)
-extern "C" void System_Console__WriteLine_System_String_(String* str)
+extern "C" void System_Console__WriteLine_System_String_(StringObject* str)
 {
 	if (str == NULL)
 		printf("\n");

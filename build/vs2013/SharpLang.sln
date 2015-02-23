@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0259E1F6-6EC3-956D-B701-471323AB73C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLang.Compiler", "..\..\src\SharpLang.Compiler\SharpLang.Compiler.csproj", "{AEEE66AF-9AD2-2705-0333-2258EF351287}"
@@ -44,10 +46,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Rocks", "..\..\d
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{16CF2D0E-82E3-55BF-4B65-F91EB73852F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker", "..\..\src\mcs\tools\linker\Mono.Linker.csproj", "{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Linker", "..\..\src\linker\Mono.Linker.csproj", "{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Class Libraries", "Class Libraries", "{F82601D3-64B2-6E97-6DC3-F18BD9CDCA97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mscorlib", "..\..\src\mscorlib\mscorlib.csproj", "{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharpLang.Runtime.Reflection", "..\..\src\SharpLang.Runtime.Reflection\SharpLang.Runtime.Reflection.shproj", "{7D18FA10-20F1-44D3-AF1D-1752A26849A6}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\src\SharpLang.Runtime.Reflection\SharpLang.Runtime.Reflection.projitems*{3da06c3a-2e7b-4cb7-80ed-9b12916013f9}*SharedItemsImports = 4
 		..\..\src\SharpLang.Runtime.Reflection\SharpLang.Runtime.Reflection.projitems*{7d18fa10-20f1-44d3-af1d-1752a26849a6}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +146,13 @@ Global
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Release|x64.Build.0 = Release|Any CPU
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Release|x86.ActiveCfg = Release|Any CPU
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46}.Release|x86.Build.0 = Release|Any CPU
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Debug|x64.ActiveCfg = Debug|x86
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Debug|x86.ActiveCfg = Debug|x86
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Debug|x86.Build.0 = Debug|x86
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Release|x64.ActiveCfg = Release|amd64
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Release|x64.Build.0 = Release|amd64
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Release|x86.ActiveCfg = Release|x86
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +168,7 @@ Global
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626} = {457FF40C-B193-1CBE-7A15-C01DE6E818EF}
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC} = {457FF40C-B193-1CBE-7A15-C01DE6E818EF}
 		{DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46} = {16CF2D0E-82E3-55BF-4B65-F91EB73852F0}
+		{3DA06C3A-2E7B-4CB7-80ED-9B12916013F9} = {F82601D3-64B2-6E97-6DC3-F18BD9CDCA97}
 		{7D18FA10-20F1-44D3-AF1D-1752A26849A6} = {F82601D3-64B2-6E97-6DC3-F18BD9CDCA97}
 	EndGlobalSection
 EndGlobal

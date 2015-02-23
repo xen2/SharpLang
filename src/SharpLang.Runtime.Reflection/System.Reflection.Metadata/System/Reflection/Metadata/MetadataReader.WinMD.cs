@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 
 namespace System.Reflection.Metadata
 {
+    using CorElementType = System.Reflection.Metadata.Ecma335.CorElementType;
+
     partial class MetadataReader
     {
         internal const string ClrPrefix = "<CLR>";

@@ -99,7 +99,7 @@ solution "SharpLang"
 
   group "Tools"
     external "Mono.Linker"
-      location (srcdir .. "/mcs/tools/linker")
+      location (srcdir .. "/linker")
       uuid "DD28E2B1-057B-4B4D-A04D-B2EBD9E76E46"
       kind "ConsoleApp"
       language "C#"
@@ -108,4 +108,17 @@ solution "SharpLang"
       configmap {
           ["x32"] = "Any CPU",
           ["x64"] = "Any CPU"
+      }
+
+  group "Class Libraries"
+    external "mscorlib"
+      location (srcdir .. "/mscorlib")
+      uuid "3DA06C3A-2E7B-4CB7-80ED-9B12916013F9"
+      kind "SharedLib"
+      language "C#"
+      removeplatforms "*"
+      platforms { "Any CPU" }
+      configmap {
+          ["x32"] = "x86",
+          ["x64"] = "amd64"
       }
