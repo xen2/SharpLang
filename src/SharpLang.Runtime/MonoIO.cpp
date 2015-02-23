@@ -39,7 +39,7 @@ extern "C" void* System_IO_MonoIO__get_ConsoleError__()
 	return GetStdHandle(STD_ERROR_HANDLE);
 }
 
-extern "C" int32_t System_IO_MonoIO__GetFileAttributes_System_String_System_IO_MonoIOError__(String* path, int32_t* error)
+extern "C" int32_t System_IO_MonoIO__GetFileAttributes_System_String_System_IO_MonoIOError__(StringObject* path, int32_t* error)
 {
 	*error = ERROR_SUCCESS;
 

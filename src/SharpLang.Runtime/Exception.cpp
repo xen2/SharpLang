@@ -212,10 +212,10 @@ static bool handleActionValue(int64_t *resultAction,
 			uintptr_t P = readEncodedPointer(&EntryP, TTypeEncoding);
 			
 			// Expected exception type
-			struct EEType* expectedExceptionType = reinterpret_cast<struct EEType*>(P);
+			EEType* expectedExceptionType = reinterpret_cast<EEType*>(P);
 
 			// Actual exception type
-			struct EEType* exceptionType = exceptionInfo->exceptionObject->eeType;
+			EEType* exceptionType = exceptionInfo->exceptionObject->eeType;
 
 			// Check if they match (by testing each class in hierarchy)
 			while (exceptionType != NULL)

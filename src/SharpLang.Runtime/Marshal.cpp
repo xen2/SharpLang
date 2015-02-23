@@ -90,7 +90,7 @@ extern "C" void System_Runtime_InteropServices_Marshal__FreeHGlobal_System_IntPt
 #endif
 }
 
-extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalAnsi_System_String_(String* str)
+extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalAnsi_System_String_(StringObject* str)
 {
 	uint32_t bufferLength = (str->length + 1) * UNI_MAX_UTF8_BYTES_PER_CODE_POINT;
 	uint8_t* buffer = (uint8_t*) System_Runtime_InteropServices_Marshal__AllocHGlobal_System_IntPtr_(bufferLength);
@@ -102,7 +102,7 @@ extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalAnsi_Sys
 	return buffer;
 }
 
-extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalUni_System_String_(String* str)
+extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalUni_System_String_(StringObject* str)
 {
 	uint32_t bufferLength = (str->length + 1) * sizeof(char16_t);
 	uint8_t* buffer = (uint8_t*)System_Runtime_InteropServices_Marshal__AllocHGlobal_System_IntPtr_(bufferLength);
@@ -112,20 +112,20 @@ extern "C" void* System_Runtime_InteropServices_Marshal__StringToHGlobalUni_Syst
 	return buffer;
 }
 
-extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringAnsi_System_IntPtr_(void* ptr)
+extern "C" StringObject* System_Runtime_InteropServices_Marshal__PtrToStringAnsi_System_IntPtr_(void* ptr)
 {
 	if (ptr == NULL)
 		return NULL;
 
-	return String::Create((char*)ptr);
+	return StringObject::NewString((char*)ptr);
 }
 
-extern "C" String* System_Runtime_InteropServices_Marshal__PtrToStringUni_System_IntPtr_(void* ptr)
+extern "C" StringObject* System_Runtime_InteropServices_Marshal__PtrToStringUni_System_IntPtr_(void* ptr)
 {
 	if (ptr == NULL)
 		return NULL;
 
-	return String::Create((char16_t*)ptr);
+	return StringObject::NewString((char16_t*)ptr);
 }
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__SizeOf_System_Type_(RuntimeType* type)
