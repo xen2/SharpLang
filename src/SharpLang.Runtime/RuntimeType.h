@@ -4,17 +4,22 @@
 #include <stdint.h>
 #include <string.h>
 
-struct Object;
-struct RuntimeType;
+class Object;
+class RuntimeType;
 
-struct TypeDefinition
+class TypeDefinition
 {
+public:
 	Object* sharpLangModule;
 	uint32_t token;
 };
 
-struct EEType
+class MethodTable;
+typedef MethodTable EEType;
+
+class MethodTable
 {
+public:
 	EEType* base;
 
 	uint8_t isConcreteType;
@@ -35,63 +40,78 @@ struct EEType
 	void* virtualTable[0];
 };
 
-struct Object
+class Object
 {
+public:
 	Object(EEType* eeType) : eeType(eeType) {}
 
 	EEType* eeType;
 };
 
-struct RuntimeType : Object
+class RuntimeType : public Object
 {
 	void* implObsolete; // Type._impl should be removed
+public:
 	EEType* runtimeEEType;
 };
 
-struct Exception : Object
+class Exception : public Object
 {
 };
 
 extern EEType System_String_rtti;
 
-struct String : Object
+class StringObject : public Object
 {
-	String(uint32_t length) : Object(&System_String_rtti), length(length)
+public:
+	StringObject(uint32_t length) : Object(&System_String_rtti), length(length)
 	{
 		(&firstChar)[length] = 0;
 	}
 
-	String(uint32_t length, const char16_t* str) : Object(&System_String_rtti), length(length)
+	StringObject(uint32_t length, const char16_t* str) : Object(&System_String_rtti), length(length)
 	{
 		memcpy(&firstChar, str, sizeof(char16_t) * length);
 		(&firstChar)[length] = 0;
 	}
 
-	String(uint32_t length, const char* str);
+	StringObject(uint32_t length, const char* str);
 
-	static String* Create(uint32_t length);
-	static String* Create(uint32_t length, const char16_t* str);
-	static String* Create(uint32_t length, const char* str);
-
-	static String* Create(const char* str)
+	static StringObject* NewString(uint32_t length);
+	static StringObject* NewString(const char16_t* str, uint32_t length);
+	static StringObject* NewString(const char* str, uint32_t length);
+	static StringObject* NewString(const wchar_t* str, uint32_t length)
 	{
-		return Create(strlen(str), str);
+		NewString((const char16_t*)str, length);
 	}
 
-	static String* Create(const char16_t* str);
+	static StringObject* NewString(const char* str)
+	{
+		return NewString(str, strlen(str));
+	}
+
+	static StringObject* NewString(const char16_t* str);
+
+	static StringObject* NewString(const wchar_t* str)
+	{
+		NewString((const char16_t*)str);
+	}
+
 
 	uint32_t length;
 	char16_t firstChar;
 };
 
-struct ArrayBase : Object
+class ArrayBase : public Object
 {
+public:
 	size_t length;
 };
 
 template <class T>
-struct Array : ArrayBase
+class Array : public ArrayBase
 {
+public:
 	T* value;
 };
 

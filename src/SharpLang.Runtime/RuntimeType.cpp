@@ -5,35 +5,35 @@
 #include "RuntimeType.h"
 #include "ConvertUTF.h"
 
-String* String::Create(uint32_t length)
+StringObject* StringObject::NewString(uint32_t length)
 {
-	void* allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
-	return new(allocatedMemory)String(length);
+	void* allocatedMemory = malloc(sizeof(StringObject) + sizeof(char16_t) * length);
+	return new(allocatedMemory)StringObject(length);
 }
 
-String* String::Create(uint32_t length, const char16_t* str)
+StringObject* StringObject::NewString(const char16_t* str, uint32_t length)
 {
-	void* allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
-	return new(allocatedMemory)String(length, str);
+	void* allocatedMemory = malloc(sizeof(StringObject) + sizeof(char16_t) * length);
+	return new(allocatedMemory)StringObject(length, str);
 }
 
-String::String(uint32_t length, const char* str) : Object(&System_String_rtti), length(length)
+StringObject::StringObject(uint32_t length, const char* str) : Object(&System_String_rtti), length(length)
 {
 	auto strStart = &firstChar;
 	ConvertUTF8toUTF16((const UTF8**)&str, (UTF8*)str + length, (UTF16**)&strStart, (UTF16*)strStart + length, strictConversion);
 	(&firstChar)[length] = 0;
 }
 
-String* String::Create(uint32_t length, const char* str)
+StringObject* StringObject::NewString(const char* str, uint32_t length)
 {
 	// We are not expecting any non ASCII characters, so we can use sprintf size as is.
-	auto allocatedMemory = malloc(sizeof(String) + sizeof(char16_t) * length);
-	return new(allocatedMemory) String(length, str);
+	auto allocatedMemory = malloc(sizeof(StringObject) + sizeof(char16_t) * length);
+	return new(allocatedMemory) StringObject(length, str);
 }
 
-String* String::Create(const char16_t* str)
+StringObject* StringObject::NewString(const char16_t* str)
 {
-	return Create(std::char_traits<char16_t>::length(str), str);
+	return NewString(str, std::char_traits<char16_t>::length(str));
 }
 
 extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface)
