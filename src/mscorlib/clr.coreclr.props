@@ -124,7 +124,7 @@
   <PropertyGroup>
     <FeatureCoreFxGlobalization>true</FeatureCoreFxGlobalization>
     <FeatureAppx>false</FeatureAppx>
-	<FeatureSharpLangCoreFxGlobalization>true</FeatureSharpLangCoreFxGlobalization>
+    <FeatureSharpLangCoreFxGlobalization>true</FeatureSharpLangCoreFxGlobalization>
     <FeatureSharpLangFakeEventing>true</FeatureSharpLangFakeEventing>
   </PropertyGroup>
 </Project>

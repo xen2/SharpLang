@@ -9,6 +9,8 @@
     <Import_RootNamespace>SharpLang.Runtime.Reflection</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)SharpLang.Marshalling\MarshalFunctionAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharpLang.Marshalling\MarshalHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\Strings.Designer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\System\Collections\Immutable\IImmutableArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\System\Collections\Immutable\IImmutableList.cs" />
@@ -155,6 +157,23 @@
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Reflection\PortableExecutable\SectionHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Runtime\CompilerServices\StrongBox_T.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\ArrayT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\ISharpLangGenericContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangAssembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEEType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypeComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypeDefinition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypePtr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangMethodInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeByRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeDefinition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeGeneric.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypeGenericParameter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangTypePointer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\String.cs" />
   </ItemGroup>
 </Project>

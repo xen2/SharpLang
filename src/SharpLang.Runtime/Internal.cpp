@@ -13,6 +13,18 @@
 #include <sys/utsname.h>
 #endif
 
+static Object* AllocateObject(EEType* eeType)
+{
+	auto objectSize = eeType->objectSize;
+	Object* object = (Object*) malloc(objectSize);
+
+	// TODO: Maybe we could avoid zero-ing memory in various cases?
+	memset(object, 0, objectSize);
+
+	object->eeType = eeType;
+	return object;
+}
+
 // TODO: Emit IL directly?
 extern "C" Object* System_SharpLangHelper__UnsafeCast_System_Object_System_Object_(Object* obj)
 {
@@ -51,6 +63,12 @@ extern "C" Object* System_Object__GetType__(Object* obj)
 	return System_SharpLangModule__ResolveType_System_SharpLangEEType__(obj->eeType);
 }
 
+extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__GetHashCode_System_Object_(Object* obj)
+{
+	// We don't have a GC yet, so use object address
+	return (int32_t)(intptr_t)obj;
+}
+
 extern "C" bool System_Type__EqualsInternal_System_Type_(RuntimeType* a, RuntimeType* b)
 {
 	return a == b;
@@ -61,27 +79,29 @@ extern "C" Object* System_Type__internal_from_handle_System_IntPtr_(EEType* eeTy
 	return System_SharpLangModule__ResolveType_System_SharpLangEEType__(eeType);
 }
 
-extern "C" bool System_Type__type_is_subtype_of_System_Type_System_Type_System_Boolean_(RuntimeType* a, RuntimeType* b, bool checkInterfaces)
+extern "C" bool System_RuntimeType__IsSubclassOf_System_Type_(RuntimeType* a, RuntimeType* b);
+extern "C" bool System_RuntimeTypeHandle__IsInterface_System_RuntimeType_(RuntimeType* type);
+
+extern "C" bool System_RuntimeTypeHandle__CanCastTo_System_RuntimeType_System_RuntimeType_(RuntimeType* type, RuntimeType* target)
 {
-	assert(!checkInterfaces);
-
-	auto rttiA = a->runtimeEEType;
-	auto rttiB = b->runtimeEEType;
-	while (rttiA != NULL)
+	// TODO: Covariance/contravariance
+	// TODO: type is interface?
+	if (System_RuntimeTypeHandle__IsInterface_System_RuntimeType_(target))
 	{
-		if (rttiA == rttiB)
-			return true;
-
-		rttiA = rttiA->base;
+		// Currently not supported
+		return isInstInterface(type->runtimeEEType, target->runtimeEEType);
 	}
 
-	return false;
+	// Note: using EE type (when available) is probably faster than having to resolve System.Type at every step
+	return System_RuntimeType__IsSubclassOf_System_Type_(target, type);
 }
 
-extern "C" bool System_Type__type_is_assignable_from_System_Type_System_Type_(RuntimeType* a, RuntimeType* b)
+extern "C" Object* System_RuntimeTypeHandle__CreateInstance_System_RuntimeType_System_Boolean_System_Boolean_System_Boolean__System_RuntimeMethodHandleInternal__System_Boolean__(RuntimeType* type, bool publicOnly, bool noCheck, bool* canBeCached, void* ctor, bool* needSecurityCheck)
 {
-	// TODO: Check interfaces
-	return System_Type__type_is_subtype_of_System_Type_System_Type_System_Boolean_(b, a, false);
+	*canBeCached = false;
+
+	// TODO: Find and execute ctor!
+	return AllocateObject(type->runtimeEEType);
 }
 
 extern "C" int32_t System_Array__GetLength_System_Int32_(ArrayBase* arr, int32_t dimension)
@@ -105,14 +125,14 @@ extern "C" int32_t System_Array__GetLowerBound_System_Int32_(ArrayBase* arr)
 	return 0;
 }
 
-extern "C" void System_Array__ClearInternal_System_Array_System_Int32_System_Int32_(Array<uint8_t>* arr, int32_t index, int32_t length)
+extern "C" void System_Array__Clear_System_Array_System_Int32_System_Int32_(Array<uint8_t>* arr, int32_t index, int32_t length)
 {
 	int32_t elementSize = arr->eeType->elementSize;
 
 	memset((void*)(arr->value + index * elementSize), 0, elementSize * length);
 }
 
-extern "C" bool System_Array__FastCopy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* source, int32_t sourceIndex, Array<uint8_t>* dest, int32_t destIndex, int32_t length)
+extern "C" bool System_Array__Copy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_System_Boolean_(Array<uint8_t>* source, int32_t sourceIndex, Array<uint8_t>* dest, int32_t destIndex, int32_t length, bool reliable)
 {
 	// TODO: Temporary implementation.
 	// Later, we should perform additional checks (i.e. if element types are compatible, etc...)
@@ -158,15 +178,56 @@ extern "C" int32_t System_Environment__get_Platform__()
 	return 2;
 }
 
-extern "C" int32_t System_Environment__get_ProcessorCount__()
+extern "C" int32_t System_String__IndexOf_System_Char_System_Int32_System_Int32_(StringObject* str, char16_t value, int32_t startIndex, int32_t count)
 {
-#ifdef _WIN32
-	SYSTEM_INFO systemInfo;
-	GetSystemInfo(&systemInfo);
-	return systemInfo.dwNumberOfProcessors;
-#else
-	return std::thread::hardware_concurrency();
-#endif
+	int32_t lastIndex = startIndex + count;
+	for (int32_t i = startIndex; i < lastIndex; ++i)
+	{
+		if ((&str->firstChar)[i] == value)
+			return i;
+	}
+
+	return -1;
+}
+
+extern "C" int32_t System_String__LastIndexOf_System_Char_System_Int32_System_Int32_(StringObject* str, char16_t value, int32_t startIndex, int32_t count)
+{
+	int32_t lastIndex = startIndex - count + 1;
+	for (int32_t i = startIndex; i >= lastIndex; --i)
+	{
+		if ((&str->firstChar)[i] == value)
+			return i;
+	}
+
+	return -1;
+}
+
+extern "C" int32_t System_ParseNumbers__StringToInt_System_String_System_Int32_System_Int32_System_Int32__(StringObject* str, int32_t radix, int32_t flags, int32_t* curPos)
+{
+	// TODO: Use coreclr implementation
+	char buffer[64];
+	auto sourceStart = &str->firstChar + *curPos;
+	auto destStart = buffer;
+	ConvertUTF16toUTF8((const UTF16**)&sourceStart, (UTF16*)sourceStart + str->length, (UTF8**)&destStart, (UTF8*)destStart + 64, strictConversion);
+
+	char* endptr;
+	auto result = strtol(buffer, &endptr, radix);
+	*curPos += endptr - buffer;
+	return result;
+}
+
+extern "C" int64_t System_ParseNumbers__StringToLong_System_String_System_Int32_System_Int32_System_Int32__(StringObject* str, int32_t radix, int32_t flags, int32_t* curPos)
+{
+	// TODO: Use coreclr implementation
+	char buffer[64];
+	auto sourceStart = &str->firstChar + *curPos;
+	auto destStart = buffer;
+	ConvertUTF16toUTF8((const UTF16**) &sourceStart, (UTF16*) sourceStart + str->length, (UTF8**) &destStart, (UTF8*) destStart + 64, strictConversion);
+
+	char* endptr;
+	auto result = strtoll(buffer, &endptr, radix);
+	*curPos += endptr - buffer;
+	return result;
 }
 
 extern "C" StringObject* System_Environment__GetOSVersionString__()
@@ -195,7 +256,7 @@ extern "C" StringObject* System_Environment__GetOSVersionString__()
 #endif
 }
 
-extern "C" void System_Threading_Monitor__Enter_System_Object_(Object* object)
+extern "C" void System_Threading_Monitor__ReliableEnter_System_Object_System_Boolean__(Object* object, bool& lockTaken)
 {
 	// Not implemented yet
 }
@@ -205,9 +266,14 @@ extern "C" void System_Threading_Monitor__Exit_System_Object_(Object* object)
 	// Not implemented yet
 }
 
-extern "C" void System_Threading_Monitor__try_enter_with_atomic_var_System_Object_System_Int32_System_Boolean__(Object* object, int32_t millisecondsTimeout, bool& lockTaken)
+extern "C" void System_Threading_Thread__MemoryBarrier__()
 {
 	// Not implemented yet
+}
+
+extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object__System_Object_System_Object_(Object** location1, Object* value, Object* comparand)
+{
+	return (Object*) InterlockedCompareExchangePointer((PVOID*) location1, value, comparand);
 }
 
 extern "C" StringObject* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t* code_page)
@@ -224,7 +290,18 @@ extern "C" StringObject* System_Environment__GetNewLine__()
 	return newline;
 }
 
-extern "C" StringObject* System_String__InternalAllocateStr_System_Int32_(int32_t length)
+extern "C" int32_t System_String__get_Length__(StringObject* str)
+{
+	// TODO: Make it an intrinsic for optimization
+	return str->length;
+}
+
+extern "C" char16_t System_String__get_Chars_System_Int32_(StringObject* str, int32_t index)
+{
+	return (&str->firstChar)[index];
+}
+
+extern "C" StringObject* System_String__FastAllocateString_System_Int32_(int32_t length)
 {
 	return StringObject::NewString(length);
 }
@@ -265,6 +342,11 @@ extern "C" void System_NumberFormatter__GetFormatterTables_System_UInt64___Syste
 	*decHexDigits = Formatter_DecHexDigits;
 }
 
+extern "C" RuntimeType* System_Type__GetTypeFromHandle_System_RuntimeTypeHandle_(RuntimeType* runtimeType)
+{
+	return runtimeType;
+}
+
 extern "C" StringObject* System_Globalization_CultureInfo__get_current_locale_name__()
 {
 	// Redirect to invariant culture by using an empty string ("")
@@ -273,41 +355,24 @@ extern "C" StringObject* System_Globalization_CultureInfo__get_current_locale_na
 	return locale;
 }
 
-extern "C" Object* System_Threading_Thread__CurrentInternalThread_internal__()
+extern "C" Object* System_Threading_Thread__GetCurrentThreadNative__()
 {
-	return NULL;
+	static Thread* thread = (Thread*)AllocateObject(&System_Threading_Thread_rtti);
+	return thread;
 }
 
-extern "C" int32_t System_Threading_Thread__GetDomainID__()
+extern "C" int32_t System_AppDomain__GetId__()
 {
 	// For now, we only support one AppDomain
 	return 1;
 }
 
-// int System.Runtime.CompilerServices.RuntimeHelpers.get_OffsetToStringData()
-extern "C" int32_t System_Runtime_CompilerServices_RuntimeHelpers__get_OffsetToStringData__()
-{
-	return offsetof(StringObject, firstChar);
-}
-
-extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_IntPtr_(Array<uint8_t>* arr, uint8_t* fieldHandle)
+extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_RuntimeFieldHandle_(Array<uint8_t>* arr, uint8_t* fieldHandle)
 {
 	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->eeType->elementSize);
 }
 
-static Object* AllocateObject(EEType* eeType)
-{
-	auto objectSize = eeType->objectSize;
-	Object* object = (Object*)malloc(objectSize);
-
-	// TODO: Maybe we could avoid zero-ing memory in various cases?
-	memset(object, 0, objectSize);
-
-	object->eeType = eeType;
-	return object;
-}
-
-extern "C" void System_GC__SuppressFinalize_System_Object_(Object* obj)
+extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__ProbeForSufficientStack__()
 {
 }
 
@@ -316,28 +381,24 @@ extern "C" Object* System_GC__get_ephemeron_tombstone__()
 	return NULL;
 }
 
-extern "C" bool System_Buffer__BlockCopyInternal_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* src, int32_t src_offset, Array<uint8_t>* dest, int32_t dest_offset, int32_t count)
+extern "C" void System_GC___SuppressFinalize_System_Object_(Object* obj)
 {
-	auto srcB = src->value + src_offset;
-	auto destB = dest->value + dest_offset;
+}
 
-	if (src == dest) // Move inside same array
+extern "C" void System_Buffer__InternalBlockCopy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* src, int32_t srcOffset, Array<uint8_t>* dst, int32_t dstOffset, int32_t count)
+{
+	auto srcB = src->value + srcOffset;
+	auto destB = dst->value + dstOffset;
+
+	if (src == dst) // Move inside same array
 		memmove((void*)destB, (void*)srcB, count);
 	else
 		memcpy((void*)destB, (void*)srcB, count);
-
-	return true;
 }
 
-extern "C" double System_Math__Floor_System_Double_(double d)
+extern "C" void System_Buffer__BlockCopy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(Array<uint8_t>* src, int32_t srcOffset, Array<uint8_t>* dst, int32_t dstOffset, int32_t count)
 {
-	return floor(d);
-}
-
-extern "C" double System_Math__Round_System_Double_(double d)
-{
-	// TODO: Math.Round is different from C++ round, need to make a better implementation
-	return round(d);
+	System_Buffer__InternalBlockCopy_System_Array_System_Int32_System_Array_System_Int32_System_Int32_(src, srcOffset, dst, dstOffset, count);
 }
 
 extern "C" bool System_Security_SecurityManager__get_SecurityEnabled__()
@@ -368,21 +429,11 @@ extern "C" StringObject* System_Environment__internalGetEnvironmentVariable_Syst
 #endif
 }
 
-extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object_T__T_T_(Object** location1, Object* value, Object* comparand)
-{
-	auto result = *location1;
-	if (*location1 == comparand)
-		*location1 = value;
-
-	return result;
-}
-
-
 // ThunkPointers is defined by LLVM
 extern void* ThunkPointers[4096];
 void* ThunkTargets[4096];
 
-thread_local uint32_t ThunkCurrentId;
+uint32_t ThunkCurrentId;
 
 extern "C" void** SharpLang_Marshalling_MarshalHelper__GetThunkTargets__()
 {
@@ -397,4 +448,45 @@ extern "C" void** SharpLang_Marshalling_MarshalHelper__GetThunkPointers__()
 extern "C" uint32_t SharpLang_Marshalling_MarshalHelper__GetThunkCurrentId__()
 {
 	return ThunkCurrentId;
+}
+
+extern "C" StringObject* System_Number__FormatInt32_System_Int32_System_String_System_Globalization_NumberFormatInfo_(int32_t value, StringObject* format, Object* info)
+{
+	char buffer[64];
+	sprintf(buffer, "%i", value);
+	return StringObject::NewString(buffer);
+}
+
+// QCall
+extern "C" __declspec(dllexport) bool __stdcall InternalUseRandomizedHashing()
+{
+	return false;
+}
+
+extern "C" __declspec(dllexport) int32_t __stdcall GetProcessorCount()
+{
+#ifdef _WIN32
+	SYSTEM_INFO systemInfo;
+	GetSystemInfo(&systemInfo);
+	return systemInfo.dwNumberOfProcessors;
+#else
+	return std::thread::hardware_concurrency();
+#endif
+}
+
+
+extern "C" __declspec(dllexport) bool __stdcall InternalGetDefaultLocaleName(int localType, StringObject** localeString)
+{
+	return false;
+}
+
+extern "C" __declspec(dllexport) bool __stdcall InternalGetUserDefaultUILanguage(char16_t* localeString)
+{
+	return false;
+}
+
+extern "C" __declspec(dllexport) void* __stdcall NativeInternalInitSortHandle(char16_t* localeName, void** handleOrigin)
+{
+	handleOrigin = NULL;
+	return NULL;
 }

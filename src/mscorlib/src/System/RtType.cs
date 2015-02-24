@@ -2711,7 +2711,7 @@ namespace System
         #endregion
 
         #region Constructor
-        internal RuntimeType() { throw new NotSupportedException(); }
+        internal RuntimeType() {}
         #endregion
 
         #region Private\Internal Members

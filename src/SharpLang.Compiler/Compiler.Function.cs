@@ -361,10 +361,30 @@ namespace SharpLang.CompilerServices
 
             LLVM.PositionBuilderAtEnd(builder, functionContext.BasicBlock);
 
+            // Rewrite IL for various methods
             if (methodReference.DeclaringType.Name == "EncodingHelper" && methodReference.Name == "LoadGetStringPlatform")
             {
                 body = new MethodBody(method);
                 body.Instructions.Add(Instruction.Create(OpCodes.Ldnull));
+                body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            }
+            else if (methodReference.DeclaringType.FullName == typeof(System.Threading.Interlocked).FullName && methodReference.Name == "CompareExchange" && methodReference.ContainsGenericParameter == true)
+            {
+                // Find System.Threading.Interlocked::CompareExchange(ref Object, Object, Object)
+                var compareExchangeObjectMethod = methodReference.DeclaringType.Resolve().Methods.Single(x => x.IsStatic && x.Name == "CompareExchange" && x.Parameters[2].ParameterType.FullName == typeof(object).FullName);
+
+                body = new MethodBody(method);
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+                body.Instructions.Add(Instruction.Create(OpCodes.Call, compareExchangeObjectMethod));
+                body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            }
+            else if (methodReference.DeclaringType.Name == "JitHelpers" && methodReference.Name == "UnsafeCastToStackPointer")
+            {
+                body = new MethodBody(method);
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                body.Instructions.Add(Instruction.Create(OpCodes.Conv_I));
                 body.Instructions.Add(Instruction.Create(OpCodes.Ret));
             }
 
@@ -1042,8 +1062,19 @@ namespace SharpLang.CompilerServices
 
                         if (type != null && type.Class != null)
                         {
+                            var runtimeType = GetType(corlib.MainModule.GetType("System.RuntimeType"), TypeState.VTableEmitted);
+                            var sharpLangModuleType = GetType(corlib.MainModule.GetType("System.SharpLangModule"), TypeState.VTableEmitted);
+                            var resolveTypeMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "ResolveType" && x.MethodReference.Parameters[0].ParameterType.Name == "SharpLangEEType*");
+
+                            // Resolve type
+                            functionContext.Stack.Add(new StackValue(StackValueType.Reference, intPtr, LLVM.ConstPointerCast(type.Class.GeneratedEETypeTokenLLVM, intPtrLLVM)));
+                            EmitCall(functionContext, resolveTypeMethod.Signature, resolveTypeMethod.GeneratedValue);
+
+                            var runtimeTypeValue = LLVM.BuildPointerCast(builder, functionContext.Stack.Pop().Value, runtimeType.DefaultTypeLLVM, string.Empty);
+
+                            // Create RuntimeTypeHandle
                             runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
-                            runtimeHandleValue = LLVM.BuildInsertValue(builder, runtimeHandleValue, LLVM.ConstPointerCast(type.Class.GeneratedEETypeTokenLLVM, intPtrLLVM), 0, string.Empty);
+                            runtimeHandleValue = LLVM.BuildInsertValue(builder, runtimeHandleValue, runtimeTypeValue, 0, string.Empty);
                         }
                         else
                         {
@@ -1695,6 +1726,55 @@ namespace SharpLang.CompilerServices
                     break;
                 #endregion
 
+                #region TypedReference (refanytype, mkrefany) -- currently not implemented
+                case Code.Refanytype:
+                {
+                    stack.Pop();
+
+                    var runtimeHandleClass = GetClass(corlib.MainModule.GetType(typeof(RuntimeTypeHandle).FullName));
+
+                    // TODO: Implement this
+                    var runtimeHandleValue = LLVM.ConstNull(runtimeHandleClass.Type.DataTypeLLVM);
+
+                    // Add indirection
+                    var runtimeHandleValueIndirect = LLVM.BuildAlloca(builderAlloca, runtimeHandleClass.Type.DataTypeLLVM, string.Empty);
+                    LLVM.BuildStore(builder, runtimeHandleValue, runtimeHandleValueIndirect);
+
+                    stack.Add(new StackValue(runtimeHandleClass.Type.StackType, runtimeHandleClass.Type, runtimeHandleValueIndirect));
+                    break;
+                }
+                case Code.Mkrefany:
+                {
+                    stack.Pop();
+
+                    var typedReferenceClass = GetClass(corlib.MainModule.GetType(typeof(TypedReference).FullName));
+
+                    // TODO: Implement this
+                    var typeReferenceValue = LLVM.ConstNull(typedReferenceClass.Type.DataTypeLLVM);
+
+                    // Add indirection
+                    var typeReferenceValueIndirect = LLVM.BuildAlloca(builderAlloca, typedReferenceClass.Type.DataTypeLLVM, string.Empty);
+                    LLVM.BuildStore(builder, typeReferenceValue, typeReferenceValueIndirect);
+
+                    stack.Add(new StackValue(typedReferenceClass.Type.StackType, typedReferenceClass.Type, typeReferenceValueIndirect));
+                    break;
+                }
+                case Code.Refanyval:
+                {
+                    stack.Pop();
+
+                    // Push empty address
+                    var typeReference = ResolveGenericsVisitor.Process(methodReference, (TypeReference)instruction.Operand);
+                    var type = GetType(typeReference, TypeState.VTableEmitted);
+
+                    var refType = GetType(type.TypeReferenceCecil.MakeByReferenceType(), TypeState.Opaque);
+
+                    stack.Add(new StackValue(StackValueType.Reference, refType, LLVM.ConstNull(refType.DefaultTypeLLVM)));
+
+                    break;
+                }
+                #endregion
+
                 default:
                     throw new NotImplementedException(string.Format("Opcode {0} not implemented.", instruction.OpCode));
             }
@@ -1888,23 +1968,25 @@ namespace SharpLang.CompilerServices
                         // Cast to expected RTTI type
                         rttiPointer = LLVM.BuildPointerCast(builder, rttiPointer, LLVM.TypeOf(@class.GeneratedEETypeRuntimeLLVM), string.Empty);
 
-                        // Virtual table call
-                        if (targetMethod.VirtualSlot == -1)
+                        if (targetMethod.VirtualSlot != -1)
                         {
-                            throw new InvalidOperationException("Trying to call a virtual method without slot.");
+                            // Virtual table call: Get method stored in vtable slot
+                            indices = new[]
+                            {
+                                LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
+                                LLVM.ConstInt(int32LLVM, (int)RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
+                                LLVM.ConstInt(int32LLVM, (ulong)targetMethod.VirtualSlot, false), // Access specific vtable slot
+                            };
+
+                            var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
+                            resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
+                            resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
                         }
-
-                        // Get method stored in vtable slot
-                        indices = new[]
+                        else
                         {
-                            LLVM.ConstInt(int32LLVM, 0, false), // Pointer indirection
-                            LLVM.ConstInt(int32LLVM, (int) RuntimeTypeInfoFields.VirtualTable, false), // Access vtable
-                            LLVM.ConstInt(int32LLVM, (ulong) targetMethod.VirtualSlot, false), // Access specific vtable slot
-                        };
-
-                        var vtable = LLVM.BuildInBoundsGEP(builder, rttiPointer, indices, string.Empty);
-                        resolvedMethod = LLVM.BuildLoad(builder, vtable, string.Empty);
-                        resolvedMethod = LLVM.BuildPointerCast(builder, resolvedMethod, LLVM.PointerType(targetMethod.FunctionType, 0), string.Empty);
+                            // Not an actual virtual method, call it directly
+                            resolvedMethod = targetMethod.GeneratedValue;
+                        }
                     }
                 }
             }

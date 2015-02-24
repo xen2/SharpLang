@@ -48,6 +48,15 @@ namespace System.Collections.Generic
             if (t == typeof(byte)) {
                 return (EqualityComparer<T>)(object)(new ByteEqualityComparer());
             }
+            // String and SharpLangEETypePtr are used by Metadata.Reflection (ends up in infinite loop if user reflection code)
+            if (t == typeof(string))
+            {
+                return (EqualityComparer<T>)(object)(new GenericEqualityComparer<string>());
+            }
+            if (t == typeof(SharpLangEETypePtr))
+            {
+                return (EqualityComparer<T>)(object)(new GenericEqualityComparer<SharpLangEETypePtr>());
+            }
             // If T implements IEquatable<T> return a GenericEqualityComparer<T>
             if (typeof(IEquatable<T>).IsAssignableFrom(t)) {
                 return (EqualityComparer<T>)RuntimeTypeHandle.CreateInstanceForAnotherGenericParameter((RuntimeType)typeof(GenericEqualityComparer<int>), t);

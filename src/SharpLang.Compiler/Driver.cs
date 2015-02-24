@@ -208,6 +208,12 @@ namespace SharpLang.CompilerServices
             //arguments.Append(" --driver-mode=g++ -std=c++11");
             arguments.AppendFormat(" {0} -o {1}", string.Join(" ", filesToLink), outputFile);
 
+            // Necessary for some CoreCLR new/delete
+            // Note: not sure yet if we want to keep stdc++ deps or not?
+            arguments.Append(" -lstdc++");
+            if (triple.Contains("windows"))
+                arguments.Append(" -loleaut32");
+
             ExecuteClang(triple, arguments.ToString());
         }
 

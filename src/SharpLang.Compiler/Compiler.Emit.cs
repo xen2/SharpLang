@@ -181,9 +181,9 @@ namespace SharpLang.CompilerServices
             // and InternalAllocateStr will do the actual allocation
             if (type.TypeReferenceCecil.FullName == typeof(string).FullName)
             {
-                var targetMethod = type.Class.Functions.First(x => x.MethodReference.Name == "CreateString" && CompareParameterTypes(x.ParameterTypes, ctor.ParameterTypes));
+                var targetMethod = type.Class.Functions.First(x => x.MethodReference.Name.StartsWith("Ctor") && CompareParameterTypes(x.ParameterTypes, ctor.ParameterTypes));
 
-                // Insert a null "this" pointer (note: CreateString would probably be better as static to avoid that)
+                // Insert a null "this" pointer (note: CtorXXX would probably be better as static to avoid that)
                 functionContext.Stack.Insert(functionContext.Stack.Count - (targetMethod.ParameterTypes.Length - 1), new StackValue(type.StackType, type, LLVM.ConstNull(type.DefaultTypeLLVM)));
 
                 EmitCall(functionContext, targetMethod.Signature, targetMethod.GeneratedValue);

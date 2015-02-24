@@ -2,6 +2,7 @@
 #include <windows.h>
 #endif
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 enum class PInvokeAttributes : uint16_t
@@ -16,10 +17,10 @@ extern "C" void* PInvokeOpenLibrary(const char* moduleName)
 {
 #ifdef _WIN32
 	// Current module?
-	if (strcmp(moduleName, "__Internal") == 0)
+	if (strcmp(moduleName, "__Internal") == 0 || strcmp(moduleName, "QCall") == 0)
 		return GetModuleHandle(NULL);
 
-	return LoadLibrary(moduleName);
+	return LoadLibraryA(moduleName);
 #else
 	return NULL;
 #endif
@@ -50,6 +51,18 @@ extern "C" void* PInvokeGetProcAddress(void* module, const char* procName, PInvo
 
 	result = (void*)GetProcAddress((HMODULE)module, charsetProcName);
 	free(charsetProcName);
+
+	// Try stdcall mangling
+	char* buffer = (char*)malloc(strlen(procName) + 12);
+	for (int i = 0; i < 128; i += 4)
+	{
+		sprintf(buffer, "%s@%i", procName, i);
+		result = (void*)GetProcAddress((HMODULE)module, buffer);
+		if (result != NULL)
+			break;
+	}
+	free(buffer);
+
 	return result;
 #else
 	return NULL;

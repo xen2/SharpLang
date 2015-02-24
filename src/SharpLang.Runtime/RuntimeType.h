@@ -40,18 +40,27 @@ public:
 	void* virtualTable[0];
 };
 
+extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface);
+
+struct AppDomain;
+
 class Object
 {
 public:
 	Object(EEType* eeType) : eeType(eeType) {}
+    
+    AppDomain* GetAppDomain() { return NULL; }
 
 	EEType* eeType;
 };
 
 class RuntimeType : public Object
 {
-	void* implObsolete; // Type._impl should be removed
 public:
+	Object* m_keepalive;
+	void* m_cache;
+	void* m_handle;
+	
 	EEType* runtimeEEType;
 };
 
@@ -97,6 +106,15 @@ public:
 		NewString((const char16_t*)str);
 	}
 
+	wchar_t* GetBuffer() { return (wchar_t*)&firstChar; }
+    
+    uint32_t GetStringLength() { return length; }
+    
+    void RefInterpretGetStringValuesDangerousForGC(wchar_t **chars, int *length)
+    {
+        *length = GetStringLength();
+        *chars  = GetBuffer();
+    }
 
 	uint32_t length;
 	char16_t firstChar;
@@ -105,6 +123,11 @@ public:
 class ArrayBase : public Object
 {
 public:
+    inline size_t GetNumComponents() { return length; }
+    inline size_t GetComponentSize() { return eeType->elementSize; }
+    
+    inline uint8_t* GetDataPtr() { return (uint8_t*)(this + 1); }
+
 	size_t length;
 };
 
@@ -113,6 +136,36 @@ class Array : public ArrayBase
 {
 public:
 	T* value;
+    
+    const T* GetDirectConstPointerToNonObjectElements() const
+    {
+        return value;
+    }
+    
+    T* GetDirectPointerToNonObjectElements()
+    { 
+        return value;
+    }
+};
+
+extern EEType System_Threading_Thread_rtti;
+
+class Thread : public Object
+{
+public:
+	Thread() : Object(&System_Threading_Thread_rtti) {}
+};
+
+class StringBufferObject : public Object
+{
+  private:
+    Array<char16_t>* m_ChunkChars;
+    StringBufferObject* m_ChunkPrevious;
+    uint32_t m_ChunkLength;
+    uint32_t m_ChunkOffset;
+    int32_t m_MaxCapacity;
+    
+    // TODO
 };
 
 #endif

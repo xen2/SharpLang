@@ -151,7 +151,29 @@ namespace SharpLang.CompilerServices.Marshalling
                         break;
                     }
 
+                    if (type.FullName == typeof(RuntimeTypeHandle).FullName
+                        || type.FullName == typeof(RuntimeFieldHandle).FullName
+                        || type.FullName == typeof(RuntimeMethodHandle).FullName)
+                    {
+                        return new BlittableMarshaller();
+                    }
+
                     var typeDefinition = type.Resolve();
+
+                    // Type inherits from SafeHandle?
+                    {
+                        var currentType = typeDefinition;
+                        while (true)
+                        {
+                            if (currentType.FullName == typeof(SafeHandle).FullName)
+                            {
+                                return new SafeHandleMarshaller();
+                            }
+                            if (currentType.BaseType == null)
+                                break;
+                            currentType = currentType.BaseType.Resolve();
+                        }
+                    }
 
                     // Check if type is a delegate
                     if (typeDefinition.BaseType != null && typeDefinition.BaseType.FullName == typeof(MulticastDelegate).FullName)

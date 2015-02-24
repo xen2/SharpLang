@@ -123,6 +123,7 @@
     <Compile Include="Marshalling\MarshalledObjectEmitterStack.cs" />
     <Compile Include="Marshalling\Marshaller.cs" />
     <Compile Include="Marshalling\ParameterMarshalledObjectEmitter.cs" />
+    <Compile Include="Marshalling\SafeHandleMarshaller.cs" />
     <Compile Include="Marshalling\StringBuilderMarshaller.cs" />
     <Compile Include="Marshalling\StringMarshaller.cs" />
     <Compile Include="Marshalling\StructMarshaller.cs" />

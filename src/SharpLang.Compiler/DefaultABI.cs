@@ -23,7 +23,7 @@ namespace SharpLang.CompilerServices
             {
                 // Types smaller than register size will be coerced to integer register type
                 var structSize = LLVM.ABISizeOfType(targetData, type.DefaultTypeLLVM);
-                if (structSize <= (ulong)intPtrSize)
+                if (structSize <= (ulong)intPtrSize && structSize != 0)
                 {
                     return new ABIParameterInfo(ABIParameterInfoKind.Coerced, LLVM.IntTypeInContext(context, (uint)structSize * 8));
                 }

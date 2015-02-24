@@ -225,8 +225,7 @@ namespace SharpLang.CompilerServices
                 // Get ctor for SharpLangModule and SharpLangType
                 var moduleCtor = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Resolve().IsConstructor);
 
-                var registerTypeMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "RegisterType");
-                var sortTypesMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "SortTypes");
+                var registerTypesMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "RegisterTypes");
 
                 // Initialize SharpLangModule instance:
                 //   new SharpLangModule(moduleName, metadataStart, metadataLength)
@@ -245,6 +244,7 @@ namespace SharpLang.CompilerServices
                 EmitCall(functionContext, moduleCtor.Signature, moduleCtor.GeneratedValue);
 
                 // Register types
+                var typesToRegister = new List<ValueRef>();
                 foreach (var type in types)
                 {
                     var @class = type.Value.Class;
@@ -261,9 +261,25 @@ namespace SharpLang.CompilerServices
                     if (type.Value.TypeDefinitionCecil.IsInterface)
                         continue;
 
-                    functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, LLVM.ConstPointerCast(@class.GeneratedEETypeRuntimeLLVM, intPtrLLVM)));
-                    EmitCall(functionContext, registerTypeMethod.Signature, registerTypeMethod.GeneratedValue);
+                    // If we are processing mscorlib, there are a few special cases:
+                    // 1/ For string, we will initialize string.Empty (it is initialised by the EE to avoid using a .cctor for String)
+                    if (type.Value.TypeDefinitionCecil.FullName == typeof(string).FullName)
+                    {
+                        EmitLdstr(functionContext.Stack, string.Empty);
+                        EmitStsfld(functionContext.Stack, @class.StaticFields.Single(x => x.Key.Name == "Empty").Value, InstructionFlags.None);
+                    }
+
+                    typesToRegister.Add(LLVM.ConstPointerCast(@class.GeneratedEETypeRuntimeLLVM, intPtrLLVM));
                 }
+
+                var typesGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(intPtrLLVM, (uint)typesToRegister.Count), ".types");
+                LLVM.SetInitializer(typesGlobal, LLVM.ConstArray(intPtrLLVM, typesToRegister.ToArray()));
+                LLVM.SetLinkage(typesGlobal, Linkage.PrivateLinkage);
+
+                // Call System.SharpLangModule.RegisterTypes(types, types.Count)
+                functionContext.Stack.Add(new StackValue(StackValueType.NativeInt, intPtr, typesGlobal));
+                functionContext.Stack.Add(new StackValue(StackValueType.Int32, int32, LLVM.ConstInt(int32LLVM, (ulong)typesToRegister.Count, false)));
+                EmitCall(functionContext, registerTypesMethod.Signature, registerTypesMethod.GeneratedValue);
 
                 // Register unmanaged delegate callbacks
                 var delegateWrappers = assembly.MainModule.GetType("DelegateWrappers");
@@ -288,10 +304,6 @@ namespace SharpLang.CompilerServices
                         EmitCall(functionContext, marshalHelperRegisterDelegateWrapper.Signature, marshalHelperRegisterDelegateWrapper.GeneratedValue);
                     }
                 }
-
-                // Sort and remove duplicates after adding all our types
-                // TODO: Somehow sort everything before insertion at compile time?
-                EmitCall(functionContext, sortTypesMethod.Signature, sortTypesMethod.GeneratedValue);
 
                 LLVM.BuildRetVoid(builder);
             }
@@ -327,6 +339,19 @@ namespace SharpLang.CompilerServices
 	            var parameters = (entryPoint.ParameterTypes.Length > 0)
 	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultTypeLLVM) }
 	                : new ValueRef[0];
+
+                if (!TestMode)
+                {
+                    var functionContext = new FunctionCompilerContext(mainFunction, new FunctionSignature(abi, @void, new Type[0], MethodCallingConvention.Default, null));
+                    functionContext.Stack = new FunctionStack();
+    
+                    // Sort and remove duplicates after adding all our types
+                    // TODO: Somehow sort everything before insertion at compile time?
+                    var sortTypesMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "SortTypes");
+    
+                    EmitCall(functionContext, sortTypesMethod.Signature, sortTypesMethod.GeneratedValue);
+                }
+
 
                 LLVM.BuildCall(builder, entryPoint.GeneratedValue, parameters, string.Empty);
                 LLVM.BuildRet(builder, LLVM.ConstInt(int32LLVM, 0, false));

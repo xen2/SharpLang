@@ -125,6 +125,7 @@ namespace System {
                 // returning, we're going into an infinite loop and we should 
                 // return a bogus string.  
 
+#if SHARPLANG_NOTSUPPORTED
                 GetResourceStringUserData userData = new GetResourceStringUserData(this, key, culture);
 
                 RuntimeHelpers.TryCode tryCode = new RuntimeHelpers.TryCode(GetResourceStringCode);
@@ -132,6 +133,9 @@ namespace System {
 
                 RuntimeHelpers.ExecuteCodeWithGuaranteedCleanup(tryCode, cleanupCode, userData);
                 return userData.m_retVal;
+#else
+                return key;
+#endif
             }
 
             #if FEATURE_CORECLR

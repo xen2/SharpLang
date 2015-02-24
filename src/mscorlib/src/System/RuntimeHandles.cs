@@ -245,8 +245,10 @@ namespace System
         internal static extern Object Allocate(RuntimeType type);
 
         [System.Security.SecurityCritical]  // auto-generated
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal static extern Object CreateInstanceForAnotherGenericParameter(RuntimeType type, RuntimeType genericParameter);
+        internal static Object CreateInstanceForAnotherGenericParameter(RuntimeType type, RuntimeType genericParameter)
+        {
+            return Activator.CreateInstance(type.GetGenericTypeDefinition().MakeGenericType(genericParameter));
+        }
         
         internal RuntimeType GetRuntimeType()
         {
@@ -275,7 +277,11 @@ namespace System
         
         [System.Security.SecuritySafeCritical]
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static RuntimeType GetBaseType(RuntimeType type);
+        internal static RuntimeType GetBaseType(RuntimeType type)
+        {
+            // implemented by SharpLangType
+            return ((SharpLangType)type).GetBaseType();
+        }
 
         [System.Security.SecurityCritical]  // auto-generated
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -423,8 +429,10 @@ namespace System
         internal extern static bool IsContextful(RuntimeType type); 
 
         [System.Security.SecurityCritical]  // auto-generated
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool IsInterface(RuntimeType type);
+        internal static bool IsInterface(RuntimeType type)
+        {
+            return (type.Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Interface;
+        }
 
         [System.Security.SecurityCritical]  // auto-generated
         [DllImport(JitHelpers.QCall, CharSet = CharSet.Unicode)]
@@ -736,11 +744,19 @@ namespace System
 
         [System.Security.SecuritySafeCritical]  // auto-generated
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool IsGenericTypeDefinition(RuntimeType type);
+        internal static bool IsGenericTypeDefinition(RuntimeType type)
+        {
+            // implemented by SharpLangType
+            return type.IsGenericTypeDefinition;
+        }
        
         [System.Security.SecuritySafeCritical]  // auto-generated
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool IsGenericVariable(RuntimeType type);
+        internal static bool IsGenericVariable(RuntimeType type)
+        {
+            // implemented by SharpLangType
+            return type.IsGenericParameter;
+        }
 
         internal bool IsGenericVariable()
         {
@@ -1493,22 +1509,27 @@ namespace System
         internal RuntimeFieldHandle GetNativeHandle()
         {
             // Create local copy to avoid a race condition
-            IRuntimeFieldInfo field = m_ptr;
+            //IRuntimeFieldInfo field = m_ptr;
+            IRuntimeFieldInfo field = null;
             if (field == null)
                 throw new ArgumentNullException(null, Environment.GetResourceString("Arg_InvalidHandle"));
             return new RuntimeFieldHandle(field);
         }
 
-        private IRuntimeFieldInfo m_ptr;
+        // Temporarily for static .cctor, until real FieldInfo support
+        private IntPtr m_ptr;
+        //private IRuntimeFieldInfo m_ptr;
 
         internal RuntimeFieldHandle(IRuntimeFieldInfo fieldInfo)
         {
-            m_ptr = fieldInfo;
+            //m_ptr = fieldInfo;
+            m_ptr = IntPtr.Zero;
         }
 
         internal IRuntimeFieldInfo GetRuntimeFieldInfo()
         {
-            return m_ptr;
+            //return m_ptr;
+            return null;
         }
 
         public IntPtr Value
@@ -1520,13 +1541,15 @@ namespace System
 #endif
             get
             {
-                return m_ptr != null ? m_ptr.Value.Value : IntPtr.Zero;
+                //return m_ptr != null ? m_ptr.Value.Value : IntPtr.Zero;
+                return m_ptr;
             }
         }
 
         internal bool IsNullHandle() 
         {
-            return m_ptr == null; 
+            //return m_ptr == null; 
+            return m_ptr == IntPtr.Zero;
         }
 
         [SecuritySafeCritical]

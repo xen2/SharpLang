@@ -237,6 +237,15 @@ namespace SharpLang.CompilerServices
 
                     // Apply linkage
                     LLVM.SetLinkage(runtimeTypeInfoGlobal, @class.Type.Linkage);
+
+                    // If type implements IEquatable<T>, let's force generation of GenericEqualityComparer<T>
+                    // TODO: We might want to centralize such behavior in a single place, probably like "RegisterLocalTypes" done right after "RegisterExternalTypes"
+                    if (@class.Type.TypeDefinitionCecil.Interfaces.Any(x => x.IsGenericInstance && ((GenericInstanceType)x).ElementType.FullName == typeof(IEquatable<>).FullName))
+                    {
+                        var genericEqualityComparerT = corlib.MainModule.GetType("System.Collections.Generic.GenericEqualityComparer`1");
+                        var genericEqualityComparer = genericEqualityComparerT.MakeGenericType(@class.Type.TypeReferenceCecil);
+                        GetType(genericEqualityComparer, TypeState.Opaque);
+                    }
                 }
 
                 // Prepare class initializer

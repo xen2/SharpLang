@@ -113,15 +113,15 @@
 		<type fullname="System.STAThreadAttribute" />
 		<type fullname="System.String" preserve="fields">
 			<method name=".ctor" />
-			<method name="CtorCharArray" />
-			<method name="CtorCharArrayStartLength" />
-			<method name="CtorCharCount" />
-			<method name="CtorCharPtr" />
-			<method name="CtorCharPtrStartLength" />
-			<method name="CtorSBytePtr" />
-			<method name="CreateString" />
-			<method name="FastAllocateString" />
-			<method name="InternalAllocateStr" />
+      <method name="CtorCharArray" />
+      <method name="CtorCharArrayStartLength" />
+      <method name="CtorCharCount" />
+      <method name="CtorCharPtr" />
+      <method name="CtorCharPtrStartLength" />
+      <method name="CtorSBytePtr" />
+      <method name="CreateString" />
+      <method name="FastAllocateString" />
+      <method name="InternalAllocateStr" />
 			<method name="memcpy" />
 			<method name="memset" />
 		</type>
