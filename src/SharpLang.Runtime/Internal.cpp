@@ -3,9 +3,6 @@
 #include <assert.h>
 #include "RuntimeType.h"
 #include "ConvertUTF.h"
-#include "char-category-data.h"
-#include "char-conversions.h"
-#include "number-formatter.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -309,37 +306,6 @@ extern "C" StringObject* System_String__FastAllocateString_System_Int32_(int32_t
 extern "C" int32_t System_String__GetLOSLimit__()
 {
 	return INT32_MAX;
-}
-
-extern "C" void System_Char__GetDataTablePointers_System_Int32_System_Byte___System_UInt16___System_Byte___System_Double___System_UInt16___System_UInt16___System_UInt16___System_UInt16___(
-					    int category_data_version, uint8_t const **category_data, uint16_t const **category_astral_index,
-					    uint8_t const **numeric_data, double const **numeric_data_values,
-					    uint16_t const **to_lower_data_low, uint16_t const **to_lower_data_high,
-					    uint16_t const **to_upper_data_low, uint16_t const **to_upper_data_high)
-{
-	*category_data = CategoryData;
-	*numeric_data = NumericData;
-	*numeric_data_values = NumericDataValues;
-	*to_lower_data_low = ToLowerDataLow;
-	*to_lower_data_high = ToLowerDataHigh;
-	*to_upper_data_low = ToUpperDataLow;
-	*to_upper_data_high = ToUpperDataHigh;
-}
-
-extern "C" void System_NumberFormatter__GetFormatterTables_System_UInt64___System_Int32___System_Char___System_Char___System_Int64___System_Int32___ (
-					uint64_t const **mantissas,
-					int32_t const **exponents,
-					char16_t const **digitLowerTable,
-					char16_t const **digitUpperTable,
-					int64_t const **tenPowersList,
-					int32_t const **decHexDigits)
-{
-	*mantissas = Formatter_MantissaBitsTable;
-	*exponents = Formatter_TensExponentTable;
-	*digitLowerTable = Formatter_DigitLowerTable;
-	*digitUpperTable = Formatter_DigitUpperTable;
-	*tenPowersList = Formatter_TenPowersList;
-	*decHexDigits = Formatter_DecHexDigits;
 }
 
 extern "C" RuntimeType* System_Type__GetTypeFromHandle_System_RuntimeTypeHandle_(RuntimeType* runtimeType)

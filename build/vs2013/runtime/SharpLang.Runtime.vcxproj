@@ -97,16 +97,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\RuntimeType.h" />
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\char-category-data.h" />
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\char-conversions.h" />
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\number-formatter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.c" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Exception.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Internal.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Marshal.cpp" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\MonoIO.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\PInvoke.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\RuntimeType.cpp" />
   </ItemGroup>
