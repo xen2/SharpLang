@@ -28,7 +28,7 @@ namespace System {
     #if CONTRACTS_FULL
     [ContractClass(typeof(ArrayContracts))]
     #endif
-    public abstract class Array : ICloneable, IList, IStructuralComparable, IStructuralEquatable 
+    public abstract partial class Array : ICloneable, IList, IStructuralComparable, IStructuralEquatable 
     {
         /// <internalonly/>
         internal Array() {}  // Don't call this.  Internal for ArrayContracts type.

@@ -146,5 +146,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Reflection\PortableExecutable\PEStreamOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Reflection\PortableExecutable\SectionHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Runtime\CompilerServices\StrongBox_T.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\ArrayT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangHelper.cs" />
   </ItemGroup>
 </Project>

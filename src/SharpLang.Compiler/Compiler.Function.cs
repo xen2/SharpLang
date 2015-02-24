@@ -1728,7 +1728,7 @@ namespace SharpLang.CompilerServices
 
                 // TODO: We temporarily ignore extern class in test mode
                 // Not sure if that's the way we want to keep it
-                if (TestMode && !@class.Type.IsLocal)
+                if (TestMode && @class.Type.TypeDefinitionCecil.Module.Assembly != assembly)
                     return;
 
                 // Check if class is initialized

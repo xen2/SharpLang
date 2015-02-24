@@ -13,6 +13,12 @@
 #include <sys/utsname.h>
 #endif
 
+// TODO: Emit IL directly?
+extern "C" Object* System_SharpLangHelper__UnsafeCast_System_Object_System_Object_(Object* obj)
+{
+	return obj;
+}
+
 extern "C" void* System_SharpLangHelper__GetObjectPointer_System_Object_(Object* obj)
 {
 	return obj;

@@ -175,7 +175,7 @@ namespace SharpLang.CompilerServices.Tests
         
         public static string LinkAssembly(string assemblyFile, string outputDirectory)
         {
-            var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", @"..\..\..\..\src\mcs\class\lib\net_4_5", "-c", "link", "-b", "true" });
+            var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", @"..\..\..\..\build\vs2013\lib\runtime.net\x86", "-c", "link", "-b", "true" });
             if (monoLinkerResult != 0)
                 throw new InvalidOperationException("Error during Mono Linker phase.");
 

@@ -290,6 +290,21 @@
       <Member MemberType="Property" Name="Rank" />
       <Member MemberType="Property" Name="SyncRoot" />
       <Member Status="ImplRoot" Name="GetDataPtrOffsetInternal" /> <!-- EE -->
+      <Member Name="InternalArray__ICollection_get_Count" />
+      <Member Name="InternalArray__ICollection_get_IsReadOnly" />
+      <Member Name="InternalArray__IEnumerable_GetEnumerator&lt;T&gt;" />
+      <Member Name="InternalArray__ICollection_Clear" />
+      <Member Name="InternalArray__ICollection_Add&lt;T&gt;(T)" />
+      <Member Name="InternalArray__ICollection_Remove&lt;T&gt;(T)" />
+      <Member Name="InternalArray__ICollection_Contains&lt;T&gt;(T)" />
+      <Member Name="InternalArray__ICollection_CopyTo&lt;T&gt;(T[],System.Int32)" />
+      <Member Name="InternalArray__IReadOnlyList_get_Item&lt;T&gt;(System.Int32)" />
+      <Member Name="InternalArray__IReadOnlyCollection_get_Count" />
+      <Member Name="InternalArray__Insert&lt;T&gt;(System.Int32,T)" />
+      <Member Name="InternalArray__RemoveAt(System.Int32)" />
+      <Member Name="InternalArray__IndexOf&lt;T&gt;(T)" />
+      <Member Name="InternalArray__get_Item&lt;T&gt;(System.Int32)" />
+      <Member Name="InternalArray__set_Item&lt;T&gt;(System.Int32,T)" />
     </Type>
     <Type Name="System.ArraySegment&lt;T&gt;">
         <Member Name="#ctor(T[])" />
