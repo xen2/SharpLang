@@ -63,6 +63,7 @@ namespace Microsoft.Win32 {
         internal static extern bool FreeLibrary(IntPtr hModule);
 
 
+#if SHARPLANG_NOTSUPPORTED
         [SecurityCritical]
         [SuppressUnmanagedCodeSecurityAttribute()]
         internal static unsafe class ManifestEtw
@@ -268,6 +269,7 @@ namespace Microsoft.Win32 {
                 ref int ReturnLength);
 
         }
+#endif
 #if FEATURE_COMINTEROP
         [SecurityCritical]
         [DllImport("combase.dll", PreserveSig = true)]

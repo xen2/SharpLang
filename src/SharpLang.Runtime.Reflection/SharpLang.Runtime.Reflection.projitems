@@ -24,6 +24,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\System\Runtime\InteropServices\ImmutableArrayInterop.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\Validation\Requires.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\Validation\ValidatedNotNullAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventActivityOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventCommandEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\EventSourceAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\NonEventAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Diagnostics.Eventing\Winmeta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\Resources\MetadataResources.Designer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Reflection\Internal\MemoryBlocks\AbstractMemoryBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\System\Reflection\Internal\MemoryBlocks\ByteArrayMemoryBlock.cs" />

@@ -9756,7 +9756,7 @@
     </Type>
     <Type Status="ImplRoot" Name="System.Diagnostics.StackFrameHelper" />
 
-    <Type Name="System.Diagnostics.Tracing.EventAttribute">
+    <!--<Type Name="System.Diagnostics.Tracing.EventAttribute">
       <Member Name="#ctor(System.Int32)" />
       <Member Name="get_EventId" />
       <Member MemberType="Property" Name="Channel" />
@@ -10039,7 +10039,7 @@
 
    <Type Name="System.Diagnostics.Tracing.FrameworkEventSource+Opcodes">
       <Member MemberType="Field" Name="ReceiveHandled" />
-   </Type>
+   </Type>-->
 
     
     <Type Status="ImplRoot" Name="System.DuplicateWaitObjectException" />

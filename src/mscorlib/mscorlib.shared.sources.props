@@ -973,6 +973,8 @@
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\Stacktrace.cs" />
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\Stackframe.cs" />
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\EditAndContinueHelper.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(FeatureSharpLangFakeEventing)' != 'true'">
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\Eventing\ActivityTracker.cs" />
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\Eventing\EventActivityOptions.cs" />
     <DiagnosticsSources Include="$(BclSourcesRoot)\System\Diagnostics\Eventing\EventDescriptor.cs" />

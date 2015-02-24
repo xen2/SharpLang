@@ -125,5 +125,6 @@
     <FeatureCoreFxGlobalization>true</FeatureCoreFxGlobalization>
     <FeatureAppx>false</FeatureAppx>
 	<FeatureSharpLangCoreFxGlobalization>true</FeatureSharpLangCoreFxGlobalization>
+    <FeatureSharpLangFakeEventing>true</FeatureSharpLangFakeEventing>
   </PropertyGroup>
 </Project>
