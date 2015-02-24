@@ -63,12 +63,6 @@ extern "C" void* System_UIntPtr__op_Explicit_System_UInt64(uint64_t p)
 	return (void*)p;
 }
 
-// int System.String.get_Length()
-extern "C" int32_t System_String__get_Length__(StringObject* str)
-{
-	return str->length;
-}
-
 // void System.Console.WriteLine(string)
 extern "C" void System_Console__WriteLine_System_String_(StringObject* str)
 {
@@ -183,11 +177,6 @@ extern "C" uint8_t System_Int32__Equals_System_Object_(int32_t* i, void* obj)
 	return *i == ((Int32*)obj)->value ? 1 : 0;
 }
 
-extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_RuntimeFieldHandle_(Array<uint8_t>* arr, uint8_t* fieldHandle)
-{
-	memcpy((void*)arr->value, (const void*)fieldHandle, arr->length * arr->eeType->elementSize);
-}
-
 extern "C" Object* System_SharpLangModule__ResolveType_System_SharpLangEEType__(EEType* eeType)
 {
 	// Needed by System_Object__GetType__
@@ -199,3 +188,18 @@ extern "C" ArrayBase* System_SharpLangType__MakeArrayType__(RuntimeType* element
 	// Needed by System_Array__CreateInstanceImpl_System_Type_System_Int32___System_Int32___
 	assert(false);
 }
+
+extern "C" bool System_RuntimeType__IsSubclassOf_System_Type_(RuntimeType* a, RuntimeType* b)
+{
+	// Needed by System_RuntimeTypeHandle__CanCastTo_System_RuntimeType_System_RuntimeType_
+	assert(false);
+}
+
+extern "C" bool System_RuntimeTypeHandle__IsInterface_System_RuntimeType_(RuntimeType* type)
+{
+	// Needed by System_RuntimeTypeHandle__CanCastTo_System_RuntimeType_System_RuntimeType_
+	assert(false);
+}
+
+// Needed by AllocateObject
+EEType System_Threading_Thread_rtti;
