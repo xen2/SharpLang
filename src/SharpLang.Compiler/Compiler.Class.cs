@@ -213,6 +213,10 @@ namespace SharpLang.CompilerServices
 
                         runtimeTypeInfoFields.AddRange(new[]
                         {
+                            int16LLVM,
+                            int16LLVM,
+                            LLVM.PointerType(fieldDesc.DefaultTypeLLVM, 0),
+
                             int32LLVM, // SuperTypesCount
                             int32LLVM, // InterfacesCount
                             LLVM.PointerType(intPtrLLVM, 0), // SuperTypes
@@ -609,8 +613,48 @@ namespace SharpLang.CompilerServices
                     return LLVM.ConstNull(fieldType.DefaultTypeLLVM);
                 }).ToArray());
 
+                // Order fields: instance ref (for GC), instance non-ref, then static ref and non-ref
+                var fields = @class.Type.Fields != null ? (IEnumerable<KeyValuePair<FieldDefinition, Field>>)@class.Type.Fields.OrderBy(x => (x.Key.IsStatic ? 2 : 0) + (x.Value.Type.TypeDefinitionCecil.IsValueType ? 1 : 0)) : new KeyValuePair<FieldDefinition, Field>[0];
+                int garbageCollectableFieldCount = 0;
+
+                // Generate SharpLangFieldDescription
+                var fieldDescriptions = fields.Select(x =>
+                {
+                    if (!x.Key.IsStatic && x.Value.Type.TypeDefinitionCecil.IsValueType)
+                    {
+                        garbageCollectableFieldCount++;
+                    }
+
+                    // Encode what SharpLangFieldDescription expects
+                    // Note: at some point, we might want to include a SharpLangFieldDescription.cs with #ifdef to be sure it doesn't get out of sync
+                    uint data1 = x.Key.MetadataToken.RID;
+                    if (x.Key.IsStatic)
+                        data1 |= 1 << 24;
+
+                    uint data2 = IsCustomLayout(@class.Type.TypeDefinitionCecil)
+                        ? (uint)x.Value.StructIndex
+                        : (uint)LLVM.OffsetOfElement(targetData, @class.Type.ValueTypeLLVM, (uint)x.Value.StructIndex); // alternative: ConstGEP?
+                    data2 &= 0x7FFFFFF;
+                    data2 |= (uint)@class.Type.TypeDefinitionCecil.MetadataType << 27;
+
+                    return LLVM.ConstNamedStruct(fieldDesc.DefaultTypeLLVM, new[]
+                    {
+                        LLVM.ConstInt(int32LLVM, data1, false),
+                        LLVM.ConstInt(int32LLVM, data2, false),
+                    });
+                }).ToArray();
+
+                var fieldDescriptionsConstantGlobal = LLVM.AddGlobal(module, LLVM.ArrayType(fieldDesc.DefaultTypeLLVM, (uint)fieldDescriptions.Length), @class.Type.TypeReferenceCecil.MangledName() + ".fields");
+                LLVM.SetLinkage(fieldDescriptionsConstantGlobal, Linkage.PrivateLinkage);
+                LLVM.SetInitializer(fieldDescriptionsConstantGlobal, LLVM.ConstArray(fieldDesc.DefaultTypeLLVM, fieldDescriptions));
+                var fieldDescriptionsGlobal = LLVM.ConstInBoundsGEP(fieldDescriptionsConstantGlobal, new[] { zero, zero });
+
                 runtimeTypeFields.AddRange(new[]
                 {
+                    LLVM.ConstInt(int16LLVM, (ulong)garbageCollectableFieldCount, false),
+                    LLVM.ConstInt(int16LLVM, (ulong)fieldDescriptions.Length, false),
+                    fieldDescriptionsGlobal,
+
                     superTypeCount,
                     interfacesCount,
                     superTypesGlobal,

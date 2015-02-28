@@ -20,6 +20,11 @@ namespace SharpLang.CompilerServices
         // Cached RuntimeType (lazy initialized)
         Type,
 
+        // Fields
+        GarbageCollectableFieldCount, // First fields in FieldDescriptions will be the one interesting for GC: instance fields of referencable types
+        FieldCount,
+        FieldDescriptions,
+
         // This part is valid only if it's a concrete type (no interface, no generic type def)
         SuperTypeCount,
         InterfacesCount,

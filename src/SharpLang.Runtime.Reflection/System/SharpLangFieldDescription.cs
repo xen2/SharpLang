@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -11,7 +12,7 @@ namespace System
         // offset: 27, type: 5
         private uint data2;
 
-        public FieldDefinitionHandle RowID
+        public FieldDefinitionHandle FieldDefinition
         {
             get
             {
@@ -26,7 +27,7 @@ namespace System
 
         public CorElementType Type
         {
-            get { return data2 >> 27; }
+            get { return (CorElementType)(data2 >> 27); }
         }
     }
 }

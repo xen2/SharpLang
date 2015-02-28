@@ -163,6 +163,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypeComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypeDefinition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangEETypePtr.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangFieldDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangMethodInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SharpLangModule.cs" />

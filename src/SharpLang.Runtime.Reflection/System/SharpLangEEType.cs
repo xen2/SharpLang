@@ -18,6 +18,12 @@ namespace System
         public IntPtr ExtraTypeInfo;
         public IntPtr CachedTypeField;
 
+        // Field infos
+        public ushort GarbageCollectableFieldCount; // First entries in FieldDescriptions will be for the GC: instance fields of referencable types
+        public ushort FieldCount;
+
+        public SharpLangFieldDescription* FieldDescriptions;
+
         // Concrete type info
         public uint SuperTypeCount;
         public uint InterfacesCount;

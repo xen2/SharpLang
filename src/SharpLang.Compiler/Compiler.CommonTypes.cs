@@ -24,11 +24,13 @@ namespace SharpLang.CompilerServices
         private Type @char;
         private Type @object;
         private Type @void;
+        private Type fieldDesc;
 
         // LLVM Types
         private TypeRef intPtrLLVM; // Native integer, pointer representation
         private int intPtrSize;
         private TypeRef nativeIntLLVM; // Native integer, integer representation
+        private TypeRef int16LLVM;
         private TypeRef int32LLVM;
         private TypeRef int64LLVM;
 
@@ -81,6 +83,7 @@ namespace SharpLang.CompilerServices
 
             // Initialize LLVM types
             intPtrLLVM = LLVM.PointerType(LLVM.Int8TypeInContext(context), 0);
+            int16LLVM = LLVM.Int16TypeInContext(context);
             int32LLVM = LLVM.Int32TypeInContext(context);
             int64LLVM = LLVM.Int64TypeInContext(context);
             intPtrSize = (int)LLVM.ABISizeOfType(targetData, intPtrLLVM);
@@ -102,6 +105,7 @@ namespace SharpLang.CompilerServices
             @char = GetType(corlib.MainModule.GetType(typeof(char).FullName), TypeState.StackComplete);
             @object = GetType(corlib.MainModule.GetType(typeof(object).FullName), TypeState.StackComplete);
             @void = GetType(corlib.MainModule.GetType(typeof(void).FullName), TypeState.StackComplete);
+            fieldDesc = GetType(corlib.MainModule.GetType("System.SharpLangFieldDescription"), TypeState.StackComplete);
 
             // struct IMTEntry { i8* interfaceFunctionPtr, i8* functionPtr }
             imtEntryLLVM = LLVM.StructCreateNamed(context, "IMTEntry");

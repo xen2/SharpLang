@@ -107,6 +107,7 @@
 		<type fullname="System.RuntimeFieldHandle" preserve="fields" />
 		<type fullname="System.RuntimeMethodHandle" preserve="fields" />
 		<type fullname="System.RuntimeTypeHandle" preserve="fields" />
+		<type fullname="System.RuntimeType" preserve="fields" />
 		<type fullname="System.SByte" preserve="fields" />
 		<type fullname="System.Single" preserve="fields" />
 		<type fullname="System.StackOverflowException" />

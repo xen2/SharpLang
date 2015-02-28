@@ -17,6 +17,28 @@ public:
 class MethodTable;
 typedef MethodTable EEType;
 
+class FieldDescription
+{
+private:
+	uint32_t data1;
+	uint32_t data2;
+public:
+	uint32_t GetRowID()
+	{
+		return data1 & 0x00FFFFFF;
+	}
+
+	uint32_t GetOffset()
+	{
+		return data2 & 0x7FFFFFF;
+	}
+
+	uint32_t GetType()
+	{
+		return (data2 >> 27);
+	}
+};
+
 class MethodTable
 {
 public:
@@ -24,10 +46,17 @@ public:
 
 	uint8_t isConcreteType;
 
+	// Metadata
 	TypeDefinition typeDef;
 	EEType* elementType;
 	RuntimeType* runtimeType;
+
+	// Field infos
+	uint16_t garbageCollectableFieldCount; // First entries in FieldDescriptions will be for the GC: instance fields of referencable types
+	uint16_t fieldCount;
+	FieldDescription* fieldDescriptions;
 	
+	// Concrete type info
 	uint32_t superTypeCount;
 	uint32_t interfacesCount;
 	EEType** superTypes;
@@ -35,7 +64,11 @@ public:
 	uint8_t initialized;
 	uint32_t objectSize;
 	uint32_t elementSize;
+
+	// IMT
 	void* interfaceMethodTable[19];
+
+	// VTable
 	uint32_t virtualTableSize;
 	void* virtualTable[0];
 };
