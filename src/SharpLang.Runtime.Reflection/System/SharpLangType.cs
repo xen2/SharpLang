@@ -170,6 +170,14 @@ namespace System
             }
         }
 
+        public override Type BaseType
+        {
+            get
+            {
+                return GetBaseType();
+            }
+        }
+
         public unsafe virtual SharpLangType GetBaseType()
         {
             // TODO: Interface should return null too
