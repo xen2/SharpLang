@@ -56,7 +56,7 @@ It's still a early work in progress. Any help/feedback is welcome!
  * Vararg
 * Immix GC integration
 * Cross-platform
- * Enscripten HTML5 (javascript) support
+ * [Emscripten](https://github.com/kripken/emscripten) HTML5 (javascript) support
  * Linux/MacOSX support
  * Android, iOS
 * Code quality
