@@ -48,13 +48,13 @@ It's still a early work in progress. Any help/feedback is welcome!
 ### What's next
 
 * Driver/Linker
-* Runtime
+* Runtime (probably lot will be imported from [CoreCLR](https://github.com/dotnet/coreclr))
  * Reflection (method, fields, custom attributes)
  * Threads, Locks, etc...
  * I/O
  * Marshalling
  * Vararg
-* Immix GC integration
+* GC integration (either [CoreCLR](https://github.com/dotnet/coreclr/tree/master/src/gc), [Mono](https://github.com/mono/mono/tree/master/mono/metadata) or [BoehmGC](https://github.com/ivmai/bdwgc/))
 * Cross-platform
  * [Emscripten](https://github.com/kripken/emscripten) HTML5 (javascript) support
  * Linux/MacOSX support
