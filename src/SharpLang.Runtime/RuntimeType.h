@@ -124,7 +124,7 @@ public:
 	static StringObject* NewString(const char* str, uint32_t length);
 	static StringObject* NewString(const wchar_t* str, uint32_t length)
 	{
-		NewString((const char16_t*)str, length);
+		return NewString((const char16_t*)str, length);
 	}
 
 	static StringObject* NewString(const char* str)
@@ -136,7 +136,7 @@ public:
 
 	static StringObject* NewString(const wchar_t* str)
 	{
-		NewString((const char16_t*)str);
+		return NewString((const char16_t*)str);
 	}
 
 	wchar_t* GetBuffer() { return (wchar_t*)&firstChar; }
