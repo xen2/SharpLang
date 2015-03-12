@@ -82,4 +82,4 @@ It's still a early work in progress. Any help/feedback is welcome!
 Here for now, until later moved to a more specific documentation.
 
 * ~~UTF8 string (UTF16 was choosed mainly because of Windows API, but UTF8 is more space efficient, API compatible with char* and avoid many conversions)~~
-* String/Array indrection to more easily carve substring/subarrays.
+* String/Array indirection to more easily carve substring/subarrays.
