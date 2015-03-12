@@ -427,7 +427,7 @@ namespace SharpLang.CompilerServices
                 LLVM.ConstNamedStruct(typeDefLLVM, new[]
                 {
                     sharpLangModule,
-                    LLVM.ConstInt(int32LLVM, @class.Type.TypeDefinitionCecil.MetadataToken.ToUInt32(), false),
+                    LLVM.ConstInt(int32LLVM, @class.Type.TypeDefinitionCecil.MetadataToken.RID, false),
                 }),
                 extraTypeInfo,
                 LLVM.ConstNull(sharpLangTypeType.DefaultTypeLLVM),
