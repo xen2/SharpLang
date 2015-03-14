@@ -377,5 +377,9 @@
 		<type fullname="SharpLang.Marshalling.MarshalHelper" />
 		<type fullname="SharpLang.Marshalling.MarshalFunctionAttribute" />
 
+		<type fullname="Microsoft.Win32.SafeLibraryHandle" />
+		<type fullname="Microsoft.Win32.SafeHandles.SafeFindHandle" />
+		<type fullname="Microsoft.Win32.SafeHandles.SafeRegistryHandle" />
+		<type fullname="System.Security.SafeBSTRHandle" />
 	</assembly>
 </linker>

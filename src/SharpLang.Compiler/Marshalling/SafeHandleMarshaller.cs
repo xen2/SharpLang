@@ -24,9 +24,15 @@ namespace SharpLang.CompilerServices.Marshalling
 
         public override void EmitConvertNativeToManaged(MarshalCodeContext context)
         {
-            // TODO: Not implemented yet
-            //context.NativeEmitters.Peek().Emit(context.ILProcessor);
-            context.ILProcessor.Emit(OpCodes.Ldnull);
+            var corlib = context.Assembly.MainModule.Import(typeof(void)).Resolve().Module.Assembly;
+            var safeHandle = corlib.MainModule.GetType(typeof(SafeHandle).FullName);
+            var actualSafeHandle = context.ManagedEmitters.Peek().Type.Resolve();
+
+            var ctor = actualSafeHandle.Methods.First(x => x.IsConstructor && !x.IsStatic && x.Parameters.Count == 0);
+            context.ILProcessor.Emit(OpCodes.Newobj, context.Assembly.MainModule.Import(ctor));
+            context.ILProcessor.Emit(OpCodes.Dup);
+            context.NativeEmitters.Peek().Emit(context.ILProcessor);
+            context.ILProcessor.Emit(OpCodes.Call, context.Assembly.MainModule.Import(safeHandle.Methods.First(x => x.Name == "SetHandle")));
         }
 
         public override TypeReference GetNativeType(MarshalCodeContext context)

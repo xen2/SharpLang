@@ -58,3 +58,11 @@ extern "C" void System_Runtime_InteropServices_Marshal__CopyToManaged_System_Int
 
 	memcpy((void*) (dest->value + destIndex), (const void*) source, elementSize * length);
 }
+
+extern "C" void System_Runtime_InteropServices_SafeHandle__InternalDispose__(Object* safeHandle)
+{
+}
+
+extern "C" void System_Runtime_InteropServices_SafeHandle__InternalFinalize__(Object* safeHandle)
+{
+}
