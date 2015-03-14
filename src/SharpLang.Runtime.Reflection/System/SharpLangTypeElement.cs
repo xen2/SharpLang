@@ -44,6 +44,11 @@ namespace System
             }
         }
 
+        public override Type DeclaringType
+        {
+            get { return null; }
+        }
+
         internal override string InternalAssemblyName
         {
             get { return elementType.InternalAssemblyName; }
