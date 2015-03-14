@@ -175,6 +175,7 @@ namespace SharpLang.CompilerServices
                     {
                         parentRuntimeTypeInfoType,
                         LLVM.Int8TypeInContext(context), // IsConcreteType
+                        LLVM.Int8TypeInContext(context), // CorElementType
                         typeDefLLVM,
                         intPtrLLVM,
                         sharpLangTypeType.DefaultTypeLLVM, // CachedType
@@ -424,6 +425,7 @@ namespace SharpLang.CompilerServices
             {
                 @class.BaseType != null ? @class.BaseType.GeneratedEETypeTokenLLVM : LLVM.ConstPointerNull(intPtrLLVM),
                 LLVM.ConstInt(LLVM.Int8TypeInContext(context), isConcreteType ? 1U : 0U, false),
+                LLVM.ConstInt(LLVM.Int8TypeInContext(context), (byte)@class.Type.TypeReferenceCecil.MetadataType, false),
                 LLVM.ConstNamedStruct(typeDefLLVM, new[]
                 {
                     sharpLangModule,

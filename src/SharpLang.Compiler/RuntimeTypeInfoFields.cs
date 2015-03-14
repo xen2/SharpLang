@@ -10,6 +10,7 @@ namespace SharpLang.CompilerServices
         // Interface & generic type def don't have real type info (they exist just for Ldtoken/typeof())
         // There is no info past "Type".
         IsConcreteType,
+        CorElementType,
 
         // Metadata/Reflection
         // TypeDef or GenericType

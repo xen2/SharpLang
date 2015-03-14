@@ -45,6 +45,7 @@ public:
 	EEType* base;
 
 	uint8_t isConcreteType;
+	uint8_t corElementType;
 
 	// Metadata
 	TypeDefinition typeDef;

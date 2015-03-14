@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 
 namespace System
@@ -12,6 +13,7 @@ namespace System
         public SharpLangEEType* Base;
 
         public byte IsConcreteType;
+        public CorElementType CorElementType;
 
         // Metadata
         public SharpLangEETypeDefinition TypeDefinition;
