@@ -323,7 +323,7 @@ extern "C" StringObject* System_Globalization_CultureInfo__get_current_locale_na
 
 extern "C" Object* System_Threading_Thread__GetCurrentThreadNative__()
 {
-	static Thread* thread = (Thread*)AllocateObject(&System_Threading_Thread_rtti);
+	static ThreadBaseObject* thread = (ThreadBaseObject*)AllocateObject(&System_Threading_Thread_rtti);
 	return thread;
 }
 

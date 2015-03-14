@@ -206,10 +206,10 @@ public:
 
 extern EEType System_Threading_Thread_rtti;
 
-class Thread : public Object
+class ThreadBaseObject : public Object
 {
 public:
-	Thread() : Object(&System_Threading_Thread_rtti) {}
+	ThreadBaseObject() : Object(&System_Threading_Thread_rtti) {}
 };
 
 class StringBufferObject : public Object
