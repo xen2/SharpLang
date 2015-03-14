@@ -17,27 +17,7 @@ public:
 class MethodTable;
 typedef MethodTable EEType;
 
-class FieldDescription
-{
-private:
-	uint32_t data1;
-	uint32_t data2;
-public:
-	uint32_t GetRowID()
-	{
-		return data1 & 0x00FFFFFF;
-	}
-
-	uint32_t GetOffset()
-	{
-		return data2 & 0x7FFFFFF;
-	}
-
-	uint32_t GetType()
-	{
-		return (data2 >> 27);
-	}
-};
+class FieldDesc;
 
 class MethodTable
 {
@@ -55,7 +35,7 @@ public:
 	// Field infos
 	uint16_t garbageCollectableFieldCount; // First entries in FieldDescriptions will be for the GC: instance fields of referencable types
 	uint16_t fieldCount;
-	FieldDescription* fieldDescriptions;
+	FieldDesc* fieldDescriptions;
 	
 	// Concrete type info
 	uint32_t superTypeCount;
@@ -76,7 +56,7 @@ public:
 
 extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface);
 
-struct AppDomain;
+class AppDomain;
 
 class Object
 {
@@ -86,6 +66,48 @@ public:
     AppDomain* GetAppDomain() { return NULL; }
 
 	EEType* eeType;
+};
+
+class FieldDesc
+{
+private:
+	uint32_t data1;
+	uint32_t data2;
+public:
+	uint32_t GetRowID()
+	{
+		return data1 & 0x00FFFFFF;
+	}
+
+	uint32_t GetOffset()
+	{
+		return data2 & 0x7FFFFFF;
+	}
+
+	uint32_t GetType()
+	{
+		return (data2 >> 27);
+	}
+
+	uint32_t GetValue32(Object* obj)
+	{
+		return *(uint32_t*) (obj->GetDataPointer() + GetOffset());
+	}
+
+	void SetValue32(Object* obj, uint32_t value)
+	{
+		*(uint32_t*) (obj->GetDataPointer() + GetOffset()) = value;
+	}
+
+	Object* GetRefValue(Object* obj)
+	{
+		return *(Object**) (obj->GetDataPointer() + GetOffset());
+	}
+
+	void SetRefValue(Object* obj, Object* value)
+	{
+		*(Object**) (obj->GetDataPointer() + GetOffset()) = value;
+	}
 };
 
 class RuntimeType : public Object
@@ -170,7 +192,7 @@ class Array : public ArrayBase
 {
 public:
 	T* value;
-    
+
     const T* GetDirectConstPointerToNonObjectElements() const
     {
         return value;

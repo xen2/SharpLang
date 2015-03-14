@@ -217,6 +217,30 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.Utf8NullTerminatedEquals(handle.Index, value, otherTerminator);
         }
 
+        internal unsafe bool Equals(StringHandle handle, byte* value, MetadataStringDecoder utf8Decoder)
+        {
+            DebugCorlib.Assert(value != null);
+
+            if (handle.IsVirtual)
+            {
+                int len = 0;
+                byte* s = value;
+                while (*s != 0) len++;
+
+                return GetString(handle, utf8Decoder) == Encoding.UTF8.GetString(value, len);
+            }
+
+            if (handle.IsNil)
+            {
+                return *value == 0;
+            }
+
+            // TODO: MetadataStringComparer needs to use the user-supplied encoding.
+            // Need to pass the decoder down and use in Utf8NullTerminatedEquals.
+            char otherTerminator = handle.StringKind == StringKind.DotTerminated ? '.' : '\0';
+            return this.Block.Utf8NullTerminatedEquals(handle.Index, value, otherTerminator);
+        }
+
         internal bool StartsWith(StringHandle handle, string value, MetadataStringDecoder utf8Decoder)
         {
             DebugCorlib.Assert(value != null);

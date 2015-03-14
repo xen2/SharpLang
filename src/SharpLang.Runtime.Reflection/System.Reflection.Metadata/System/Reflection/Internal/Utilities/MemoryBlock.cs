@@ -281,6 +281,33 @@ namespace System.Reflection.Internal
             return -1;
         }
 
+        internal unsafe bool Utf8NullTerminatedEquals(int offset, byte* value, char terminator = '\0')
+        {
+            byte* startPointer = Pointer + offset;
+            byte* endPointer = Pointer + Length;
+
+            for (byte* iteratorPointer = startPointer; iteratorPointer < endPointer; ++iteratorPointer, ++value)
+            {
+                byte b;
+                if (iteratorPointer == endPointer || ((b = *iteratorPointer) == 0) || b == terminator)
+                {
+                    return *value == 0;
+                }
+
+                if (*value == 0)
+                {
+                    return false;
+                }
+
+                if (*value != b)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
         internal bool Utf8NullTerminatedEquals(int offset, string text, char terminator = '\0')
         {

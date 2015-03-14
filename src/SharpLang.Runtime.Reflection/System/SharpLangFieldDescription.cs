@@ -12,7 +12,7 @@ namespace System
         // offset: 27, type: 5
         private uint data2;
 
-        public FieldDefinitionHandle FieldDefinition
+        public FieldDefinitionHandle FieldDefinitionHandle
         {
             get
             {

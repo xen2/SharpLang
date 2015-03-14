@@ -579,7 +579,7 @@ namespace System.Reflection
     [Serializable]
     internal class RuntimeModule : Module
     {
-        internal RuntimeModule() { throw new NotSupportedException(); }
+        internal RuntimeModule() {}
 
         #region FCalls
         [System.Security.SecurityCritical]  // auto-generated

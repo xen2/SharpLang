@@ -66,6 +66,16 @@ namespace System.Reflection.Metadata
             return reader.StringStream.Equals(handle, value, reader.utf8Decoder);
         }
 
+        public unsafe bool Equals(StringHandle handle, byte* value)
+        {
+            if (value == null)
+            {
+                ThrowValueArgumentNull();
+            }
+
+            return reader.StringStream.Equals(handle, value, reader.utf8Decoder);
+        }
+
         public bool Equals(NamespaceDefinitionHandle handle, string value)
         {
             if (value == null)
@@ -79,6 +89,25 @@ namespace System.Reflection.Metadata
             }
 
             return value == reader.namespaceCache.GetFullName(handle);
+        }
+
+        public unsafe bool Equals(NamespaceDefinitionHandle handle, byte* value)
+        {
+            if (value == null)
+            {
+                ThrowValueArgumentNull();
+            }
+
+            if (handle.HasFullName)
+            {
+                return reader.StringStream.Equals(handle.GetFullName(), value, reader.utf8Decoder);
+            }
+
+            int len = 0;
+            byte* s = value;
+            while (*s != 0) len++;
+
+            return Encoding.UTF8.GetString(value, len) == reader.namespaceCache.GetFullName(handle);
         }
 
         public bool StartsWith(StringHandle handle, string value)

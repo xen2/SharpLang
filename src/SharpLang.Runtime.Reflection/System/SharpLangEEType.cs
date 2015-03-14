@@ -89,5 +89,25 @@ namespace System
 
             return (SharpLangEEType*)(ExtraTypeInfo - (int)kind);
         }
+
+        // Used by mscorlib binder
+        internal unsafe SharpLangFieldDescription* FindField(byte* name)
+        {
+            var module = TypeDefinition.Module;
+            var stringComparer = module.MetadataReader.StringComparer;
+
+            var fieldCount = FieldCount;
+            for (int fieldIndex = 0; fieldIndex < fieldCount; ++fieldIndex)
+            {
+                var fieldDesc = &FieldDescriptions[fieldIndex];
+                var field = module.MetadataReader.GetFieldDefinition(fieldDesc->FieldDefinitionHandle);
+                if (stringComparer.Equals(field.Name, name))
+                {
+                    return fieldDesc;
+                }
+            }
+
+            return null;
+        }
     }
 }

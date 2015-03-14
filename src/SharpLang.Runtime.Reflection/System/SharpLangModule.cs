@@ -11,8 +11,10 @@ namespace System
     /// <summary>
     /// Implementation of <see cref="Module"/> for SharpLang runtime.
     /// </summary>
-    public class SharpLangModule : Module
+    internal class SharpLangModule : RuntimeModule
     {
+        private SharpLangAssembly assembly;
+
         internal static object SystemTypeLock = new object();
 
         internal readonly List<SharpLangAssembly> Assemblies = new List<SharpLangAssembly>();
@@ -34,7 +36,6 @@ namespace System
         public readonly int MetadataLength;
         
         private MetadataReader metadataReader;
-        private SharpLangAssembly assembly;
 
         internal MetadataReader MetadataReader
         {
@@ -116,6 +117,28 @@ namespace System
         }
 
         internal unsafe SharpLangType ResolveType(string @namespace, string name)
+        {
+            var stringComparer = MetadataReader.StringComparer;
+
+            foreach (var typeDefHandle in MetadataReader.TypeDefinitions)
+            {
+                var typeDef = MetadataReader.GetTypeDefinition(typeDefHandle);
+                if (stringComparer.Equals(typeDef.Name, name)
+                    && stringComparer.Equals(typeDef.Namespace, @namespace))
+                {
+                    // Look for type in types
+                    lock (SystemTypeLock)
+                    {
+                        // Find this type in list of instantiated types
+                        return ResolveTypeDef(null, typeDefHandle);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        internal unsafe SharpLangType ResolveType(byte* @namespace, byte* name)
         {
             var stringComparer = MetadataReader.StringComparer;
 
