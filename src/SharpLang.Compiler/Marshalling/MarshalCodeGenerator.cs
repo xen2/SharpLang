@@ -179,9 +179,18 @@ namespace SharpLang.CompilerServices.Marshalling
             if (returnValue != null)
             {
                 // Convert return value to managed type
+                var variableType = methodDefinition.ReturnType;
+                var variable = new VariableDefinition(variableType);
+                methodDefinition.Body.Variables.Add(variable);
+
+                context.ManagedEmitters.Push(new VariableMarshalledObjectEmitter(variable));
                 context.NativeEmitters.Push(new VariableMarshalledObjectEmitter(returnValue));
                 returnMarshaller.EmitStoreNativeToManaged(context);
+                context.ManagedEmitters.Pop();
                 context.NativeEmitters.Pop();
+
+                // Load previously processed variable on the stack
+                context.ILProcessor.Emit(OpCodes.Ldloc, variable);
             }
             context.ILProcessor.Emit(OpCodes.Ret);
 
