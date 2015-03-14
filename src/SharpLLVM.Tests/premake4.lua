@@ -9,15 +9,10 @@ project "SharpLLVM.Tests"
   files { "**.cs" }
   excludes { "obj/**" }
 
-  libdirs 
-  {
-    depsdir .. "/NUnit",
-  }
-    
   links
   {
     "System",
     "System.Core",
     "SharpLLVM",
-    "nunit.framework"
+    depsdir .. "/NUnit/nunit.framework",
   }

@@ -9,11 +9,6 @@ project "SharpLang.Compiler.Tests"
   files { "*.cs" }
   excludes { "obj/**" }
 
-  libdirs 
-  {
-    depsdir .. "/NUnit",
-  }
-
   links
   {
     "System",
@@ -25,6 +20,6 @@ project "SharpLang.Compiler.Tests"
     "SharpLang.Compiler",
     "SharpLLVM",
     "Microsoft.CSharp",
-    "nunit.framework",
+    depsdir .. "/NUnit/nunit.framework",
     "Mono.Linker"
   }
