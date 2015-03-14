@@ -1749,9 +1749,9 @@ namespace SharpLang.CompilerServices
                 case Code.Ldind_I2: type = int16; break;
                 case Code.Ldind_I4: type = int32; break;
                 case Code.Ldind_I8: type = int64; break;
-                case Code.Ldind_U1: type = int8; break;
-                case Code.Ldind_U2: type = int16; break;
-                case Code.Ldind_U4: type = int32; break;
+                case Code.Ldind_U1: type = uint8; break;
+                case Code.Ldind_U2: type = uint16; break;
+                case Code.Ldind_U4: type = uint32; break;
                 case Code.Ldind_R4: type = @float; break;
                 case Code.Ldind_R8: type = @double; break;
                 case Code.Ldind_Ref:
