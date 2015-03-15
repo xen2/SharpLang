@@ -607,37 +607,6 @@ inline T* InterlockedCompareExchangeT(
     return InterlockedCompareExchangeT(destination, exchange, reinterpret_cast<T*>(comparand));
 }
 
-// NULL pointer variants of the above to avoid having to cast NULL
-// to the appropriate pointer type.
-template <typename T>
-inline T* InterlockedExchangeT(
-    T* volatile *  target,
-    std::nullptr_t value) // When nullptr is provided as argument.
-{
-    //STATIC_ASSERT(value == 0);
-    return InterlockedExchangeT(target, reinterpret_cast<T*>(value));
-}
-
-template <typename T>
-inline T* InterlockedCompareExchangeT(
-    T* volatile *  destination,
-    std::nullptr_t exchange,  // When nullptr is provided as argument.
-    T*             comparand)
-{
-    //STATIC_ASSERT(exchange == 0);
-    return InterlockedCompareExchangeT(destination, reinterpret_cast<T*>(exchange), comparand);
-}
-
-template <typename T>
-inline T* InterlockedCompareExchangeT(
-    T* volatile *  destination,
-    T*             exchange,
-    std::nullptr_t comparand) // When nullptr is provided as argument.
-{
-    //STATIC_ASSERT(comparand == 0);
-    return InterlockedCompareExchangeT(destination, exchange, reinterpret_cast<T*>(comparand));
-}
-
 #undef InterlockedExchangePointer
 #define InterlockedExchangePointer Use_InterlockedExchangeT
 #undef InterlockedCompareExchangePointer

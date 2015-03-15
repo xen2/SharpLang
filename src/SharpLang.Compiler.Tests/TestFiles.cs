@@ -25,7 +25,7 @@ namespace SharpLang.CompilerServices.Tests
             var sourceAssembly = CompileAssembly(sourceFile);
 
             // Run Mono.Linker
-            sourceAssembly = LinkAssembly(sourceAssembly);
+            sourceAssembly = LinkAssembly(sourceAssembly, Driver.GetDefaultTriple());
 
             // Compile and link to LLVM
             var outputAssembly = CompileAndLinkToLLVM(sourceAssembly);
@@ -45,7 +45,7 @@ namespace SharpLang.CompilerServices.Tests
             var sourceAssembly = CompileAssembly(sourceFile, "System.dll", "System.Windows.Forms.dll");
 
             // Run Mono.Linker
-            sourceAssembly = LinkAssembly(sourceAssembly);
+            sourceAssembly = LinkAssembly(sourceAssembly, Driver.GetDefaultTriple());
 
             // Compile and link to LLVM
             var outputAssembly = CompileAndLinkToLLVM(sourceAssembly);
@@ -154,7 +154,7 @@ namespace SharpLang.CompilerServices.Tests
             throw new NotImplementedException("Unknown source format.");
         }
 
-        public static string LinkAssembly(string sourceAssembly)
+        public static string LinkAssembly(string sourceAssembly, string triple)
         {
             // Link assembly
             var assemblyBaseName = Path.GetFileNameWithoutExtension(sourceAssembly);
@@ -170,12 +170,12 @@ namespace SharpLang.CompilerServices.Tests
             }
 
             // Use Mono.Linker to reduce IL code to process (tree-shaking)
-            return LinkAssembly(sourceAssembly, outputDirectory);
+            return LinkAssembly(sourceAssembly, outputDirectory, triple);
         }
         
-        public static string LinkAssembly(string assemblyFile, string outputDirectory)
+        public static string LinkAssembly(string assemblyFile, string outputDirectory, string triple)
         {
-            var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", @"..\..\..\..\build\vs2013\lib\runtime.net\x86", "-c", "link", "-b", "true" });
+            var monoLinkerResult = Mono.Linker.Driver.Main(new[] { "-out", outputDirectory, "-a", assemblyFile, "-d", Compiler.LocateManagedRuntimeAssembly(triple), "-c", "link", "-b", "true" });
             if (monoLinkerResult != 0)
                 throw new InvalidOperationException("Error during Mono Linker phase.");
 

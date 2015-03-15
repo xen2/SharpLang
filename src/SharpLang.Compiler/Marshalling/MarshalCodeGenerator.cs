@@ -23,7 +23,7 @@ namespace SharpLang.CompilerServices.Marshalling
             get { return assemblyDefinition; }
         }
 
-        public MarshalCodeGenerator(string inputFile)
+        public MarshalCodeGenerator(string inputFile, string triple)
         {
             var assemblyResolver = new CustomAssemblyResolver();
 
@@ -33,7 +33,7 @@ namespace SharpLang.CompilerServices.Marshalling
             // TODO: Remove hardcoded relative paths
             assemblyResolver.Register(assemblyDefinition);
             assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyDefinition.MainModule.FullyQualifiedName));
-            assemblyResolver.AddSearchDirectory(@"..\..\..\..\build\vs2013\lib\runtime.net\x86".Replace('\\', Path.DirectorySeparatorChar));
+            assemblyResolver.AddSearchDirectory(Compiler.LocateManagedRuntimeAssembly(triple));
         }
 
         public MarshalCodeGenerator(AssemblyDefinition assemblyDefinition)

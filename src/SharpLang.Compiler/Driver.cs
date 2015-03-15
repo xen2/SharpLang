@@ -46,7 +46,7 @@ namespace SharpLang.CompilerServices
 
         public static void CompileAssembly(string inputFile, string outputFile, string triple, bool generateIR = false, bool verifyModule = true, System.Type[] additionalTypes = null)
         {
-            var assemblyDefinition = LoadAssembly(inputFile);
+            var assemblyDefinition = LoadAssembly(inputFile, triple);
 
             // Generate marshalling code for PInvoke
             var mcg = new MarshalCodeGenerator(assemblyDefinition);
@@ -105,7 +105,7 @@ namespace SharpLang.CompilerServices
             LLVM.WriteBitcodeToFile(module, outputFile);
         }
 
-        private static AssemblyDefinition LoadAssembly(string inputFile)
+        private static AssemblyDefinition LoadAssembly(string inputFile, string triple)
         {
             // Force PdbReader to be referenced
             typeof (Mono.Cecil.Pdb.PdbReader).ToString();
@@ -121,7 +121,7 @@ namespace SharpLang.CompilerServices
             // Register self to assembly resolver
             assemblyResolver.Register(assemblyDefinition);
             assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyDefinition.MainModule.FullyQualifiedName));
-            assemblyResolver.AddSearchDirectory(@"..\..\..\..\build\vs2013\lib\runtime.net\x86".Replace('\\', Path.DirectorySeparatorChar));
+            assemblyResolver.AddSearchDirectory(Compiler.LocateManagedRuntimeAssembly(triple));
             return assemblyDefinition;
         }
 

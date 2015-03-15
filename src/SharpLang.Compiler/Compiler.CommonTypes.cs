@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using SharpLLVM;
 
 namespace SharpLang.CompilerServices
@@ -55,17 +56,52 @@ namespace SharpLang.CompilerServices
         private Type sharpLangTypeType;
         private Type sharpLangModuleType;
 
-        static string LocateRuntimeModuleHelper(string triple)
+        static string LocateNativeRuntimeModuleHelper(string triple)
         {
             return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple).Replace('\\', Path.DirectorySeparatorChar);
         }
 
+        /// <summary>
+        /// Returns the folder containing mscorlib.dll for the specified target triple.
+        /// </summary>
+        /// <param name="triple">The target triple.</param>
+        /// <returns></returns>
+        public static string LocateManagedRuntimeAssembly(string triple)
+        {
+            string runtimePlatform;
+            var cpu = triple.Split('-').First();
+            switch (cpu)
+            {
+                case "i686":
+                    runtimePlatform = "x86";
+                    break;
+                case "x86_64":
+                    runtimePlatform = "amd64";
+                    break;
+                case "arm":
+                    runtimePlatform = "arm";
+                    break;
+                case "aarch64":
+                    runtimePlatform = "arm64";
+                    break;
+                default:
+                    throw new InvalidOperationException(string.Format("Can't find a mscorlib for CPU architecture {0}", cpu));
+            }
+
+            return string.Format(@"..\runtime.net\{0}", runtimePlatform).Replace('\\', Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Returns the LLVM bitcode file of the native runtime for the specificed target triple.
+        /// </summary>
+        /// <param name="triple">The target triple.</param>
+        /// <returns></returns>
         public static string LocateRuntimeModule(string triple)
         {
             // Locate runtime
-            var runtimeLocation = LocateRuntimeModuleHelper(triple);
+            var runtimeLocation = LocateNativeRuntimeModuleHelper(triple);
             if (!File.Exists(runtimeLocation))
-                runtimeLocation = LocateRuntimeModuleHelper(triple.Replace("-unknown", string.Empty));
+                runtimeLocation = LocateNativeRuntimeModuleHelper(triple.Replace("-unknown", string.Empty));
             if (!File.Exists(runtimeLocation))
                 throw new InvalidOperationException(string.Format("Can't locate runtime for target {0}", triple));
 
