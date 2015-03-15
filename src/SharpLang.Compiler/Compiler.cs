@@ -305,6 +305,13 @@ namespace SharpLang.CompilerServices
                     }
                 }
 
+                if (assembly.Name.Name == "mscorlib")
+                {
+                    // Setup mscorlib binder (MscorlibBinder::AttachModule)
+                    var mscorlibBinderAttachModule = ImportRuntimeFunction(module, "_ZN14MscorlibBinder12AttachModuleEP6Module");
+                    LLVM.BuildCall(builder, mscorlibBinderAttachModule, new[] { LLVM.BuildPointerCast(builder, sharpLangModuleGlobal, LLVM.TypeOf(LLVM.GetParam(mscorlibBinderAttachModule, 0)), string.Empty) }, string.Empty);
+                }
+
                 LLVM.BuildRetVoid(builder);
             }
             else

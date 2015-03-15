@@ -4,9 +4,9 @@ function premake.make.cpp.buildcommand(prj, objext, node)
 	if not iscfile then
 	  extraFlags = extraFlags .. " -std=c++11"
 	end
-	if node.name ~= "Exception.cpp" then
-	  extraFlags = extraFlags .. " -fno-exceptions"
-	end
+	--if node.name ~= "Exception.cpp" then
+	--  extraFlags = extraFlags .. " -fno-exceptions"
+	--end
 	local flags = iif(prj.language == "C" or iscfile, '$(CC) $(ALL_CFLAGS)', '$(CXX) $(ALL_CXXFLAGS)')
 	_p('\t$(SILENT) %s $(FORCE_INCLUDE) %s -o "$@" -MF $(@:%%.%s=%%.d) -c "$<"', flags, extraFlags, objext)
 end
@@ -56,10 +56,10 @@ solution "SharpLang.Runtime"
 	
 	targetextension ".bc"
 	
-	defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS", "LIBCXXABI_HAS_NO_THREADS" }
+	defines { "__STDC_CONSTANT_MACROS", "__STDC_LIMIT_MACROS", "LIBCXXABI_HAS_NO_THREADS", "UNICODE", "USE_STL", "_BLD_CLR", "FEATURE_CORECLR", "FEATURE_BCL_FORMATTING", "FEATURE_CRYPTO", "FEATURE_COREFX_GLOBALIZATION" }
 
-	includedirs { "../deps/llvm/include" }
-	buildoptions { "-emit-llvm -O3 -g1 --target=" .. _ARGS[1] }
+	includedirs { "../deps/llvm/include", "../src/SharpLang.Runtime/coreclr/vm", "../src/SharpLang.Runtime/coreclr/inc", "../src/SharpLang.Runtime/coreclr/classlibnative/inc", "../src/SharpLang.Runtime/coreclr/classlibnative/cryptography" }
+	buildoptions { "-emit-llvm -O3 -g0 --target=" .. _ARGS[1] }
 
 	if is64 then
 		includedirs { "../deps/llvm/build_x64/include" }

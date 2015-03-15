@@ -9,6 +9,7 @@
 #include <thread>
 #include <sys/utsname.h>
 #endif
+#include "corhdr.h"
 
 static Object* AllocateObject(EEType* eeType)
 {
@@ -49,6 +50,16 @@ extern "C" Object* System_Object__MemberwiseClone__(Object* obj)
 	// Blindly copy data
 	// TODO: Improve this with write barrier?
 	memcpy(objCopy, obj, length);
+
+	// Array: Copy referenced data as well
+	if (obj->eeType->corElementType == ELEMENT_TYPE_SZARRAY || obj->eeType->corElementType == ELEMENT_TYPE_ARRAY)
+	{
+		auto array = (ArrayBase*) obj;
+		auto arrayDataSize = array->length * array->eeType->elementSize;
+		auto arrayDataCopy = (uint8_t*) malloc(arrayDataSize);
+		memcpy(arrayDataCopy, array->GetDataPtr(), arrayDataSize);
+		((ArrayBase*) objCopy)->SetDataPtr(arrayDataCopy);
+	}
 
 	return objCopy;
 }
@@ -270,7 +281,12 @@ extern "C" void System_Threading_Thread__MemoryBarrier__()
 
 extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object__System_Object_System_Object_(Object** location1, Object* value, Object* comparand)
 {
-	return (Object*) InterlockedCompareExchangePointer((PVOID*) location1, value, comparand);
+	return (Object*)InterlockedCompareExchangePointer((PVOID*)location1, value, comparand);
+}
+
+extern "C" Object* System_Threading_Interlocked__CompareExchange_System_IntPtr__System_IntPtr_System_IntPtr_(void** location1, void* value, void* comparand)
+{
+	return (Object*)InterlockedCompareExchangePointer((PVOID*)location1, value, comparand);
 }
 
 extern "C" StringObject* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t* code_page)
@@ -340,6 +356,12 @@ extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_
 
 extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__ProbeForSufficientStack__()
 {
+}
+
+extern "C" bool System_Runtime_CompilerServices_RuntimeHelpers__Equals_System_Object_System_Object_(Object* a, Object* b)
+{
+	// TODO: Handle case when it's not a reference type (need a flag to know that)
+	return a == b;
 }
 
 extern "C" Object* System_GC__get_ephemeron_tombstone__()
@@ -416,11 +438,14 @@ extern "C" uint32_t SharpLang_Marshalling_MarshalHelper__GetThunkCurrentId__()
 	return ThunkCurrentId;
 }
 
-extern "C" StringObject* System_Number__FormatInt32_System_Int32_System_String_System_Globalization_NumberFormatInfo_(int32_t value, StringObject* format, Object* info)
+extern "C" Object* System_Runtime_InteropServices_GCHandle__InternalGet_System_IntPtr_(GCHandle* gcHandle)
 {
-	char buffer[64];
-	sprintf(buffer, "%i", value);
-	return StringObject::NewString(buffer);
+	return gcHandle->value;
+}
+
+extern "C" Object* System_Runtime_InteropServices_GCHandle__InternalCompareExchange_System_IntPtr_System_Object_System_Object_System_Boolean_(GCHandle* gcHandle, Object* value, Object* oldValue, bool isPinned)
+{
+	return (Object*)InterlockedCompareExchangePointer((PVOID*)&gcHandle->value, value, oldValue);
 }
 
 // QCall
@@ -455,4 +480,13 @@ extern "C" __declspec(dllexport) void* __stdcall NativeInternalInitSortHandle(ch
 {
 	handleOrigin = NULL;
 	return NULL;
+}
+
+extern "C" __declspec(dllexport) void* __stdcall GetGCHandle(RuntimeType* runtimeType, int32_t handleType)
+{
+	auto gcHandle = (GCHandle*)malloc(sizeof(GCHandle));
+	gcHandle->runtimeType = runtimeType;
+	gcHandle->value = NULL;
+	gcHandle->handleType = handleType;
+	return gcHandle;
 }

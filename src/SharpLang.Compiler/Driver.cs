@@ -210,9 +210,9 @@ namespace SharpLang.CompilerServices
 
             // Necessary for some CoreCLR new/delete
             // Note: not sure yet if we want to keep stdc++ deps or not?
-            arguments.Append(" -lstdc++");
             if (triple.Contains("windows"))
-                arguments.Append(" -loleaut32");
+                arguments.Append(" -lole32 -loleaut32");
+            arguments.Append(" -static -lstdc++");
 
             ExecuteClang(triple, arguments.ToString());
         }

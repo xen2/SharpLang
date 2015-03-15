@@ -203,3 +203,16 @@ extern "C" bool System_RuntimeTypeHandle__IsInterface_System_RuntimeType_(Runtim
 
 // Needed by AllocateObject
 EEType System_Threading_Thread_rtti;
+
+EEType System_Byte___rtti;
+
+class Module;
+extern "C" RuntimeType* System_SharpLangModule__ResolveType_System_Byte__System_Byte__(Module* module, const char* _namespace, const char* name)
+{
+	assert(false);
+}
+
+extern "C" FieldDesc* System_SharpLangEEType__FindField_System_Byte__(EEType* type, const char* name)
+{
+	assert(false);
+}

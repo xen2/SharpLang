@@ -1,15 +1,324 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="coreclr">
+      <UniqueIdentifier>{0FB9B9D3-7B98-386F-84B0-C345F00E9FD0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\classlibnative">
+      <UniqueIdentifier>{F2A9BB22-DEA3-E474-C710-7B85B3A94AE1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\classlibnative\bcltype">
+      <UniqueIdentifier>{548DABB8-40B3-751F-29F9-FAEA15BE9AEB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\classlibnative\cryptography">
+      <UniqueIdentifier>{4D89830D-B942-EEB7-42A2-0892AE5AA427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\classlibnative\float">
+      <UniqueIdentifier>{772EB96E-63E9-A81A-0CA1-2165F83AF3AA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\classlibnative\inc">
+      <UniqueIdentifier>{FBE59E0B-E7F5-4ADC-50AF-AFFA3CDE3975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\inc">
+      <UniqueIdentifier>{983B191D-04F1-9112-8DE5-8BE9F9998816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\vm">
+      <UniqueIdentifier>{412A94CA-2DE2-D517-96E9-AE7382C07008}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\RuntimeType.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\console.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\currency.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\decimal.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\number.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\oavariant.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\stringbuffer.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\stringnative.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\system.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\varargsnative.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\variant.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\windowsruntimebufferhelper.h">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\cryptography.h">
+      <Filter>coreclr\classlibnative\cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\x509certificate.h">
+      <Filter>coreclr\classlibnative\cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\float\floatnative.h">
+      <Filter>coreclr\classlibnative\float</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\calendardata.h">
+      <Filter>coreclr\classlibnative\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\floatclass.h">
+      <Filter>coreclr\classlibnative\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nls.h">
+      <Filter>coreclr\classlibnative\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nlsinfo.h">
+      <Filter>coreclr\classlibnative\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nlstable.h">
+      <Filter>coreclr\classlibnative\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\check.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrconfig.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrconfigvalues.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrtypes.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\contract.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhdr.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhlpr.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhlprpriv.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\cortypeinfo.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\crsttypes.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\crtwrap.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\daccess.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugmacros.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugmacrosext.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugreturn.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\eehash.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\entrypoints.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\fstring.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\genericstackprobe.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\holder.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\iterator.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\log.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\loglf.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\memoryrange.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\newapis.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\palclr.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\palclr_win.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\predeftlsslot.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\registrywrapper.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\safemath.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\safewrap.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\sbuffer.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\sstring.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\static_assert.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\staticcontract.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\stresslog.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\utilcode.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\volatile.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\winwrap.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\binder.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\classnames.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\common.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\comutilnative.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\crst.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\exceptmacros.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\fcall.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\field.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\frames.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\gc.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\gcenv.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\metasig.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\mscorlib.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\namespace.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\object.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\qcall.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\rexcep.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\runtimeexceptionkind.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\stackprobe.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.c" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\CoreCLR.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Exception.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Internal.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Marshal.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\PInvoke.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\RuntimeType.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\console.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\currency.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\decimal.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\number.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\oavariant.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\variant.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\windowsruntimebufferhelper.cpp">
+      <Filter>coreclr\classlibnative\bcltype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\cryptography.cpp">
+      <Filter>coreclr\classlibnative\cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\x509certificate.cpp">
+      <Filter>coreclr\classlibnative\cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\float\floatnative.cpp">
+      <Filter>coreclr\classlibnative\float</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\binder.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\comutilnative.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\crst.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\sharplang.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\util.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

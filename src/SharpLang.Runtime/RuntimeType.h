@@ -52,6 +52,13 @@ public:
 	// VTable
 	uint32_t virtualTableSize;
 	void* virtualTable[0];
+
+	enum
+	{
+		NO_SLOT = 0xffff // a unique slot number used to indicate "empty" for fields that record slot numbers
+	};
+
+	bool IsFullyLoaded() { return true; }
 };
 
 extern "C" bool isInstInterface(const EEType* eeType, const EEType* expectedInterface);
@@ -63,10 +70,47 @@ class Object
 public:
 	Object(EEType* eeType) : eeType(eeType) {}
     
-    AppDomain* GetAppDomain() { return NULL; }
+	AppDomain* GetDomain();
 
 	EEType* eeType;
+
+	uint8_t* GetDataPointer() { return (uint8_t*)(this + 1); }
+
+	MethodTable* GetGCSafeMethodTable() { return eeType; }
 };
+
+class Context
+{
+public:
+	static Context* GetDefault()
+	{
+		static Context defaultContext;
+		return &defaultContext;
+	}
+};
+
+extern EEType System_AppDomain_rtti;
+
+class AppDomain : public Object
+{
+public:
+	AppDomain() : Object(&System_AppDomain_rtti) {}
+
+	Context* GetContext() { return Context::GetDefault(); }
+
+	static Context* GetDefaultContext() { return Context::GetDefault(); }
+
+	static AppDomain* GetDefault()
+	{
+		static AppDomain defaultDomain;
+		return &defaultDomain;
+	}
+};
+
+inline AppDomain* Object::GetDomain()
+{
+	return AppDomain::GetDefault();
+}
 
 class FieldDesc
 {
@@ -179,10 +223,11 @@ public:
 class ArrayBase : public Object
 {
 public:
-    inline size_t GetNumComponents() { return length; }
-    inline size_t GetComponentSize() { return eeType->elementSize; }
+	inline size_t GetNumComponents() { return length; }
+	inline size_t GetComponentSize() { return eeType->elementSize; }
     
-    inline uint8_t* GetDataPtr() { return (uint8_t*)(this + 1); }
+	inline uint8_t* GetDataPtr() { return *(uint8_t**)(this + 1); }
+	inline void SetDataPtr(uint8_t* data) { *(uint8_t**)(this + 1) = data; }
 
 	size_t length;
 };
@@ -222,6 +267,14 @@ class StringBufferObject : public Object
     int32_t m_MaxCapacity;
     
     // TODO
+};
+
+// Temporary GCHandle (until we have a GC)
+struct GCHandle
+{
+	RuntimeType* runtimeType;
+	Object* value;
+	int32_t handleType;
 };
 
 #endif
