@@ -22,7 +22,7 @@ ifeq ($(config),debug)
   INCLUDES += -I../../../../deps/llvm/include -I../../../../src/SharpLang.Runtime/coreclr/vm -I../../../../src/SharpLang.Runtime/coreclr/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography -I../../../../deps/llvm/build_x32/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O0 -g0 --target=i686-pc-windows-gnu
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g0 --target=i686-pc-windows-gnu
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
@@ -52,7 +52,7 @@ ifeq ($(config),release)
   INCLUDES += -I../../../../deps/llvm/include -I../../../../src/SharpLang.Runtime/coreclr/vm -I../../../../src/SharpLang.Runtime/coreclr/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography -I../../../../deps/llvm/build_x32/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O0 -g0 --target=i686-pc-windows-gnu
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -emit-llvm -O3 -g0 --target=i686-pc-windows-gnu
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
