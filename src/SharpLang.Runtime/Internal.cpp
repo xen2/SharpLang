@@ -267,6 +267,7 @@ extern "C" StringObject* System_Environment__GetOSVersionString__()
 extern "C" void System_Threading_Monitor__ReliableEnter_System_Object_System_Boolean__(Object* object, bool& lockTaken)
 {
 	// Not implemented yet
+	lockTaken = true;
 }
 
 extern "C" void System_Threading_Monitor__Exit_System_Object_(Object* object)
@@ -347,6 +348,35 @@ extern "C" int32_t System_AppDomain__GetId__()
 {
 	// For now, we only support one AppDomain
 	return 1;
+}
+
+extern "C" AppDomain* System_Threading_Thread__GetDomainInternal__()
+{
+	return AppDomain::GetDefault();
+}
+
+extern "C" AppDomain* System_Threading_Thread__GetFastDomainInternal__()
+{
+	return AppDomain::GetDefault();
+}
+
+extern "C" bool System_AppDomain__IsUnloadingForcedFinalize__(AppDomain* domain)
+{
+	return false;
+}
+
+extern "C" int32_t System_BCLDebug__GetRegistryLoggingValues_System_Boolean__System_Boolean__System_Int32__System_Boolean__System_Boolean__System_Boolean__(bool& loggingEnabled, bool& logToConsole, int32_t& logLevel, bool& perfWarnings, bool& correctnessWarnings, bool& safeHandleStackTraces)
+{
+	auto logFacility = 0;
+
+	loggingEnabled = false;
+	logToConsole = false;
+	logLevel = 0;
+	perfWarnings = false;
+	correctnessWarnings = false;
+	safeHandleStackTraces = false;
+
+	return logFacility;
 }
 
 extern "C" void System_Runtime_CompilerServices_RuntimeHelpers__InitializeArray_System_Array_System_RuntimeFieldHandle_(Array<uint8_t>* arr, uint8_t* fieldHandle)
