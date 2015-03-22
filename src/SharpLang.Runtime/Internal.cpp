@@ -9,7 +9,10 @@
 #include <thread>
 #include <sys/utsname.h>
 #endif
-#include "corhdr.h"
+//#include "corhdr.h"
+
+#define ELEMENT_TYPE_SZARRAY 0x1d
+#define ELEMENT_TYPE_ARRAY 0x14
 
 static Object* AllocateObject(EEType* eeType)
 {
@@ -280,16 +283,6 @@ extern "C" void System_Threading_Thread__MemoryBarrier__()
 	// Not implemented yet
 }
 
-extern "C" Object* System_Threading_Interlocked__CompareExchange_System_Object__System_Object_System_Object_(Object** location1, Object* value, Object* comparand)
-{
-	return (Object*)InterlockedCompareExchangePointer((PVOID*)location1, value, comparand);
-}
-
-extern "C" Object* System_Threading_Interlocked__CompareExchange_System_IntPtr__System_IntPtr_System_IntPtr_(void** location1, void* value, void* comparand)
-{
-	return (Object*)InterlockedCompareExchangePointer((PVOID*)location1, value, comparand);
-}
-
 extern "C" StringObject* System_Text_Encoding__InternalCodePage_System_Int32__(int32_t* code_page)
 {
 	// ASCII
@@ -466,16 +459,6 @@ extern "C" void** SharpLang_Marshalling_MarshalHelper__GetThunkPointers__()
 extern "C" uint32_t SharpLang_Marshalling_MarshalHelper__GetThunkCurrentId__()
 {
 	return ThunkCurrentId;
-}
-
-extern "C" Object* System_Runtime_InteropServices_GCHandle__InternalGet_System_IntPtr_(GCHandle* gcHandle)
-{
-	return gcHandle->value;
-}
-
-extern "C" Object* System_Runtime_InteropServices_GCHandle__InternalCompareExchange_System_IntPtr_System_Object_System_Object_System_Boolean_(GCHandle* gcHandle, Object* value, Object* oldValue, bool isPinned)
-{
-	return (Object*)InterlockedCompareExchangePointer((PVOID*)&gcHandle->value, value, oldValue);
 }
 
 // QCall

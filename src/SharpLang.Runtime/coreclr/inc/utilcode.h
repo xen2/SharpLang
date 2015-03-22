@@ -15,6 +15,7 @@
 #include "corhlprpriv.h"
 #include "clrtypes.h"
 #include "safemath.h"
+#include <oleauto.h>
 
 // #include "clrhost.h"
 #define ClrSleepEx SleepEx
@@ -29,6 +30,15 @@
 #endif
 
 #define CLRGetTickCount64() GetTickCount64()
+
+//********** Macros. **********************************************************
+#ifndef FORCEINLINE
+ #if _MSC_VER < 1200
+   #define FORCEINLINE inline
+ #else
+   #define FORCEINLINE __forceinline
+ #endif
+#endif
 
 //*****************************************************************************
 // Placement new is used to new and object at an exact location.  The pointer

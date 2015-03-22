@@ -27,7 +27,16 @@
 #define __assume(x) (void)0
 #define __success(expr)
 
+#ifndef FORCEINLINE
+ #if _MSC_VER < 1200
+   #define FORCEINLINE inline
+ #else
+   #define FORCEINLINE __forceinline
+ #endif
+#endif
+
 #include "contract.h"
+#include "utilcode.h"
 #include "holder.h"
 #include "gcenv.h"
 
@@ -37,7 +46,6 @@ typedef SIZE_T GSCookie;
 #include "util.hpp"
 
 #include "daccess.h"
-#include "utilcode.h"
 
 // #include "pal.h"
 #ifdef _MSC_VER

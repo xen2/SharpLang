@@ -8,7 +8,7 @@
     <SourceDir>$(__SourceDir)\</SourceDir>
     <PackagesDir>$(__PackagesDir)\</PackagesDir>
     <RootBinDir>..\..\build\vs2013\obj\corlib\</RootBinDir>
-	<OutputPath>..\..\build\vs2013\lib\runtime.net\$(Platform)\</OutputPath>
+    <OutputPath>..\..\build\vs2013\lib\runtime.net\$(Platform)\</OutputPath>
     <BinDir>..\..\build\vs2013\lib\runtime.net.core\$(Platform)\</BinDir>
     <!-- We dont append back slash because this path is used by nuget.exe as output directory and it
          fails to write packages to it if the path contains the forward slash.

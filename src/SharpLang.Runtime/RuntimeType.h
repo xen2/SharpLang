@@ -189,10 +189,12 @@ public:
 	static StringObject* NewString(uint32_t length);
 	static StringObject* NewString(const char16_t* str, uint32_t length);
 	static StringObject* NewString(const char* str, uint32_t length);
+#ifndef PLATFORM_UNIX
 	static StringObject* NewString(const wchar_t* str, uint32_t length)
 	{
 		return NewString((const char16_t*)str, length);
 	}
+#endif
 
 	static StringObject* NewString(const char* str)
 	{
@@ -200,11 +202,12 @@ public:
 	}
 
 	static StringObject* NewString(const char16_t* str);
-
+#ifndef PLATFORM_UNIX
 	static StringObject* NewString(const wchar_t* str)
 	{
 		return NewString((const char16_t*)str);
 	}
+#endif
 
 	wchar_t* GetBuffer() { return (wchar_t*)&firstChar; }
     

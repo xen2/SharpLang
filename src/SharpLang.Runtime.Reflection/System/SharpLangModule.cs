@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace System
@@ -613,24 +612,25 @@ namespace System
 
         static byte[] HashPublicKey(byte[] publicKey, AssemblyHashAlgorithm hashAlgorithm)
         {
-            HashAlgorithm algorithm;
+#if FEATURE_CRYPTO
+            System.Security.Cryptography.HashAlgorithm algorithm;
 
             switch (hashAlgorithm)
             {
                 case AssemblyHashAlgorithm.MD5:
-                    algorithm = new MD5CryptoServiceProvider();
+                    algorithm = new System.Security.Cryptography.MD5CryptoServiceProvider();
                     break;
                 case AssemblyHashAlgorithm.Sha1:
                     // None default to SHA1
-                    algorithm = new SHA1Managed();
+                    algorithm = new System.Security.Cryptography.SHA1Managed();
                     break;
                 case AssemblyHashAlgorithm.Sha256:
                     // None default to SHA1
-                    algorithm = new SHA256Managed();
+                    algorithm = new System.Security.Cryptography.SHA256Managed();
                     break;
                 case AssemblyHashAlgorithm.Sha512:
                     // None default to SHA1
-                    algorithm = new SHA512Managed();
+                    algorithm = new System.Security.Cryptography.SHA512Managed();
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -638,6 +638,9 @@ namespace System
 
             using (algorithm)
                 return algorithm.ComputeHash(publicKey);
+#else
+            return new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+#endif
         }
 
         static string BytesToHexString(byte[] bytes)

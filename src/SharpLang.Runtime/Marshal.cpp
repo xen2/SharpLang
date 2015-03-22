@@ -3,8 +3,8 @@
 #endif
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include "RuntimeType.h"
-#include "ConvertUTF.h"
 
 extern "C" int32_t System_Runtime_InteropServices_Marshal__GetLastWin32Error__()
 {

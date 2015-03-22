@@ -2,8 +2,11 @@
 #define _common_h_
 
 #include <math.h>
+
+#ifdef _WIN32
 #define _copysign copysign
 #define _isnan isnan
+#endif
 
 #include "object.h"
 #include "contract.h"

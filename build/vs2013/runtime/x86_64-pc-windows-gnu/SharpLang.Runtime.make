@@ -18,7 +18,7 @@ ifeq ($(config),debug)
   TARGETDIR = ../../lib/runtime/x86_64-pc-windows-gnu
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = ../obj/x86_64-pc-windows-gnu/Debug
-  DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS -DUNICODE -DUSE_STL -D_BLD_CLR -DFEATURE_CORECLR -DFEATURE_BCL_FORMATTING -DFEATURE_CRYPTO -DFEATURE_COREFX_GLOBALIZATION
+  DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS -DUNICODE -D_BLD_CLR -DFEATURE_CORECLR -DFEATURE_BCL_FORMATTING -DFEATURE_COREFX_GLOBALIZATION -DFEATURE_CRYPTO -DBIT64
   INCLUDES += -I../../../../deps/llvm/include -I../../../../src/SharpLang.Runtime/coreclr/vm -I../../../../src/SharpLang.Runtime/coreclr/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography -I../../../../deps/llvm/build_x64/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -48,7 +48,7 @@ ifeq ($(config),release)
   TARGETDIR = ../../lib/runtime/x86_64-pc-windows-gnu
   TARGET = $(TARGETDIR)/SharpLang.Runtime.bc
   OBJDIR = ../obj/x86_64-pc-windows-gnu/Release
-  DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS -DUNICODE -DUSE_STL -D_BLD_CLR -DFEATURE_CORECLR -DFEATURE_BCL_FORMATTING -DFEATURE_CRYPTO -DFEATURE_COREFX_GLOBALIZATION
+  DEFINES += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DLIBCXXABI_HAS_NO_THREADS -DUNICODE -D_BLD_CLR -DFEATURE_CORECLR -DFEATURE_BCL_FORMATTING -DFEATURE_COREFX_GLOBALIZATION -DFEATURE_CRYPTO -DBIT64
   INCLUDES += -I../../../../deps/llvm/include -I../../../../src/SharpLang.Runtime/coreclr/vm -I../../../../src/SharpLang.Runtime/coreclr/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/inc -I../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography -I../../../../deps/llvm/build_x64/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -75,7 +75,6 @@ OBJECTS := \
 	$(OBJDIR)/abort_message.o \
 	$(OBJDIR)/cxa_guard.o \
 	$(OBJDIR)/ConvertUTF.o \
-	$(OBJDIR)/CoreCLR.o \
 	$(OBJDIR)/Exception.o \
 	$(OBJDIR)/Internal.o \
 	$(OBJDIR)/Marshal.o \
@@ -92,6 +91,7 @@ OBJECTS := \
 	$(OBJDIR)/x509certificate.o \
 	$(OBJDIR)/floatnative.o \
 	$(OBJDIR)/ex.o \
+	$(OBJDIR)/CoreCLR.o \
 	$(OBJDIR)/binder.o \
 	$(OBJDIR)/comutilnative.o \
 	$(OBJDIR)/crst.o \
@@ -161,97 +161,97 @@ endif
 
 $(OBJDIR)/mulodi4.o: ../../../../deps/compiler-rt/lib/builtins/mulodi4.c
 	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE)  -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE)  -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/abort_message.o: ../../../../deps/libcxxabi/src/abort_message.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/cxa_guard.o: ../../../../deps/libcxxabi/src/cxa_guard.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/ConvertUTF.o: ../../../../src/SharpLang.Runtime/ConvertUTF.c
 	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE)  -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/CoreCLR.o: ../../../../src/SharpLang.Runtime/CoreCLR.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE)  -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Exception.o: ../../../../src/SharpLang.Runtime/Exception.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Internal.o: ../../../../src/SharpLang.Runtime/Internal.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Marshal.o: ../../../../src/SharpLang.Runtime/Marshal.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/PInvoke.o: ../../../../src/SharpLang.Runtime/PInvoke.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/RuntimeType.o: ../../../../src/SharpLang.Runtime/RuntimeType.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/console.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/console.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/currency.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/currency.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/decimal.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/decimal.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/number.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/number.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/oavariant.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/oavariant.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/variant.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/variant.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/windowsruntimebufferhelper.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/bcltype/windowsruntimebufferhelper.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/cryptography.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography/cryptography.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/x509certificate.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/cryptography/x509certificate.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/floatnative.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/float/floatnative.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/ex.o: ../../../../src/SharpLang.Runtime/coreclr/utilcode/ex.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/CoreCLR.o: ../../../../src/SharpLang.Runtime/coreclr/vm/CoreCLR.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/binder.o: ../../../../src/SharpLang.Runtime/coreclr/vm/binder.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/comutilnative.o: ../../../../src/SharpLang.Runtime/coreclr/vm/comutilnative.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/crst.o: ../../../../src/SharpLang.Runtime/coreclr/vm/crst.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/excep.o: ../../../../src/SharpLang.Runtime/coreclr/vm/excep.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/hosting.o: ../../../../src/SharpLang.Runtime/coreclr/vm/hosting.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/mscorlib.o: ../../../../src/SharpLang.Runtime/coreclr/vm/mscorlib.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/qcall.o: ../../../../src/SharpLang.Runtime/coreclr/vm/qcall.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/safehandle.o: ../../../../src/SharpLang.Runtime/coreclr/vm/safehandle.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/sharplang.o: ../../../../src/SharpLang.Runtime/coreclr/vm/sharplang.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/util.o: ../../../../src/SharpLang.Runtime/coreclr/vm/util.cpp
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -o "$@" -MF $(@:%.o=%.d) -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
 -include $(OBJECTS:%.o=%.d)
 ifneq (,$(PCH))
