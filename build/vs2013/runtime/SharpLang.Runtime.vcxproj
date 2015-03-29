@@ -116,11 +116,15 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nls.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nlsinfo.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nlstable.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\gc\gc.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\gc\sample\etmdummy.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\check.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrconfig.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrconfigvalues.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\clrtypes.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\contract.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\cor.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corerror.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhdr.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhlpr.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhlprpriv.h" />
@@ -131,8 +135,8 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugmacros.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugmacrosext.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugreturn.h" />
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\eehash.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\entrypoints.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\ex.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\fstring.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\genericstackprobe.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\holder.h" />
@@ -143,6 +147,8 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\newapis.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\palclr.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\palclr_win.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\perfcounterdefs.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\perfcounters.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\predeftlsslot.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\registrywrapper.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\safemath.h" />
@@ -152,6 +158,7 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\static_assert.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\staticcontract.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\stresslog.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\unsafe.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\utilcode.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\volatile.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\winwrap.h" />
@@ -160,6 +167,9 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\common.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\comutilnative.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\crst.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\ecalllist.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\eecontract.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\eehash.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\exceptmacros.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\fcall.h" />
@@ -170,19 +180,20 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\metasig.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\mscorlib.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\namespace.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\nativeoverlapped.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\object.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\qcall.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\rexcep.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\runtimeexceptionkind.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\spinlock.h" />
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\stackprobe.h" />
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\threads.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.c" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\CoreCLR.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Exception.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Internal.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Marshal.cpp" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\PInvoke.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\RuntimeType.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\console.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\currency.cpp" />
@@ -194,11 +205,18 @@
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\cryptography.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\cryptography\x509certificate.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\float\floatnative.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\CoreCLR.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\PInvoke.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\sharplang.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\utilcode\ex.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\binder.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\comutilnative.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\crst.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.cpp" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\sharplang.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\hosting.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\mscorlib.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\qcall.cpp" />
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\safehandle.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

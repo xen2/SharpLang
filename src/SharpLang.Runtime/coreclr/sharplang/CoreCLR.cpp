@@ -62,3 +62,7 @@ extern "C" __declspec(dllexport) void __stdcall EndHash(CRYPT_HASH_CTX * pHashCt
 }
 #endif
 
+extern "C" VOID DbgAssertDialog(const char *szFile, int iLine, const char *szExpr)
+{
+	assert(false);
+}

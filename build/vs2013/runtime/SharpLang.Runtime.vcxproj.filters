@@ -19,8 +19,20 @@
     <Filter Include="coreclr\classlibnative\inc">
       <UniqueIdentifier>{FBE59E0B-E7F5-4ADC-50AF-AFFA3CDE3975}</UniqueIdentifier>
     </Filter>
+    <Filter Include="coreclr\gc">
+      <UniqueIdentifier>{482894CA-34E0-D517-9DE7-AE7389BE7008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\gc\sample">
+      <UniqueIdentifier>{F967268D-657E-2423-AEF5-AF441A4BF5AA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="coreclr\inc">
       <UniqueIdentifier>{983B191D-04F1-9112-8DE5-8BE9F9998816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\sharplang">
+      <UniqueIdentifier>{1E35DEA7-8A4B-DC3D-D3C2-675F3F18ADC5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="coreclr\utilcode">
+      <UniqueIdentifier>{D71A732E-C313-9280-EC45-7705D89D718C}</UniqueIdentifier>
     </Filter>
     <Filter Include="coreclr\vm">
       <UniqueIdentifier>{412A94CA-2DE2-D517-96E9-AE7382C07008}</UniqueIdentifier>
@@ -86,6 +98,12 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\inc\nlstable.h">
       <Filter>coreclr\classlibnative\inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\gc\gc.h">
+      <Filter>coreclr\gc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\gc\sample\etmdummy.h">
+      <Filter>coreclr\gc\sample</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\check.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
@@ -99,6 +117,12 @@
       <Filter>coreclr\inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\contract.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\cor.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corerror.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\corhdr.h">
@@ -131,10 +155,10 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\debugreturn.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\eehash.h">
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\entrypoints.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\entrypoints.h">
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\ex.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\fstring.h">
@@ -167,6 +191,12 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\palclr_win.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\perfcounterdefs.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\perfcounters.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\predeftlsslot.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
@@ -194,6 +224,9 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\stresslog.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\unsafe.h">
+      <Filter>coreclr\inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\inc\utilcode.h">
       <Filter>coreclr\inc</Filter>
     </ClInclude>
@@ -216,6 +249,15 @@
       <Filter>coreclr\vm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\crst.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\ecalllist.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\eecontract.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\eehash.h">
       <Filter>coreclr\vm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.h">
@@ -248,6 +290,9 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\namespace.h">
       <Filter>coreclr\vm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\nativeoverlapped.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\object.h">
       <Filter>coreclr\vm</Filter>
     </ClInclude>
@@ -260,17 +305,21 @@
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\runtimeexceptionkind.h">
       <Filter>coreclr\vm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\spinlock.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\stackprobe.h">
+      <Filter>coreclr\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\threads.h">
       <Filter>coreclr\vm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\ConvertUTF.c" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\CoreCLR.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Exception.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Internal.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\Marshal.cpp" />
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\PInvoke.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\RuntimeType.cpp" />
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\bcltype\console.cpp">
       <Filter>coreclr\classlibnative\bcltype</Filter>
@@ -302,6 +351,18 @@
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\classlibnative\float\floatnative.cpp">
       <Filter>coreclr\classlibnative\float</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\CoreCLR.cpp">
+      <Filter>coreclr\sharplang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\PInvoke.cpp">
+      <Filter>coreclr\sharplang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\sharplang\sharplang.cpp">
+      <Filter>coreclr\sharplang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\utilcode\ex.cpp">
+      <Filter>coreclr\utilcode</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\binder.cpp">
       <Filter>coreclr\vm</Filter>
     </ClCompile>
@@ -314,7 +375,16 @@
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\excep.cpp">
       <Filter>coreclr\vm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\sharplang.cpp">
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\hosting.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\mscorlib.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\qcall.cpp">
+      <Filter>coreclr\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\safehandle.cpp">
       <Filter>coreclr\vm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\SharpLang.Runtime\coreclr\vm\util.cpp">

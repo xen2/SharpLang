@@ -78,7 +78,6 @@ OBJECTS := \
 	$(OBJDIR)/Exception.o \
 	$(OBJDIR)/Internal.o \
 	$(OBJDIR)/Marshal.o \
-	$(OBJDIR)/PInvoke.o \
 	$(OBJDIR)/RuntimeType.o \
 	$(OBJDIR)/console.o \
 	$(OBJDIR)/currency.o \
@@ -90,8 +89,10 @@ OBJECTS := \
 	$(OBJDIR)/cryptography.o \
 	$(OBJDIR)/x509certificate.o \
 	$(OBJDIR)/floatnative.o \
-	$(OBJDIR)/ex.o \
 	$(OBJDIR)/CoreCLR.o \
+	$(OBJDIR)/PInvoke.o \
+	$(OBJDIR)/sharplang.o \
+	$(OBJDIR)/ex.o \
 	$(OBJDIR)/binder.o \
 	$(OBJDIR)/comutilnative.o \
 	$(OBJDIR)/crst.o \
@@ -100,7 +101,6 @@ OBJECTS := \
 	$(OBJDIR)/mscorlib.o \
 	$(OBJDIR)/qcall.o \
 	$(OBJDIR)/safehandle.o \
-	$(OBJDIR)/sharplang.o \
 	$(OBJDIR)/util.o \
 
 RESOURCES := \
@@ -180,9 +180,6 @@ $(OBJDIR)/Internal.o: ../../../../src/SharpLang.Runtime/Internal.cpp
 $(OBJDIR)/Marshal.o: ../../../../src/SharpLang.Runtime/Marshal.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/PInvoke.o: ../../../../src/SharpLang.Runtime/PInvoke.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/RuntimeType.o: ../../../../src/SharpLang.Runtime/RuntimeType.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
@@ -216,10 +213,16 @@ $(OBJDIR)/x509certificate.o: ../../../../src/SharpLang.Runtime/coreclr/classlibn
 $(OBJDIR)/floatnative.o: ../../../../src/SharpLang.Runtime/coreclr/classlibnative/float/floatnative.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/ex.o: ../../../../src/SharpLang.Runtime/coreclr/utilcode/ex.cpp
+$(OBJDIR)/CoreCLR.o: ../../../../src/SharpLang.Runtime/coreclr/sharplang/CoreCLR.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/CoreCLR.o: ../../../../src/SharpLang.Runtime/coreclr/vm/CoreCLR.cpp
+$(OBJDIR)/PInvoke.o: ../../../../src/SharpLang.Runtime/coreclr/sharplang/PInvoke.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/sharplang.o: ../../../../src/SharpLang.Runtime/coreclr/sharplang/sharplang.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/ex.o: ../../../../src/SharpLang.Runtime/coreclr/utilcode/ex.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/binder.o: ../../../../src/SharpLang.Runtime/coreclr/vm/binder.cpp
@@ -244,9 +247,6 @@ $(OBJDIR)/qcall.o: ../../../../src/SharpLang.Runtime/coreclr/vm/qcall.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/safehandle.o: ../../../../src/SharpLang.Runtime/coreclr/vm/safehandle.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/sharplang.o: ../../../../src/SharpLang.Runtime/coreclr/vm/sharplang.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE)  -std=c++11 -DUSE_STL -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/util.o: ../../../../src/SharpLang.Runtime/coreclr/vm/util.cpp

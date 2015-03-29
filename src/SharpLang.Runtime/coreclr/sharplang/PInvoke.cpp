@@ -1,6 +1,4 @@
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "winwrap.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,20 +13,18 @@ enum class PInvokeAttributes : uint16_t
 
 extern "C" void* PInvokeOpenLibrary(const char* moduleName)
 {
-#ifdef _WIN32
-	// Current module?
-	if (strcmp(moduleName, "__Internal") == 0 || strcmp(moduleName, "QCall") == 0)
-		return GetModuleHandle(NULL);
+	if (strcmp(moduleName, "__Internal") == 0 || strcmp(moduleName, "QCall") == 0 || strcmp(moduleName, "libcoreclr.so") == 0)
+    {
+        // Current module?
+        static HMODULE localModule = GetModuleHandle(NULL);
+		return localModule;
+    }
 
 	return LoadLibraryA(moduleName);
-#else
-	return NULL;
-#endif
 }
 
 extern "C" void* PInvokeGetProcAddress(void* module, const char* procName, PInvokeAttributes pinvokeAttributes)
 {
-#ifdef _WIN32
 	// Try to load with exact name first
 	auto result = (void*)GetProcAddress((HMODULE)module, procName);
 	if (result != NULL)
@@ -64,7 +60,4 @@ extern "C" void* PInvokeGetProcAddress(void* module, const char* procName, PInvo
 	free(buffer);
 
 	return result;
-#else
-	return NULL;
-#endif
 }
