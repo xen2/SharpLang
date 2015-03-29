@@ -1,2 +1,7 @@
 Makefile eol=lf
 *.Make eol=lf
+
+*.in text eol=lf
+*.sh text eol=lf
+src/SharpLang.Runtime/coreclr/pal/tests/palsuite/paltestlist.txt text eol=lf
+src/SharpLang.Runtime/coreclr/pal/tests/palsuite/paltestlist_to_be_reviewed.txt text eol=lf
