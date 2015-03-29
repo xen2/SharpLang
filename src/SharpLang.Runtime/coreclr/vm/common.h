@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#ifdef _WIN32
+#ifndef PLATFORM_UNIX
 #define _copysign copysign
 #define _isnan isnan
 #endif
