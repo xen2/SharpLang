@@ -24,7 +24,7 @@ namespace SharpLang.Marshalling
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern uint GetThunkCurrentId();
 
-        private static readonly Dictionary<SharpLangEETypePtr, IntPtr> delegateWrappers = new Dictionary<SharpLangEETypePtr, IntPtr>();
+        private static readonly Dictionary<SharpLangEETypePtr, IntPtr> delegateWrappers = new Dictionary<SharpLangEETypePtr, IntPtr>(new GenericEqualityComparer<SharpLangEETypePtr>());
 
         public static unsafe void RegisterDelegateWrapper(SharpLangEEType* delegateType, IntPtr delegateWrapper)
         {
