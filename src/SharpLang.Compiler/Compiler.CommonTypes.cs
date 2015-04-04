@@ -37,6 +37,7 @@ namespace SharpLang.CompilerServices
 
         // Runtime
         private ModuleRef runtimeModule;
+        private ModuleRef runtimeCoreModule;
 
         // Runtime Types
         private TypeRef imtEntryLLVM;
@@ -50,15 +51,16 @@ namespace SharpLang.CompilerServices
         private ValueRef sharpPersonalityFunctionLLVM;
         private ValueRef pinvokeLoadLibraryFunctionLLVM;
         private ValueRef pinvokeGetProcAddressFunctionLLVM;
+        private ValueRef palInitializeFunctionLLVM;
 
         // Types used for reflection
         private TypeRef typeDefLLVM;
         private Type sharpLangTypeType;
         private Type sharpLangModuleType;
 
-        static string LocateNativeRuntimeModuleHelper(string triple)
+        static string LocateNativeRuntimeFolderHelper(string triple)
         {
-            return string.Format(@"..\runtime\{0}\SharpLang.Runtime.bc", triple).Replace('\\', Path.DirectorySeparatorChar);
+            return string.Format(@"..\runtime\{0}", triple).Replace('\\', Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -96,13 +98,13 @@ namespace SharpLang.CompilerServices
         /// </summary>
         /// <param name="triple">The target triple.</param>
         /// <returns></returns>
-        public static string LocateRuntimeModule(string triple)
+        public static string LocateNativeRuntimeFolder(string triple)
         {
             // Locate runtime
-            var runtimeLocation = LocateNativeRuntimeModuleHelper(triple);
-            if (!File.Exists(runtimeLocation))
-                runtimeLocation = LocateNativeRuntimeModuleHelper(triple.Replace("-unknown", string.Empty));
-            if (!File.Exists(runtimeLocation))
+            var runtimeLocation = LocateNativeRuntimeFolderHelper(triple);
+            if (!Directory.Exists(runtimeLocation))
+                runtimeLocation = LocateNativeRuntimeFolderHelper(triple.Replace("-unknown", string.Empty));
+            if (!Directory.Exists(runtimeLocation))
                 throw new InvalidOperationException(string.Format("Can't locate runtime for target {0}", triple));
 
             return runtimeLocation;
@@ -111,7 +113,8 @@ namespace SharpLang.CompilerServices
         public void InitializeCommonTypes()
         {
             // Load runtime
-            runtimeModule = LoadModule(context, LocateRuntimeModule(triple));
+            runtimeModule = LoadModule(context, Path.Combine(LocateNativeRuntimeFolder(triple), "SharpLang.Runtime.bc"));
+            runtimeCoreModule = LoadModule(context, Path.Combine(LocateNativeRuntimeFolder(triple), "SharpLang.Runtime.CoreCLR.bc"));
 
             // Load data layout from runtime
             var dataLayout = LLVM.GetDataLayout(runtimeModule);
@@ -168,13 +171,19 @@ namespace SharpLang.CompilerServices
             LLVM.StructSetBody(typeDefLLVM, new[] { sharpLangModuleType.DefaultTypeLLVM, int32LLVM }, false);
 
             // Import runtime methods
-            allocObjectFunctionLLVM = ImportRuntimeFunction(module, "allocObject");
-            resolveInterfaceCallFunctionLLVM = ImportRuntimeFunction(module, "resolveInterfaceCall");
-            isInstInterfaceFunctionLLVM = ImportRuntimeFunction(module, "isInstInterface");
-            throwExceptionFunctionLLVM = ImportRuntimeFunction(module, "throwException");
-            sharpPersonalityFunctionLLVM = ImportRuntimeFunction(module, "sharpPersonality");
-            pinvokeLoadLibraryFunctionLLVM = ImportRuntimeFunction(module, "PInvokeOpenLibrary");
-            pinvokeGetProcAddressFunctionLLVM = ImportRuntimeFunction(module, "PInvokeGetProcAddress");
+            allocObjectFunctionLLVM = ImportRuntimeFunction(module, runtimeModule, "allocObject");
+            resolveInterfaceCallFunctionLLVM = ImportRuntimeFunction(module, runtimeModule, "resolveInterfaceCall");
+            isInstInterfaceFunctionLLVM = ImportRuntimeFunction(module, runtimeModule, "isInstInterface");
+            throwExceptionFunctionLLVM = ImportRuntimeFunction(module, runtimeModule, "throwException");
+            sharpPersonalityFunctionLLVM = ImportRuntimeFunction(module, runtimeModule, "sharpPersonality");
+            pinvokeLoadLibraryFunctionLLVM = ImportRuntimeFunction(module, runtimeCoreModule, "PInvokeOpenLibrary");
+            pinvokeGetProcAddressFunctionLLVM = ImportRuntimeFunction(module, runtimeCoreModule, "PInvokeGetProcAddress");
+
+            if (triple.Contains("linux"))
+            {
+                var palInitializeFunctionType = LLVM.FunctionType(int32LLVM, new[] {int32LLVM, LLVM.PointerType(intPtrLLVM, 0)}, false);
+                palInitializeFunctionLLVM = LLVM.AddFunction(module, "PAL_Initialize", palInitializeFunctionType);
+            }
         }
 
         private static ModuleRef LoadModule(ContextRef context, string fileName)
@@ -193,7 +202,7 @@ namespace SharpLang.CompilerServices
             return runtimeModule;
         }
 
-        private ValueRef ImportRuntimeFunction(ModuleRef module, string name)
+        private ValueRef ImportRuntimeFunction(ModuleRef module, ModuleRef runtimeModule, string name)
         {
             var function = LLVM.GetNamedFunction(runtimeModule, name);
             var functionType = LLVM.GetElementType(LLVM.TypeOf(function));

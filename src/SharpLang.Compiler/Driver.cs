@@ -159,7 +159,7 @@ namespace SharpLang.CompilerServices
                 var cpu = triple.Split('-').First();
                 var archSize = cpu == "x86_64" ? 64 : 32;
                 var hostArchSize = IntPtr.Size * 8;
-                arguments.AppendFormat("--target={0} -g -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", triple);
+                arguments.AppendFormat("--target={0} -g2 -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS", triple);
                 arguments.AppendFormat(" -I../../../../deps/llvm/build_x{0}/include -I../../../../deps/llvm/include", hostArchSize);
 
                 if (triple.Contains("windows-gnu") || triple.Contains("mingw"))
@@ -191,7 +191,15 @@ namespace SharpLang.CompilerServices
                 triple = GetDefaultTriple();
 
             var filesToLink = new List<string>();
-            filesToLink.Add(Compiler.LocateRuntimeModule(triple));
+            filesToLink.Add(Path.Combine(Compiler.LocateNativeRuntimeFolder(triple), "SharpLang.Runtime.bc"));
+            filesToLink.Add(Path.Combine(Compiler.LocateNativeRuntimeFolder(triple), "SharpLang.Runtime.CoreCLR.bc"));
+
+            // On Linux, link against PAL
+            if (triple.Contains("linux"))
+            {
+                filesToLink.Add(Path.Combine(Compiler.LocateNativeRuntimeFolder(triple), "CoreClrPal.bc"));
+                filesToLink.Add(Path.Combine(Compiler.LocateNativeRuntimeFolder(triple), "palrt.bc"));
+            }
 
             var arguments = new StringBuilder();
             
@@ -211,8 +219,14 @@ namespace SharpLang.CompilerServices
             // Necessary for some CoreCLR new/delete
             // Note: not sure yet if we want to keep stdc++ deps or not?
             if (triple.Contains("windows"))
+            {
                 arguments.Append(" -lole32 -loleaut32");
-            arguments.Append(" -static -lstdc++");
+                arguments.Append(" -static -lstdc++");
+            }
+            else if (triple.Contains("linux"))
+            {
+                arguments.Append(" -lm -ldl -lpthread -rdynamic -lstdc++");
+            }
 
             ExecuteClang(triple, arguments.ToString());
         }

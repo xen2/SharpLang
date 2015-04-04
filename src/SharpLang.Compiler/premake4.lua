@@ -21,5 +21,6 @@ project "SharpLang.Compiler"
     "Mono.Cecil.Rocks",
     "Mono.Linker",
     depsdir .. "/Mono.Options/Mono.Options",
+    depsdir .. "/System.Reflection.Metadata/System.Collections.Immutable",
     depsdir .. "/System.Reflection.Metadata/System.Reflection.Metadata",
   }

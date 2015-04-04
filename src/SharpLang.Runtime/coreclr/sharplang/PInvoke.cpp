@@ -1,4 +1,4 @@
-#include "winwrap.h"
+#include "common.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,11 +14,11 @@ enum class PInvokeAttributes : uint16_t
 extern "C" void* PInvokeOpenLibrary(const char* moduleName)
 {
 	if (strcmp(moduleName, "__Internal") == 0 || strcmp(moduleName, "QCall") == 0 || strcmp(moduleName, "libcoreclr.so") == 0)
-    {
-        // Current module?
-        static HMODULE localModule = GetModuleHandle(NULL);
+	{
+		// Current module?
+		static HMODULE localModule = GetModuleHandleA(NULL);
 		return localModule;
-    }
+	}
 
 	return LoadLibraryA(moduleName);
 }

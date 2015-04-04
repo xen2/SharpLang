@@ -29,8 +29,9 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-/build/vs2012/gen
-/build/vs2013/gen
+/build/vs2013/gen/
+/build/vs2013/runtime/*/
+/build/vs2013/lib/
 /build/gmake
 /deps/mingw32
 /deps/mingw64

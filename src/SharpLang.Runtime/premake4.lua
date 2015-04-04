@@ -1,6 +1,7 @@
-local defaultMakeOptions32 = 'CC=../../../../deps/llvm/build_x32/RelWithDebInfo/bin/clang CXX=../../../../deps/llvm/build_x32/RelWithDebInfo/bin/clang LLVM_LINK=../../../../deps/llvm/build_x32/RelWithDebInfo/bin/llvm-link.exe CPPFLAGS="-I../../../../deps/mingw32/i686-w64-mingw32/include -I../../../../deps/mingw32/i686-w64-mingw32/include/c++ -I../../../../deps/mingw32/i686-w64-mingw32/include/c++/i686-w64-mingw32"'
+local cmakePrepare32 = 'if not exist i686-pc-windows-gnu mkdir i686-pc-windows-gnu\r\ncd i686-pc-windows-gnu\r\ncmake ..\\..\\..\\.. -G "MinGW Makefiles"\r\n'
 
-local defaultMakeOptions64 = 'CC=../../../../deps/llvm/build_x64/RelWithDebInfo/bin/clang CXX=../../../../deps/llvm/build_x64/RelWithDebInfo/bin/clang LLVM_LINK=../../../../deps/llvm/build_x64/RelWithDebInfo/bin/llvm-link.exe CPPFLAGS="-I../../../../deps/mingw64/x86_64-w64-mingw32/include -I../../../../deps/mingw64/x86_64-w64-mingw32/include/c++ -I../../../../deps/mingw64/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32"'
+local cmakePrepare64 = 'if not exist x86_64-pc-windows-gnu mkdir x86_64-pc-windows-gnu\r\ncd x86_64-pc-windows-gnu\r\ncmake ..\\..\\..\\.. -G "MinGW Makefiles"\r\n'
+
 
 project "SharpLang.Runtime"
   kind "Makefile"
@@ -10,10 +11,10 @@ project "SharpLang.Runtime"
   files { "**.cpp", "**.c", "**.h" }
 
   configuration { "x32" }
-    buildcommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C i686-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} all " .. defaultMakeOptions32 }
-    rebuildcommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C i686-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean all " .. defaultMakeOptions32 }
-    cleancommands { "..\\..\\..\\deps\\mingw32\\bin\\mingw32-make -C i686-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean " .. defaultMakeOptions32 }
+    buildcommands { cmakePrepare32 .. "..\\..\\..\\..\\deps\\mingw32\\bin\\mingw32-make all " }
+    rebuildcommands { cmakePrepare32 .. "..\\..\\..\\..\\deps\\mingw32\\bin\\mingw32-make clean all " }
+    cleancommands { cmakePrepare32 .. "..\\..\\..\\..\\deps\\mingw32\\bin\\mingw32-make clean " }
   configuration { "x64" }
-    buildcommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} all " .. defaultMakeOptions64 }
-    rebuildcommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean all " .. defaultMakeOptions64 }
-    cleancommands { "..\\..\\..\\deps\\mingw64\\bin\\mingw32-make -C x86_64-pc-windows-gnu config=%{string.lower(cfg.buildcfg)} clean " .. defaultMakeOptions64 }
+    buildcommands { cmakePrepare64 .. "..\\..\\..\\..\\deps\\mingw64\\bin\\mingw32-make all " }
+    rebuildcommands { cmakePrepare64 .. "..\\..\\..\\..\\deps\\mingw64\\bin\\mingw32-make clean all " }
+    cleancommands { cmakePrepare64 .. "..\\..\\..\\..\\deps\\mingw64\\bin\\mingw32-make clean " }

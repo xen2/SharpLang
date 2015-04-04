@@ -308,7 +308,7 @@ namespace SharpLang.CompilerServices
                 if (assembly.Name.Name == "mscorlib")
                 {
                     // Setup mscorlib binder (MscorlibBinder::AttachModule)
-                    var mscorlibBinderAttachModule = ImportRuntimeFunction(module, "_ZN14MscorlibBinder12AttachModuleEP6Module");
+                    var mscorlibBinderAttachModule = ImportRuntimeFunction(module, runtimeCoreModule, "_ZN14MscorlibBinder12AttachModuleEP6Module");
                     LLVM.BuildCall(builder, mscorlibBinderAttachModule, new[] { LLVM.BuildPointerCast(builder, sharpLangModuleGlobal, LLVM.TypeOf(LLVM.GetParam(mscorlibBinderAttachModule, 0)), string.Empty) }, string.Empty);
                 }
 
@@ -337,21 +337,29 @@ namespace SharpLang.CompilerServices
 
             // Emit "main" which will call the assembly entry point (if any)
             if (entryPoint != null)
-	        {
-                var mainFunctionType = LLVM.FunctionType(int32LLVM, new TypeRef[0], false);
-	            var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
+            {
+                // i32 main(i32, i8**)
+                var mainFunctionType = LLVM.FunctionType(int32LLVM, new[] { int32LLVM, LLVM.PointerType(intPtrLLVM, 0) }, false);
+                var mainFunction = LLVM.AddFunction(module, "main", mainFunctionType);
                 LLVM.SetLinkage(mainFunction, Linkage.ExternalLinkage);
                 LLVM.PositionBuilderAtEnd(builder, LLVM.AppendBasicBlockInContext(context, mainFunction, string.Empty));
 
-	            var parameters = (entryPoint.ParameterTypes.Length > 0)
-	                ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultTypeLLVM) }
-	                : new ValueRef[0];
+                var parameters = (entryPoint.ParameterTypes.Length > 0)
+                    ? new[] { LLVM.ConstPointerNull(entryPoint.ParameterTypes[0].DefaultTypeLLVM) }
+                    : new ValueRef[0];
 
                 if (!TestMode)
                 {
-                    var functionContext = new FunctionCompilerContext(mainFunction, new FunctionSignature(abi, @void, new Type[0], MethodCallingConvention.Default, null));
+                    var functionContext = new FunctionCompilerContext(mainFunction, new FunctionSignature(abi, int32, new Type[0], MethodCallingConvention.Default, null));
                     functionContext.Stack = new FunctionStack();
-    
+
+                    // Call PAL entry point
+                    if (triple.Contains("linux"))
+                    {
+                        var palInitializeCall = LLVM.BuildCall(builder, palInitializeFunctionLLVM, new[] {LLVM.GetParam(mainFunction, 0), LLVM.GetParam(mainFunction, 1)}, string.Empty);
+                        LLVM.SetInstructionCallConv(palInitializeCall, (uint)CallConv.X86StdcallCallConv);
+                    }
+
                     // Sort and remove duplicates after adding all our types
                     // TODO: Somehow sort everything before insertion at compile time?
                     var sortTypesMethod = sharpLangModuleType.Class.Functions.First(x => x.DeclaringType == sharpLangModuleType && x.MethodReference.Name == "SortTypes");
@@ -365,7 +373,7 @@ namespace SharpLang.CompilerServices
 
                 // Emit PInvoke Thunks and Globals needed in entry point module
                 PInvokeEmitGlobals();
-	        }
+            }
 
             LLVM.DIBuilderFinalize(debugBuilder);
             LLVM.DIBuilderDispose(debugBuilder);

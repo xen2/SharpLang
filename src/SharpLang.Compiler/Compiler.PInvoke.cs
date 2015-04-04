@@ -24,6 +24,10 @@ namespace SharpLang.CompilerServices
             {
                 target = PInvokeTarget.WindowsX64;
             }
+            else if (triple.Contains("linux"))
+            {
+                target = PInvokeTarget.Linux;
+            }
             else
             {
                 throw new NotSupportedException("Unknown platform target.");
@@ -60,6 +64,10 @@ namespace SharpLang.CompilerServices
                 pinvokeThunks.AppendFormat("    movl ${0}, %eax\n", i);
                 // Call thunkHelper dispatch function
                 pinvokeThunks.AppendFormat("    jmp {0}\n", AssemblySymbolName(target, "thunkHelper"));
+            }
+            else if (target == PInvokeTarget.Linux)
+            {
+                // TODO: Implement this for various CPU architectures
             }
             else
             {
@@ -108,6 +116,10 @@ namespace SharpLang.CompilerServices
                 // Jump to eax = ThunkTargets[index]
                 pinvokeThunks.AppendLine("    jmp *%rax");
             }
+            else if (target == PInvokeTarget.Linux)
+            {
+                // TODO: Implement this for various CPU architectures
+            }
             else
             {
                 throw new NotImplementedException();
@@ -145,6 +157,7 @@ namespace SharpLang.CompilerServices
         {
             WindowsX86,
             WindowsX64,
+            Linux,
         }
     }
 }
