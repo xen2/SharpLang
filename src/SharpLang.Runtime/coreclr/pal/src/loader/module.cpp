@@ -277,6 +277,27 @@ done:
     return hModule;
 }
 
+HMODULE
+PALAPI
+GetModuleHandleA(
+        IN LPCSTR lpModuleName)
+{
+    HMODULE hModule = NULL;
+
+    if (lpModuleName != NULL)
+    {
+        TRACE("lpModuleName is not NULL\n");
+        SetLastError(ERROR_INVALID_PARAMETER);
+        goto done;
+    }
+
+    hModule = &exe_module;
+
+done:
+    return hModule;
+}
+
+
 /*++
 Function:
   GetProcAddress

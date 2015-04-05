@@ -3202,6 +3202,12 @@ LoadLibraryExW(
         IN /*Reserved*/ HANDLE hFile,
         IN DWORD dwFlags);
 
+PALIMPORT
+HMODULE
+PALAPI
+GetModuleHandleA(
+        IN LPCSTR lpModuleName);
+
 /*++
 Function:
   PAL_LOADLoadPEFile
