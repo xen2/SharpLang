@@ -35,11 +35,9 @@ add_subdirectory(coreclr)
 add_definitions(-DUSE_STL)
 
 include_directories("${PROJECT_SOURCE_DIR}/../../deps/llvm/include")
+include_directories("${PROJECT_SOURCE_DIR}/../../deps/llvm/${LLVM_BUILD_SUBFOLDER}/include")
 if(SHARPLANG_RUNTIME_64BIT)
-  include_directories("${PROJECT_SOURCE_DIR}/../../deps/llvm/build_x64/include")
   add_definitions(-DBIT64)
-else()
-  include_directories("${PROJECT_SOURCE_DIR}/../../deps/llvm/build_x32/include")
 endif()
 
 add_library(SharpLang.Runtime
