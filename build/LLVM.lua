@@ -15,6 +15,7 @@ if _OPTIONS['llvm'] ~= nil then
   LLVMRootDir = _OPTIONS['llvm']
 end
 
+LLVMBuildDir = path.join(LLVMRootDir, "build")
 LLVMBuild32Dir = path.join(LLVMRootDir, "build_x32")
 LLVMBuild64Dir = path.join(LLVMRootDir, "build_x64")
 
@@ -28,19 +29,26 @@ function SetupLLVMIncludes()
     path.join(LLVMRootDir, "tools/clang/lib"),    
   }
   
-  configuration { "x32" }
+  configuration { "not vs*" }
+    includedirs
+    {
+      path.join(LLVMBuildDir, "include"),
+      path.join(LLVMBuildDir, "tools/clang/include"),
+    }
+
+  configuration { "x32", "vs*" }
     includedirs
     {
       path.join(LLVMBuild32Dir, "include"),
       path.join(LLVMBuild32Dir, "tools/clang/include"),
-	}
+    }
 
-  configuration { "x64" }
+  configuration { "x64", "vs*" }
     includedirs
     {
       path.join(LLVMBuild64Dir, "include"),
       path.join(LLVMBuild64Dir, "tools/clang/include"),
-	}
+    }
 	
   configuration(c)
 end
@@ -48,10 +56,8 @@ end
 function SetupLLVMLibDirs()
   local c = configuration()
 
-  configuration { "x32" }
-    libdirs { path.join(LLVMBuild32Dir, "lib") }
-  configuration { "x64" }
-    libdirs { path.join(LLVMBuild64Dir, "lib") }
+  configuration { "not vs*" }
+    libdirs { path.join(LLVMBuildDir, "lib") }
 	
   configuration { "x32", "Debug", "vs*" }
     libdirs { path.join(LLVMBuild32Dir, "Debug/lib") }
