@@ -8,10 +8,6 @@ dofile "Helpers.lua"
 --dofile "Tests.lua"
 dofile "LLVM.lua"
 
-if not os.is("windows") then
-  target_triplet = os.capture("gcc -dumpmachine"):gsub("[\r\n]+", "")
-end
-
 solution "SharpLang"
 
   configurations { "Debug", "Release" }
@@ -41,7 +37,7 @@ solution "SharpLang"
     else
       -- Linux: call make recursively on runtime
       external "SharpLang.Runtime"
-        location ("gmake/runtime/" .. target_triplet)
+        location ("gmake/runtime/native")
         kind "SharedLib"
         removeplatforms "*"
         configmap {

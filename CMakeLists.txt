@@ -48,9 +48,13 @@ set(SHARPLANG_BUILD_SUBDIR "${CMAKE_BINARY_DIR}/../../lib")
 # Set default compilation flags
 set(CMAKE_BITCODE_FLAGS   "${CMAKE_BITCODE_FLAGS} -emit-llvm ")
 
-if (SHARPLANG_TARGET)
-  set(CMAKE_BITCODE_FLAGS   "${CMAKE_BITCODE_FLAGS} --target=${SHARPLANG_TARGET}")
+if (NOT SHARPLANG_TARGET)
+  execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE SHARPLANG_TARGET)
+  string ( REGEX REPLACE "[\r\n]" "" SHARPLANG_TARGET ${SHARPLANG_TARGET} )
+  message("SHARPLANG_TARGET was not specified, auto-detected: ${SHARPLANG_TARGET}")
 endif()
+
+set(CMAKE_BITCODE_FLAGS   "${CMAKE_BITCODE_FLAGS} --target=${SHARPLANG_TARGET}")
 
 # Set bitcode output directory
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SHARPLANG_BUILD_SUBDIR}/runtime/${SHARPLANG_TARGET})
