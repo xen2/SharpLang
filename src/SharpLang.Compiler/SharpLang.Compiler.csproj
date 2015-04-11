@@ -70,6 +70,9 @@
     <Reference Include="Mono.Options">
       <HintPath>..\..\deps\Mono.Options\Mono.Options.dll</HintPath>
     </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\deps\System.Reflection.Metadata\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Reflection.Metadata">
       <HintPath>..\..\deps\System.Reflection.Metadata\System.Reflection.Metadata.dll</HintPath>
     </Reference>
