@@ -1,5 +1,7 @@
 # SharpLang
 
+[![Join the chat at https://gitter.im/xen2/SharpLang](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/xen2/SharpLang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 SharpLang is a .NET (MSIL) compiler front-end for LLVM.
 
 It allows you to compile C# and other .NET languages code to any supported LLVM backend.
