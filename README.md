@@ -1,5 +1,7 @@
 # SharpLang
 
+**This project is no longer active, consider migrating to https://github.com/dotnet/corert**
+
 SharpLang is a .NET (MSIL) compiler front-end for LLVM.
 
 It allows you to compile C# and other .NET languages code to any supported LLVM backend.
